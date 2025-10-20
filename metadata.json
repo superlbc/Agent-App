@@ -1,0 +1,5 @@
+{
+  "name": "Momentum Note Crafter with Env variables",
+  "description": "An intelligent UI to transform meeting transcripts into structured notes, action items, and summaries. Paste your meeting content, select formatting options, and instantly generate, preview, and export professional meeting minutes.",
+  "requestFramePermissions": []
+}

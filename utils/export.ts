@@ -1,0 +1,33 @@
+
+import { NextStep } from '../types.ts';
+
+export const exportToCsv = (data: NextStep[], filename: string) => {
+  if (!data.length) return;
+
+  const headers = ['Department', 'Owner', 'Task', 'Due Date', 'Status', 'Status Notes'];
+  const csvRows = [
+    headers.join(','),
+    ...data.map(row =>
+      [
+        `"${row.department.replace(/"/g, '""')}"`,
+        `"${row.owner.replace(/"/g, '""')}"`,
+        `"${row.task.replace(/"/g, '""')}"`,
+        `"${row.due_date.replace(/"/g, '""')}"`,
+        `"${(row.status || '').replace(/"/g, '""')}"`,
+        `"${(row.status_notes || '').replace(/"/g, '""')}"`
+      ].join(',')
+    )
+  ];
+
+  const csvString = csvRows.join('\r\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', filename);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
