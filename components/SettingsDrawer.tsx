@@ -38,7 +38,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   };
   
   const handleReset = () => {
-    const defaultBotId = (import.meta.env)?.VITE_DEFAULT_BOT_ID || '';
+    const defaultBotId = (import.meta.env)?.DEFAULT_BOT_ID || '';
     setBotId(defaultBotId);
     addToast('Bot ID has been reset to default.', 'success');
     onClose();

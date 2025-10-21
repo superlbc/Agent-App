@@ -47,12 +47,12 @@ const AppContent: React.FC = () => {
     tags: ["Internal only"],
   });
   
-  const [botId, setBotId] = useLocalStorage<string>('botId', (import.meta.env)?.VITE_DEFAULT_BOT_ID || '');
+  const [botId, setBotId] = useLocalStorage<string>('botId', (import.meta.env)?.DEFAULT_BOT_ID || '');
 
   const apiConfig: ApiConfig = {
     hostname: 'https://interact.interpublic.com',
-    clientId: (import.meta.env)?.VITE_CLIENT_ID || '',
-    clientSecret: (import.meta.env)?.VITE_CLIENT_SECRET || '',
+    clientId: (import.meta.env)?.CLIENT_ID || '',
+    clientSecret: (import.meta.env)?.CLIENT_SECRET || '',
     botId: botId,
   };
 

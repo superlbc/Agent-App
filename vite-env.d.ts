@@ -4,9 +4,9 @@
 
 interface ImportMetaEnv {
   readonly DEV: boolean;
-  readonly VITE_CLIENT_ID: string;
-  readonly VITE_CLIENT_SECRET: string;
-  readonly VITE_DEFAULT_BOT_ID: string;
+  readonly CLIENT_ID: string;
+  readonly CLIENT_SECRET: string;
+  readonly DEFAULT_BOT_ID: string;
 }
 
 interface ImportMeta {

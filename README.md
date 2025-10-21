@@ -240,11 +240,11 @@ Edit `.env.local` with your credentials:
 
 ```env
 # API Credentials for Interact.interpublic.com
-VITE_CLIENT_ID="YourClientID"
-VITE_CLIENT_SECRET="YourClientSecret"
+CLIENT_ID="YourClientID"
+CLIENT_SECRET="YourClientSecret"
 
 # Default Bot ID for AI Agent
-VITE_DEFAULT_BOT_ID="64650431-dad7-4b47-8bb1-4a81800f9f5f"
+DEFAULT_BOT_ID="64650431-dad7-4b47-8bb1-4a81800f9f5f"
 
 # Google Gemini API Key (optional, not currently used)
 GEMINI_API_KEY="PLACEHOLDER_API_KEY"
@@ -642,13 +642,13 @@ export const graphConfig = {
 
 ### Environment Variables
 
-The application uses environment variables for sensitive configuration. All variables prefixed with `VITE_` are exposed to the client-side code.
+The application uses environment variables for sensitive configuration.
 
 | Variable | Required | Description | Example |
 |----------|----------|-------------|---------|
-| `VITE_CLIENT_ID` | ✅ Yes | API client identifier for Interact.interpublic.com | `"MeetingNotes"` |
-| `VITE_CLIENT_SECRET` | ✅ Yes | API client secret for authentication | `"eOk9dez@#En@nWw2w%0N"` |
-| `VITE_DEFAULT_BOT_ID` | ✅ Yes | Bot ID for the AI agent | `"64650431-dad7-4b47-8bb1-4a81800f9f5f"` |
+| `CLIENT_ID` | ✅ Yes | API client identifier for Interact.interpublic.com | `"MeetingNotes"` |
+| `CLIENT_SECRET` | ✅ Yes | API client secret for authentication | `"eOk9dez@#En@nWw2w%0N"` |
+| `DEFAULT_BOT_ID` | ✅ Yes | Bot ID for the AI agent | `"64650431-dad7-4b47-8bb1-4a81800f9f5f"` |
 | `GEMINI_API_KEY` | ❌ No | Google Gemini API key (not currently used) | `"PLACEHOLDER_API_KEY"` |
 
 ### API Configuration
@@ -674,7 +674,7 @@ The application uses environment variables for sensitive configuration. All vari
 The Bot ID identifies which AI agent to use for processing. You can configure this in two ways:
 
 1. **Environment Variable** (default):
-   - Set `VITE_DEFAULT_BOT_ID` in `.env.local`
+   - Set `DEFAULT_BOT_ID` in `.env.local`
 
 2. **Settings Panel** (runtime):
    - Click the ⚙️ icon in the header
@@ -917,9 +917,9 @@ All API requests require an OAuth 2.0 access token obtained via the Client Crede
 Create a `.env.production` file:
 
 ```env
-VITE_CLIENT_ID="MeetingNotes"
-VITE_CLIENT_SECRET="your-production-secret"
-VITE_DEFAULT_BOT_ID="64650431-dad7-4b47-8bb1-4a81800f9f5f"
+CLIENT_ID="MeetingNotes"
+CLIENT_SECRET="your-production-secret"
+DEFAULT_BOT_ID="64650431-dad7-4b47-8bb1-4a81800f9f5f"
 ```
 
 2. **Update MSAL redirect URI** in `auth/authConfig.ts`:
@@ -965,9 +965,9 @@ vercel
 ```
 
 3. Configure environment variables in Vercel dashboard:
-   - Add `VITE_CLIENT_ID`
-   - Add `VITE_CLIENT_SECRET`
-   - Add `VITE_DEFAULT_BOT_ID`
+   - Add `CLIENT_ID`
+   - Add `CLIENT_SECRET`
+   - Add `DEFAULT_BOT_ID`
 
 4. Update Azure AD redirect URI to match Vercel deployment URL
 
@@ -984,7 +984,7 @@ vercel
 
 4. Add environment variables in Azure Portal:
    - Navigate to **Configuration** → **Application settings**
-   - Add `VITE_CLIENT_ID`, `VITE_CLIENT_SECRET`, `VITE_DEFAULT_BOT_ID`
+   - Add `CLIENT_ID`, `CLIENT_SECRET`, `DEFAULT_BOT_ID`
 
 5. Push to GitHub to trigger automatic deployment
 
@@ -1073,7 +1073,7 @@ Access-Control-Allow-Headers: Authorization, Content-Type
 
 #### Problem: "Failed to fetch token" error
 **Solution**:
-1. Verify `VITE_CLIENT_ID` and `VITE_CLIENT_SECRET` in `.env.local`
+1. Verify `CLIENT_ID` and `CLIENT_SECRET` in `.env.local`
 2. Check network tab for 401/400 responses
 3. Ensure API credentials are correct
 4. Confirm API server is accessible (not behind firewall)
@@ -1108,10 +1108,10 @@ Access-Control-Allow-Headers: Authorization, Content-Type
 
 #### Problem: Environment variables not working in production
 **Solution**:
-- Ensure all variables are prefixed with `VITE_` for client-side access
+- Ensure environment variables are configured properly in your build system
 - Re-run build after changing `.env` files
 - Verify environment variables are set in hosting platform dashboard
-- Check `import.meta.env.VITE_*` usage in code
+- Check `import.meta.env.*` usage in code
 
 #### Problem: "Cannot find module" errors after deployment
 **Solution**:
