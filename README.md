@@ -910,6 +910,87 @@ All API requests require an OAuth 2.0 access token obtained via the Client Crede
 
 ## Deployment
 
+### Google Cloud Run Deployment Progress
+
+This section tracks the progress of deploying Momentum Note Crafter to Google Cloud Run.
+
+#### Project Information
+
+- **GCP Project**: `mom-ai-apps`
+- **Project Team**: Luis Bustos, Nick Keller (Editors), Jeff Davalos (Admin)
+- **Target Platform**: Google Cloud Run
+- **Repository**: Git initialized locally
+
+#### Deployment Progress Tracker
+
+| Step | Status | Details | Notes |
+|------|--------|---------|-------|
+| 1. Initialize Git Repository | ✅ Complete | Commit: `7a9bfce` | Initial commit with all source code |
+| 2. Rename Environment Variables | ✅ Complete | Commit: `d1557af` | Removed VITE_ prefix, updated vite.config.ts |
+| 3. Install Docker Desktop | ⏳ Pending | Required | Need Docker to build images locally |
+| 4. Obtain nginx.conf | ⏳ Waiting | **Critical** | Nick sending - needed for Dockerfile COPY command |
+| 5. Confirm GCP Registry URL | ⏳ Waiting | TBD | Region: us-east4? Repo: note-crafter? |
+| 6. Add npm build script | ⏳ Pending | package.json | Need to add `"build": "vite build"` |
+| 7. Create Dockerfile | ⏳ Pending | Blocked | Waiting on nginx.conf and registry URL |
+| 8. Adapt build-push-image script | ⏳ Pending | Blocked | Waiting on registry URL confirmation |
+| 9. Create Cloud Artifact Registry | ⏳ Pending | TBD | Jeff may need to create this |
+| 10. Build Docker Image Locally | ⏳ Pending | Blocked | Requires Docker + Dockerfile |
+| 11. Push Image to Registry | ⏳ Pending | Blocked | Requires build-push-image script |
+| 12. Create Cloud Run Service | ⏳ Pending | Blocked | Requires pushed Docker image |
+| 13. Configure Environment Variables | ⏳ Pending | Cloud Run | Set CLIENT_ID, CLIENT_SECRET, DEFAULT_BOT_ID |
+| 14. Update MSAL Redirect URI | ⏳ Pending | authConfig.ts | Set to Cloud Run URL |
+| 15. Test Production Deployment | ⏳ Pending | Final | Verify authentication and API calls work |
+
+#### Outstanding Questions for Nick
+
+1. **nginx.conf file** (Critical): Can you send the nginx.conf file? The Dockerfile references it via `COPY nginx.conf /etc/nginx/conf.d/default.conf`
+   - Does it include API proxying configuration for `/api/*` → `https://interact.interpublic.com`?
+
+2. **GCP Registry Configuration**:
+   - Region: Should we use `us-east4` (same as your staffing app)?
+   - Repository name: Should it be `note-crafter`?
+   - Full URL format: `us-east4-docker.pkg.dev/mom-ai-apps/note-crafter`?
+
+3. **Environment Variables Strategy**:
+   - Should we pass them as build-time `ENV` in Dockerfile?
+   - Or configure them in Cloud Run environment settings?
+   - Required vars: `CLIENT_ID`, `CLIENT_SECRET`, `DEFAULT_BOT_ID`, `MSAL_CLIENT_ID`, `MSAL_TENANT_ID`
+
+4. **Cloud Run URL**: What will the production URL be? (Needed for MSAL redirect URI configuration)
+
+5. **Architecture Confirmation**: Your staffing app - does it use:
+   - Option A: Frontend with Nginx proxy (1 Cloud Run service)?
+   - Option B: Separate frontend + backend (2 Cloud Run services)?
+
+#### Outstanding Questions for Jeff
+
+1. **Cloud Artifact Registry**: Does the registry repository need to be created, or does it auto-create on first push?
+
+2. **Networking**: You mentioned subnet requirements - what are the specific networking needs?
+
+#### Git Commit History
+
+```bash
+d1557af - Rename environment variables for Docker deployment compatibility
+7a9bfce - Initial commit: Note Crafter app
+```
+
+#### Next Immediate Actions
+
+1. **Install Docker Desktop** (Luis) - Download from [docker.com](https://www.docker.com/products/docker-desktop)
+2. **Add build script** to package.json:
+   ```json
+   "scripts": {
+     "dev": "vite",
+     "build": "vite build",
+     "preview": "vite preview"
+   }
+   ```
+3. **Wait for nginx.conf** from Nick
+4. **Confirm registry details** with Nick
+
+---
+
 ### Build for Production
 
 1. **Set production environment variables**:
@@ -1498,7 +1579,48 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2024-01-20
+### 📅 Latest Update - 2025-01-21
+
+**Summary**: Prepared application for Google Cloud Run deployment by renaming environment variables and adding deployment progress tracker.
+
+#### Changes
+
+**Environment Variables**:
+- ✅ Removed `VITE_` prefix from `CLIENT_ID`, `CLIENT_SECRET`, `DEFAULT_BOT_ID`
+- ✅ Updated `vite.config.ts` to expose non-VITE_ prefixed variables using `loadEnv`
+- ✅ Updated all code references in `App.tsx` and `SettingsDrawer.tsx`
+- ✅ Updated TypeScript type definitions in `vite-env.d.ts`
+- ✅ Updated `.env.example` template
+
+**Deployment Preparation**:
+- ✅ Initialized Git repository (commit: `7a9bfce`)
+- ✅ Committed environment variable changes (commit: `d1557af`)
+- ✅ Added comprehensive deployment progress tracker to README
+- ✅ Documented outstanding questions for Nick and Jeff
+- ✅ Created deployment roadmap with 15 tracked steps
+
+**Documentation**:
+- ✅ Added "Google Cloud Run Deployment Progress" section to README
+- ✅ Added deployment progress tracker table
+- ✅ Documented GCP project information (`mom-ai-apps`)
+- ✅ Listed next immediate actions and blockers
+
+#### Git Commits
+
+- `d1557af` - Rename environment variables for Docker deployment compatibility
+- `7a9bfce` - Initial commit: Note Crafter app
+
+#### Benefits
+
+- ✅ Environment variables now compatible with Docker build-time injection
+- ✅ Clear deployment roadmap with trackable progress
+- ✅ All stakeholders have visibility into deployment status
+- ✅ Blockers and dependencies clearly documented
+- ✅ Git history provides version control for Docker image tagging
+
+---
+
+### 📅 Previous Update - 2024-01-20
 
 **Summary**: Initial comprehensive documentation created for Momentum Note Crafter application, including full README and environment configuration template.
 
