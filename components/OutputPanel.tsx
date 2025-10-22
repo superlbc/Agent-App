@@ -8,6 +8,7 @@ import { exportToCsv } from '../utils/export';
 import { Chip } from './ui/Chip';
 import { markdownToHtml } from '../utils/formatting';
 import { InterrogateTranscriptModal } from './InterrogateTranscriptModal';
+import { telemetryService } from '../utils/telemetryService';
 
 interface OutputPanelProps {
   output: AgentResponse | null;
@@ -294,10 +295,24 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
                 'text/plain': blobText,
             });
             await navigator.clipboard.write([clipboardItem]);
+
+            // Telemetry: Track clipboard copy
+            telemetryService.trackEvent('copiedToClipboard', {
+                contentLength: markdownContent.length,
+                format: 'richText'
+            });
+
             addToast('Formatted notes copied to clipboard.', 'success');
         } catch (err) {
             console.error('Failed to copy rich text, falling back to plain text:', err);
             await navigator.clipboard.writeText(markdownContent);
+
+            // Telemetry: Track fallback copy
+            telemetryService.trackEvent('copiedToClipboard', {
+                contentLength: markdownContent.length,
+                format: 'plainText'
+            });
+
             addToast('Notes copied to clipboard (plain text).', 'success');
         }
     };
@@ -308,7 +323,13 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
             addToast('Could not open print window. Please disable popup blockers.', 'error');
             return;
         }
-        
+
+        // Telemetry: Track PDF export
+        telemetryService.trackEvent('exportedToPDF', {
+            contentLength: markdownContent.length,
+            title: title
+        });
+
         const htmlContent = markdownToHtml(markdownContent);
         
         printWindow.document.write(`
@@ -351,6 +372,12 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
         const fullMarkdown = intro + markdownContent;
         const htmlBody = markdownToHtml(fullMarkdown);
 
+        // Telemetry: Track email draft export
+        telemetryService.trackEvent('exportedToEmail', {
+            contentLength: fullMarkdown.length,
+            actionItemCount: nextSteps.length
+        });
+
         try {
             const blobHtml = new Blob([htmlBody], { type: 'text/html' });
             const blobText = new Blob([fullMarkdown], { type: 'text/plain' });
@@ -383,6 +410,13 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
             addToast('No action items to export.', 'error');
             return;
         }
+
+        // Telemetry: Track CSV export
+        telemetryService.trackEvent('exportedToCSV', {
+            actionItemCount: nextSteps.length,
+            fileName: `next_steps_${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv`
+        });
+
         const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         exportToCsv(nextSteps, `next_steps_${safeTitle}.csv`);
         addToast('CSV downloaded successfully.', 'success');
@@ -498,6 +532,14 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
 
 export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig }) => {
   const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
+
+  const handleInterrogateOpen = () => {
+    // Telemetry: Track transcript interrogation
+    telemetryService.trackEvent('transcriptInterrogated', {
+      transcriptLength: formState.transcript.length
+    });
+    setIsInterrogateModalOpen(true);
+  };
   
   if (isLoading) {
     return (
@@ -535,11 +577,11 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
         {/* Sticky Export Bar */}
         <div className="sticky top-24 z-20 -mx-6 -mt-6 mb-6">
           <div className="p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-             <ExportBar 
-                output={output} 
-                title={output.markdown.split('\n')[0].replace('# ', '')} 
-                addToast={addToast} 
-                onInterrogate={() => setIsInterrogateModalOpen(true)}
+             <ExportBar
+                output={output}
+                title={output.markdown.split('\n')[0].replace('# ', '')}
+                addToast={addToast}
+                onInterrogate={handleInterrogateOpen}
               />
           </div>
         </div>

@@ -183,6 +183,119 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 
 ---
 
+## Telemetry & Analytics 📊
+
+The application includes a comprehensive telemetry framework that tracks user interactions and usage patterns to help improve the product. All telemetry data is sent to Power Automate flows for centralized logging and analysis.
+
+### What is Tracked
+
+**Authentication Events**:
+- User login (once per session)
+- User logout
+
+**Core Functionality**:
+- Notes generated (first generation)
+- Notes regenerated (subsequent generations with different settings)
+- Meeting settings used (audience, tone, view mode, preset, etc.)
+- Action item count in generated notes
+
+**Export & Sharing**:
+- Copy to clipboard (rich text or plain text fallback)
+- Download PDF (print preview)
+- Download CSV (action items)
+- Draft email (mailto link)
+
+**Transcript Interrogation**:
+- Modal opened
+- Questions asked (includes question length and conversation turn)
+
+**File Uploads**:
+- TXT file uploads (includes file size)
+- DOCX file uploads (includes file size)
+
+**User Interactions**:
+- Sample data loaded
+- Form cleared
+- Preset selected (includes preset details)
+- Settings opened
+- Bot ID changed (hashed for privacy)
+
+**Tour Interactions**:
+- Tour started
+- Tour completed (finished all steps)
+- Tour dismissed (closed before completing)
+
+### Privacy & Security
+
+- **User Data**: Only authenticated user name and email (from Azure AD) are sent
+- **Bot IDs**: Hashed using a simple hash function before transmission
+- **Meeting Content**: Meeting titles, transcripts, and generated notes are **never** sent to telemetry
+- **File Names**: Only file extensions are tracked, not full file names
+- **Fire-and-Forget**: Telemetry failures do not impact application functionality
+
+### Power Automate Integration
+
+The application sends telemetry data to three Power Automate flow endpoints:
+
+1. **User Login Flow** (Legacy, optional): Tracks user authentication events
+2. **Notes Generated Flow** (Legacy, optional): Tracks major business events
+3. **Centralized Telemetry Flow** (Recommended): Tracks all events with rich metadata
+
+#### Centralized Telemetry Event Schema
+
+```json
+{
+  "appName": "Meeting Notes Generator",
+  "appVersion": "1.0.0",
+  "sessionId": "unique-session-id-per-browser-session",
+  "correlationId": "optional-id-to-link-related-events",
+  "eventType": "notesGenerated",
+  "timestamp": "2025-01-22T14:30:00.000Z",
+  "userContext": {
+    "name": "John Doe",
+    "email": "john.doe@company.com",
+    "tenantId": "azure-ad-tenant-id"
+  },
+  "eventPayload": "{\"meetingTitle\":\"Q4 Planning\",\"transcriptLength\":5430,\"actionItemCount\":7}"
+}
+```
+
+### Configuration
+
+Telemetry flow URLs are configured in [appConfig.ts](appConfig.ts):
+
+```typescript
+export const appConfig = {
+  userLoginFlowUrl: "YOUR_POWER_AUTOMATE_LOGIN_FLOW_URL",
+  notesGeneratedFlowUrl: "YOUR_POWER_AUTOMATE_NOTES_FLOW_URL",
+  telemetryFlowUrl: "YOUR_POWER_AUTOMATE_TELEMETRY_FLOW_URL"
+};
+```
+
+**To configure**:
+1. Create HTTP trigger flows in Power Automate
+2. Copy the HTTP POST URLs from each flow
+3. Replace the placeholder URLs in `appConfig.ts`
+4. If URLs are not configured (still contain "YOUR_"), telemetry will be disabled with console warnings
+
+### Disabling Telemetry (Development)
+
+To disable telemetry during local development:
+- Leave the placeholder URLs in `appConfig.ts` unchanged
+- The app will log warnings to the console but continue functioning normally
+
+### Telemetry Dashboard (Optional)
+
+The telemetry data can be used to create Power BI dashboards showing:
+- Daily/weekly active users
+- Most popular presets and settings
+- Export format preferences
+- Tour completion rates
+- Average meeting notes length
+- Feature adoption metrics
+
+---
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed and configured:
@@ -1788,9 +1901,12 @@ c:\Users\luis.bustos\Downloads\Momo Mettings App\
 │   ├── export.ts                     # CSV export logic
 │   ├── formatting.ts                 # Markdown to HTML conversion
 │   ├── parsing.ts                    # Text parsing utilities
-│   └── tourHelper.ts                 # Tour helper functions
+│   ├── tourHelper.ts                 # Tour helper functions
+│   ├── telemetryService.ts           # Centralized telemetry tracking service
+│   └── reporting.ts                  # Legacy Power Automate flow trigger utility
 │
 ├── 📄 App.tsx                        # Main app component (layout, routing)
+├── 📄 appConfig.ts                   # Power Automate flow URL configuration
 ├── 📄 index.tsx                      # React DOM entry point
 ├── 📄 index.html                     # HTML template (Tailwind CDN, meta tags)
 ├── 📄 types.ts                       # TypeScript interfaces and types
@@ -2066,7 +2182,59 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2025-01-22 (Part 2)
+### 📅 Latest Update - 2025-01-22 (Part 3)
+
+**Summary**: Implemented comprehensive telemetry framework for tracking user interactions and usage analytics.
+
+#### Telemetry Framework Implementation
+
+**New Files Created**:
+- ✅ `appConfig.ts` - Power Automate flow URL configuration
+- ✅ `utils/telemetryService.ts` - Centralized event tracking service (24 event types)
+- ✅ `utils/reporting.ts` - Legacy Power Automate flow trigger utility
+
+**Events Tracked**:
+- **Authentication**: userLogin, userLogout
+- **Core Functionality**: notesGenerated, notesRegenerated
+- **Exports**: exportedToCSV, exportedToPDF, exportedToEmail, copiedToClipboard
+- **Transcript Interaction**: transcriptInterrogated, questionAsked
+- **Settings**: settingsOpened, botIdChanged
+- **Data Input**: sampleDataLoaded, formCleared, transcriptFileUploaded, docxFileUploaded
+- **Presets**: presetSelected
+- **Tour**: tourStarted, tourCompleted, tourDismissed
+
+**Integration Points**:
+- ✅ App.tsx - User login tracking, notes generation tracking
+- ✅ OutputPanel.tsx - Export tracking (CSV, PDF, email, clipboard)
+- ✅ InterrogateTranscriptModal.tsx - Question tracking
+- ✅ SettingsDrawer.tsx - Settings interactions
+- ✅ InputPanel.tsx - File uploads and preset selections
+- ✅ TourContext.tsx - Tour start tracking
+- ✅ TourStep.tsx - Tour completion and dismissal tracking
+
+**Features**:
+- Session ID generation (unique per browser session)
+- User context management (from Azure AD)
+- Event envelopes with app metadata (version, timestamp, correlation ID)
+- Fire-and-forget HTTP POST (doesn't block UI)
+- Graceful degradation when URLs not configured
+- Privacy-focused (bot IDs hashed, no meeting content sent)
+
+**Benefits**:
+- Track feature adoption and usage patterns
+- Identify popular presets and export formats
+- Measure tour completion rates
+- Monitor user engagement
+- Data-driven product decisions
+
+**Documentation**:
+- Added comprehensive "Telemetry & Analytics" section in README
+- Included event schema, configuration guide, and privacy details
+- Optional Power BI dashboard suggestions
+
+---
+
+### 📅 Earlier Update - 2025-01-22 (Part 2)
 
 **Summary**: Added Scroll to Top button for improved navigation on long pages.
 

@@ -7,6 +7,7 @@ import { Button } from './ui/Button';
 import { FormState, ApiConfig, ChatMessage } from '../types';
 import { interrogateTranscript } from '../services/apiService';
 import { Tooltip } from './ui/Tooltip';
+import { telemetryService } from '../utils/telemetryService';
 
 interface InterrogateTranscriptModalProps {
   isOpen: boolean;
@@ -119,9 +120,15 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
     const trimmedQuestion = questionToSend.trim();
     if (!trimmedQuestion || isLoading) return;
 
+    // Telemetry: Track question asked
+    telemetryService.trackEvent('questionAsked', {
+      questionLength: trimmedQuestion.length,
+      conversationTurn: conversation.length + 1
+    });
+
     setIsLoading(true);
     setQuestion('');
-    
+
     // Add user's question to the conversation immediately for better UX
     const userMessage: ChatMessage = { question: trimmedQuestion };
     setConversation(prev => [...prev, userMessage]);

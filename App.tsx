@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from './components/Header';
 import { InputPanel } from './components/InputPanel';
 import { OutputPanel } from './components/OutputPanel';
@@ -16,6 +16,10 @@ import { Icon } from './components/ui/Icon';
 import { TourProvider, useTourContext } from './contexts/TourContext';
 import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
+import { useAuth } from './contexts/AuthContext';
+import { telemetryService } from './utils/telemetryService';
+import { triggerPowerAutomateFlow } from './utils/reporting';
+import { appConfig } from './appConfig';
 
 const DEFAULT_CONTROLS: Controls = {
   focus_department: [],
@@ -35,7 +39,7 @@ const DEFAULT_CONTROLS: Controls = {
 };
 
 const AppContent: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useLocalStorage('darkMode', 
+  const [isDarkMode, setIsDarkMode] = useLocalStorage('darkMode',
     window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
   );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -47,7 +51,7 @@ const AppContent: React.FC = () => {
     transcript: '',
     tags: ["Internal only"],
   });
-  
+
   const [botId, setBotId] = useLocalStorage<string>('botId', (import.meta.env)?.DEFAULT_BOT_ID || '');
 
   const apiConfig: ApiConfig = {
@@ -65,8 +69,10 @@ const AppContent: React.FC = () => {
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  
+
   const { startTour, isTourActive } = useTourContext();
+  const { isAuthenticated, user } = useAuth();
+  const hasTriggeredLoginFlow = useRef(false);
 
   useEffect(() => {
     const tourCompleted = localStorage.getItem('tourCompleted');
@@ -82,6 +88,29 @@ const AppContent: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Telemetry: Set user context when authentication changes
+  useEffect(() => {
+    telemetryService.setUser(user);
+  }, [user]);
+
+  // Telemetry: Track user login (once per session)
+  useEffect(() => {
+    if (isAuthenticated && user && !hasTriggeredLoginFlow.current) {
+      hasTriggeredLoginFlow.current = true;
+
+      // Legacy login tracking (optional, for backwards compatibility)
+      triggerPowerAutomateFlow(appConfig.userLoginFlowUrl, {
+        eventType: "userLogin",
+        userName: user.name,
+        userEmail: user.username,
+        timestamp: new Date().toISOString()
+      });
+
+      // Modern centralized tracking
+      telemetryService.trackEvent('userLogin', {});
+    }
+  }, [isAuthenticated, user]);
 
   const addToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
@@ -99,6 +128,10 @@ const AppContent: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
+
+    // Generate correlation ID for tracking related events
+    const correlationId = crypto.randomUUID();
+
     try {
       const payload: Payload = {
         meeting_title: currentFormState.title,
@@ -106,9 +139,43 @@ const AppContent: React.FC = () => {
         transcript: currentFormState.transcript,
         controls: currentControls,
       };
-      
+
       const response = await generateNotes(payload, apiConfig);
       setOutput(response);
+
+      // Telemetry: Track notes generation with details
+      const eventType = hasGenerated ? 'notesRegenerated' : 'notesGenerated';
+      telemetryService.trackEvent(eventType, {
+        meetingTitle: currentFormState.title,
+        transcriptLength: currentFormState.transcript.length,
+        agendaItemCount: payload.agenda.length,
+        audience: currentControls.audience,
+        tone: currentControls.tone,
+        viewMode: currentControls.view,
+        meetingCoachEnabled: currentControls.meeting_coach,
+        coachingStyle: currentControls.coaching_style,
+        preset: currentControls.meetingPreset,
+        criticalLens: currentControls.critical_lens,
+        redactionEnabled: currentControls.redact,
+        useIcons: currentControls.use_icons,
+        boldKeywords: currentControls.bold_important_words,
+        actionItemCount: response.next_steps?.length || 0,
+        hasTags: currentFormState.tags.length > 0
+      }, correlationId);
+
+      // Legacy tracking (optional)
+      if (!hasGenerated) {
+        triggerPowerAutomateFlow(appConfig.notesGeneratedFlowUrl, {
+          eventType: "notesGenerated",
+          userName: user?.name,
+          userEmail: user?.username,
+          timestamp: new Date().toISOString(),
+          meetingTitle: currentFormState.title,
+          actionItemCount: response.next_steps?.length || 0,
+          preset: currentControls.meetingPreset
+        });
+      }
+
       setHasGenerated(true);
       if(hasGenerated) {
         addToast('Preview updated successfully', 'success');
@@ -123,7 +190,7 @@ const AppContent: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [hasGenerated, apiConfig]);
+  }, [hasGenerated, apiConfig, user]);
 
   const handleGenerateClick = () => {
     handleGenerate(formState, controls);
@@ -133,12 +200,18 @@ const AppContent: React.FC = () => {
     setFormState({ title: '', agenda: '', transcript: '', tags: [] });
     setOutput(null);
     setHasGenerated(false);
-    // Do not show toast when clearing form programmatically for the tour
+
+    // Telemetry: Track form clear
+    telemetryService.trackEvent('formCleared', {});
   }, [setFormState]);
 
   const handleUseSampleData = useCallback(() => {
     setFormState(SAMPLE_DATA);
-    // Do not show toast when using sample data programmatically for the tour
+
+    // Telemetry: Track sample data load
+    telemetryService.trackEvent('sampleDataLoaded', {
+      sampleTitle: SAMPLE_DATA.title
+    });
   }, [setFormState]);
   
   const handleReplayTour = () => {

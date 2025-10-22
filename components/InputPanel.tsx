@@ -25,6 +25,7 @@ import {
   COACHING_STYLE_OPTIONS,
   DEPARTMENT_LEGEND,
 } from '../constants';
+import { telemetryService } from '../utils/telemetryService';
 
 interface InputPanelProps {
   formState: FormState;
@@ -53,6 +54,16 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   // When a preset is selected, update the relevant controls and tags.
   const handlePresetChange = (preset: Exclude<MeetingPreset, 'custom'>) => {
     const config = PRESET_CONFIGS[preset];
+
+    // Telemetry: Track preset selection
+    telemetryService.trackEvent('presetSelected', {
+      preset: preset,
+      audience: config.audience,
+      tone: config.tone,
+      viewMode: config.view,
+      coachingEnabled: config.meeting_coach
+    });
+
     setControls(prev => ({
         ...prev,
         ...config,
@@ -85,6 +96,13 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     const reader = new FileReader();
 
     if (file.type === 'text/plain') {
+      // Telemetry: Track TXT file upload
+      telemetryService.trackEvent('transcriptFileUploaded', {
+        fileType: 'txt',
+        fileSize: file.size,
+        fileName: file.name.substring(file.name.lastIndexOf('.'))
+      });
+
       reader.onload = (e) => {
         const text = e.target?.result as string;
         setFormState(prev => ({ ...prev, transcript: text }));
@@ -98,6 +116,13 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         addToast('Could not read the .docx file or parsing library is not available.', 'error');
         return;
       }
+
+      // Telemetry: Track DOCX file upload
+      telemetryService.trackEvent('docxFileUploaded', {
+        fileSize: file.size,
+        fileName: file.name.substring(file.name.lastIndexOf('.'))
+      });
+
       addToast(`Processing .docx file...`, 'success');
       reader.onload = (e) => {
         const arrayBuffer = e.target?.result as ArrayBuffer;

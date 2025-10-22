@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Icon } from './ui/Icon.tsx';
 import { Input } from './ui/Input.tsx';
 import { Button } from './ui/Button.tsx';
+import { telemetryService } from '../utils/telemetryService';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -25,6 +26,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
     if (isOpen) {
       setIsRendered(true);
       setLocalBotId(botId); // Sync form with stored config when opened
+
+      // Telemetry: Track settings opened
+      telemetryService.trackEvent('settingsOpened', {});
     } else {
       const timer = setTimeout(() => setIsRendered(false), 300); // match animation duration
       return () => clearTimeout(timer);
@@ -32,13 +36,42 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   }, [isOpen, botId]);
   
   const handleSave = () => {
+    // Telemetry: Track bot ID change if value differs
+    if (localBotId !== botId) {
+      // Hash the bot IDs for privacy
+      const hashString = (str: string) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash; // Convert to 32bit integer
+        }
+        return Math.abs(hash).toString(16);
+      };
+
+      telemetryService.trackEvent('botIdChanged', {
+        oldBotIdHash: hashString(botId),
+        newBotIdHash: hashString(localBotId),
+        wasDefault: botId === (import.meta.env)?.DEFAULT_BOT_ID
+      });
+    }
+
     setBotId(localBotId);
     addToast('Settings saved successfully!', 'success');
     onClose();
   };
-  
+
   const handleReset = () => {
     const defaultBotId = (import.meta.env)?.DEFAULT_BOT_ID || '';
+
+    // Telemetry: Track bot ID reset
+    telemetryService.trackEvent('botIdChanged', {
+      oldBotIdHash: 'custom',
+      newBotIdHash: 'default',
+      wasDefault: false,
+      action: 'reset'
+    });
+
     setBotId(defaultBotId);
     addToast('Bot ID has been reset to default.', 'success');
     onClose();

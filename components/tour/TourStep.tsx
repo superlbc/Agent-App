@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useState, useRef } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { telemetryService } from '../../utils/telemetryService';
 
 interface TourStepProps {
   step: {
@@ -132,7 +133,14 @@ export const TourStep: React.FC<TourStepProps> = ({
           <div className="flex justify-between items-start">
             <h3 className="font-bold text-lg">{title}</h3>
             <button
-              onClick={onStop}
+              onClick={() => {
+                // Telemetry: Track tour dismissed via close (X) button
+                telemetryService.trackEvent('tourDismissed', {
+                  stepIndex: currentStepIndex,
+                  totalSteps: totalSteps
+                });
+                onStop();
+              }}
               className="-mt-2 -mr-2 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
               aria-label="Close tutorial"
             >
@@ -150,10 +158,27 @@ export const TourStep: React.FC<TourStepProps> = ({
           <p className="text-sm text-slate-600 dark:text-slate-300">{content}</p>
           
           <div className="flex justify-between items-center mt-4">
-            <Button variant="secondary" size="sm" onClick={onStop}>End Tour</Button>
+            <Button variant="secondary" size="sm" onClick={() => {
+              // Telemetry: Track tour dismissed via "End Tour" button
+              telemetryService.trackEvent('tourDismissed', {
+                stepIndex: currentStepIndex,
+                totalSteps: totalSteps
+              });
+              onStop();
+            }}>End Tour</Button>
             <div className="flex gap-2">
               {!isFirst && <Button variant="outline" size="sm" onClick={onPrev}>Previous</Button>}
-              <Button size="sm" onClick={isLast ? onStop : onNext}>
+              <Button size="sm" onClick={() => {
+                if (isLast) {
+                  // Telemetry: Track tour completed via "Finish" button
+                  telemetryService.trackEvent('tourCompleted', {
+                    totalSteps: totalSteps
+                  });
+                  onStop();
+                } else {
+                  onNext();
+                }
+              }}>
                 {isLast ? 'Finish' : 'Next'}
               </Button>
             </div>

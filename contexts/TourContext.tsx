@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { telemetryService } from '../utils/telemetryService';
 
 interface TourContextType {
   isTourActive: boolean;
@@ -16,6 +17,9 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const startTour = useCallback(() => {
+    // Telemetry: Track tour started
+    telemetryService.trackEvent('tourStarted', {});
+
     setCurrentStepIndex(0);
     setIsTourActive(true);
     document.body.style.overflow = 'hidden';
