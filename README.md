@@ -1,4 +1,6 @@
-# Momentum Note Crafter
+# Meeting Notes Generator
+
+> *Drive consistency and impact in every meeting.*
 
 ### 🚀 AI-Powered Meeting Notes Generation with Intelligent Insights
 
@@ -27,7 +29,7 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 
 ## Overview
 
-**Momentum Note Crafter** is a React-based web application that leverages AI to transform unstructured meeting transcripts into professional, actionable meeting minutes. The tool intelligently extracts action items, provides meeting quality insights through an optional "Meeting Coach" feature, and offers multiple formatting options tailored to different audiences (executive, cross-functional, department-specific).
+**Meeting Notes Generator** is a React-based web application that leverages AI to transform unstructured meeting transcripts into professional, actionable meeting minutes. The tool intelligently extracts action items, provides meeting quality insights through an optional "Meeting Coach" feature, and offers multiple formatting options tailored to different audiences (executive, cross-functional, department-specific).
 
 ### 🎯 Key Use Cases
 
@@ -503,7 +505,7 @@ This application uses **Microsoft Authentication Library (MSAL)** to authenticat
 3. Click **"New registration"**
 
 4. **Configure the app**:
-   - **Name**: `Momentum Note Crafter` (or your preferred name)
+   - **Name**: `Meeting Notes Generator` (or your preferred name)
    - **Supported account types**: Select **"Accounts in this organizational directory only (Single tenant)"**
    - **Redirect URI**:
      - Platform: **Single-page application (SPA)**
@@ -1581,7 +1583,7 @@ system: {
 
 ### 📅 Latest Update - 2025-01-21
 
-**Summary**: Prepared application for Google Cloud Run deployment by renaming environment variables and adding deployment progress tracker.
+**Summary**: Prepared Meeting Notes Generator for Google Cloud Run deployment by renaming environment variables and adding deployment progress tracker.
 
 #### Changes
 
@@ -1622,7 +1624,7 @@ system: {
 
 ### 📅 Previous Update - 2024-01-20
 
-**Summary**: Initial comprehensive documentation created for Momentum Note Crafter application, including full README and environment configuration template.
+**Summary**: Initial comprehensive documentation created for Meeting Notes Generator application, including full README and environment configuration template.
 
 #### Changes
 
