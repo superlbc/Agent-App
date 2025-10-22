@@ -89,13 +89,53 @@ Edit `config/sql-connection.json`:
    - Select workspace
    - Share with stakeholders
 
-#### Option B: Automated Creation (Coming in Phase 2)
+#### Option B: Automated Deployment (After Building .pbix Files)
+
+**One-time manual step:** Build the 3 .pbix files following [BUILD-DASHBOARDS.md](BUILD-DASHBOARDS.md) (~1.5 hours total)
+
+**Then automate everything else:**
 
 ```powershell
-# Build and deploy all dashboards
+# Deploy all dashboards to Power BI Service (fully automated)
 cd powerbi/scripts
-.\build-all-dashboards.ps1 -ConfigFile "..\config\deployment-config.json"
+.\deploy-all.ps1
 ```
+
+This automation handles:
+- ✅ Workspace creation
+- ✅ Dashboard deployment
+- ✅ Permission configuration
+- ✅ Refresh schedule setup
+- ✅ Access link generation
+
+**Or run steps individually:**
+```powershell
+.\1-create-workspace.ps1
+.\2-deploy-dashboards.ps1
+.\3-configure-permissions.ps1
+.\4-configure-refresh.ps1
+```
+
+---
+
+## ⚡ Automation Approach
+
+**What CAN be automated (without paid tools):**
+- ✅ Deploying .pbix files to Power BI Service
+- ✅ Creating/configuring workspaces
+- ✅ Setting up data refresh schedules
+- ✅ Managing user permissions
+- ✅ Sharing dashboards with stakeholders
+- ✅ Generating embed codes for SharePoint
+
+**What requires one-time manual work:**
+- ⚠️ Building the 3 .pbix files (visuals cannot be created programmatically without paid tools)
+
+**Our Solution: Hybrid Approach**
+1. **Build .pbix files once** (~1.5 hours) following [BUILD-DASHBOARDS.md](BUILD-DASHBOARDS.md)
+2. **Automate everything else** (2-3 minutes per deployment) using PowerShell scripts
+
+After initial setup, all future deployments are fully automated!
 
 ---
 
@@ -105,30 +145,34 @@ cd powerbi/scripts
 powerbi/
 ├── README.md                           ← You are here
 ├── QUICKSTART.md                       ← 5-minute setup guide
+├── BUILD-DASHBOARDS.md                 ← Step-by-step .pbix creation guide
 ├── TROUBLESHOOTING.md                  ← Common issues
 │
-├── dashboards/                         ← Dashboard specifications
-│   ├── meeting-notes-spec.md           (visual-by-visual build guide)
-│   ├── estimatecrafter-spec.md
-│   └── unified-spec.md
+├── dashboards/                         ← .pbix files (created by you)
+│   ├── MeetingNotesGenerator.pbix      (build using guide)
+│   ├── EstimateCrafter.pbix            (build using guide)
+│   └── UnifiedAnalytics.pbix           (build using guide)
 │
 ├── measures/                           ← DAX measure scripts
-│   ├── meeting-notes-measures.dax      (50+ lines, copy/paste)
-│   ├── estimatecrafter-measures.dax
-│   └── unified-measures.dax
+│   ├── meeting-notes-measures.dax      (60 measures, copy/paste)
+│   ├── estimatecrafter-measures.dax    (75 measures, copy/paste)
+│   └── unified-measures.dax            (80 measures, copy/paste)
 │
 ├── scripts/                            ← PowerShell automation
 │   ├── validate-connection.ps1         (test SQL connection)
-│   ├── import-measures.ps1             (bulk import DAX via Tabular Editor)
-│   └── deployment/                     (Phase 2 - full automation)
-│       ├── deploy-to-service.ps1
-│       ├── create-workspace.ps1
-│       └── configure-refresh.ps1
+│   ├── 1-create-workspace.ps1          (create Power BI workspace)
+│   ├── 2-deploy-dashboards.ps1         (upload .pbix files)
+│   ├── 3-configure-permissions.ps1     (add users, generate links)
+│   ├── 4-configure-refresh.ps1         (schedule data refresh)
+│   └── deploy-all.ps1                  (master script - runs all steps)
 │
 └── config/                             ← Configuration templates
     ├── sql-connection.json             (database connection)
     ├── deployment-config.json          (Power BI Service settings)
-    └── stakeholder-list.json           (viewer permissions)
+    ├── stakeholder-list.json           (viewer permissions)
+    ├── workspace-info.json             (auto-generated)
+    ├── deployment-info.json            (auto-generated)
+    └── access-links.txt                (auto-generated)
 ```
 
 ---
