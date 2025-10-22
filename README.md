@@ -912,88 +912,524 @@ All API requests require an OAuth 2.0 access token obtained via the Client Crede
 
 ## Deployment
 
-### Google Cloud Run Deployment Progress
+### Google Cloud Run Deployment
 
-This section tracks the progress of deploying Momentum Note Crafter to Google Cloud Run.
-
-#### Project Information
-
-- **GCP Project**: `mom-ai-apps`
-- **Project Team**: Luis Bustos, Nick Keller (Editors), Jeff Davalos (Admin)
-- **Target Platform**: Google Cloud Run
-- **Repository**: Git initialized locally
-
-#### Deployment Progress Tracker
-
-| Step | Status | Details | Notes |
-|------|--------|---------|-------|
-| 1. Initialize Git Repository | ✅ Complete | Commit: `7a9bfce` | Initial commit with all source code |
-| 2. Rename Environment Variables | ✅ Complete | Commit: `d1557af` | Removed VITE_ prefix, updated vite.config.ts |
-| 3. Install Docker Desktop | ⏳ Pending | Required | Need Docker to build images locally |
-| 4. Obtain nginx.conf | ⏳ Waiting | **Critical** | Nick sending - needed for Dockerfile COPY command |
-| 5. Confirm GCP Registry URL | ⏳ Waiting | TBD | Region: us-east4? Repo: note-crafter? |
-| 6. Add npm build script | ⏳ Pending | package.json | Need to add `"build": "vite build"` |
-| 7. Create Dockerfile | ⏳ Pending | Blocked | Waiting on nginx.conf and registry URL |
-| 8. Adapt build-push-image script | ⏳ Pending | Blocked | Waiting on registry URL confirmation |
-| 9. Create Cloud Artifact Registry | ⏳ Pending | TBD | Jeff may need to create this |
-| 10. Build Docker Image Locally | ⏳ Pending | Blocked | Requires Docker + Dockerfile |
-| 11. Push Image to Registry | ⏳ Pending | Blocked | Requires build-push-image script |
-| 12. Create Cloud Run Service | ⏳ Pending | Blocked | Requires pushed Docker image |
-| 13. Configure Environment Variables | ⏳ Pending | Cloud Run | Set CLIENT_ID, CLIENT_SECRET, DEFAULT_BOT_ID |
-| 14. Update MSAL Redirect URI | ⏳ Pending | authConfig.ts | Set to Cloud Run URL |
-| 15. Test Production Deployment | ⏳ Pending | Final | Verify authentication and API calls work |
-
-#### Outstanding Questions for Nick
-
-1. **nginx.conf file** (Critical): Can you send the nginx.conf file? The Dockerfile references it via `COPY nginx.conf /etc/nginx/conf.d/default.conf`
-   - Does it include API proxying configuration for `/api/*` → `https://interact.interpublic.com`?
-
-2. **GCP Registry Configuration**:
-   - Region: Should we use `us-east4` (same as your staffing app)?
-   - Repository name: Should it be `note-crafter`?
-   - Full URL format: `us-east4-docker.pkg.dev/mom-ai-apps/note-crafter`?
-
-3. **Environment Variables Strategy**:
-   - Should we pass them as build-time `ENV` in Dockerfile?
-   - Or configure them in Cloud Run environment settings?
-   - Required vars: `CLIENT_ID`, `CLIENT_SECRET`, `DEFAULT_BOT_ID`, `MSAL_CLIENT_ID`, `MSAL_TENANT_ID`
-
-4. **Cloud Run URL**: What will the production URL be? (Needed for MSAL redirect URI configuration)
-
-5. **Architecture Confirmation**: Your staffing app - does it use:
-   - Option A: Frontend with Nginx proxy (1 Cloud Run service)?
-   - Option B: Separate frontend + backend (2 Cloud Run services)?
-
-#### Outstanding Questions for Jeff
-
-1. **Cloud Artifact Registry**: Does the registry repository need to be created, or does it auto-create on first push?
-
-2. **Networking**: You mentioned subnet requirements - what are the specific networking needs?
-
-#### Git Commit History
-
-```bash
-d1557af - Rename environment variables for Docker deployment compatibility
-7a9bfce - Initial commit: Note Crafter app
-```
-
-#### Next Immediate Actions
-
-1. **Install Docker Desktop** (Luis) - Download from [docker.com](https://www.docker.com/products/docker-desktop)
-2. **Add build script** to package.json:
-   ```json
-   "scripts": {
-     "dev": "vite",
-     "build": "vite build",
-     "preview": "vite preview"
-   }
-   ```
-3. **Wait for nginx.conf** from Nick
-4. **Confirm registry details** with Nick
+This section documents the deployment of Momentum Note Crafter to Google Cloud Run using a 2-service architecture (frontend + backend) with private IP networking.
 
 ---
 
-### Build for Production
+## Architecture Overview
+
+### Final Production Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Momentum Employee Browser                                       │
+│  URL: https://note-crafter.momentum.com (TBD)                   │
+└──────────────────┬──────────────────────────────────────────────┘
+                   │ DNS Resolution
+                   ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  On-Prem DNS Forwarder → GCP Internal DNS Zone                  │
+│  Resolves to: Internal Application Load Balancer (Private IP)   │
+└──────────────────┬──────────────────────────────────────────────┘
+                   │ Routes Traffic
+                   ├────────────────────┬─────────────────────────┐
+                   ▼                    ▼                         │
+    ┌──────────────────────────┐  ┌──────────────────────────┐   │
+    │  Frontend Cloud Run      │  │  Backend Cloud Run       │   │
+    │  note-crafter-frontend   │  │  note-crafter-backend    │   │
+    │  Private IP              │  │  Private IP              │   │
+    │  ┌────────────────────┐  │  │  ┌────────────────────┐  │   │
+    │  │ Nginx + React SPA  │  │  │  │ Node.js/Express    │  │   │
+    │  │ Static file server │  │  │  │ API proxy service  │  │   │
+    │  │ Health: /health    │  │  │  │ Health: /health    │  │   │
+    │  └────────────────────┘  │  │  │ Stores CLIENT_     │  │   │
+    │                          │  │  │ SECRET securely    │  │   │
+    │  Frontend calls:         │  │  └────────────────────┘  │   │
+    │  backend-url/api/token   │  │                          │   │
+    │  backend-url/api/chat    │  │                          │   │
+    └──────────────────────────┘  └────────┬─────────────────┘   │
+                                           │ VPC Egress            │
+                                           ▼                       │
+                                  ┌─────────────────────┐          │
+                                  │ interact.interpublic │          │
+                                  │ .com API             │          │
+                                  │ (Internal IPG)       │          │
+                                  └─────────────────────┘          │
+```
+
+### Why 2 Services?
+
+**Security**: Keeps `CLIENT_SECRET` server-side, never exposed to browser
+**CORS**: Backend handles external API calls, avoiding CORS issues
+**Scalability**: Frontend and backend can scale independently
+**Best Practice**: Follows Nick's proven Staff Plan architecture
+
+---
+
+## Project Information
+
+- **GCP Project**: `mom-ai-apps`
+- **Project Team**: Luis Bustos, Nick Keller (Editors), Jeff Davalos (Admin)
+- **Target Platform**: Google Cloud Run (2 services)
+- **Repository**: Local Git repository (4 commits)
+- **Registry**: `us-east4-docker.pkg.dev/mom-ai-apps/note-crafter`
+- **DNS Names**: TBD (need to decide with Nick)
+
+---
+
+## Current Status
+
+### ✅ Code & Configuration (100% Complete)
+
+| Component | Status | Commit | Details |
+|-----------|--------|--------|---------|
+| Git Repository | ✅ Complete | `7a9bfce` | Initial commit with source code |
+| Environment Variables | ✅ Complete | `d1557af` | Removed VITE_ prefix, updated vite.config.ts |
+| Deployment Tracker | ✅ Complete | `806914a` | Added comprehensive deployment docs |
+| Backend Service | ✅ Complete | `4376144` | Node.js/Express proxy, Dockerfiles, scripts |
+| Frontend Dockerfile | ✅ Complete | `4376144` | Two-stage build (Node build + Nginx serve) |
+| Backend Dockerfile | ✅ Complete | `4376144` | Node.js 18 Alpine, health checks |
+| nginx.conf | ✅ Complete | `4376144` | Received from Nick, configured for SPA |
+| Build Scripts | ✅ Complete | `4376144` | build-push-frontend.sh, build-push-backend.sh |
+| npm build script | ✅ Complete | `4376144` | Added to package.json |
+
+**Code is 100% ready for deployment. Waiting on infrastructure.**
+
+### 🚨 Infrastructure Blockers (Jeff's Team)
+
+| Blocker | Owner | Status | Impact | ETA |
+|---------|-------|--------|--------|-----|
+| **Load Balancer Issue** | Jeff + GCP Support | 🔴 Critical | Can't deploy ANYTHING | 3-7 days |
+| **Design Verification** | **Luis + Nick** | 🟠 **Action Required** | Blocks IP assignment | 1 meeting |
+| **Private IP Assignment** | Jeff | 🟡 Waiting | Can't deploy | After design verification |
+| **VPC Connector** | Jeff | 🟡 Waiting | Backend can't reach interact.interpublic.com | After infrastructure |
+| **DNS Zones** | Jeff + IPG Teams | 🟡 Waiting | Can't use friendly URLs | After load balancer |
+
+**Infrastructure Timeline: 1-2 weeks minimum** (per Jeff's update)
+
+### ⏳ Local Setup (Not Started)
+
+| Task | Status | Estimated Time |
+|------|--------|----------------|
+| Install Docker Desktop | ⏳ Pending | 1 hour |
+| Install gcloud CLI | ⏳ Pending | 30 minutes |
+| Configure Docker for Artifact Registry | ⏳ Pending | 15 minutes |
+| Test Docker builds locally | ⏳ Pending | 1 hour |
+
+---
+
+## Infrastructure Challenges (Jeff's Update)
+
+Jeff's team is working on two critical infrastructure issues that are **new territory** for IPG:
+
+### 1. Network Connectivity (Private IP Addresses)
+
+**Goal**: Cloud Run services communicate through private IPs (not public internet)
+
+**Status**:
+- ✅ Nick's Staff Plan: Already has private IP space (working)
+- ⏳ Note Crafter: Waiting for private IP assignment
+- 🚨 **Blocker**: Need to **verify design with Nick** before Jeff can assign IPs
+
+### 2. Name Resolution (Internal DNS)
+
+**Goal**: Access services via friendly names like `note-crafter.momentum.com`
+
+**Status**:
+- 🔴 **Critical Blocker**: Internal Application Load Balancer can't see Cloud Run services
+- GCP Support ticket opened (as of today)
+- IPG Network Security team hasn't done this configuration before
+- Requires coordination between multiple teams:
+  - Jeff's team (GCP DNS zones)
+  - IPG M365/Directory Ops (on-prem DNS forwarders)
+
+**Jeff's Quote**: *"I expect our research and implementation to take at least another few days. I will update you, daily."*
+
+---
+
+## Complete Deployment Plan
+
+### Git Commit History
+
+```bash
+4376144 (HEAD -> master) Add backend service, Dockerfiles, and deployment scripts
+806914a Add Google Cloud Run deployment progress tracker to README
+d1557af Rename environment variables for Docker deployment compatibility
+7a9bfce Initial commit: Note Crafter app
+```
+
+### Phase 1: Infrastructure Preparation (Jeff's Team) - 1-2 weeks
+
+| Step | Owner | Status | Blocker? |
+|------|-------|--------|----------|
+| 1.1 Solve Load Balancer Issue | Jeff + GCP Support | 🔴 In Progress | **YES** |
+| 1.2 Verify Design with Nick | **Luis + Nick** | 🟠 **Action Required** | **YES** |
+| 1.3 Assign Private IP Space | Jeff | 🟡 Waiting on 1.2 | **YES** |
+| 1.4 Create Artifact Registry | Jeff | 🟡 Waiting on 1.3 | No |
+| 1.5 Configure VPC Connector | Jeff | 🟡 Waiting on 1.1, 1.3 | **YES** |
+
+### Phase 2: DNS & Naming - 3-5 days
+
+| Step | Owner | Status |
+|------|-------|--------|
+| 2.1 Decide DNS Names | Luis + Nick | ⏳ Pending |
+| 2.2 Create Internal DNS Zones | Jeff's team | ⏳ Waiting |
+| 2.3 Configure On-Prem DNS Forwarders | IPG M365/Dir Ops | ⏳ Waiting |
+
+### Phase 3: Local Preparation (Can Start Now!) - 1 day
+
+| Step | Status | Time |
+|------|--------|------|
+| 3.1 Install Docker Desktop | ⏳ **Can Do Now** | 1 hour |
+| 3.2 Install gcloud CLI | ⏳ **Can Do Now** | 30 min |
+| 3.3 Authenticate gcloud | ⏳ After 3.2 | 5 min |
+| 3.4 Configure Docker for Artifact Registry | ⏳ After 3.3 | 5 min |
+| 3.5 Test Backend Locally | ⏳ After 3.1 | 1 hour |
+| 3.6 Test Frontend Build | ⏳ After 3.1 | 30 min |
+| 3.7 Test Docker Builds Locally | ⏳ After 3.1 | 1 hour |
+
+### Phase 4: Docker Build & Push - 1-2 hours
+
+| Step | Status | Dependencies |
+|------|--------|--------------|
+| 4.1 Install Backend Dependencies | ⏳ Pending | Phase 3 |
+| 4.2 Build Frontend Image | ⏳ Pending | Phases 1, 3 |
+| 4.3 Build Backend Image | ⏳ Pending | Phases 1, 3 |
+| 4.4 Push Frontend Image | ⏳ Pending | Phase 4.2 |
+| 4.5 Push Backend Image | ⏳ Pending | Phase 4.3 |
+
+### Phase 5: Cloud Run Deployment - 1 day
+
+| Step | Status | Dependencies |
+|------|--------|--------------|
+| 5.1 Deploy Backend Service | ⏳ Pending | Phases 1, 4 |
+| 5.2 Configure Backend Env Vars | ⏳ Pending | Phase 5.1 |
+| 5.3 Test Backend Health & API Connectivity | ⏳ Pending | Phase 5.2 |
+| 5.4 Deploy Frontend Service | ⏳ Pending | Phases 2, 4, 5.3 |
+| 5.5 Configure DNS Mapping | ⏳ Pending | Phases 2, 5.4 |
+
+### Phase 6: Frontend Code Updates - 2-3 hours
+
+| Step | Status | Dependencies |
+|------|--------|--------------|
+| 6.1 Update apiService.ts to call backend | ⏳ Pending | Phase 5.1 (need backend URL) |
+| 6.2 Remove CLIENT_SECRET from frontend | ⏳ Pending | Phase 6.1 |
+| 6.3 Update MSAL Redirect URI | ⏳ Pending | Phase 5.4 (need frontend URL) |
+| 6.4 Rebuild & Redeploy Frontend | ⏳ Pending | Phases 6.1-6.3 |
+
+### Phase 7: Testing & Validation - 1 day
+
+| Step | Status |
+|------|--------|
+| 7.1 Test MSAL Authentication | ⏳ Pending |
+| 7.2 Test Token Acquisition | ⏳ Pending |
+| 7.3 Test Meeting Notes Generation | ⏳ Pending |
+| 7.4 Test Export Functions | ⏳ Pending |
+| 7.5 Test from Different Networks | ⏳ Pending |
+| 7.6 User Acceptance Testing | ⏳ Pending |
+
+### Phase 8: Production Hardening (Optional) - 1-2 days
+
+| Step | Status |
+|------|--------|
+| 8.1 Move CLIENT_SECRET to Secret Manager | ⏳ Pending |
+| 8.2 Configure Cloud Logging | ⏳ Pending |
+| 8.3 Configure Cloud Monitoring Alerts | ⏳ Pending |
+| 8.4 Create Dev Environment | ⏳ Pending |
+| 8.5 Document Operations Runbook | ⏳ Pending |
+
+**Total Timeline: 2-3 weeks** (Critical Path: Phase 1 Infrastructure)
+
+---
+
+## Critical Next Actions
+
+### 🚨 PRIORITY 1: Talk to Nick (URGENT)
+
+**Purpose**: Verify the design so Jeff can assign private IP space.
+
+**Schedule a call to discuss**:
+
+1. **Architecture Confirmation**
+   - Confirm 2-service design (frontend + backend) matches Staff Plan pattern
+   - Review infrastructure diagram above
+
+2. **DNS Names Decision**
+   - What should services be called?
+   - Suggestions:
+     - Frontend: `note-crafter.momentum.com` or `meeting-notes.momentum.com`
+     - Backend: `note-crafter-api.momentum.com` (internal only)
+   - What naming convention did Staff Plan use?
+
+3. **Network Requirements**
+   - Confirm backend needs VPC egress to `interact.interpublic.com`
+   - How does Staff Plan handle this?
+   - Any special firewall rules needed?
+
+4. **Private IP Strategy**
+   - Should both services have private IPs?
+   - Or frontend public + backend private?
+
+**Action**: Send email to Nick (template below)
+
+### ⏳ PRIORITY 2: Install Docker & gcloud (Can Do Now)
+
+**Docker Desktop**:
+1. Download: https://www.docker.com/products/docker-desktop
+2. Install (requires admin privileges)
+3. Restart computer
+4. Launch Docker Desktop
+5. Verify: `docker --version`
+
+**gcloud CLI**:
+1. Download: https://cloud.google.com/sdk/docs/install-sdk#windows
+2. Run installer: `GoogleCloudSDKInstaller.exe`
+3. Restart terminal
+4. Authenticate: `gcloud auth login`
+5. Set project: `gcloud config set project mom-ai-apps`
+6. Configure Docker: `gcloud auth configure-docker us-east4-docker.pkg.dev`
+7. Verify: `gcloud --version`
+
+### ⏸️ PRIORITY 3: Wait for Infrastructure (Jeff's Team)
+
+Monitor Jeff's daily updates on:
+- Load balancer issue resolution (GCP Support ticket)
+- Private IP assignment (after design verification)
+- VPC connector configuration
+
+---
+
+## Email Templates
+
+### To Nick - Design Verification
+
+```
+Hi Nick,
+
+Jeff mentioned I need to "verify the design with you" before he can assign
+private IP address space for Note Crafter.
+
+Can we schedule a quick call to discuss:
+
+1. Architecture Review: My 2-service design (frontend + backend) - confirm
+   it matches your Staff Plan pattern
+
+2. DNS Names: What should we call the services? Following your naming convention:
+   - Frontend: note-crafter.momentum.com?
+   - Backend: note-crafter-api.momentum.com?
+
+3. Network Setup: Does my backend need VPC egress to reach interact.interpublic.com?
+   How did you handle this for Staff Plan?
+
+4. Private IP Strategy: Should both services have private IPs?
+   Or frontend public + backend private?
+
+Jeff's team is working on the load balancer issue (they opened a GCP Support ticket),
+but they can't assign my IP space until we verify the design.
+
+When works for you?
+
+Thanks!
+Luis
+```
+
+### To Jeff - Infrastructure Status
+
+```
+Hi Jeff,
+
+Thanks for the detailed infrastructure update.
+
+I understand the load balancer issue is being worked on with GCP Support,
+and I'm ready to "verify the design" with Nick so you can assign private IP space.
+
+Current status:
+- ✅ Code: 100% ready (backend service created, Dockerfiles, scripts all done)
+- ⏳ Local setup: Installing Docker Desktop and gcloud CLI
+- ⏳ Infrastructure: Waiting on load balancer resolution
+
+I'll schedule a call with Nick this week to verify the design and will update
+you once that's complete.
+
+Standing by for your daily updates!
+
+Thanks,
+Luis
+```
+
+---
+
+## Docker Build & Push Instructions
+
+### Prerequisites
+
+Before you can build and push Docker images:
+
+1. **Docker Desktop installed and running**
+   ```bash
+   docker --version
+   docker ps
+   ```
+
+2. **gcloud CLI installed and authenticated**
+   ```bash
+   gcloud --version
+   gcloud auth login
+   gcloud config set project mom-ai-apps
+   ```
+
+3. **Docker configured for Artifact Registry**
+   ```bash
+   gcloud auth configure-docker us-east4-docker.pkg.dev
+   ```
+
+4. **Artifact Registry repository created** (Jeff will do this)
+   ```bash
+   # Check if exists:
+   gcloud artifacts repositories list --project=mom-ai-apps --location=us-east4
+   ```
+
+### Building & Pushing Frontend
+
+```bash
+# Option 1: Use the script (recommended)
+./build-push-frontend.sh
+
+# Option 2: Manual commands
+docker build -t us-east4-docker.pkg.dev/mom-ai-apps/note-crafter/note-crafter-frontend:latest .
+docker push us-east4-docker.pkg.dev/mom-ai-apps/note-crafter/note-crafter-frontend --all-tags
+```
+
+### Building & Pushing Backend
+
+```bash
+# Option 1: Use the script (recommended)
+./build-push-backend.sh
+
+# Option 2: Manual commands
+cd backend
+npm install
+docker build -t us-east4-docker.pkg.dev/mom-ai-apps/note-crafter/note-crafter-backend:latest .
+docker push us-east4-docker.pkg.dev/mom-ai-apps/note-crafter/note-crafter-backend --all-tags
+```
+
+### Testing Locally First
+
+Test your Docker builds work before pushing:
+
+**Frontend:**
+```bash
+# Build locally
+docker build -t note-crafter-frontend:test .
+
+# Run locally
+docker run -p 8080:8080 note-crafter-frontend:test
+
+# Test in browser: http://localhost:8080
+```
+
+**Backend:**
+```bash
+cd backend
+docker build -t note-crafter-backend:test .
+
+# Run with env vars
+docker run -p 8080:8080 \
+  -e CLIENT_ID=YourClientID \
+  -e CLIENT_SECRET=YourSecret \
+  note-crafter-backend:test
+
+# Test health: http://localhost:8080/health
+```
+
+---
+
+## Deployment Commands (After Infrastructure Ready)
+
+### Deploy Backend Service
+
+```bash
+gcloud run deploy note-crafter-backend \
+  --image us-east4-docker.pkg.dev/mom-ai-apps/note-crafter/note-crafter-backend:latest \
+  --platform managed \
+  --region us-east4 \
+  --set-env-vars CLIENT_ID=YourClientID,CLIENT_SECRET=YourClientSecret,API_BASE_URL=https://interact.interpublic.com \
+  --no-allow-unauthenticated \
+  --vpc-connector YOUR_VPC_CONNECTOR \
+  --service-account YOUR_SERVICE_ACCOUNT
+```
+
+### Deploy Frontend Service
+
+```bash
+gcloud run deploy note-crafter-frontend \
+  --image us-east4-docker.pkg.dev/mom-ai-apps/note-crafter/note-crafter-frontend:latest \
+  --platform managed \
+  --region us-east4 \
+  --allow-unauthenticated \
+  --vpc-connector YOUR_VPC_CONNECTOR
+```
+
+---
+
+## Troubleshooting
+
+### Docker Issues
+
+**Problem**: `docker: command not found`
+**Solution**: Install Docker Desktop, restart computer
+
+**Problem**: `permission denied while trying to connect to Docker daemon`
+**Solution**: Start Docker Desktop application
+
+**Problem**: `unauthorized: You don't have the needed permissions`
+**Solution**: Run `gcloud auth configure-docker us-east4-docker.pkg.dev`
+
+### gcloud Issues
+
+**Problem**: `gcloud: command not found`
+**Solution**: Install gcloud CLI, restart terminal
+
+**Problem**: `denied: Permission denied for project`
+**Solution**: Verify project: `gcloud config get-value project` (should be `mom-ai-apps`)
+
+### Build Issues
+
+**Problem**: Build fails with `npm ERR!`
+**Solution**: Check `package.json` has `build` script, try `npm install` first
+
+**Problem**: `repository does not exist`
+**Solution**: Ask Jeff to create the Artifact Registry repository
+
+---
+
+## Success Criteria
+
+Deployment is successful when:
+- ✅ Frontend accessible via friendly DNS name (e.g., `note-crafter.momentum.com`)
+- ✅ Backend running on private IP (not publicly accessible)
+- ✅ MSAL authentication working
+- ✅ Meeting notes generation working end-to-end
+- ✅ All export functions (CSV, PDF, Email) working
+- ✅ Health checks passing on both services
+- ✅ CLIENT_SECRET never exposed to browser
+- ✅ Backend successfully calling interact.interpublic.com through VPC
+
+---
+
+## Related Documentation
+
+- Backend Service: See [backend/README.md](backend/README.md)
+- Docker Build Scripts: See `build-push-frontend.sh` and `build-push-backend.sh`
+- Frontend Dockerfile: See [Dockerfile](Dockerfile)
+- Backend Dockerfile: See [backend/Dockerfile](backend/Dockerfile)
+- Nginx Configuration: See [nginx.conf](nginx.conf)
+
+---
+
+### Alternative Deployment Options (Not Currently Used)
 
 1. **Set production environment variables**:
 
