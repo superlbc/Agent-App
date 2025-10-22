@@ -16,12 +16,13 @@ interface TourControllerProps {
 
 export const TourController: React.FC<TourControllerProps> = (props) => {
   const { isTourActive, currentStepIndex, nextStep, prevStep, stopTour } = useTourContext();
+  const { setFormState, setControls, setOutput, handleClearForm, handleUseSampleData } = props;
   const wasTourActive = useRef(isTourActive);
 
   useEffect(() => {
     // When tour transitions from active to inactive, run cleanup.
     if (wasTourActive.current && !isTourActive) {
-      props.handleClearForm();
+      handleClearForm();
       const advancedSettingsButton = document.getElementById('advanced-settings-button');
       if (advancedSettingsButton?.textContent?.includes('Hide')) {
           (advancedSettingsButton as HTMLButtonElement).click();
@@ -36,7 +37,7 @@ export const TourController: React.FC<TourControllerProps> = (props) => {
       }
     }
     wasTourActive.current = isTourActive;
-  }, [isTourActive, props]);
+  }, [isTourActive, handleClearForm]);
 
   const tourSteps = useMemo(() => [
     // Part 1: Basic Flow
@@ -46,7 +47,7 @@ export const TourController: React.FC<TourControllerProps> = (props) => {
       content: 'This tour will walk you through the key features. Let\'s get started.',
       placement: 'right' as const,
       beforeAction: async () => {
-        props.handleClearForm();
+        handleClearForm();
         const advancedSettingsButton = document.getElementById('advanced-settings-button');
         if (advancedSettingsButton?.textContent?.includes('Hide')) {
             (advancedSettingsButton as HTMLButtonElement).click();
@@ -65,7 +66,7 @@ export const TourController: React.FC<TourControllerProps> = (props) => {
       content: 'For this tour, we\'ll load some sample data to see how it works.',
       placement: 'top' as const,
       beforeAction: async () => {
-        props.handleUseSampleData();
+        handleUseSampleData();
         await wait(200);
       }
     },
@@ -131,7 +132,7 @@ export const TourController: React.FC<TourControllerProps> = (props) => {
       content: 'Here are your structured, professional notes. Let\'s look at the key sections.',
       placement: 'left' as const,
       beforeAction: async () => {
-        props.setOutput(parseSampleAgentResponse(SAMPLE_AGENT_RESPONSE));
+        setOutput(parseSampleAgentResponse(SAMPLE_AGENT_RESPONSE));
         await wait(300);
         document.getElementById('output-panel-wrapper')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -196,8 +197,8 @@ export const TourController: React.FC<TourControllerProps> = (props) => {
             }
             
             // Clear form and scroll to top
-            props.handleClearForm();
-            props.setOutput(null);
+            handleClearForm();
+            setOutput(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             await wait(300); // Allow time for scroll and state updates
         }
@@ -299,7 +300,7 @@ export const TourController: React.FC<TourControllerProps> = (props) => {
           }
       }
     },
-  ], [props]);
+  ], [handleClearForm, handleUseSampleData, setOutput]);
 
   const currentStepConfig = tourSteps[currentStepIndex];
 
