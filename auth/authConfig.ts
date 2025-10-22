@@ -1,10 +1,10 @@
 import { PublicClientApplication, Configuration, LogLevel } from "@azure/msal-browser";
 
 export const getRedirectUri = (): string => {
-    if (window.location.hostname === "localhost") {
-        return "http://localhost:5173";
-    }
-    return "https://aistudio.google.com";
+    // Fully dynamic - uses the current origin (protocol + hostname + port)
+    // Works for localhost, Cloud Run, and any future deployment URLs
+    // IMPORTANT: All redirect URIs must be registered in Azure AD app registration
+    return window.location.origin;
 };
 
 // IMPORTANT: The authority must be a full URL.

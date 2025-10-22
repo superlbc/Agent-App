@@ -14,10 +14,10 @@ const getAuthToken = async (config: ApiConfig): Promise<string> => {
         }
     }
     
-    // In development, we use a relative path to leverage the Vite proxy and avoid CORS issues.
-    // In a production build, we'll use the full hostname. The environment switcher in settings
-    // will not work in development as the proxy has a fixed target.
-    const baseUrl = (import.meta.env)?.DEV ? '' : config.hostname;
+    // Always use relative path to leverage proxy (Vite in dev, nginx in production).
+    // This avoids CORS issues by keeping requests on the same origin.
+    // Note: Direct hostname usage is not supported - always use proxy.
+    const baseUrl = '';
     const tokenUrl = `${baseUrl}/api/token`;
     
     // Debugging log to confirm the URL being used
@@ -103,8 +103,8 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig): Pro
     try {
         const accessToken = await getAuthToken(apiConfig);
         
-        // Use relative path in dev for Vite proxy, full hostname in prod.
-        const baseUrl = (import.meta.env)?.DEV ? '' : apiConfig.hostname;
+        // Always use relative path to leverage proxy (Vite in dev, nginx in production).
+        const baseUrl = '';
         const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.botId}/messages`;
         const prompt = constructPrompt(payload);
 
@@ -221,7 +221,8 @@ export const interrogateTranscript = async (
     try {
         const accessToken = await getAuthToken(apiConfig);
 
-        const baseUrl = (import.meta.env)?.DEV ? '' : apiConfig.hostname;
+        // Always use relative path to leverage proxy (Vite in dev, nginx in production).
+        const baseUrl = '';
         const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.botId}/messages`;
 
         const payload: Payload = {

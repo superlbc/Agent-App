@@ -1,35 +1,39 @@
 # Build stage
-FROM node:22-alpine AS build
-
-# Set working directory
+FROM node:18-alpine as builder
+ 
 WORKDIR /app
-
+ 
 # Copy package files
-COPY package.json package-lock.json ./
-
-# Install dependencies (including dev dependencies for build)
+COPY package*.json ./
 RUN npm ci
-
+ 
 # Copy source code
 COPY . .
+ 
+# Build arguments for environment variables
+ARG GEMINI_API_KEY
+ARG CLIENT_ID
+ARG CLIENT_SECRET
+ARG DEFAULT_BOT_ID
+ 
+ENV GEMINI_API_KEY=PLACEHOLDER_API_KEY
+ENV CLIENT_ID="MeetingNotes"
+ENV CLIENT_SECRET="eOk9dez@#En@nWw2w%0N"
+ENV DEFAULT_BOT_ID="64650431-dad7-4b47-8bb1-4a81800f9f5f"
 
-# Build the application
+
+# Build the app
 RUN npm run build
-
+ 
 # Production stage
-FROM nginx:stable-alpine
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built files from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Expose port 8080 (Cloud Run standard)
+FROM nginx:alpine
+ 
+# Copy built assets from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
+ 
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+ 
 EXPOSE 8080
-
-# Start nginx
+ 
 CMD ["nginx", "-g", "daemon off;"]

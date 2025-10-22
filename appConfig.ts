@@ -3,7 +3,7 @@
 
 export const appConfig = {
   // Centralized endpoint for all telemetry events
-  telemetryFlowUrl: "YOUR_POWER_AUTOMATE_TELEMETRY_FLOW_URL"
+  telemetryFlowUrl: "https://2e7cf80af71de950a36d4962c11a22.06.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/579ee4bc3fb44c8daf7e6b9bc28f41ec/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=V8bdLaSJHkXCTc8xptUKLGt2crZtbrZUg7yqLTpD-Vs",
 };
 
 /*
