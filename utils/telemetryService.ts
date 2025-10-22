@@ -36,16 +36,16 @@ export type EventType =
   | 'coachInsightsExpanded';
 
 interface UserContext {
-    name: string | null;
+    name: string;
     email: string;
-    tenantId: string | null;
+    tenantId: string;
 }
 
 interface EventEnvelope {
     appName: string;
     appVersion: string;
     sessionId: string;
-    correlationId: string | null;
+    correlationId: string;
     eventType: EventType;
     timestamp: string;
     userContext: UserContext;
@@ -75,9 +75,9 @@ class TelemetryService {
     public setUser(user: AccountInfo | null) {
         if (user) {
             this.userContext = {
-                name: user.name ?? null,
+                name: user.name ?? '',
                 email: user.username,
-                tenantId: user.tenantId ?? null,
+                tenantId: user.tenantId ?? '',
             };
         } else {
             this.userContext = null;
@@ -94,7 +94,7 @@ class TelemetryService {
             appName: APP_NAME,
             appVersion: APP_VERSION,
             sessionId: this.sessionId,
-            correlationId: correlationId || null,
+            correlationId: correlationId || '',
             eventType: eventType,
             timestamp: new Date().toISOString(),
             userContext: this.userContext,
@@ -112,6 +112,14 @@ class TelemetryService {
             return;
         }
 
+        // Log the payload being sent (useful for debugging)
+        console.log('📊 Telemetry Event:', envelope.eventType, {
+            sessionId: envelope.sessionId,
+            correlationId: envelope.correlationId,
+            user: envelope.userContext.email,
+            payload: JSON.parse(envelope.eventPayload)
+        });
+
         fetch(flowUrl, {
             method: 'POST',
             headers: {
@@ -119,17 +127,35 @@ class TelemetryService {
             },
             body: JSON.stringify(envelope),
         })
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
-                console.warn(`Telemetry flow trigger failed with status ${response.status}.`, {
+                // Try to get error details from response
+                let errorDetails = '';
+                try {
+                    const text = await response.text();
+                    errorDetails = text;
+                } catch (e) {
+                    // Ignore if we can't read the response
+                }
+
+                console.error(`❌ Telemetry flow trigger failed with status ${response.status}`, {
                     url: flowUrl,
                     status: response.status,
                     statusText: response.statusText,
+                    eventType: envelope.eventType,
+                    errorDetails: errorDetails,
+                    sentPayload: envelope
                 });
+            } else {
+                console.log(`✅ Telemetry event sent successfully: ${envelope.eventType}`);
             }
         })
         .catch(error => {
-            console.warn("An error occurred while trying to trigger the telemetry flow.", error);
+            console.error("❌ An error occurred while trying to trigger the telemetry flow.", {
+                error,
+                eventType: envelope.eventType,
+                sentPayload: envelope
+            });
         });
     }
 }
