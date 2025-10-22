@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 64 measures**
+7. **Repeat for all 67 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (64 total):
+**Expected Measures** (67 total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -113,10 +113,16 @@ Each dashboard follows the same process:
 - Filter: Users with > 50 events
 - Columns: `UserEmail`, `Total Events`, `Last Active`
 
-**Visual 8: Session Duration**
-- Insert **Column Chart**
-- X-axis: Session duration buckets
-- Y-axis: Count of sessions
+**Visual 8: Session Duration Distribution**
+- Insert **Clustered Column Chart**
+- **X-axis**: Add `SessionID` field
+- **Values**: Add `Session Duration Bucket` measure
+- **Y-axis**: Add `Session Count` measure
+- **Sort**: Click visual → More options (···) → Sort by → `Session Duration Bucket`
+  - Custom sort order: < 1 min, 1-5 min, 5-10 min, 10-30 min, 30-60 min, 60+ min
+- **What this shows**: Distribution of session lengths
+  - Example: "45 sessions lasted 1-5 minutes, 32 sessions lasted 5-10 minutes"
+- **Alternative (simpler)**: Use histogram visual with `Avg Session Duration Min` on X-axis
 
 **Visual 9: Time of Day Heatmap**
 - Insert **Matrix**

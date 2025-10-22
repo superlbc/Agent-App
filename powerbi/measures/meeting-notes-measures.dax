@@ -2,10 +2,10 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 64
+// Total Measures: 67
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.1.0
+// Version: 1.2.0
 // ============================================================================
 
 // ============================================================================
@@ -415,6 +415,32 @@ VAR SessionDurations =
     )
 RETURN
     AVERAGEX(SessionDurations, [Duration])
+
+// Session Duration (for current session in context)
+Session Duration Min =
+DATEDIFF(
+    CALCULATE(MIN(vw_MeetingNotesGenerator[EventTimestamp])),
+    CALCULATE(MAX(vw_MeetingNotesGenerator[EventTimestamp])),
+    MINUTE
+)
+
+// Session Duration Bucket (for grouping in charts)
+Session Duration Bucket =
+VAR Duration = [Session Duration Min]
+RETURN
+    SWITCH(
+        TRUE(),
+        Duration < 1, "< 1 min",
+        Duration < 5, "1-5 min",
+        Duration < 10, "5-10 min",
+        Duration < 30, "10-30 min",
+        Duration < 60, "30-60 min",
+        "60+ min"
+    )
+
+// Session Count (distinct sessions)
+Session Count =
+DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID])
 
 // ============================================================================
 // FEATURE ADOPTION FUNNEL
