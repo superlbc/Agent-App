@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 67 measures**
+7. **Repeat for all 69 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (67 total):
+**Expected Measures** (69 total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -106,12 +106,12 @@ Each dashboard follows the same process:
 **Visual 6: Active Users Trend**
 - Insert **Area Chart**
 - X-axis: `EventDate`
-- Y-axis: `Active Users`
+- Y-axis: `Active Users This Week` (or use `Active Users This Month`)
 
 **Visual 7: Power Users**
 - Insert **Table**
 - Filter: Users with > 50 events
-- Columns: `UserEmail`, `Total Events`, `Last Active`
+- Columns: `UserEmail`, `Total Events`, `Last Active Date`
 
 **Visual 8: Session Duration Distribution**
 - Insert **Clustered Column Chart**
@@ -135,7 +135,7 @@ Each dashboard follows the same process:
 **Visual 10: Preset Usage**
 - Insert **Bar Chart**
 - Y-axis: Preset names (parsed from `PresetName` field)
-- X-axis: `Preset Usage Count`
+- X-axis: `Preset Selections`
 
 **Visual 11: Interrogate Adoption**
 - Insert **Gauge**
@@ -357,7 +357,7 @@ Each dashboard follows the same process:
 **Visual 7: User Retention**
 - Insert **Line Chart**
 - X-axis: Week number
-- Y-axis: Active Users, Returning Users
+- Y-axis: `Active Users This Week`, `Returning Users This Week`
 
 **Visual 8: Time-of-Day Heatmap**
 - Insert **Matrix**

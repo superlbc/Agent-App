@@ -2,10 +2,10 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 67
+// Total Measures: 69
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.2.0
+// Version: 1.3.0
 // ============================================================================
 
 // ============================================================================
@@ -384,6 +384,48 @@ DATEDIFF(
     TODAY(),
     DAY
 )
+
+// Returning Users (users who were active in previous period and current period)
+Returning Users This Week =
+VAR CurrentWeekUsers =
+    CALCULATETABLE(
+        VALUES(vw_MeetingNotesGenerator[UserEmail]),
+        DATESINPERIOD(
+            vw_MeetingNotesGenerator[EventDate],
+            TODAY(),
+            -7,
+            DAY
+        )
+    )
+VAR PreviousWeekUsers =
+    CALCULATETABLE(
+        VALUES(vw_MeetingNotesGenerator[UserEmail]),
+        DATESINPERIOD(
+            vw_MeetingNotesGenerator[EventDate],
+            TODAY() - 7,
+            -7,
+            DAY
+        )
+    )
+RETURN
+    COUNTROWS(INTERSECT(CurrentWeekUsers, PreviousWeekUsers))
+
+// Returning Users This Month
+Returning Users This Month =
+VAR CurrentMonthUsers =
+    CALCULATETABLE(
+        VALUES(vw_MeetingNotesGenerator[UserEmail]),
+        MONTH(vw_MeetingNotesGenerator[EventDate]) = MONTH(TODAY()),
+        YEAR(vw_MeetingNotesGenerator[EventDate]) = YEAR(TODAY())
+    )
+VAR PreviousMonthUsers =
+    CALCULATETABLE(
+        VALUES(vw_MeetingNotesGenerator[UserEmail]),
+        MONTH(vw_MeetingNotesGenerator[EventDate]) = MONTH(TODAY()) - 1,
+        YEAR(vw_MeetingNotesGenerator[EventDate]) = YEAR(TODAY())
+    )
+RETURN
+    COUNTROWS(INTERSECT(CurrentMonthUsers, PreviousMonthUsers))
 
 // Power Users (5+ Sessions)
 Power Users =
