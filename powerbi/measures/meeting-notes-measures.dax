@@ -2,10 +2,10 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 69
+// Total Measures: 79
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.3.0
+// Version: 1.4.0
 // ============================================================================
 
 // ============================================================================
@@ -532,6 +532,46 @@ VAR Interrogates =
     )
 RETURN
     DIVIDE(Interrogates, Generates, 0)
+
+// ============================================================================
+// TIME DIMENSIONS (for grouping and analysis)
+// ============================================================================
+
+// Day of Week (from EventDate)
+Day of Week = FORMAT(vw_MeetingNotesGenerator[EventDate], "dddd")
+
+// Day of Week Number (1=Sunday, 2=Monday, etc.)
+Day of Week Number = WEEKDAY(vw_MeetingNotesGenerator[EventDate], 1)
+
+// Hour of Day (from EventTimestamp)
+Hour of Day = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
+
+// Time of Day Bucket
+Time of Day =
+VAR HourNum = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
+RETURN
+    SWITCH(
+        TRUE(),
+        HourNum < 6, "Night (12am-6am)",
+        HourNum < 12, "Morning (6am-12pm)",
+        HourNum < 18, "Afternoon (12pm-6pm)",
+        "Evening (6pm-12am)"
+    )
+
+// Month Name
+Month Name = FORMAT(vw_MeetingNotesGenerator[EventDate], "MMMM")
+
+// Month Number
+Month Number = MONTH(vw_MeetingNotesGenerator[EventDate])
+
+// Year
+Year = YEAR(vw_MeetingNotesGenerator[EventDate])
+
+// Quarter
+Quarter = "Q" & FORMAT(QUARTER(vw_MeetingNotesGenerator[EventDate]), "0")
+
+// Week Number
+Week Number = WEEKNUM(vw_MeetingNotesGenerator[EventDate], 2)
 
 // ============================================================================
 // TIME-BASED METRICS

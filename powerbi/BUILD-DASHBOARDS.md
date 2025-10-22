@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 69 measures**
+7. **Repeat for all 79 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (69 total):
+**Expected Measures** (79 total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -126,9 +126,10 @@ Each dashboard follows the same process:
 
 **Visual 9: Time of Day Heatmap**
 - Insert **Matrix**
-- Rows: Day of Week
-- Columns: Hour of Day
+- Rows: `Day of Week` measure (or `Day of Week Number` for proper sorting)
+- Columns: `Hour of Day` measure
 - Values: `Total Events`
+- **Tip**: Use `Day of Week Number` for rows to ensure proper order (Sun-Sat), then hide the number and show day names
 
 #### Page 3: Feature Usage
 
