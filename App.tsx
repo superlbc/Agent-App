@@ -6,6 +6,7 @@ import { SettingsDrawer } from './components/SettingsDrawer';
 import { HelpModal } from './components/HelpModal';
 import { LoadingModal } from './components/ui/LoadingModal';
 import { Toast } from './components/ui/Toast';
+import { ScrollToTop } from './components/ui/ScrollToTop';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { generateNotes } from './services/apiService';
 import { Controls, Payload, AgentResponse, FormState, ToastState, ApiConfig } from './types';
@@ -229,6 +230,8 @@ const AppContent: React.FC = () => {
           handleClearForm={handleClearForm}
           handleUseSampleData={handleUseSampleData}
         />
+
+      <ScrollToTop />
     </div>
   );
 };

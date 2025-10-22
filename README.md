@@ -173,6 +173,14 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 - Auto-dismiss with timer
 - Non-blocking UI
 
+✅ **Scroll to Top Button** 🔼
+- Floating action button (FAB) in bottom-right corner
+- Automatically appears after scrolling 400px down the page
+- Smooth scroll animation back to top
+- Circular design with brand color and hover effects
+- Dark mode support with glassmorphism styling
+- Fully accessible (keyboard navigation, ARIA labels)
+
 ---
 
 ## Prerequisites
@@ -966,6 +974,14 @@ This section documents the deployment of Momentum Note Crafter to Google Cloud R
 **Scalability**: Frontend and backend can scale independently
 **Best Practice**: Follows Nick's proven Staff Plan architecture
 
+### Important Architecture Notes
+
+**From Nick Meeting (2025-01-22)**:
+- ✅ **Frontend → Backend Communication**: Frontend makes DIRECT calls to backend Cloud Run URL (e.g., `https://note-crafter-backend-xxx.run.app/api/token`)
+- ✅ **No Nginx Reverse Proxy**: The nginx.conf does NOT proxy requests to interact.interpublic.com or backend
+- ✅ **Backend CORS Configuration**: Backend allows CORS requests from frontend URL
+- ✅ **interact.interpublic.com Access**: Confirmed accessible without VPN/netscope requirements
+
 ---
 
 ## Project Information
@@ -989,13 +1005,15 @@ This section documents the deployment of Momentum Note Crafter to Google Cloud R
 | Environment Variables | ✅ Complete | `d1557af` | Removed VITE_ prefix, updated vite.config.ts |
 | Deployment Tracker | ✅ Complete | `806914a` | Added comprehensive deployment docs |
 | Backend Service | ✅ Complete | `4376144` | Node.js/Express proxy, Dockerfiles, scripts |
-| Frontend Dockerfile | ✅ Complete | `4376144` | Two-stage build (Node build + Nginx serve) |
+| Frontend Dockerfile | ✅ Complete | Updated with Nick | Two-stage build (Node build + Nginx serve) |
 | Backend Dockerfile | ✅ Complete | `4376144` | Node.js 18 Alpine, health checks |
-| nginx.conf | ✅ Complete | `4376144` | Received from Nick, configured for SPA |
+| nginx.conf | ✅ Complete | Updated with Nick | Configured for SPA, NO API proxying |
 | Build Scripts | ✅ Complete | `4376144` | build-push-frontend.sh, build-push-backend.sh |
 | npm build script | ✅ Complete | `4376144` | Added to package.json |
 
 **Code is 100% ready for deployment. Waiting on infrastructure.**
+
+**Note**: During meeting with Nick (2025-01-22), Dockerfile and nginx.conf were updated to match Staff Plan architecture pattern.
 
 ### 🚨 Infrastructure Blockers (Jeff's Team)
 
@@ -1009,14 +1027,17 @@ This section documents the deployment of Momentum Note Crafter to Google Cloud R
 
 **Infrastructure Timeline: 1-2 weeks minimum** (per Jeff's update)
 
-### ⏳ Local Setup (Not Started)
+### ⏳ Local Setup (In Progress)
 
 | Task | Status | Estimated Time |
 |------|--------|----------------|
-| Install Docker Desktop | ⏳ Pending | 1 hour |
+| Install Docker Desktop | ✅ Complete | 1 hour |
+| **Install WSL2 (Required for Docker)** | 🟡 **Restart Required** | 30 minutes |
 | Install gcloud CLI | ⏳ Pending | 30 minutes |
 | Configure Docker for Artifact Registry | ⏳ Pending | 15 minutes |
 | Test Docker builds locally | ⏳ Pending | 1 hour |
+
+**IMPORTANT**: WSL2 (Ubuntu 22.04) installation completed during Nick meeting. **Computer restart required** to complete setup.
 
 ---
 
@@ -1031,7 +1052,8 @@ Jeff's team is working on two critical infrastructure issues that are **new terr
 **Status**:
 - ✅ Nick's Staff Plan: Already has private IP space (working)
 - ⏳ Note Crafter: Waiting for private IP assignment
-- 🚨 **Blocker**: Need to **verify design with Nick** before Jeff can assign IPs
+- ✅ **Design Verified with Nick** (2025-01-22 meeting): 2-service architecture confirmed
+- 🟡 **Next**: Formally communicate design verification to Jeff
 
 ### 2. Name Resolution (Internal DNS)
 
@@ -1065,10 +1087,12 @@ d1557af Rename environment variables for Docker deployment compatibility
 | Step | Owner | Status | Blocker? |
 |------|-------|--------|----------|
 | 1.1 Solve Load Balancer Issue | Jeff + GCP Support | 🔴 In Progress | **YES** |
-| 1.2 Verify Design with Nick | **Luis + Nick** | 🟠 **Action Required** | **YES** |
-| 1.3 Assign Private IP Space | Jeff | 🟡 Waiting on 1.2 | **YES** |
+| 1.2 Verify Design with Nick | **Luis + Nick** | ✅ **Complete (2025-01-22)** | No |
+| 1.3 Assign Private IP Space | Jeff | 🟡 Waiting on 1.1 + design confirmation email | **YES** |
 | 1.4 Create Artifact Registry | Jeff | 🟡 Waiting on 1.3 | No |
 | 1.5 Configure VPC Connector | Jeff | 🟡 Waiting on 1.1, 1.3 | **YES** |
+
+**Update**: Met with Nick on 2025-01-22. Architecture verified: 2-service design (frontend + backend) confirmed matching Staff Plan pattern.
 
 ### Phase 2: DNS & Naming - 3-5 days
 
@@ -1078,17 +1102,20 @@ d1557af Rename environment variables for Docker deployment compatibility
 | 2.2 Create Internal DNS Zones | Jeff's team | ⏳ Waiting |
 | 2.3 Configure On-Prem DNS Forwarders | IPG M365/Dir Ops | ⏳ Waiting |
 
-### Phase 3: Local Preparation (Can Start Now!) - 1 day
+### Phase 3: Local Preparation (In Progress) - 1 day
 
 | Step | Status | Time |
 |------|--------|------|
-| 3.1 Install Docker Desktop | ⏳ **Can Do Now** | 1 hour |
-| 3.2 Install gcloud CLI | ⏳ **Can Do Now** | 30 min |
+| 3.1 Install Docker Desktop | ✅ Complete | 1 hour |
+| 3.1a **Install WSL2 (Windows requirement)** | 🟡 **Restart Required** | 30 min |
+| 3.2 Install gcloud CLI | ⏳ After restart | 30 min |
 | 3.3 Authenticate gcloud | ⏳ After 3.2 | 5 min |
 | 3.4 Configure Docker for Artifact Registry | ⏳ After 3.3 | 5 min |
-| 3.5 Test Backend Locally | ⏳ After 3.1 | 1 hour |
-| 3.6 Test Frontend Build | ⏳ After 3.1 | 30 min |
-| 3.7 Test Docker Builds Locally | ⏳ After 3.1 | 1 hour |
+| 3.5 Test Backend Locally | ⏳ After restart | 1 hour |
+| 3.6 Test Frontend Build | ⏳ After restart | 30 min |
+| 3.7 Test Docker Builds Locally | ⏳ After restart | 1 hour |
+
+**Update (2025-01-22)**: Docker Desktop installed. WSL2 (Ubuntu 22.04 LTS) installation started. **Computer restart required** to complete WSL2 setup before continuing.
 
 ### Phase 4: Docker Build & Push - 1-2 hours
 
@@ -1146,42 +1173,36 @@ d1557af Rename environment variables for Docker deployment compatibility
 
 ## Critical Next Actions
 
-### 🚨 PRIORITY 1: Talk to Nick (URGENT)
+### ✅ ~~PRIORITY 1: Talk to Nick~~ COMPLETE (2025-01-22)
 
-**Purpose**: Verify the design so Jeff can assign private IP space.
+**Status**: Met with Nick on 2025-01-22. Key outcomes:
 
-**Schedule a call to discuss**:
+1. **Architecture Confirmed**: ✅ 2-service design (frontend + backend) matches Staff Plan pattern
+2. **Nginx Configuration**: ✅ nginx.conf does NOT proxy to interact.interpublic.com - frontend calls backend directly
+3. **Backend CORS**: ✅ Backend allows CORS requests from frontend URL
+4. **Network Access**: ✅ interact.interpublic.com is accessible without VPN/netscope
+5. **DNS Names**: Still TBD - will decide later
+6. **Docker Setup**: Started during call - WSL2 installation requires computer restart
 
-1. **Architecture Confirmation**
-   - Confirm 2-service design (frontend + backend) matches Staff Plan pattern
-   - Review infrastructure diagram above
+**Files Updated During Meeting**:
+- Dockerfile (Nick sent updated version)
+- nginx.conf (Nick sent updated configuration)
+- build-push-image script (Nick provided)
 
-2. **DNS Names Decision**
-   - What should services be called?
-   - Suggestions:
-     - Frontend: `note-crafter.momentum.com` or `meeting-notes.momentum.com`
-     - Backend: `note-crafter-api.momentum.com` (internal only)
-   - What naming convention did Staff Plan use?
+### 🟡 NEW PRIORITY 1: Complete WSL2 Setup (AFTER RESTART)
 
-3. **Network Requirements**
-   - Confirm backend needs VPC egress to `interact.interpublic.com`
-   - How does Staff Plan handle this?
-   - Any special firewall rules needed?
+**Status**: WSL2 (Ubuntu 22.04 LTS) installation started. **Computer restart required** to complete.
 
-4. **Private IP Strategy**
-   - Should both services have private IPs?
-   - Or frontend public + backend private?
+**After Restart**:
+1. Verify WSL2 is working: `wsl --status`
+2. Launch Ubuntu: `wsl` or search "Ubuntu" in Start Menu
+3. Complete Docker Desktop setup with WSL2 backend
+4. Continue with Nick to test Docker builds
+5. Test build-push scripts locally
 
-**Action**: Send email to Nick (template below)
+### 🚨 NEW PRIORITY 2: Email Jeff - Design Verified (URGENT)
 
-### ⏳ PRIORITY 2: Install Docker & gcloud (Can Do Now)
-
-**Docker Desktop**:
-1. Download: https://www.docker.com/products/docker-desktop
-2. Install (requires admin privileges)
-3. Restart computer
-4. Launch Docker Desktop
-5. Verify: `docker --version`
+### ⏸️ PRIORITY 3: Install gcloud CLI (After Restart)
 
 **gcloud CLI**:
 1. Download: https://cloud.google.com/sdk/docs/install-sdk#windows
@@ -1192,11 +1213,11 @@ d1557af Rename environment variables for Docker deployment compatibility
 6. Configure Docker: `gcloud auth configure-docker us-east4-docker.pkg.dev`
 7. Verify: `gcloud --version`
 
-### ⏸️ PRIORITY 3: Wait for Infrastructure (Jeff's Team)
+### ⏸️ PRIORITY 4: Wait for Infrastructure (Jeff's Team)
 
 Monitor Jeff's daily updates on:
 - Load balancer issue resolution (GCP Support ticket)
-- Private IP assignment (after design verification)
+- Private IP assignment (after receiving design confirmation email from Luis)
 - VPC connector configuration
 
 ---
@@ -1235,23 +1256,32 @@ Thanks!
 Luis
 ```
 
-### To Jeff - Infrastructure Status
+### To Jeff - Design Verification Complete
 
 ```
 Hi Jeff,
 
-Thanks for the detailed infrastructure update.
+I met with Nick today (2025-01-22) and verified the design for Note Crafter.
 
-I understand the load balancer issue is being worked on with GCP Support,
-and I'm ready to "verify the design" with Nick so you can assign private IP space.
+Architecture Confirmed:
+- ✅ 2-service design (frontend + backend) - matches Nick's Staff Plan pattern
+- ✅ Frontend: Nginx + React SPA (static file server)
+- ✅ Backend: Node.js/Express API proxy (stores CLIENT_SECRET securely)
+- ✅ Frontend makes direct calls to backend Cloud Run URL
+- ✅ Backend needs VPC egress to reach interact.interpublic.com
+- ✅ Nick confirmed interact.interpublic.com is accessible without VPN
 
-Current status:
-- ✅ Code: 100% ready (backend service created, Dockerfiles, scripts all done)
-- ⏳ Local setup: Installing Docker Desktop and gcloud CLI
-- ⏳ Infrastructure: Waiting on load balancer resolution
+Files Updated:
+- Dockerfile and nginx.conf updated during meeting with Nick
+- Build scripts ready to go
 
-I'll schedule a call with Nick this week to verify the design and will update
-you once that's complete.
+Current Status:
+- ✅ Code: 100% ready for deployment
+- ✅ Design: Verified with Nick (2-service architecture)
+- 🟡 Local Setup: WSL2 installed, computer restart required to complete Docker setup
+- ⏳ Infrastructure: Waiting on load balancer resolution and private IP assignment
+
+You can now proceed with assigning private IP space for Note Crafter.
 
 Standing by for your daily updates!
 
@@ -1272,6 +1302,24 @@ Before you can build and push Docker images:
    docker --version
    docker ps
    ```
+
+   **Windows Users - WSL2 Required**:
+   Docker Desktop on Windows requires WSL2 (Windows Subsystem for Linux 2).
+
+   **Install WSL2**:
+   ```powershell
+   # Run PowerShell as Administrator
+   wsl --install
+
+   # Or install specific distribution (recommended: Ubuntu 22.04)
+   wsl --install -d Ubuntu-22.04
+   ```
+
+   **After Installation**:
+   - Computer restart is required to complete WSL2 installation
+   - After restart, Docker Desktop will automatically use WSL2 backend
+   - Verify WSL2 is working: `wsl --status`
+   - Launch Ubuntu: `wsl` or search "Ubuntu" in Start Menu
 
 2. **gcloud CLI installed and authenticated**
    ```bash
@@ -1721,7 +1769,8 @@ c:\Users\luis.bustos\Downloads\Momo Mettings App\
 │       ├── Chip.tsx                  # Tag/chip component (removable)
 │       ├── Tooltip.tsx               # Tooltip with hover trigger
 │       ├── LoadingModal.tsx          # Full-screen loading spinner
-│       └── SkeletonLoader.tsx        # Content loading skeleton
+│       ├── SkeletonLoader.tsx        # Content loading skeleton
+│       └── ScrollToTop.tsx           # Floating scroll to top button (appears after 400px scroll)
 │
 ├── 📁 contexts/                      # React Context providers
 │   ├── AuthContext.tsx               # Authentication state (user, logout, profile)
@@ -2017,7 +2066,72 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2025-01-21
+### 📅 Latest Update - 2025-01-22 (Part 2)
+
+**Summary**: Added Scroll to Top button for improved navigation on long pages.
+
+#### UX Enhancement
+
+**New Feature - Scroll to Top Button**:
+- ✅ Created `ScrollToTop.tsx` component with smooth scroll behavior
+- ✅ Floating action button (FAB) appears after scrolling 400px down
+- ✅ Positioned in bottom-right corner (standard UX convention)
+- ✅ Circular design with primary brand color and glassmorphism styling
+- ✅ Smooth scroll animation (not instant jump)
+- ✅ Hover effect: scales up 110% with enhanced shadow
+- ✅ Full accessibility: ARIA labels, keyboard navigation, focus ring
+- ✅ Dark mode support
+- ✅ Integrated into main App component
+
+**Implementation Details**:
+- Uses existing `chevron-up` icon from Icon component
+- Event listener with automatic cleanup
+- 400px scroll threshold for visibility
+- Fixed positioning with z-index: 40 (below modals, above content)
+- Size: 48px × 48px (mobile-friendly touch target)
+- Smooth transitions: 300ms duration
+
+**Benefits**:
+- Improved navigation on long meeting notes
+- Better user experience when scrolling through extensive output
+- Follows modern web design best practices
+- Consistent with application's existing design system
+
+---
+
+### 📅 Earlier Update - 2025-01-22 (Part 1)
+
+**Summary**: Met with Nick to verify deployment architecture and started Docker/WSL2 setup. Computer restart required to complete WSL2 installation.
+
+#### Meeting with Nick Keller (2025-01-22)
+
+**Architecture Verification**:
+- ✅ Confirmed 2-service design (frontend + backend) matches Staff Plan pattern
+- ✅ Clarified nginx.conf does NOT proxy to interact.interpublic.com
+- ✅ Frontend calls backend directly via Cloud Run URL
+- ✅ Backend handles CORS configuration
+- ✅ Confirmed interact.interpublic.com is accessible without VPN/netscope
+
+**Files Updated During Meeting**:
+- ✅ Dockerfile - Nick provided updated version
+- ✅ nginx.conf - Nick provided updated configuration
+- ✅ build-push-image script - Nick provided shell script
+
+**Docker Setup Progress**:
+- ✅ Docker Desktop installed
+- ✅ WSL2 (Ubuntu 22.04) installation started
+- 🟡 Computer restart required to complete WSL2 setup
+- ⏳ Will continue Docker build testing after restart
+
+**Next Steps**:
+1. Restart computer to complete WSL2 installation
+2. Verify Docker Desktop works with WSL2
+3. Continue with Nick to test Docker builds
+4. Email Jeff confirming design verification is complete
+
+---
+
+### 📅 Previous Update - 2025-01-21
 
 **Summary**: Prepared Meeting Notes Generator for Google Cloud Run deployment by renaming environment variables and adding deployment progress tracker.
 
