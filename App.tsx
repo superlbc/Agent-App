@@ -18,8 +18,6 @@ import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
 import { telemetryService } from './utils/telemetryService';
-import { triggerPowerAutomateFlow } from './utils/reporting';
-import { appConfig } from './appConfig';
 
 const DEFAULT_CONTROLS: Controls = {
   focus_department: [],
@@ -99,15 +97,7 @@ const AppContent: React.FC = () => {
     if (isAuthenticated && user && !hasTriggeredLoginFlow.current) {
       hasTriggeredLoginFlow.current = true;
 
-      // Legacy login tracking (optional, for backwards compatibility)
-      triggerPowerAutomateFlow(appConfig.userLoginFlowUrl, {
-        eventType: "userLogin",
-        userName: user.name,
-        userEmail: user.username,
-        timestamp: new Date().toISOString()
-      });
-
-      // Modern centralized tracking
+      // Track login event
       telemetryService.trackEvent('userLogin', {});
     }
   }, [isAuthenticated, user]);
@@ -162,19 +152,6 @@ const AppContent: React.FC = () => {
         actionItemCount: response.next_steps?.length || 0,
         hasTags: currentFormState.tags.length > 0
       }, correlationId);
-
-      // Legacy tracking (optional)
-      if (!hasGenerated) {
-        triggerPowerAutomateFlow(appConfig.notesGeneratedFlowUrl, {
-          eventType: "notesGenerated",
-          userName: user?.name,
-          userEmail: user?.username,
-          timestamp: new Date().toISOString(),
-          meetingTitle: currentFormState.title,
-          actionItemCount: response.next_steps?.length || 0,
-          preset: currentControls.meetingPreset
-        });
-      }
 
       setHasGenerated(true);
       if(hasGenerated) {

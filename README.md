@@ -235,11 +235,7 @@ The application includes a comprehensive telemetry framework that tracks user in
 
 ### Power Automate Integration
 
-The application sends telemetry data to three Power Automate flow endpoints:
-
-1. **User Login Flow** (Legacy, optional): Tracks user authentication events
-2. **Notes Generated Flow** (Legacy, optional): Tracks major business events
-3. **Centralized Telemetry Flow** (Recommended): Tracks all events with rich metadata
+The application sends all telemetry data to a single centralized Power Automate flow endpoint that tracks all events with rich metadata.
 
 #### Centralized Telemetry Event Schema
 
@@ -262,21 +258,20 @@ The application sends telemetry data to three Power Automate flow endpoints:
 
 ### Configuration
 
-Telemetry flow URLs are configured in [appConfig.ts](appConfig.ts):
+The telemetry flow URL is configured in [appConfig.ts](appConfig.ts):
 
 ```typescript
 export const appConfig = {
-  userLoginFlowUrl: "YOUR_POWER_AUTOMATE_LOGIN_FLOW_URL",
-  notesGeneratedFlowUrl: "YOUR_POWER_AUTOMATE_NOTES_FLOW_URL",
   telemetryFlowUrl: "YOUR_POWER_AUTOMATE_TELEMETRY_FLOW_URL"
 };
 ```
 
 **To configure**:
-1. Create HTTP trigger flows in Power Automate
-2. Copy the HTTP POST URLs from each flow
-3. Replace the placeholder URLs in `appConfig.ts`
-4. If URLs are not configured (still contain "YOUR_"), telemetry will be disabled with console warnings
+1. Create an HTTP trigger flow in Power Automate
+2. Configure the flow to receive the telemetry event schema (see schema above)
+3. Copy the HTTP POST URL from the trigger
+4. Replace the placeholder URL in `appConfig.ts`
+5. If URL is not configured (still contains "YOUR_"), telemetry will be disabled with console warnings
 
 ### Disabling Telemetry (Development)
 
@@ -2189,9 +2184,9 @@ system: {
 #### Telemetry Framework Implementation
 
 **New Files Created**:
-- ✅ `appConfig.ts` - Power Automate flow URL configuration
+- ✅ `appConfig.ts` - Power Automate flow URL configuration (single centralized endpoint)
 - ✅ `utils/telemetryService.ts` - Centralized event tracking service (24 event types)
-- ✅ `utils/reporting.ts` - Legacy Power Automate flow trigger utility
+- ✅ `utils/reporting.ts` - Power Automate flow trigger utility (not actively used)
 
 **Events Tracked**:
 - **Authentication**: userLogin, userLogout
