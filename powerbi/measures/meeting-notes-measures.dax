@@ -1,0 +1,517 @@
+// ============================================================================
+// MEETING NOTES GENERATOR - DAX MEASURES
+// ============================================================================
+// Data Source: vw_MeetingNotesGenerator
+// Created: 2025-10-22
+// Version: 1.0.0
+// ============================================================================
+
+// ============================================================================
+// BASE METRICS
+// ============================================================================
+
+// Total Events
+Total Events = COUNTROWS(vw_MeetingNotesGenerator)
+
+// Unique Users
+Unique Users = DISTINCTCOUNT(vw_MeetingNotesGenerator[UserEmail])
+
+// Unique Sessions
+Unique Sessions = DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID])
+
+// Events Per Session
+Avg Events Per Session =
+DIVIDE(
+    [Total Events],
+    [Unique Sessions],
+    0
+)
+
+// ============================================================================
+// CORE FUNCTIONALITY METRICS
+// ============================================================================
+
+// Notes Generated (first time)
+Notes Generated =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "notesGenerated"
+)
+
+// Notes Regenerated (subsequent times)
+Notes Regenerated =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "notesRegenerated"
+)
+
+// Total Notes (Generated + Regenerated)
+Total Notes = [Notes Generated] + [Notes Regenerated]
+
+// Regeneration Rate
+Regeneration Rate =
+DIVIDE(
+    [Notes Regenerated],
+    [Notes Generated],
+    0
+)
+
+// Average Transcript Length
+Avg Transcript Length =
+AVERAGE(vw_MeetingNotesGenerator[TranscriptLength])
+
+// Average Action Items Per Note
+Avg Action Items =
+AVERAGE(vw_MeetingNotesGenerator[ActionItemCount])
+
+// ============================================================================
+// EXPORT METRICS
+// ============================================================================
+
+// Total Exports (all types)
+Total Exports =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventCategory] = "Exports"
+)
+
+// PDF Exports
+PDF Exports =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "exportedToPDF"
+)
+
+// Copied to Clipboard
+Clipboard Copies =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "copiedToClipboard"
+)
+
+// Email Exports
+Email Exports =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "exportedToEmail"
+)
+
+// CSV Exports
+CSV Exports =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "exportedToCSV"
+)
+
+// Export Rate (% of notes that get exported)
+Export Rate =
+DIVIDE(
+    [Total Exports],
+    [Total Notes],
+    0
+)
+
+// Most Popular Export Format
+Most Popular Export Format =
+VAR ExportEvents =
+    FILTER(
+        vw_MeetingNotesGenerator,
+        vw_MeetingNotesGenerator[EventCategory] = "Exports"
+    )
+VAR MostPopular =
+    TOPN(
+        1,
+        SUMMARIZE(
+            ExportEvents,
+            vw_MeetingNotesGenerator[EventType]
+        ),
+        CALCULATE([Total Events]),
+        DESC
+    )
+RETURN
+    MAXX(MostPopular, vw_MeetingNotesGenerator[EventType])
+
+// ============================================================================
+// PRESET METRICS
+// ============================================================================
+
+// Preset Selections
+Preset Selections =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "presetSelected"
+)
+
+// Most Popular Preset
+Most Popular Preset =
+VAR PresetEvents =
+    FILTER(
+        vw_MeetingNotesGenerator,
+        NOT ISBLANK(vw_MeetingNotesGenerator[Preset])
+    )
+VAR MostPopular =
+    TOPN(
+        1,
+        SUMMARIZE(
+            PresetEvents,
+            vw_MeetingNotesGenerator[Preset]
+        ),
+        CALCULATE([Total Events]),
+        DESC
+    )
+RETURN
+    MAXX(MostPopular, vw_MeetingNotesGenerator[Preset])
+
+// Preset Usage Distribution
+Preset Usage % =
+VAR TotalPresetSelections = [Preset Selections]
+VAR CurrentPresetCount = [Total Events]
+RETURN
+    DIVIDE(CurrentPresetCount, TotalPresetSelections, 0)
+
+// ============================================================================
+// INTERROGATE / Q&A METRICS
+// ============================================================================
+
+// Interrogate Sessions
+Interrogate Sessions =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "transcriptInterrogated"
+)
+
+// Questions Asked
+Questions Asked =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "questionAsked"
+)
+
+// Average Questions Per Session
+Avg Questions Per Interrogate =
+DIVIDE(
+    [Questions Asked],
+    [Interrogate Sessions],
+    0
+)
+
+// Interrogate Adoption Rate
+Interrogate Adoption Rate =
+DIVIDE(
+    [Interrogate Sessions],
+    [Total Notes],
+    0
+)
+
+// ============================================================================
+// DATA INPUT METRICS
+// ============================================================================
+
+// Sample Data Loads
+Sample Data Loads =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "sampleDataLoaded"
+)
+
+// Form Clears
+Form Clears =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "formCleared"
+)
+
+// TXT File Uploads
+TXT Uploads =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "transcriptFileUploaded"
+)
+
+// DOCX File Uploads
+DOCX Uploads =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "docxFileUploaded"
+)
+
+// Total File Uploads
+Total Uploads = [TXT Uploads] + [DOCX Uploads]
+
+// Average Upload File Size (KB)
+Avg Upload Size KB =
+DIVIDE(
+    AVERAGE(vw_MeetingNotesGenerator[FileSize]),
+    1024,
+    0
+)
+
+// ============================================================================
+// TOUR METRICS
+// ============================================================================
+
+// Tours Started
+Tours Started =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "tourStarted"
+)
+
+// Tours Completed
+Tours Completed =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "tourCompleted"
+)
+
+// Tours Dismissed
+Tours Dismissed =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "tourDismissed"
+)
+
+// Tour Completion Rate
+Tour Completion Rate =
+DIVIDE(
+    [Tours Completed],
+    [Tours Started],
+    0
+)
+
+// Tour Dismissal Rate
+Tour Dismissal Rate =
+DIVIDE(
+    [Tours Dismissed],
+    [Tours Started],
+    0
+)
+
+// Average Tour Progress (steps completed)
+Avg Tour Steps Completed =
+VAR DismissedTours =
+    FILTER(
+        vw_MeetingNotesGenerator,
+        vw_MeetingNotesGenerator[EventType] = "tourDismissed"
+    )
+RETURN
+    AVERAGE(DismissedTours[TourStepIndex])
+
+// ============================================================================
+// SETTINGS METRICS
+// ============================================================================
+
+// Settings Opened
+Settings Opened =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "settingsOpened"
+)
+
+// Bot ID Changes
+Bot ID Changes =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventType] = "botIdChanged"
+)
+
+// ============================================================================
+// USER ENGAGEMENT METRICS
+// ============================================================================
+
+// Active Users Today
+Active Users Today =
+CALCULATE(
+    [Unique Users],
+    vw_MeetingNotesGenerator[EventDate] = TODAY()
+)
+
+// Active Users This Week
+Active Users This Week =
+VAR StartOfWeek = TODAY() - WEEKDAY(TODAY(), 2) + 1
+RETURN
+    CALCULATE(
+        [Unique Users],
+        vw_MeetingNotesGenerator[EventDate] >= StartOfWeek
+    )
+
+// Active Users This Month
+Active Users This Month =
+CALCULATE(
+    [Unique Users],
+    MONTH(vw_MeetingNotesGenerator[EventDate]) = MONTH(TODAY()),
+    YEAR(vw_MeetingNotesGenerator[EventDate]) = YEAR(TODAY())
+)
+
+// New Users (First Login This Period)
+New Users This Month =
+VAR CurrentMonthUsers =
+    VALUES(vw_MeetingNotesGenerator[UserEmail])
+VAR UsersWithHistory =
+    CALCULATETABLE(
+        VALUES(vw_MeetingNotesGenerator[UserEmail]),
+        DATESBETWEEN(
+            vw_MeetingNotesGenerator[EventDate],
+            DATE(1900, 1, 1),
+            EOMONTH(TODAY(), -1)
+        )
+    )
+RETURN
+    COUNTROWS(
+        EXCEPT(CurrentMonthUsers, UsersWithHistory)
+    )
+
+// Power Users (5+ Sessions)
+Power Users =
+VAR UserSessions =
+    SUMMARIZE(
+        vw_MeetingNotesGenerator,
+        vw_MeetingNotesGenerator[UserEmail],
+        "SessionCount", CALCULATE([Unique Sessions])
+    )
+VAR PowerUserList =
+    FILTER(
+        UserSessions,
+        [SessionCount] >= 5
+    )
+RETURN
+    COUNTROWS(PowerUserList)
+
+// Average Session Duration (Minutes)
+Avg Session Duration Min =
+VAR SessionDurations =
+    ADDCOLUMNS(
+        VALUES(vw_MeetingNotesGenerator[SessionID]),
+        "Duration",
+        DATEDIFF(
+            CALCULATE(MIN(vw_MeetingNotesGenerator[EventTimestamp])),
+            CALCULATE(MAX(vw_MeetingNotesGenerator[EventTimestamp])),
+            MINUTE
+        )
+    )
+RETURN
+    AVERAGEX(SessionDurations, [Duration])
+
+// ============================================================================
+// FEATURE ADOPTION FUNNEL
+// ============================================================================
+
+// Funnel: Login to Generate
+Login to Generate Rate =
+VAR Logins =
+    CALCULATE(
+        DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+        vw_MeetingNotesGenerator[EventType] = "userLogin"
+    )
+VAR Generates =
+    CALCULATE(
+        DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+        vw_MeetingNotesGenerator[EventType] IN {"notesGenerated", "notesRegenerated"}
+    )
+RETURN
+    DIVIDE(Generates, Logins, 0)
+
+// Funnel: Generate to Export
+Generate to Export Rate =
+VAR Generates =
+    CALCULATE(
+        DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+        vw_MeetingNotesGenerator[EventType] IN {"notesGenerated", "notesRegenerated"}
+    )
+VAR Exports =
+    CALCULATE(
+        DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+        vw_MeetingNotesGenerator[EventCategory] = "Exports"
+    )
+RETURN
+    DIVIDE(Exports, Generates, 0)
+
+// Funnel: Generate to Interrogate
+Generate to Interrogate Rate =
+VAR Generates =
+    CALCULATE(
+        DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+        vw_MeetingNotesGenerator[EventType] IN {"notesGenerated", "notesRegenerated"}
+    )
+VAR Interrogates =
+    CALCULATE(
+        DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+        vw_MeetingNotesGenerator[EventType] = "transcriptInterrogated"
+    )
+RETURN
+    DIVIDE(Interrogates, Generates, 0)
+
+// ============================================================================
+// TIME-BASED METRICS
+// ============================================================================
+
+// Events Yesterday
+Events Yesterday =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventDate] = TODAY() - 1
+)
+
+// Events Last 7 Days
+Events Last 7 Days =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventDate] >= TODAY() - 7
+)
+
+// Events Last 30 Days
+Events Last 30 Days =
+CALCULATE(
+    [Total Events],
+    vw_MeetingNotesGenerator[EventDate] >= TODAY() - 30
+)
+
+// Growth Rate (Month over Month)
+MoM Growth Rate =
+VAR CurrentMonth = [Total Events]
+VAR LastMonth =
+    CALCULATE(
+        [Total Events],
+        DATEADD(vw_MeetingNotesGenerator[EventDate], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - LastMonth, LastMonth, 0)
+
+// ============================================================================
+// CONDITIONAL FORMATTING HELPERS
+// ============================================================================
+
+// Status Color (for KPI cards)
+Status Color =
+SWITCH(
+    TRUE(),
+    [Total Events] = 0, "Red",
+    [Total Events] < 100, "Yellow",
+    [Total Events] >= 100, "Green",
+    "Gray"
+)
+
+// Trend Indicator (▲ ▼ ►)
+Trend Indicator =
+VAR CurrentValue = [Total Events]
+VAR PreviousValue =
+    CALCULATE(
+        [Total Events],
+        DATEADD(vw_MeetingNotesGenerator[EventDate], -1, MONTH)
+    )
+RETURN
+    SWITCH(
+        TRUE(),
+        CurrentValue > PreviousValue, "▲ Increasing",
+        CurrentValue < PreviousValue, "▼ Decreasing",
+        CurrentValue = PreviousValue, "► Stable",
+        "No Data"
+    )
+
+// ============================================================================
+// END OF MEASURES
+// ============================================================================
+// Total Measures: 60
+// To import: Copy each measure into Power BI Desktop (Modeling → New Measure)
+// Or use Tabular Editor for bulk import
+// ============================================================================

@@ -1,0 +1,703 @@
+// ============================================================================
+// UNIFIED ANALYTICS - DAX MEASURES
+// ============================================================================
+// Data Source: vw_UnifiedAnalytics
+// Purpose: Cross-app metrics and portfolio analysis
+// Created: 2025-10-22
+// Version: 1.0.0
+// ============================================================================
+
+// ============================================================================
+// BASE METRICS (ALL APPS)
+// ============================================================================
+
+// Total Events (All Apps)
+Total Events = COUNTROWS(vw_UnifiedAnalytics)
+
+// Unique Users (All Apps)
+Total Users = DISTINCTCOUNT(vw_UnifiedAnalytics[UserEmail])
+
+// Unique Sessions (All Apps)
+Total Sessions = DISTINCTCOUNT(vw_UnifiedAnalytics[SessionID])
+
+// Active Apps
+Active Apps = DISTINCTCOUNT(vw_UnifiedAnalytics[AppName])
+
+// Events Per Session
+Avg Events Per Session =
+DIVIDE(
+    [Total Events],
+    [Total Sessions],
+    0
+)
+
+// ============================================================================
+// APP-SPECIFIC METRICS
+// ============================================================================
+
+// Meeting Notes Generator Events
+MNG Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[AppName] = "Meeting Notes Generator"
+)
+
+// EstimateCrafter Events
+EC Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[AppName] = "EstimateCrafter"
+)
+
+// Meeting Notes Generator Users
+MNG Users =
+CALCULATE(
+    [Total Users],
+    vw_UnifiedAnalytics[AppName] = "Meeting Notes Generator"
+)
+
+// EstimateCrafter Users
+EC Users =
+CALCULATE(
+    [Total Users],
+    vw_UnifiedAnalytics[AppName] = "EstimateCrafter"
+)
+
+// Meeting Notes Generator Sessions
+MNG Sessions =
+CALCULATE(
+    [Total Sessions],
+    vw_UnifiedAnalytics[AppName] = "Meeting Notes Generator"
+)
+
+// EstimateCrafter Sessions
+EC Sessions =
+CALCULATE(
+    [Total Sessions],
+    vw_UnifiedAnalytics[AppName] = "EstimateCrafter"
+)
+
+// ============================================================================
+// APP COMPARISON METRICS
+// ============================================================================
+
+// Most Used App
+Most Used App =
+VAR AppSummary =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[AppName],
+        "EventCount", [Total Events]
+    )
+VAR TopApp =
+    TOPN(1, AppSummary, [EventCount], DESC)
+RETURN
+    MAXX(TopApp, vw_UnifiedAnalytics[AppName])
+
+// App Usage Distribution (%)
+App Usage % =
+VAR TotalAppEvents = [Total Events]
+VAR CurrentAppEvents = [Total Events]
+RETURN
+    DIVIDE(CurrentAppEvents, TotalAppEvents, 0)
+
+// App with Most Users
+App with Most Users =
+VAR AppUserCounts =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[AppName],
+        "UserCount", [Total Users]
+    )
+VAR TopApp =
+    TOPN(1, AppUserCounts, [UserCount], DESC)
+RETURN
+    MAXX(TopApp, vw_UnifiedAnalytics[AppName])
+
+// ============================================================================
+// UNIFIED CORE ACTIONS
+// ============================================================================
+
+// Total Generations (Notes + Estimates)
+Total Generations =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ActionType] = "Generation"
+)
+
+// Total Exports (All Apps)
+Total Exports =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ActionType] = "Export"
+)
+
+// Total Logins (All Apps)
+Total Logins =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ActionType] = "Login"
+)
+
+// Export Rate (Cross-App)
+Export Rate =
+DIVIDE(
+    [Total Exports],
+    [Total Generations],
+    0
+)
+
+// ============================================================================
+// UNIFIED EXPORT METRICS
+// ============================================================================
+
+// PDF Exports (All Apps)
+PDF Exports =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ExportFormat] = "pdf"
+)
+
+// CSV Exports (All Apps)
+CSV Exports =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ExportFormat] = "csv"
+)
+
+// HTML Exports
+HTML Exports =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ExportFormat] = "html"
+)
+
+// Rich Text Exports
+Rich Text Exports =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ExportFormat] = "richText"
+)
+
+// Plain Text Exports
+Plain Text Exports =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[ExportFormat] = "plainText"
+)
+
+// Most Popular Export Format (Cross-App)
+Most Popular Export Format =
+VAR ExportEvents =
+    FILTER(
+        vw_UnifiedAnalytics,
+        NOT ISBLANK(vw_UnifiedAnalytics[ExportFormat])
+    )
+VAR MostPopular =
+    TOPN(
+        1,
+        SUMMARIZE(
+            ExportEvents,
+            vw_UnifiedAnalytics[ExportFormat]
+        ),
+        [Total Events],
+        DESC
+    )
+RETURN
+    MAXX(MostPopular, vw_UnifiedAnalytics[ExportFormat])
+
+// ============================================================================
+// AI INTERACTION METRICS (CROSS-APP)
+// ============================================================================
+
+// AI Interactions (All Apps)
+AI Interactions =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[IsAIInteraction] = 1
+)
+
+// AI Adoption Rate (Cross-App)
+AI Adoption Rate =
+DIVIDE(
+    [AI Interactions],
+    [Total Events],
+    0
+)
+
+// Sessions with AI Usage
+Sessions with AI =
+CALCULATE(
+    [Total Sessions],
+    vw_UnifiedAnalytics[IsAIInteraction] = 1
+)
+
+// AI Session Rate
+AI Session Rate =
+DIVIDE(
+    [Sessions with AI],
+    [Total Sessions],
+    0
+)
+
+// ============================================================================
+// TOUR METRICS (CROSS-APP)
+// ============================================================================
+
+// Tours Started (All Apps)
+Tours Started =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TourStatus] = "Started"
+)
+
+// Tours Completed (All Apps)
+Tours Completed =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TourStatus] = "Completed"
+)
+
+// Tours Dismissed (All Apps)
+Tours Dismissed =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TourStatus] = "Dismissed"
+)
+
+// Tour Completion Rate (Cross-App)
+Tour Completion Rate =
+DIVIDE(
+    [Tours Completed],
+    [Tours Started],
+    0
+)
+
+// Tour Dismissal Rate (Cross-App)
+Tour Dismissal Rate =
+DIVIDE(
+    [Tours Dismissed],
+    [Tours Started],
+    0
+)
+
+// ============================================================================
+// FILE OPERATIONS (CROSS-APP)
+// ============================================================================
+
+// Total File Uploads (All Apps)
+Total File Uploads =
+CALCULATE(
+    [Total Events],
+    NOT ISBLANK(vw_UnifiedAnalytics[UploadedFileName])
+)
+
+// MNG File Uploads
+MNG File Uploads =
+CALCULATE(
+    [Total File Uploads],
+    vw_UnifiedAnalytics[AppName] = "Meeting Notes Generator"
+)
+
+// EC File Uploads (Project Imports)
+EC File Uploads =
+CALCULATE(
+    [Total File Uploads],
+    vw_UnifiedAnalytics[AppName] = "EstimateCrafter"
+)
+
+// ============================================================================
+// USER ENGAGEMENT METRICS
+// ============================================================================
+
+// Active Users Today
+Active Users Today =
+CALCULATE(
+    [Total Users],
+    vw_UnifiedAnalytics[EventDate] = TODAY()
+)
+
+// Active Users This Week
+Active Users This Week =
+VAR StartOfWeek = TODAY() - WEEKDAY(TODAY(), 2) + 1
+RETURN
+    CALCULATE(
+        [Total Users],
+        vw_UnifiedAnalytics[EventDate] >= StartOfWeek
+    )
+
+// Active Users This Month
+Active Users This Month =
+CALCULATE(
+    [Total Users],
+    MONTH(vw_UnifiedAnalytics[EventDate]) = MONTH(TODAY()),
+    YEAR(vw_UnifiedAnalytics[EventDate]) = YEAR(TODAY())
+)
+
+// Power Users (5+ Sessions Across Apps)
+Power Users =
+VAR UserSessions =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[UserEmail],
+        "SessionCount", [Total Sessions]
+    )
+VAR PowerUserList =
+    FILTER(
+        UserSessions,
+        [SessionCount] >= 5
+    )
+RETURN
+    COUNTROWS(PowerUserList)
+
+// Multi-App Users (Use Both Apps)
+Multi-App Users =
+VAR UserAppCounts =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[UserEmail],
+        "AppCount", DISTINCTCOUNT(vw_UnifiedAnalytics[AppName])
+    )
+VAR MultiAppList =
+    FILTER(
+        UserAppCounts,
+        [AppCount] >= 2
+    )
+RETURN
+    COUNTROWS(MultiAppList)
+
+// Multi-App Usage Rate
+Multi-App Rate =
+DIVIDE(
+    [Multi-App Users],
+    [Total Users],
+    0
+)
+
+// Average Session Duration (Minutes)
+Avg Session Duration Min =
+VAR SessionDurations =
+    ADDCOLUMNS(
+        VALUES(vw_UnifiedAnalytics[SessionID]),
+        "Duration",
+        DATEDIFF(
+            CALCULATE(MIN(vw_UnifiedAnalytics[EventTimestamp])),
+            CALCULATE(MAX(vw_UnifiedAnalytics[EventTimestamp])),
+            MINUTE
+        )
+    )
+RETURN
+    AVERAGEX(SessionDurations, [Duration])
+
+// New Users This Month
+New Users This Month =
+VAR CurrentMonthUsers =
+    VALUES(vw_UnifiedAnalytics[UserEmail])
+VAR UsersWithHistory =
+    CALCULATETABLE(
+        VALUES(vw_UnifiedAnalytics[UserEmail]),
+        DATESBETWEEN(
+            vw_UnifiedAnalytics[EventDate],
+            DATE(1900, 1, 1),
+            EOMONTH(TODAY(), -1)
+        )
+    )
+RETURN
+    COUNTROWS(
+        EXCEPT(CurrentMonthUsers, UsersWithHistory)
+    )
+
+// Returning Users (Active in Previous Period)
+Returning Users =
+VAR CurrentUsers =
+    VALUES(vw_UnifiedAnalytics[UserEmail])
+VAR PreviousPeriodUsers =
+    CALCULATETABLE(
+        VALUES(vw_UnifiedAnalytics[UserEmail]),
+        DATEADD(vw_UnifiedAnalytics[EventDate], -1, MONTH)
+    )
+RETURN
+    COUNTROWS(
+        INTERSECT(CurrentUsers, PreviousPeriodUsers)
+    )
+
+// User Retention Rate
+User Retention Rate =
+DIVIDE(
+    [Returning Users],
+    CALCULATE(
+        [Total Users],
+        DATEADD(vw_UnifiedAnalytics[EventDate], -1, MONTH)
+    ),
+    0
+)
+
+// ============================================================================
+// EVENT CATEGORY DISTRIBUTION
+// ============================================================================
+
+// Authentication Events
+Authentication Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventCategory] = "Authentication"
+)
+
+// Core Functionality Events
+Core Functionality Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventCategory] = "Core Functionality"
+)
+
+// Export Events
+Export Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventCategory] = "Exports"
+)
+
+// Settings Events
+Settings Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventCategory] IN {"Settings", "Settings"}
+)
+
+// Tour Events
+Tour Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventCategory] = "Tour"
+)
+
+// Most Common Event Category
+Most Common Category =
+VAR CategorySummary =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[EventCategory],
+        "EventCount", [Total Events]
+    )
+VAR TopCategory =
+    TOPN(1, CategorySummary, [EventCount], DESC)
+RETURN
+    MAXX(TopCategory, vw_UnifiedAnalytics[EventCategory])
+
+// ============================================================================
+// TIME-OF-DAY ANALYSIS
+// ============================================================================
+
+// Morning Events (6am-12pm)
+Morning Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TimeOfDay] = "Morning (6am-12pm)"
+)
+
+// Afternoon Events (12pm-6pm)
+Afternoon Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TimeOfDay] = "Afternoon (12pm-6pm)"
+)
+
+// Evening Events (6pm-12am)
+Evening Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TimeOfDay] = "Evening (6pm-12am)"
+)
+
+// Night Events (12am-6am)
+Night Events =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[TimeOfDay] = "Night (12am-6am)"
+)
+
+// Peak Usage Time
+Peak Usage Time =
+VAR TimeSummary =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[TimeOfDay],
+        "EventCount", [Total Events]
+    )
+VAR PeakTime =
+    TOPN(1, TimeSummary, [EventCount], DESC)
+RETURN
+    MAXX(PeakTime, vw_UnifiedAnalytics[TimeOfDay])
+
+// ============================================================================
+// DOMAIN ANALYSIS
+// ============================================================================
+
+// Unique Domains
+Unique Domains = DISTINCTCOUNT(vw_UnifiedAnalytics[UserDomain])
+
+// Most Active Domain
+Most Active Domain =
+VAR DomainSummary =
+    SUMMARIZE(
+        vw_UnifiedAnalytics,
+        vw_UnifiedAnalytics[UserDomain],
+        "EventCount", [Total Events]
+    )
+VAR TopDomain =
+    TOPN(1, DomainSummary, [EventCount], DESC)
+RETURN
+    MAXX(TopDomain, vw_UnifiedAnalytics[UserDomain])
+
+// Internal Users (momentumww.com)
+Internal Users =
+CALCULATE(
+    [Total Users],
+    vw_UnifiedAnalytics[UserDomain] = "momentumww.com"
+)
+
+// External Users (not momentumww.com)
+External Users =
+CALCULATE(
+    [Total Users],
+    vw_UnifiedAnalytics[UserDomain] <> "momentumww.com"
+)
+
+// ============================================================================
+// GROWTH & TREND METRICS
+// ============================================================================
+
+// Events Yesterday
+Events Yesterday =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventDate] = TODAY() - 1
+)
+
+// Events Last 7 Days
+Events Last 7 Days =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventDate] >= TODAY() - 7
+)
+
+// Events Last 30 Days
+Events Last 30 Days =
+CALCULATE(
+    [Total Events],
+    vw_UnifiedAnalytics[EventDate] >= TODAY() - 30
+)
+
+// Week over Week Growth
+WoW Growth =
+VAR ThisWeek = [Events Last 7 Days]
+VAR LastWeek =
+    CALCULATE(
+        [Total Events],
+        DATESBETWEEN(
+            vw_UnifiedAnalytics[EventDate],
+            TODAY() - 14,
+            TODAY() - 8
+        )
+    )
+RETURN
+    DIVIDE(ThisWeek - LastWeek, LastWeek, 0)
+
+// Month over Month Growth
+MoM Growth =
+VAR CurrentMonth = [Total Events]
+VAR LastMonth =
+    CALCULATE(
+        [Total Events],
+        DATEADD(vw_UnifiedAnalytics[EventDate], -1, MONTH)
+    )
+RETURN
+    DIVIDE(CurrentMonth - LastMonth, LastMonth, 0)
+
+// ============================================================================
+// PORTFOLIO HEALTH METRICS
+// ============================================================================
+
+// Portfolio Health Score (0-100)
+Portfolio Health Score =
+VAR LoginScore = MIN([Total Logins] / 100, 25)
+VAR GenerationScore = MIN([Total Generations] / 100, 25)
+VAR ExportScore = MIN([Total Exports] / 50, 25)
+VAR UserScore = MIN([Total Users] / 50, 25)
+RETURN
+    (LoginScore + GenerationScore + ExportScore + UserScore)
+
+// App Balance Score (1 = perfectly balanced)
+App Balance Score =
+VAR MNGPct = DIVIDE([MNG Events], [Total Events], 0)
+VAR ECPct = DIVIDE([EC Events], [Total Events], 0)
+VAR Difference = ABS(MNGPct - ECPct)
+RETURN
+    1 - Difference
+
+// ============================================================================
+// TOP N RANKINGS
+// ============================================================================
+
+// Top User Rank
+User Rank =
+RANKX(
+    ALL(vw_UnifiedAnalytics[UserEmail]),
+    [Total Events],
+    ,
+    DESC,
+    DENSE
+)
+
+// Top Domain Rank
+Domain Rank =
+RANKX(
+    ALL(vw_UnifiedAnalytics[UserDomain]),
+    [Total Events],
+    ,
+    DESC,
+    DENSE
+)
+
+// ============================================================================
+// CONDITIONAL FORMATTING
+// ============================================================================
+
+// Traffic Light (for KPIs)
+Traffic Light =
+SWITCH(
+    TRUE(),
+    [Total Events] >= 1000, "🟢 Excellent",
+    [Total Events] >= 500, "🟡 Good",
+    [Total Events] >= 100, "🟠 Fair",
+    "🔴 Low"
+)
+
+// Trend Indicator
+Trend Indicator =
+VAR CurrentValue = [Total Events]
+VAR PreviousValue =
+    CALCULATE(
+        [Total Events],
+        DATEADD(vw_UnifiedAnalytics[EventDate], -1, MONTH)
+    )
+RETURN
+    SWITCH(
+        TRUE(),
+        CurrentValue > PreviousValue, "▲ Increasing",
+        CurrentValue < PreviousValue, "▼ Decreasing",
+        CurrentValue = PreviousValue, "► Stable",
+        "No Data"
+    )
+
+// App Comparison Text
+App Comparison =
+"MNG: " & FORMAT([MNG Events], "#,##0") & " | EC: " & FORMAT([EC Events], "#,##0")
+
+// ============================================================================
+// END OF MEASURES
+// ============================================================================
+// Total Measures: 80
+// To import: Copy each measure into Power BI Desktop (Modeling → New Measure)
+// Or use Tabular Editor for bulk import
+// ============================================================================

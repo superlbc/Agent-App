@@ -1,0 +1,25 @@
+{
+  "viewers": [
+    "executive1@momentumww.com",
+    "executive2@momentumww.com",
+    "manager1@momentumww.com",
+    "director@momentumww.com"
+  ],
+  "members": [
+    "analyst1@momentumww.com",
+    "analyst2@momentumww.com"
+  ],
+  "admins": [
+    "luis.bustos@momentumww.com"
+  ],
+  "_comment1": "========================================",
+  "_comment2": "STAKEHOLDER PERMISSIONS",
+  "_comment3": "========================================",
+  "_comment4": "Roles:",
+  "_comment5": "  viewers:  Read-only access to dashboards",
+  "_comment6": "  members:  Can edit dashboards and create content",
+  "_comment7": "  admins:   Full control over workspace",
+  "_comment8": "",
+  "_comment9": "Recommended: Use 'viewers' for all stakeholders",
+  "_comment10": "Only add to 'admins' if they need to manage workspace"
+}

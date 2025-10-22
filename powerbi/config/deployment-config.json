@@ -1,0 +1,52 @@
+{
+  "workspaceName": "Momo Analytics",
+  "sqlServer": "your-server.database.windows.net",
+  "sqlDatabase": "TelemetryDB",
+  "refreshSchedule": {
+    "frequency": "Daily",
+    "time": "06:00",
+    "timezone": "Eastern Standard Time",
+    "enabled": true
+  },
+  "powerBIService": {
+    "tenantId": "your-tenant-id",
+    "clientId": "your-service-principal-client-id",
+    "clientSecret": "your-service-principal-secret"
+  },
+  "dashboards": [
+    {
+      "name": "Meeting Notes Generator",
+      "pbixPath": "../dashboards/meeting-notes.pbix",
+      "datasetName": "MeetingNotes_Dataset"
+    },
+    {
+      "name": "EstimateCrafter",
+      "pbixPath": "../dashboards/estimatecrafter.pbix",
+      "datasetName": "EstimateCrafter_Dataset"
+    },
+    {
+      "name": "Unified Analytics",
+      "pbixPath": "../dashboards/unified.pbix",
+      "datasetName": "UnifiedAnalytics_Dataset"
+    }
+  ],
+  "viewers": [
+    "stakeholder1@company.com",
+    "stakeholder2@company.com",
+    "executive@company.com"
+  ],
+  "_comment1": "========================================",
+  "_comment2": "POWER BI DEPLOYMENT CONFIGURATION",
+  "_comment3": "========================================",
+  "_comment4": "This file is used for Phase 2 automation.",
+  "_comment5": "Update all placeholders before running deployment scripts.",
+  "_comment6": "",
+  "_comment7": "To create a service principal:",
+  "_comment8": "1. Azure Portal → Azure Active Directory → App registrations",
+  "_comment9": "2. New registration → Name it (e.g., 'PowerBI Deployment')",
+  "_comment10": "3. Copy Application (client) ID and Directory (tenant) ID",
+  "_comment11": "4. Certificates & secrets → New client secret",
+  "_comment12": "5. Add service principal to Power BI workspace as Admin",
+  "_comment13": "",
+  "_comment14": "Timezone options: Run Get-TimeZone -ListAvailable in PowerShell"
+}
