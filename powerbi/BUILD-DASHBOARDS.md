@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 60 measures**
+7. **Repeat for all 64 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (60 total):
+**Expected Measures** (64 total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -88,7 +88,9 @@ Each dashboard follows the same process:
 
 **Visual 3: Top Users Table**
 - Insert **Table**
-- Columns: `UserEmail`, `Total Events`, `Notes Generated`, `Total Exports`
+- Columns: `UserEmail`, `Total Events`, `Notes Generated`, `Total Exports`, `Last Active Date`
+- Sort by: `Total Events` (descending)
+- Format `Last Active Date` as short date
 
 **Visual 4: Feature Adoption Funnel**
 - Insert **Funnel Chart**
