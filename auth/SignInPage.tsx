@@ -25,7 +25,7 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onLogin, popupBlocked, o
           </p>
         </div>
         <p className="mt-6 text-slate-600 dark:text-slate-400">
-          To continue, please sign in with your Momentum account. This ensures secure access to the application.
+          Please sign in with your Momentum account to continue.
         </p>
 
         {!popupBlocked && (
