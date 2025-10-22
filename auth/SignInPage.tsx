@@ -15,17 +15,18 @@ export const SignInPage: React.FC<SignInPageProps> = ({ onLogin, popupBlocked, o
       <Card className="w-full max-w-md p-8 text-center">
         <Icon name="logo" className="h-20 w-20 text-primary mx-auto" />
         <div className="mt-6">
-          <div className="flex items-center justify-center space-x-2">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Welcome to Meeting Notes Generator
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Welcome to</p>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              Meeting Notes Generator
             </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500 text-white">Beta</span>
+            <span className="text-xs font-semibold px-2 py-1 rounded bg-blue-500 text-white self-start mt-1">Beta</span>
           </div>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 italic">
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400 italic">
             Drive consistency and impact in every meeting.
           </p>
         </div>
-        <p className="mt-4 text-slate-600 dark:text-slate-400">
+        <p className="mt-6 text-slate-600 dark:text-slate-400">
           To continue, please sign in with your company account. This ensures secure access to the application.
         </p>
 
