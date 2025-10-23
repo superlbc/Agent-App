@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 70 measures**
+7. **Repeat for all 72 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (70 measures total):
+**Expected Measures** (72 measures total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -74,11 +74,12 @@ Each dashboard follows the same process:
 #### Page 1: Overview Dashboard
 
 **Visual 1: KPI Cards (Top Row)**
-- Insert **Card** visual (4 cards across the top)
+- Insert **Card** visual (5 cards across the top)
 - Card 1: `Total Users`
 - Card 2: `Notes Generated`
 - Card 3: `Total Exports`
-- Card 4: `Tour Completion Rate`
+- Card 4: `Login to Transcript Ratio` (shows conversion from login to generating notes)
+- Card 5: `Tour Completion Rate`
 
 **Visual 2: Usage Over Time**
 - Insert **Line Chart**
@@ -94,7 +95,7 @@ Each dashboard follows the same process:
 
 **Visual 4: Feature Adoption Funnel**
 - Insert **Funnel Chart**
-- Values: `Total Logins` → `Notes Generated` → `Total Exports`
+- Values: `Total User Logins` → `Notes Generated` → `Total Exports`
 
 **Visual 5: Export Breakdown**
 - Insert **Pie Chart**

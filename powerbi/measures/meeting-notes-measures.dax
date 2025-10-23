@@ -2,11 +2,11 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 70
+// Total Measures: 72
 // Note: Time dimensions should be created as calculated columns, not measures
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.6.0
+// Version: 1.7.0
 // ============================================================================
 
 // ============================================================================
@@ -24,6 +24,13 @@ Total Users = [Unique Users]
 
 // Unique Sessions
 Unique Sessions = DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID])
+
+// Total User Logins
+Total User Logins =
+CALCULATE(
+    COUNTROWS(vw_MeetingNotesGenerator),
+    vw_MeetingNotesGenerator[EventType] = "userLogin"
+)
 
 // Events Per Session
 Avg Events Per Session =
@@ -559,6 +566,14 @@ VAR Interrogates =
 RETURN
     DIVIDE(Interrogates, Generates, 0)
 
+// Login to Transcript Generation Ratio
+Login to Transcript Ratio =
+DIVIDE(
+    [Notes Generated],
+    [Total User Logins],
+    0
+)
+
 // ============================================================================
 // TIME DIMENSIONS - CALCULATED COLUMNS (NOT MEASURES!)
 // ============================================================================
@@ -667,7 +682,7 @@ RETURN
 // ============================================================================
 // END OF MEASURES
 // ============================================================================
-// Total Measures: 60
+// Total Measures: 72
 // To import: Copy each measure into Power BI Desktop (Modeling → New Measure)
 // Or use Tabular Editor for bulk import
 // ============================================================================
