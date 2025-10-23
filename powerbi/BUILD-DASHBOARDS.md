@@ -31,6 +31,70 @@ Each dashboard follows the same process:
 
 ---
 
+## Understanding Metrics: Events vs Sessions vs Correlations
+
+**IMPORTANT**: The telemetry data contains three different levels of tracking:
+
+### 1. **Event Level** - Raw telemetry events
+- **What it counts**: Every individual event fired from the application
+- **Example**: User refreshes page → fires another `userLogin` event
+- **Measures**:
+  - `Total Events` - All telemetry events
+  - `Total Login Events` - All login events (includes duplicates per session)
+  - `Notes Generated` - Count of notesGenerated events
+- **Use case**: Understanding total system activity and raw event volume
+
+### 2. **Session Level** - Unique browser sessions
+- **What it counts**: Distinct browser sessions (stored in sessionStorage)
+- **Key insight**: One sessionID can have multiple login events (page refreshes) and multiple transcripts
+- **Measures**:
+  - `Unique Sessions` - All distinct sessions
+  - `Unique Login Sessions` - Sessions with at least 1 login event
+  - `Unique Transcript Sessions` - Sessions with at least 1 transcript generated
+  - `Avg Transcripts Per Session` - Average unique transcripts per session
+  - `Sessions with Multiple Transcripts` - Sessions that generated 2+ transcripts
+  - `Login Session to Transcript Session Ratio` - Conversion rate
+- **Use case**: Understanding user engagement patterns and session-based conversion
+
+### 3. **Correlation Level** - Unique transcripts/artifacts
+- **What it counts**: Distinct transcripts or related event chains
+- **Key insight**: CorrelationID links related events (notesGenerated → notesRegenerated)
+- **Measures**:
+  - `Unique Transcripts` - Distinct transcripts based on CorrelationID
+  - `Transcripts Per User` - Average unique transcripts per user
+- **Use case**: Understanding actual output/value generated (how many distinct meeting notes created)
+
+### Why This Matters
+
+**Problem**: Multiple `userLogin` events can occur in the same sessionID due to:
+- MSAL authentication flow
+- Page refreshes
+- React component re-renders
+
+**Solution**: Use session-based and correlation-based metrics for accurate analysis:
+- ❌ Don't use: `Total Login Events` for conversion rates (inflated by refreshes)
+- ✅ Do use: `Unique Login Sessions` for conversion rates
+- ✅ Do use: `Unique Transcripts` for actual output measurement
+
+**Example Scenario**:
+```
+User opens app (SessionID: abc123)
+- Event 1: userLogin (MSAL auth)
+- Event 2: userLogin (React component mount)
+- Event 3: notesGenerated (CorrelationID: xyz-001)
+- User refreshes page
+- Event 4: userLogin (page refresh)
+- Event 5: notesGenerated (CorrelationID: xyz-002) [different meeting]
+
+Results:
+- Total Login Events: 3
+- Unique Login Sessions: 1 (same SessionID)
+- Unique Transcripts: 2 (2 different meetings/transcripts)
+- Transcripts Per Session: 2.0
+```
+
+---
+
 ## Dashboard 1: Meeting Notes Generator
 
 ### Step 1: Create New Report (2 minutes)
@@ -53,12 +117,12 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 72 measures**
+7. **Repeat for all 79 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (72 measures total):
-- Base Metrics (8 measures)
+**Expected Measures** (79 measures total):
+- Base Metrics (15 measures - includes session-based metrics)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
 - Preset Metrics (4 measures)
@@ -95,7 +159,7 @@ Each dashboard follows the same process:
 
 **Visual 4: Feature Adoption Funnel**
 - Insert **Funnel Chart**
-- Values: `Total User Logins` → `Notes Generated` → `Total Exports`
+- Values: `Unique Login Sessions` → `Unique Transcripts` → `Total Exports`
 
 **Visual 5: Export Breakdown**
 - Insert **Pie Chart**
@@ -208,6 +272,60 @@ Each dashboard follows the same process:
 - Insert **Line Chart**
 - X-axis: `EventDate`
 - Y-axis: `Export Rate`
+
+#### Page 3: Session Analytics (New)
+
+**Visual 14: Session-Based KPI Cards**
+- Insert **Card** visuals (4 cards across the top)
+- Card 1: `Unique Login Sessions` (distinct sessions with login)
+- Card 2: `Unique Transcript Sessions` (distinct sessions with transcripts)
+- Card 3: `Unique Transcripts` (total distinct transcripts)
+- Card 4: `Login Session to Transcript Session Ratio` (conversion rate)
+- **What this shows**: Session-level engagement metrics
+
+**Visual 15: Transcripts Per Session Distribution**
+- Insert **Clustered Column Chart**
+- X-axis: `SessionID`
+- Y-axis: `Unique Transcripts` measure
+- **Filter**: Show only sessions with transcripts
+- **Alternative**: Create a histogram showing distribution of transcript counts per session
+- **What this shows**: How many transcripts are generated per session
+
+**Visual 16: Session Activity Table**
+- Insert **Table** visual
+- **Columns**:
+  - `SessionID` field
+  - `UserEmail` field
+  - `Unique Transcripts` measure (per session)
+  - `Total Events` measure (per session)
+  - First event timestamp (use MIN of EventTimestamp)
+  - Last event timestamp (use MAX of EventTimestamp)
+- **Sort by**: `Unique Transcripts` (descending)
+- **Filter**: Show only sessions with 2+ transcripts (`Sessions with Multiple Transcripts`)
+- **What this shows**: Power sessions where users generated multiple transcripts
+
+**Visual 17: Multi-Transcript Session Summary**
+- Insert **Card** visual
+- Value: `Sessions with Multiple Transcripts`
+- **What this shows**: Count of sessions where users generated 2+ transcripts
+- **Insight**: Higher values indicate users leveraging the tool for multiple meetings in one session
+
+**Visual 18: User Transcript Activity**
+- Insert **Table** visual
+- **Columns**:
+  - `UserEmail` field
+  - `Unique Transcripts` measure (per user)
+  - `Unique Sessions` measure (per user)
+  - `Transcripts Per User` measure (average)
+- **Sort by**: `Unique Transcripts` (descending)
+- **What this shows**: Which users are generating the most unique transcripts
+
+**Visual 19: Event vs Session vs Transcript Comparison**
+- Insert **Clustered Bar Chart**
+- Y-axis: Metric names (create a table with: Total Login Events, Unique Login Sessions, Unique Transcripts)
+- X-axis: Count values
+- **What this shows**: Visual comparison of event counts vs session counts vs unique transcripts
+- **Purpose**: Illustrates the difference between raw events and deduplicated sessions
 
 ### Step 4: Format and Style (3 minutes)
 

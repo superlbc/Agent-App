@@ -2,11 +2,11 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 72
+// Total Measures: 79
 // Note: Time dimensions should be created as calculated columns, not measures
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.7.0
+// Version: 2.0.0
 // ============================================================================
 
 // ============================================================================
@@ -25,11 +25,88 @@ Total Users = [Unique Users]
 // Unique Sessions
 Unique Sessions = DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID])
 
-// Total User Logins
-Total User Logins =
+// Total Login Events (counts all login events, including multiple per session)
+Total Login Events =
 CALCULATE(
     COUNTROWS(vw_MeetingNotesGenerator),
     vw_MeetingNotesGenerator[EventType] = "userLogin"
+)
+
+// Unique Login Sessions (distinct sessions with at least one login event)
+Unique Login Sessions =
+CALCULATE(
+    DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+    vw_MeetingNotesGenerator[EventType] = "userLogin"
+)
+
+// Unique Transcript Sessions (distinct sessions with at least one transcript generated)
+Unique Transcript Sessions =
+CALCULATE(
+    DISTINCTCOUNT(vw_MeetingNotesGenerator[SessionID]),
+    vw_MeetingNotesGenerator[EventType] = "notesGenerated"
+)
+
+// Unique Transcripts (distinct transcripts based on CorrelationID)
+Unique Transcripts =
+CALCULATE(
+    DISTINCTCOUNT(vw_MeetingNotesGenerator[CorrelationID]),
+    vw_MeetingNotesGenerator[EventType] = "notesGenerated",
+    NOT(ISBLANK(vw_MeetingNotesGenerator[CorrelationID]))
+)
+
+// Transcripts Per User (average unique transcripts per user)
+Transcripts Per User =
+VAR UserTranscripts =
+    ADDCOLUMNS(
+        VALUES(vw_MeetingNotesGenerator[UserEmail]),
+        "TranscriptCount",
+        CALCULATE(
+            DISTINCTCOUNT(vw_MeetingNotesGenerator[CorrelationID]),
+            vw_MeetingNotesGenerator[EventType] = "notesGenerated",
+            NOT(ISBLANK(vw_MeetingNotesGenerator[CorrelationID]))
+        )
+    )
+RETURN
+    AVERAGEX(UserTranscripts, [TranscriptCount])
+
+// Avg Transcripts Per Session (average unique transcripts per session)
+Avg Transcripts Per Session =
+VAR SessionTranscripts =
+    ADDCOLUMNS(
+        VALUES(vw_MeetingNotesGenerator[SessionID]),
+        "TranscriptCount",
+        CALCULATE(
+            DISTINCTCOUNT(vw_MeetingNotesGenerator[CorrelationID]),
+            vw_MeetingNotesGenerator[EventType] = "notesGenerated",
+            NOT(ISBLANK(vw_MeetingNotesGenerator[CorrelationID]))
+        )
+    )
+RETURN
+    AVERAGEX(SessionTranscripts, [TranscriptCount])
+
+// Sessions with Multiple Transcripts (sessions that generated 2+ transcripts)
+Sessions with Multiple Transcripts =
+VAR SessionTranscripts =
+    ADDCOLUMNS(
+        VALUES(vw_MeetingNotesGenerator[SessionID]),
+        "TranscriptCount",
+        CALCULATE(
+            DISTINCTCOUNT(vw_MeetingNotesGenerator[CorrelationID]),
+            vw_MeetingNotesGenerator[EventType] = "notesGenerated",
+            NOT(ISBLANK(vw_MeetingNotesGenerator[CorrelationID]))
+        )
+    )
+VAR MultiTranscriptSessions =
+    FILTER(SessionTranscripts, [TranscriptCount] >= 2)
+RETURN
+    COUNTROWS(MultiTranscriptSessions)
+
+// Login Session to Transcript Session Ratio (% of login sessions that generated transcripts)
+Login Session to Transcript Session Ratio =
+DIVIDE(
+    [Unique Transcript Sessions],
+    [Unique Login Sessions],
+    0
 )
 
 // Events Per Session
@@ -566,11 +643,12 @@ VAR Interrogates =
 RETURN
     DIVIDE(Interrogates, Generates, 0)
 
-// Login to Transcript Generation Ratio
+// Login to Transcript Generation Ratio (session-based)
+// Shows how many unique transcripts are generated per login session
 Login to Transcript Ratio =
 DIVIDE(
-    [Notes Generated],
-    [Total User Logins],
+    [Unique Transcripts],
+    [Unique Login Sessions],
     0
 )
 
@@ -682,7 +760,7 @@ RETURN
 // ============================================================================
 // END OF MEASURES
 // ============================================================================
-// Total Measures: 72
+// Total Measures: 79
 // To import: Copy each measure into Power BI Desktop (Modeling → New Measure)
 // Or use Tabular Editor for bulk import
 // ============================================================================
