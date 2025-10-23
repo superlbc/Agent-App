@@ -18,11 +18,11 @@
         "documentation": "ドキュメント"
       },
       "icons": {
-        "bug": "🐛",
-        "feature": "✨",
-        "comment": "💬",
-        "performance": "⚡",
-        "documentation": "📖"
+        "bug": "×",
+        "feature": "★",
+        "comment": "○",
+        "performance": "▸",
+        "documentation": "▪"
       }
     },
     "priority": {
@@ -35,10 +35,10 @@
         "low": "低 - 軽微な問題または提案"
       },
       "icons": {
-        "critical": "🔴",
-        "high": "🟠",
-        "medium": "🟡",
-        "low": "🟢"
+        "critical": "■",
+        "high": "■",
+        "medium": "■",
+        "low": "■"
       }
     },
     "title": {
