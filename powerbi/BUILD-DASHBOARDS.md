@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 79 measures**
+7. **Repeat for all 68 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (79 total):
+**Expected Measures** (68 measures total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -115,21 +115,54 @@ Each dashboard follows the same process:
 
 **Visual 8: Session Duration Distribution**
 - Insert **Clustered Column Chart**
-- **X-axis**: Add `SessionID` field
-- **Values**: Add `Session Duration Bucket` measure
+- **X-axis**: Create calculated column `SessionDurationBucket` (see below), then add to X-axis
 - **Y-axis**: Add `Session Count` measure
-- **Sort**: Click visual → More options (···) → Sort by → `Session Duration Bucket`
-  - Custom sort order: < 1 min, 1-5 min, 5-10 min, 10-30 min, 30-60 min, 60+ min
 - **What this shows**: Distribution of session lengths
   - Example: "45 sessions lasted 1-5 minutes, 32 sessions lasted 5-10 minutes"
-- **Alternative (simpler)**: Use histogram visual with `Avg Session Duration Min` on X-axis
+
+**To create the SessionDurationBucket calculated column:**
+1. Click on your data table → **New column**
+2. Paste this formula:
+   ```dax
+   SessionDurationBucket =
+   VAR SessionStart = MIN(vw_MeetingNotesGenerator[EventTimestamp])
+   VAR SessionEnd = MAX(vw_MeetingNotesGenerator[EventTimestamp])
+   VAR Duration = DATEDIFF(SessionStart, SessionEnd, MINUTE)
+   RETURN SWITCH(TRUE(),
+       Duration < 1, "< 1 min",
+       Duration < 5, "1-5 min",
+       Duration < 10, "5-10 min",
+       Duration < 30, "10-30 min",
+       Duration < 60, "30-60 min",
+       "60+ min"
+   )
+   ```
+3. Now drag `SessionDurationBucket` column to X-axis and `Session Count` to Y-axis
+
+**Alternative (much simpler)**: Skip this visual for now - it's complex to set up correctly
 
 **Visual 9: Time of Day Heatmap**
 - Insert **Matrix**
-- Rows: `Day of Week` measure (or `Day of Week Number` for proper sorting)
-- Columns: `Hour of Day` measure
-- Values: `Total Events`
-- **Tip**: Use `Day of Week Number` for rows to ensure proper order (Sun-Sat), then hide the number and show day names
+- **Rows**: Add `DayOfWeek` calculated column (create below)
+- **Columns**: Add `HourOfDay` calculated column (create below)
+- **Values**: Add `Total Events` measure
+- **Formatting**: Format as Heatmap (Conditional formatting → Background color → Based on `Total Events`)
+
+**To create the required calculated columns:**
+1. Click on your data table → **New column**
+2. Create `DayOfWeek` column:
+   ```dax
+   DayOfWeek = FORMAT(vw_MeetingNotesGenerator[EventDate], "dddd")
+   ```
+3. Create `DayOfWeekNumber` for sorting:
+   ```dax
+   DayOfWeekNumber = WEEKDAY(vw_MeetingNotesGenerator[EventDate], 1)
+   ```
+4. Create `HourOfDay` column:
+   ```dax
+   HourOfDay = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
+   ```
+5. Sort `DayOfWeek` by `DayOfWeekNumber`: Click `DayOfWeek` column → Column tools → Sort by column → Select `DayOfWeekNumber`
 
 #### Page 3: Feature Usage
 

@@ -2,10 +2,11 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 79
+// Total Measures: 68 (was 79 - removed 11 time dimension "measures")
+// Note: Time dimensions should be created as calculated columns, not measures
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.4.0
+// Version: 1.5.0
 // ============================================================================
 
 // ============================================================================
@@ -466,19 +467,22 @@ DATEDIFF(
     MINUTE
 )
 
-// Session Duration Bucket (for grouping in charts)
-Session Duration Bucket =
-VAR Duration = [Session Duration Min]
-RETURN
-    SWITCH(
-        TRUE(),
-        Duration < 1, "< 1 min",
-        Duration < 5, "1-5 min",
-        Duration < 10, "5-10 min",
-        Duration < 30, "10-30 min",
-        Duration < 60, "30-60 min",
-        "60+ min"
-    )
+// Session Duration Bucket - CALCULATED COLUMN (NOT MEASURE!)
+// This should be created as a calculated column for use in visuals
+// To create: Table tools → New column → Paste formula below
+//
+// SessionDurationBucket =
+//   VAR SessionStart = MIN(vw_MeetingNotesGenerator[EventTimestamp])
+//   VAR SessionEnd = MAX(vw_MeetingNotesGenerator[EventTimestamp])
+//   VAR Duration = DATEDIFF(SessionStart, SessionEnd, MINUTE)
+//   RETURN SWITCH(TRUE(),
+//       Duration < 1, "< 1 min",
+//       Duration < 5, "1-5 min",
+//       Duration < 10, "5-10 min",
+//       Duration < 30, "10-30 min",
+//       Duration < 60, "30-60 min",
+//       "60+ min"
+//   )
 
 // Session Count (distinct sessions)
 Session Count =
@@ -534,44 +538,42 @@ RETURN
     DIVIDE(Interrogates, Generates, 0)
 
 // ============================================================================
-// TIME DIMENSIONS (for grouping and analysis)
+// TIME DIMENSIONS - CALCULATED COLUMNS (NOT MEASURES!)
 // ============================================================================
-
-// Day of Week (from EventDate)
-Day of Week = FORMAT(vw_MeetingNotesGenerator[EventDate], "dddd")
-
-// Day of Week Number (1=Sunday, 2=Monday, etc.)
-Day of Week Number = WEEKDAY(vw_MeetingNotesGenerator[EventDate], 1)
-
-// Hour of Day (from EventTimestamp)
-Hour of Day = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
-
-// Time of Day Bucket
-Time of Day =
-VAR HourNum = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
-RETURN
-    SWITCH(
-        TRUE(),
-        HourNum < 6, "Night (12am-6am)",
-        HourNum < 12, "Morning (6am-12pm)",
-        HourNum < 18, "Afternoon (12pm-6pm)",
-        "Evening (6pm-12am)"
-    )
-
-// Month Name
-Month Name = FORMAT(vw_MeetingNotesGenerator[EventDate], "MMMM")
-
-// Month Number
-Month Number = MONTH(vw_MeetingNotesGenerator[EventDate])
-
-// Year
-Year = YEAR(vw_MeetingNotesGenerator[EventDate])
-
-// Quarter
-Quarter = "Q" & FORMAT(QUARTER(vw_MeetingNotesGenerator[EventDate]), "0")
-
-// Week Number
-Week Number = WEEKNUM(vw_MeetingNotesGenerator[EventDate], 2)
+// IMPORTANT: These should be created as CALCULATED COLUMNS, not measures!
+//
+// To create calculated columns in Power BI Desktop:
+// 1. Click on your vw_MeetingNotesGenerator table (Data view)
+// 2. Table tools → New column
+// 3. Paste the formula and press Enter
+//
+// WHY CALCULATED COLUMNS?
+// - Use in Rows, Columns, Slicers, Legends of visuals
+// - Computed at row level (per event)
+// - Measures cause "cannot determine single value" errors in these contexts
+//
+// RECOMMENDED CALCULATED COLUMNS TO CREATE:
+//
+// DayOfWeek = FORMAT(vw_MeetingNotesGenerator[EventDate], "dddd")
+// DayOfWeekNumber = WEEKDAY(vw_MeetingNotesGenerator[EventDate], 1)
+// HourOfDay = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
+// TimeOfDay =
+//   VAR HourNum = HOUR(vw_MeetingNotesGenerator[EventTimestamp])
+//   RETURN SWITCH(TRUE(),
+//       HourNum < 6, "Night (12am-6am)",
+//       HourNum < 12, "Morning (6am-12pm)",
+//       HourNum < 18, "Afternoon (12pm-6pm)",
+//       "Evening (6pm-12am)"
+//   )
+// MonthName = FORMAT(vw_MeetingNotesGenerator[EventDate], "MMMM")
+// MonthNumber = MONTH(vw_MeetingNotesGenerator[EventDate])
+// YearNumber = YEAR(vw_MeetingNotesGenerator[EventDate])
+// QuarterName = "Q" & FORMAT(QUARTER(vw_MeetingNotesGenerator[EventDate]), "0")
+// WeekNumber = WEEKNUM(vw_MeetingNotesGenerator[EventDate], 2)
+//
+// AFTER CREATING:
+// - Sort DayOfWeek by DayOfWeekNumber for correct day order
+//   (Click DayOfWeek → Column tools → Sort by column → DayOfWeekNumber)
 
 // ============================================================================
 // TIME-BASED METRICS
