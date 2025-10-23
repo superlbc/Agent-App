@@ -301,7 +301,7 @@ VAR DismissedTours =
         vw_MeetingNotesGenerator[EventType] = "tourDismissed"
     )
 RETURN
-    AVERAGE(DismissedTours[TourStepIndex])
+    AVERAGEX(DismissedTours, vw_MeetingNotesGenerator[TourStepIndex])
 
 // ============================================================================
 // SETTINGS METRICS
