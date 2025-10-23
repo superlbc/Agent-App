@@ -2,11 +2,11 @@
 // MEETING NOTES GENERATOR - DAX MEASURES
 // ============================================================================
 // Data Source: vw_MeetingNotesGenerator
-// Total Measures: 68 (was 79 - removed 11 time dimension "measures")
+// Total Measures: 70
 // Note: Time dimensions should be created as calculated columns, not measures
 // Created: 2025-10-22
 // Updated: 2025-10-23
-// Version: 1.5.0
+// Version: 1.6.0
 // ============================================================================
 
 // ============================================================================
@@ -302,6 +302,28 @@ VAR DismissedTours =
     )
 RETURN
     AVERAGEX(DismissedTours, vw_MeetingNotesGenerator[TourStepIndex])
+
+// User Started Tour (Yes/No per user)
+User Started Tour =
+IF(
+    CALCULATE(
+        COUNTROWS(vw_MeetingNotesGenerator),
+        vw_MeetingNotesGenerator[EventType] = "tourStarted"
+    ) > 0,
+    "Yes",
+    "No"
+)
+
+// User Completed Tour (Yes/No per user)
+User Completed Tour =
+IF(
+    CALCULATE(
+        COUNTROWS(vw_MeetingNotesGenerator),
+        vw_MeetingNotesGenerator[EventType] = "tourCompleted"
+    ) > 0,
+    "Yes",
+    "No"
+)
 
 // ============================================================================
 // SETTINGS METRICS

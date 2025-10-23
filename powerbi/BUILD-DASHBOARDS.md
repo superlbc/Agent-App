@@ -53,11 +53,11 @@ Each dashboard follows the same process:
 4. **Copy the first measure** (starts with `// Total Events`)
 5. **Paste into the formula bar** in Power BI Desktop
 6. Press **Enter** to save
-7. **Repeat for all 68 measures**
+7. **Repeat for all 70 measures**
 
 **💡 Pro Tip**: Copy multiple measures at once - Power BI will create them sequentially.
 
-**Expected Measures** (68 measures total):
+**Expected Measures** (70 measures total):
 - Base Metrics (8 measures)
 - Core Functionality (6 measures)
 - Export Metrics (10 measures)
@@ -185,6 +185,23 @@ Each dashboard follows the same process:
   - `Tours Dismissed`
 - **What this shows**: 3 side-by-side bars showing tour funnel
 - **Alternative**: Use 3 separate **Card** visuals for each measure
+
+**Visual 12b: User Tour Participation Table**
+- Insert **Table** visual
+- **Columns**:
+  - `UserEmail` field
+  - `User Started Tour` measure
+  - `User Completed Tour` measure
+- **Sort by**: UserEmail (ascending)
+- **Optional Filter**: Add visual-level filter to show only users where `User Started Tour` = "Yes"
+- **What this shows**: Which users engaged with the tour and who completed it
+- **Example output**:
+  ```
+  UserEmail              | Started Tour? | Completed Tour?
+  john@company.com       | Yes           | Yes
+  jane@company.com       | Yes           | No
+  bob@company.com        | Yes           | Yes
+  ```
 
 **Visual 13: Export Rate Trend**
 - Insert **Line Chart**
