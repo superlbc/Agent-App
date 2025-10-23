@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { InputPanel } from './components/InputPanel';
 import { OutputPanel } from './components/OutputPanel';
@@ -70,7 +70,6 @@ const AppContent: React.FC = () => {
 
   const { startTour, isTourActive } = useTourContext();
   const { isAuthenticated, user } = useAuth();
-  const hasTriggeredLoginFlow = useRef(false);
 
   useEffect(() => {
     const tourCompleted = localStorage.getItem('tourCompleted');
@@ -94,8 +93,12 @@ const AppContent: React.FC = () => {
 
   // Telemetry: Track user login (once per session)
   useEffect(() => {
-    if (isAuthenticated && user && !hasTriggeredLoginFlow.current) {
-      hasTriggeredLoginFlow.current = true;
+    // Check if login event already tracked in this session
+    const hasTrackedLogin = sessionStorage.getItem('hasTrackedLogin') === 'true';
+
+    if (isAuthenticated && user && !hasTrackedLogin) {
+      // Mark as tracked for this session (persists across page refreshes)
+      sessionStorage.setItem('hasTrackedLogin', 'true');
 
       // Track login event
       telemetryService.trackEvent('userLogin', {});
