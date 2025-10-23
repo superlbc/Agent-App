@@ -48,12 +48,55 @@ The Meeting Notes Generator application implements a comprehensive telemetry fra
 
 #### `userLogin`
 **Trigger:** User successfully authenticates with Azure AD
-**Frequency:** Once per session
-**Location:** [App.tsx:101](App.tsx#L101)
+**Frequency:** Once per session (persists across page refreshes via `sessionStorage`)
+**Location:** [App.tsx:108](App.tsx#L108)
 **Payload:**
 ```json
-{}
+{
+  "browser": "Chrome",
+  "browserVersion": "141.0.0.0",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
+  "platform": "Windows",
+  "platformVersion": "10/11",
+  "screenResolution": "1920x1080",
+  "viewportSize": "1920x945",
+  "devicePixelRatio": 1,
+  "orientation": "landscape",
+  "isFullscreen": false,
+  "deviceType": "desktop",
+  "touchSupported": false,
+  "maxTouchPoints": 0,
+  "language": "en-GB",
+  "languages": ["en-GB", "en-US", "en"],
+  "timezone": "Europe/London",
+  "timezoneOffset": -60,
+  "theme": "dark",
+  "connectionEffectiveType": "4g",
+  "connectionDownlink": 1.95,
+  "connectionRtt": 200,
+  "connectionSaveData": false,
+  "cookiesEnabled": true,
+  "localStorageAvailable": true,
+  "sessionStorageAvailable": true,
+  "webWorkersSupported": true,
+  "serviceWorkerSupported": true,
+  "hardwareConcurrency": 22,
+  "deviceMemory": 8
+}
 ```
+
+**Payload Fields (25+ data points)**:
+- **Browser Info**: `browser`, `browserVersion`, `userAgent`
+- **Platform**: `platform`, `platformVersion`
+- **Display**: `screenResolution`, `viewportSize`, `devicePixelRatio`, `orientation`, `isFullscreen`
+- **Device**: `deviceType`, `touchSupported`, `maxTouchPoints`
+- **Locale**: `language`, `languages`, `timezone`, `timezoneOffset`
+- **App State**: `theme` (light/dark mode preference)
+- **Connection** (optional - mainly Chrome/Edge): `connectionType`, `connectionEffectiveType`, `connectionDownlink`, `connectionRtt`, `connectionSaveData`
+- **Capabilities**: `cookiesEnabled`, `localStorageAvailable`, `sessionStorageAvailable`, `webWorkersSupported`, `serviceWorkerSupported`
+- **Performance** (optional - mainly Chrome): `hardwareConcurrency`, `deviceMemory`
+
+**Privacy Note**: All data points are non-PII. Browser fingerprinting is used only for analytics, not user tracking.
 
 #### `userLogout`
 **Trigger:** User explicitly signs out
@@ -727,6 +770,7 @@ Use browser DevTools Network tab to inspect requests:
 | File | Purpose |
 |------|---------|
 | [utils/telemetryService.ts](utils/telemetryService.ts) | Core telemetry service |
+| [utils/browserContext.ts](utils/browserContext.ts) | Browser/device detection utility (v1.1.0+) |
 | [appConfig.ts](appConfig.ts) | Power Automate endpoint configuration |
 | [App.tsx](App.tsx) | Authentication, generation, input events |
 | [components/OutputPanel.tsx](components/OutputPanel.tsx) | Export and interrogate events |
@@ -740,6 +784,34 @@ Use browser DevTools Network tab to inspect requests:
 ---
 
 ## Changelog
+
+### Version 1.1.0 (2025-10-23)
+
+**Enhanced Login Telemetry:**
+- ✅ **Login Event Enhancement**: Added comprehensive browser/device context capture (25+ data points)
+- ✅ **New Utility**: Created `utils/browserContext.ts` for browser/device detection
+- ✅ **Data Points Added**:
+  - Browser detection (Chrome, Edge, Firefox, Safari) with version
+  - Platform detection (Windows, macOS, Linux, iOS, Android) with version
+  - Display info (resolution, viewport, pixel ratio, orientation, fullscreen status)
+  - Device classification (desktop/tablet/mobile) with touch capabilities
+  - Locale info (language, timezone with UTC offset)
+  - App state (theme preference - light/dark)
+  - Network connection details (type, speed, RTT, data saver mode)
+  - Browser capabilities (cookies, storage, workers, service workers)
+  - Hardware specs (CPU cores, device memory)
+- ✅ **Privacy Compliance**: All captured data is non-PII, graceful degradation for unsupported APIs
+- ✅ **Use Cases**: Browser distribution analysis, mobile vs desktop adoption, dark mode usage, performance correlation
+
+**Benefits:**
+- Understand user technology landscape (browsers, devices, OS)
+- Identify browser-specific bugs and compatibility issues
+- Plan feature prioritization based on actual device capabilities
+- Optimize UI/UX for common screen resolutions
+- Track dark mode adoption rate
+- Correlate performance issues with hardware specs
+
+---
 
 ### Version 1.0.0 (2025-10-22)
 
@@ -755,6 +827,7 @@ Use browser DevTools Network tab to inspect requests:
 **Bug Fixes:**
 - 🐛 Fixed infinite loop in TourController causing excessive `formCleared` events
 - 🐛 Fixed Power Automate schema mismatch (null → empty string)
+- 🐛 Fixed login event double-fire issue (now uses sessionStorage persistence)
 
 **Not Yet Implemented:**
 - ⏳ `userLogout` event
@@ -773,6 +846,6 @@ For issues or questions:
 
 ---
 
-**Last Updated:** 2025-10-22
-**Version:** 1.0.0
+**Last Updated:** 2025-10-23
+**Version:** 1.1.0
 **Maintained By:** IPCT Team

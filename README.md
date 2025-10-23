@@ -2177,7 +2177,48 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2025-01-22 (Part 3)
+### 📅 Latest Update - 2025-10-23
+
+**Summary**: Enhanced login telemetry with comprehensive browser, device, and environment context capture for advanced analytics.
+
+#### Enhanced Login Telemetry (v1.1.0)
+
+**What's New**:
+- ✅ **Comprehensive Context Capture**: Login events now capture 25+ data points including browser, device, platform, display, locale, connection quality, and hardware specs
+- ✅ **New Utility Module**: Created `utils/browserContext.ts` for browser/device detection
+- ✅ **Dark Mode Tracking**: Captures user's theme preference (light/dark)
+- ✅ **Performance Metrics**: Tracks CPU cores and device memory (where available)
+- ✅ **Connection Quality**: Captures network type, speed, and latency
+- ✅ **Privacy-First Design**: All captured data is non-PII with graceful degradation for unsupported APIs
+
+**Use Cases**:
+- Browser distribution analysis to prioritize testing efforts
+- Mobile vs desktop adoption tracking
+- Dark mode usage statistics
+- Performance issue correlation with device capabilities
+- Resolution-based UI optimization
+- Connection quality impact on feature adoption
+
+**New Documentation**:
+- 📄 [POWERBI-LOGIN-TELEMETRY.md](POWERBI-LOGIN-TELEMETRY.md) - Power BI integration guide with DAX measures, visualizations, and use cases
+- 📄 [TELEMETRY-PRIVACY.md](TELEMETRY-PRIVACY.md) - Comprehensive privacy and compliance documentation (GDPR, CCPA, UK DPA)
+- 📄 Updated [Telemetry.md](Telemetry.md) - Enhanced login event documentation with full payload structure
+
+**Files Modified**:
+- [utils/browserContext.ts](utils/browserContext.ts) - NEW: Browser/device detection utility (340 lines)
+- [utils/telemetryService.ts](utils/telemetryService.ts) - Added `LoginEventPayload` TypeScript interface
+- [App.tsx](App.tsx) - Updated login tracking to capture browser context
+
+**Benefits**:
+- Data-driven browser support decisions
+- Identify compatibility issues before they become widespread
+- Optimize responsive design for actual user devices
+- Understand technology landscape of user base
+- Plan feature development based on device capabilities
+
+---
+
+### 📅 Previous Update - 2025-01-22 (Part 3)
 
 **Summary**: Implemented comprehensive telemetry framework for tracking user interactions and usage analytics.
 
@@ -2378,11 +2419,11 @@ system: {
 
 ## Version Information
 
-**Version**: 1.0.0
-**Last Updated**: January 20, 2024
+**Version**: 1.1.0
+**Last Updated**: October 23, 2025
 **Status**: Production Ready ✅
 **License**: Proprietary
-**Maintained By**: Interpublic Group
+**Maintained By**: Interpublic Group / IPCT Team
 
 ---
 

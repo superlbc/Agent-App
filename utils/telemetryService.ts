@@ -35,6 +35,57 @@ export type EventType =
   | 'meetingCoachViewed'
   | 'coachInsightsExpanded';
 
+// Login event payload structure
+export interface LoginEventPayload {
+  // Browser information (always available)
+  browser: string;
+  browserVersion: string;
+  userAgent: string;
+
+  // Platform information (always available)
+  platform: string;
+  platformVersion: string;
+
+  // Display information (always available)
+  screenResolution: string;
+  viewportSize: string;
+  devicePixelRatio: number;
+  orientation: string;
+  isFullscreen: boolean;
+
+  // Device information (always available)
+  deviceType: string;
+  touchSupported: boolean;
+  maxTouchPoints: number;
+
+  // Locale information (always available)
+  language: string;
+  languages: string[];
+  timezone: string;
+  timezoneOffset: number;
+
+  // App state (always available)
+  theme: string;
+
+  // Connection information (optional - mainly Chrome/Edge)
+  connectionType?: string;
+  connectionEffectiveType?: string;
+  connectionDownlink?: number;
+  connectionRtt?: number;
+  connectionSaveData?: boolean;
+
+  // Capabilities (always available)
+  cookiesEnabled: boolean;
+  localStorageAvailable: boolean;
+  sessionStorageAvailable: boolean;
+  webWorkersSupported: boolean;
+  serviceWorkerSupported: boolean;
+
+  // Performance information (optional - mainly Chrome)
+  hardwareConcurrency?: number;
+  deviceMemory?: number;
+}
+
 interface UserContext {
     name: string;
     email: string;

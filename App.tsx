@@ -18,6 +18,7 @@ import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
 import { telemetryService } from './utils/telemetryService';
+import { getBrowserContext } from './utils/browserContext';
 
 const DEFAULT_CONTROLS: Controls = {
   focus_department: [],
@@ -100,10 +101,13 @@ const AppContent: React.FC = () => {
       // Mark as tracked for this session (persists across page refreshes)
       sessionStorage.setItem('hasTrackedLogin', 'true');
 
-      // Track login event
-      telemetryService.trackEvent('userLogin', {});
+      // Capture comprehensive browser/device context
+      const browserContext = getBrowserContext(isDarkMode);
+
+      // Track login event with context
+      telemetryService.trackEvent('userLogin', browserContext);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, isDarkMode]);
 
   const addToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
