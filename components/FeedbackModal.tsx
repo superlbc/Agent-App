@@ -143,7 +143,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
                 id="feedback-modal-title"
                 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2"
               >
-                <Icon name="chat-bubble" className="h-5 w-5 text-primary" />
+                <span>💬</span>
                 {t('modal.title')}
               </h2>
               <button

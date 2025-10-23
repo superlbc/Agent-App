@@ -18,11 +18,11 @@
         "documentation": "Documentación"
       },
       "icons": {
-        "bug": "×",
-        "feature": "★",
-        "comment": "○",
-        "performance": "▸",
-        "documentation": "▪"
+        "bug": "🐛",
+        "feature": "✨",
+        "comment": "💬",
+        "performance": "⚡",
+        "documentation": "📖"
       }
     },
     "priority": {
@@ -35,10 +35,10 @@
         "low": "Baja - Problema menor o sugerencia"
       },
       "icons": {
-        "critical": "■",
-        "high": "■",
-        "medium": "■",
-        "low": "■"
+        "critical": "🔴",
+        "high": "🟠",
+        "medium": "🟡",
+        "low": "🟢"
       }
     },
     "title": {
