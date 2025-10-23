@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { InputPanel } from './components/InputPanel';
 import { OutputPanel } from './components/OutputPanel';
@@ -19,6 +20,7 @@ import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
 import { telemetryService } from './utils/telemetryService';
 import { getBrowserContext } from './utils/browserContext';
+import { FeedbackButton } from './components/FeedbackButton';
 
 const DEFAULT_CONTROLS: Controls = {
   focus_department: [],
@@ -38,6 +40,7 @@ const DEFAULT_CONTROLS: Controls = {
 };
 
 const AppContent: React.FC = () => {
+  const { t } = useTranslation(['common', 'forms']);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('darkMode',
     window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
   );
@@ -219,12 +222,12 @@ const AppContent: React.FC = () => {
                 {isLoading ? (
                     <>
                         <Icon name="loader" className="h-5 w-5 mr-2 animate-spin"/>
-                        Generating...
+                        {t('common:status.generating')}
                     </>
                 ) : (
                     <>
                         <Icon name="sparkles" className="h-5 w-5 mr-2"/>
-                        Generate Notes
+                        {t('forms:actions.generateNotes')}
                     </>
                 )}
                 </Button>
@@ -289,6 +292,7 @@ const AppContent: React.FC = () => {
         />
 
       <ScrollToTop />
+      <FeedbackButton />
     </div>
   );
 };

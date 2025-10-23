@@ -42,7 +42,7 @@ The Meeting Notes Generator application implements a comprehensive telemetry fra
 
 ---
 
-## Event Types (24 Total)
+## Event Types (25 Total)
 
 ### 1. Authentication Events (2)
 
@@ -109,7 +109,78 @@ The Meeting Notes Generator application implements a comprehensive telemetry fra
 
 ---
 
-### 2. Core Functionality Events (2)
+### 2. User Feedback Events (1)
+
+#### `feedback`
+**Trigger:** User submits feedback via the feedback button
+**Frequency:** Each feedback submission
+**Location:** [FeedbackModal.tsx](components/FeedbackModal.tsx), [feedbackService.ts](utils/feedbackService.ts)
+**Payload:**
+```json
+{
+  "feedbackType": "bug",
+  "priority": "medium",
+  "title": "Export to PDF not working",
+  "description": "When I click Export PDF, nothing happens. Browser console shows error: TypeError...",
+  "browserContext": {
+    // Same as login telemetry - full browser/device context
+    "browser": "Chrome",
+    "browserVersion": "141.0.0.0",
+    "platform": "Windows",
+    "screenResolution": "1920x1080",
+    "theme": "dark",
+    // ... all 25+ fields from login event
+  },
+  "url": "https://note-crafter.momentum.com/",
+  "page": "/",
+  "errorLogs": {
+    "hasErrors": true,
+    "errorCount": 2,
+    "warningCount": 1,
+    "recentErrors": [
+      "[error] TypeError: Cannot read property 'print' of undefined",
+      "[warning] React does not recognize the `isOpen` prop on a DOM element"
+    ]
+  }
+}
+```
+
+**Payload Fields**:
+- **Feedback Details**:
+  - `feedbackType`: "bug" | "feature" | "comment" | "performance" | "documentation"
+  - `priority`: "critical" | "high" | "medium" | "low"
+  - `title`: Brief summary (user-provided)
+  - `description`: Detailed description (user-provided)
+- **Automatic Context**:
+  - `browserContext`: Full browser/device context (same as login event)
+  - `url`: Current page URL
+  - `page`: Current route/path
+  - `errorLogs` (optional): Recent console errors if any exist
+    - `hasErrors`: boolean
+    - `errorCount`: number of errors
+    - `warningCount`: number of warnings
+    - `recentErrors`: Last 3 errors (truncated to 200 chars each)
+
+**Privacy Note**: Error logs are automatically captured from the browser console. Meeting content is never included.
+
+**UI Location**: Floating Action Button (FAB) in bottom-right corner of the app
+
+**Multi-Language Support**: Available in English, Spanish, and Japanese
+
+**User Journey**:
+1. User clicks "Feedback" button (💬 icon, bottom-right)
+2. Modal opens with form
+3. User selects type (bug, feature, comment, etc.)
+4. User selects priority (critical, high, medium, low)
+5. User enters title and description
+6. Browser/device info and error logs captured automatically
+7. User clicks "Submit Feedback"
+8. Fire-and-forget submission via telemetry service
+9. Success message shown (auto-closes after 3 seconds)
+
+---
+
+### 3. Core Functionality Events (2)
 
 #### `notesGenerated`
 **Trigger:** User generates meeting notes for the first time in a session
@@ -771,8 +842,12 @@ Use browser DevTools Network tab to inspect requests:
 |------|---------|
 | [utils/telemetryService.ts](utils/telemetryService.ts) | Core telemetry service |
 | [utils/browserContext.ts](utils/browserContext.ts) | Browser/device detection utility (v1.1.0+) |
+| [utils/feedbackService.ts](utils/feedbackService.ts) | Feedback submission service (v1.2.0+) |
+| [utils/errorLogger.ts](utils/errorLogger.ts) | Console error capture utility (v1.2.0+) |
 | [appConfig.ts](appConfig.ts) | Power Automate endpoint configuration |
-| [App.tsx](App.tsx) | Authentication, generation, input events |
+| [App.tsx](App.tsx) | Authentication, generation, input events, feedback button |
+| [components/FeedbackButton.tsx](components/FeedbackButton.tsx) | Feedback FAB button (v1.2.0+) |
+| [components/FeedbackModal.tsx](components/FeedbackModal.tsx) | Feedback form modal (v1.2.0+) |
 | [components/OutputPanel.tsx](components/OutputPanel.tsx) | Export and interrogate events |
 | [components/InputPanel.tsx](components/InputPanel.tsx) | Upload and preset events |
 | [components/SettingsDrawer.tsx](components/SettingsDrawer.tsx) | Settings events |
@@ -784,6 +859,37 @@ Use browser DevTools Network tab to inspect requests:
 ---
 
 ## Changelog
+
+### Version 1.2.0 (2025-10-23)
+
+**User Feedback System:**
+- ✅ **New Event Type**: Added `feedback` event for user feedback submissions
+- ✅ **Feedback UI**: Floating Action Button (FAB) in bottom-right corner
+- ✅ **Feedback Form**: Modal with type, priority, title, and description fields
+- ✅ **Automatic Context Capture**:
+  - Full browser/device context (same as login telemetry)
+  - Current page URL and route
+  - Console error logs (last 10 errors/warnings)
+- ✅ **Multi-Language Support**: English, Spanish, Japanese translations
+- ✅ **Fire-and-Forget**: Uses existing telemetry infrastructure
+- ✅ **Power Automate Integration**: Reuses telemetry flow with conditional routing
+- ✅ **SharePoint List Ready**: Payload designed for SharePoint list storage
+
+**New Files**:
+- `utils/feedbackService.ts` - Feedback submission service
+- `utils/errorLogger.ts` - Console error capture utility
+- `components/FeedbackButton.tsx` - FAB button component
+- `components/FeedbackModal.tsx` - Feedback form modal
+- `locales/*/feedback.json` - Translations for 3 languages
+
+**Benefits**:
+- Standardized feedback collection across all apps
+- Rich context for debugging (browser, device, errors)
+- No new infrastructure needed (reuses telemetry)
+- User-friendly UI with validation
+- Multi-language support for global teams
+
+---
 
 ### Version 1.1.0 (2025-10-23)
 
@@ -847,5 +953,5 @@ For issues or questions:
 ---
 
 **Last Updated:** 2025-10-23
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Maintained By:** IPCT Team

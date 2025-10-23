@@ -1,0 +1,84 @@
+{
+  "button": {
+    "label": "フィードバック",
+    "tooltip": "フィードバックを送信"
+  },
+  "modal": {
+    "title": "フィードバックを送信",
+    "intro": "ご意見をお聞かせください！あなたのフィードバックは、ミーティングノートジェネレーターの改善に役立ちます。"
+  },
+  "form": {
+    "type": {
+      "label": "フィードバックの種類",
+      "options": {
+        "bug": "バグ報告",
+        "feature": "機能リクエスト",
+        "comment": "一般的なコメント",
+        "performance": "パフォーマンスの問題",
+        "documentation": "ドキュメント"
+      },
+      "icons": {
+        "bug": "🐛",
+        "feature": "✨",
+        "comment": "💬",
+        "performance": "⚡",
+        "documentation": "📖"
+      }
+    },
+    "priority": {
+      "label": "優先度",
+      "optional": "（任意）",
+      "options": {
+        "critical": "緊急 - アプリが使用不可",
+        "high": "高 - 主要機能が動作しない",
+        "medium": "中 - 問題があるが回避策あり",
+        "low": "低 - 軽微な問題または提案"
+      },
+      "icons": {
+        "critical": "🔴",
+        "high": "🟠",
+        "medium": "🟡",
+        "low": "🟢"
+      }
+    },
+    "title": {
+      "label": "タイトル",
+      "placeholder": "フィードバックの簡単な要約...",
+      "required": "*"
+    },
+    "description": {
+      "label": "説明",
+      "placeholder": "フィードバックの詳細をご記入ください。\n\nバグの場合は、以下を含めてください：\n• 何をしようとしていたか\n• 実際に何が起こったか\n• 再現手順",
+      "required": "*"
+    },
+    "submit": "フィードバックを送信",
+    "cancel": "キャンセル"
+  },
+  "states": {
+    "submitting": "送信中...",
+    "success": {
+      "title": "フィードバックを送信しました",
+      "message": "フィードバックありがとうございます！",
+      "description": "{{type}}を受け取りました。すぐに確認いたします。"
+    },
+    "error": {
+      "title": "送信に失敗しました",
+      "message": "申し訳ございません。問題が発生しました。",
+      "description": "フィードバックを送信できませんでした。もう一度お試しいただくか、直接お問い合わせください：",
+      "email": "ipct-support@momentumww.com"
+    }
+  },
+  "validation": {
+    "titleRequired": "タイトルを入力してください",
+    "descriptionRequired": "説明を入力してください",
+    "titleTooShort": "タイトルは{{min}}文字以上である必要があります",
+    "descriptionTooShort": "説明は{{min}}文字以上である必要があります"
+  },
+  "feedbackTypes": {
+    "bug": "バグ報告",
+    "feature": "機能リクエスト",
+    "comment": "コメント",
+    "performance": "パフォーマンスの問題",
+    "documentation": "ドキュメントフィードバック"
+  }
+}

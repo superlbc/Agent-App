@@ -6,6 +6,9 @@ export type EventType =
   // Authentication
   | 'userLogin'
   | 'userLogout'
+  | 'accessDenied'
+  // Feedback
+  | 'feedback'
   // Core functionality
   | 'notesGenerated'
   | 'notesRegenerated'
@@ -20,6 +23,10 @@ export type EventType =
   // Settings
   | 'botIdChanged'
   | 'settingsOpened'
+  // Language
+  | 'languageChanged'
+  | 'languageDetected'
+  | 'languageChangeError'
   // Data input
   | 'sampleDataLoaded'
   | 'formCleared'
@@ -84,6 +91,25 @@ export interface LoginEventPayload {
   // Performance information (optional - mainly Chrome)
   hardwareConcurrency?: number;
   deviceMemory?: number;
+}
+
+// Access Denied event payload structure
+export interface AccessDeniedEventPayload {
+  // User information
+  userName: string;
+  userEmail: string;
+  userId: string;
+  tenantId: string;
+
+  // Authorization details
+  requiredGroupId: string;
+  requiredGroupName: string;
+  userGroups: string[]; // Array of group IDs the user belongs to
+
+  // Browser/Device context (for analysis)
+  browser: string;
+  platform: string;
+  deviceType: string;
 }
 
 interface UserContext {

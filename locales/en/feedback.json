@@ -1,0 +1,84 @@
+{
+  "button": {
+    "label": "Feedback",
+    "tooltip": "Send us feedback"
+  },
+  "modal": {
+    "title": "Send Feedback",
+    "intro": "We'd love to hear from you! Your feedback helps us improve the Meeting Notes Generator."
+  },
+  "form": {
+    "type": {
+      "label": "What type of feedback?",
+      "options": {
+        "bug": "Bug Report",
+        "feature": "Feature Request",
+        "comment": "General Comment",
+        "performance": "Performance Issue",
+        "documentation": "Documentation"
+      },
+      "icons": {
+        "bug": "🐛",
+        "feature": "✨",
+        "comment": "💬",
+        "performance": "⚡",
+        "documentation": "📖"
+      }
+    },
+    "priority": {
+      "label": "Priority",
+      "optional": "(optional)",
+      "options": {
+        "critical": "Critical - App is unusable",
+        "high": "High - Major functionality broken",
+        "medium": "Medium - Issue but has workaround",
+        "low": "Low - Minor issue or suggestion"
+      },
+      "icons": {
+        "critical": "🔴",
+        "high": "🟠",
+        "medium": "🟡",
+        "low": "🟢"
+      }
+    },
+    "title": {
+      "label": "Title",
+      "placeholder": "Brief summary of your feedback...",
+      "required": "*"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Please describe your feedback in detail.\n\nFor bugs, please include:\n• What you were trying to do\n• What actually happened\n• Steps to reproduce",
+      "required": "*"
+    },
+    "submit": "Submit Feedback",
+    "cancel": "Cancel"
+  },
+  "states": {
+    "submitting": "Submitting...",
+    "success": {
+      "title": "Feedback Submitted",
+      "message": "Thank you for your feedback!",
+      "description": "We've received your {{type}} and will review it soon."
+    },
+    "error": {
+      "title": "Submission Failed",
+      "message": "Oops! Something went wrong.",
+      "description": "We couldn't submit your feedback. Please try again or contact us directly at:",
+      "email": "ipct-support@momentumww.com"
+    }
+  },
+  "validation": {
+    "titleRequired": "Please enter a title",
+    "descriptionRequired": "Please enter a description",
+    "titleTooShort": "Title must be at least {{min}} characters",
+    "descriptionTooShort": "Description must be at least {{min}} characters"
+  },
+  "feedbackTypes": {
+    "bug": "bug report",
+    "feature": "feature request",
+    "comment": "comment",
+    "performance": "performance issue",
+    "documentation": "documentation feedback"
+  }
+}

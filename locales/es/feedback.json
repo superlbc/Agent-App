@@ -1,0 +1,84 @@
+{
+  "button": {
+    "label": "Comentarios",
+    "tooltip": "Envíanos tus comentarios"
+  },
+  "modal": {
+    "title": "Enviar Comentarios",
+    "intro": "¡Nos encantaría saber de ti! Tus comentarios nos ayudan a mejorar el Generador de Notas de Reuniones."
+  },
+  "form": {
+    "type": {
+      "label": "¿Qué tipo de comentarios?",
+      "options": {
+        "bug": "Reporte de Error",
+        "feature": "Solicitud de Función",
+        "comment": "Comentario General",
+        "performance": "Problema de Rendimiento",
+        "documentation": "Documentación"
+      },
+      "icons": {
+        "bug": "🐛",
+        "feature": "✨",
+        "comment": "💬",
+        "performance": "⚡",
+        "documentation": "📖"
+      }
+    },
+    "priority": {
+      "label": "Prioridad",
+      "optional": "(opcional)",
+      "options": {
+        "critical": "Crítica - La aplicación no se puede usar",
+        "high": "Alta - Funcionalidad principal rota",
+        "medium": "Media - Problema pero tiene solución alternativa",
+        "low": "Baja - Problema menor o sugerencia"
+      },
+      "icons": {
+        "critical": "🔴",
+        "high": "🟠",
+        "medium": "🟡",
+        "low": "🟢"
+      }
+    },
+    "title": {
+      "label": "Título",
+      "placeholder": "Resumen breve de tus comentarios...",
+      "required": "*"
+    },
+    "description": {
+      "label": "Descripción",
+      "placeholder": "Por favor describe tus comentarios en detalle.\n\nPara errores, incluye:\n• Lo que intentabas hacer\n• Lo que realmente sucedió\n• Pasos para reproducir",
+      "required": "*"
+    },
+    "submit": "Enviar Comentarios",
+    "cancel": "Cancelar"
+  },
+  "states": {
+    "submitting": "Enviando...",
+    "success": {
+      "title": "Comentarios Enviados",
+      "message": "¡Gracias por tus comentarios!",
+      "description": "Hemos recibido tu {{type}} y lo revisaremos pronto."
+    },
+    "error": {
+      "title": "Error al Enviar",
+      "message": "¡Vaya! Algo salió mal.",
+      "description": "No pudimos enviar tus comentarios. Por favor intenta de nuevo o contáctanos directamente en:",
+      "email": "ipct-support@momentumww.com"
+    }
+  },
+  "validation": {
+    "titleRequired": "Por favor ingresa un título",
+    "descriptionRequired": "Por favor ingresa una descripción",
+    "titleTooShort": "El título debe tener al menos {{min}} caracteres",
+    "descriptionTooShort": "La descripción debe tener al menos {{min}} caracteres"
+  },
+  "feedbackTypes": {
+    "bug": "reporte de error",
+    "feature": "solicitud de función",
+    "comment": "comentario",
+    "performance": "problema de rendimiento",
+    "documentation": "comentarios sobre documentación"
+  }
+}
