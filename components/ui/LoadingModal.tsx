@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from './Card';
 
 // Define the 'M' path from the logo as a constant for use in the progress bar.
@@ -10,22 +11,26 @@ interface LoadingModalProps {
   messages?: { progress: number; text: string }[];
 }
 
-const defaultMessages = [
-  { progress: 0, text: "Connecting to the AI agent..." },
-  { progress: 15, text: "Analyzing transcript structure..." },
-  { progress: 30, text: "Extracting key decisions and discussion points..." },
-  { progress: 50, text: "Identifying action items and owners..." },
-  { progress: 70, text: "Applying RAG status to each action..." },
-  { progress: 85, text: "Formatting the final document..." },
-  { progress: 95, text: "Almost there, just polishing the notes..." },
-];
-
-export const LoadingModal: React.FC<LoadingModalProps> = ({ 
-  isOpen, 
-  title = "Generating Notes", 
-  messages = defaultMessages 
+export const LoadingModal: React.FC<LoadingModalProps> = ({
+  isOpen,
+  title,
+  messages
 }) => {
-  const [currentMessage, setCurrentMessage] = useState(messages[0].text);
+  const { t } = useTranslation(['common']);
+
+  const defaultMessages = useMemo(() => [
+    { progress: 0, text: t('common:loading.steps.connecting') },
+    { progress: 15, text: t('common:loading.steps.analyzing') },
+    { progress: 30, text: t('common:loading.steps.extracting') },
+    { progress: 50, text: t('common:loading.steps.identifying') },
+    { progress: 70, text: t('common:loading.steps.applying') },
+    { progress: 85, text: t('common:loading.steps.formatting') },
+    { progress: 95, text: t('common:loading.steps.polishing') },
+  ], [t]);
+
+  const displayTitle = title || t('common:loading.title');
+  const displayMessages = messages || defaultMessages;
+  const [currentMessage, setCurrentMessage] = useState(displayMessages[0].text);
   const [progress, setProgress] = useState(0);
   const [isRendered, setIsRendered] = useState(false);
   const animationFrameRef = useRef<number | null>(null);
@@ -50,7 +55,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
 
     // Reset state for a new animation run
     setProgress(0);
-    setCurrentMessage(messages[0].text);
+    setCurrentMessage(displayMessages[0].text);
     
     let startTime: number | null = null;
     const FAST_PHASE_DURATION = 36000; // 36 seconds
@@ -83,7 +88,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
       
       // Update the message based on progress
       setCurrentMessage(prevMessage => {
-        const newMessage = [...messages].reverse().find(m => cappedProgress >= m.progress);
+        const newMessage = [...displayMessages].reverse().find(m => cappedProgress >= m.progress);
         return (newMessage && newMessage.text !== prevMessage) ? newMessage.text : prevMessage;
       });
       
@@ -98,7 +103,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isOpen, isRendered, messages]);
+  }, [isOpen, isRendered, displayMessages]);
   
   if (!isRendered) return null;
 
@@ -133,7 +138,7 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
                         </g>
                     </svg>
                 </div>
-                <p className="mt-6 text-lg font-semibold text-slate-700 dark:text-slate-200">{title}</p>
+                <p className="mt-6 text-lg font-semibold text-slate-700 dark:text-slate-200">{displayTitle}</p>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 min-h-[40px]">{currentMessage}</p>
             </div>
         </Card>

@@ -11,6 +11,10 @@ export const getRedirectUri = (): string => {
 const MSAL_CLIENT_ID = "5fa64631-ea56-4676-b6d5-433d322a4da1";
 const MSAL_TENANT_ID = "d026e4c1-5892-497a-b9da-ee493c9f0364";
 
+// Azure AD Security Group for Momentum Worldwide users
+// Group Name: "MOM WW All Users 1 SG"
+export const REQUIRED_GROUP_ID = "2c08b5d8-7def-4845-a48c-740b987dcffb";
+
 export const msalConfig: Configuration = {
     auth: {
         clientId: MSAL_CLIENT_ID,
@@ -49,7 +53,7 @@ export const msalConfig: Configuration = {
 export const msalInstance = new PublicClientApplication(msalConfig);
 
 export const loginRequest = {
-    scopes: ["User.Read"]
+    scopes: ["User.Read", "User.ReadBasic.All", "profile"]
 };
 
 export const graphConfig = {

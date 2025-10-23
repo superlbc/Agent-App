@@ -1,0 +1,223 @@
+{
+  "app": {
+    "title": "Meeting Notes Generator",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "header": {
+    "title": "Meeting Notes Generator",
+    "menu": {
+      "toggleTheme": "Toggle Theme",
+      "replayTutorial": "Replay Tutorial",
+      "help": "Help & Guidance",
+      "settings": "Settings",
+      "about": "About",
+      "signOut": "Sign Out"
+    },
+    "userGreeting": "Hello, {{name}}"
+  },
+  "buttons": {
+    "generate": "Generate Notes",
+    "regenerate": "Regenerate",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "reset": "Reset",
+    "export": "Export",
+    "copy": "Copy",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "skip": "Skip",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "delete": "Delete",
+    "download": "Download"
+  },
+  "actions": {
+    "copyToClipboard": "Copy to Clipboard",
+    "exportToCSV": "Export to CSV",
+    "exportToPDF": "Export to PDF",
+    "exportToEmail": "Export to Email",
+    "interrogateTranscript": "Interrogate Transcript",
+    "viewDetails": "View Details",
+    "clearForm": "Clear Form",
+    "loadPreset": "Load Preset",
+    "downloadPDF": "Download PDF",
+    "downloadCSVActions": "Download CSV Actions",
+    "draftEmail": "Draft Email",
+    "clearConversation": "Clear conversation",
+    "sendQuestion": "Send question"
+  },
+  "status": {
+    "generating": "Generating notes...",
+    "processing": "Processing...",
+    "saving": "Saving...",
+    "exporting": "Exporting...",
+    "loading": "Loading...",
+    "ready": "Ready",
+    "complete": "Complete",
+    "failed": "Failed",
+    "pending": "Pending"
+  },
+  "messages": {
+    "copiedToClipboard": "Copied to clipboard!",
+    "exportSuccess": "Exported successfully!",
+    "saveSuccess": "Saved successfully!",
+    "generateSuccess": "Notes generated successfully!",
+    "errorOccurred": "An error occurred. Please try again.",
+    "noDataAvailable": "No data available",
+    "confirmAction": "Are you sure you want to proceed?",
+    "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About"
+  },
+  "interrogate": {
+    "title": "Interrogate Transcript",
+    "subtitle": "Ask a question about the transcript.",
+    "suggestionsIntro": "Here are some suggestions based on your transcript:",
+    "examplesIntro": "Or try one of these examples:",
+    "followUpLabel": "Suggested follow-ups:",
+    "placeholder": "Your question...",
+    "defaultQuestions": {
+      "decisions": "What were the main decisions?",
+      "topAction": "Who owns the top action and by when?",
+      "risks": "Summarize risks or open questions."
+    }
+  },
+  "common": {
+    "or": "or",
+    "and": "and",
+    "optional": "Optional",
+    "required": "Required",
+    "none": "None",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "unknown": "Unknown",
+    "notSpecified": "Not specified",
+    "notApplicable": "N/A",
+    "loading": "Loading...",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  },
+  "output": {
+    "emptyState": {
+      "title": "Your notes will appear here",
+      "description": "Fill in the details and click \"Generate Notes\" to start."
+    }
+  },
+  "loading": {
+    "title": "Generating Notes",
+    "description": "Extracting key decisions and discussion points...",
+    "steps": {
+      "connecting": "Connecting to the AI agent...",
+      "analyzing": "Analyzing transcript structure...",
+      "extracting": "Extracting key decisions and discussion points...",
+      "identifying": "Identifying action items and owners...",
+      "applying": "Applying RAG status to each action...",
+      "formatting": "Formatting the final document...",
+      "polishing": "Almost there, just polishing the notes..."
+    }
+  },
+  "about": {
+    "title": "About",
+    "appName": "Meeting Notes Generator",
+    "version": "Version {{version}} Beta",
+    "developedBy": "Developed By",
+    "organization": "Organization",
+    "orgName": "Momentum Global Technology Team",
+    "initiative": "AI Literacy Program Initiative",
+    "copyright": "© {{year}} Meeting Notes Generator"
+  },
+  "auth": {
+    "signIn": {
+      "welcomeTo": "Welcome to",
+      "appName": "Meeting Notes Generator",
+      "tagline": "Drive consistency and impact in every meeting.",
+      "instruction": "Please sign in with your Momentum account to continue.",
+      "button": "Sign In",
+      "popupBlocked": {
+        "title": "Having trouble signing in?",
+        "message": "It looks like the sign-in pop-up was blocked. For the best experience, please open this tool in a new tab to complete authentication.",
+        "button": "Open in New Tab to Sign In"
+      }
+    },
+    "accessDenied": {
+      "title": "Access Restricted",
+      "message": "This application is only accessible to <strong>Momentum Worldwide</strong> users.",
+      "signedInAs": "Signed in as:",
+      "contactAdmin": "If you believe you should have access, please contact your administrator.",
+      "signOutButton": "Sign Out"
+    }
+  },
+  "meetingCoach": {
+    "title": "Meeting Coach",
+    "disclaimer": "The following Meeting Coach analysis is for your information only and will not be included in any exports.",
+    "sections": {
+      "whatWorkedWell": "What Worked Well",
+      "nextTimeTry": "Next Time, Try",
+      "facilitationTips": "Facilitation Tips"
+    },
+    "healthSnapshot": {
+      "title": "Health Snapshot",
+      "metrics": {
+        "agendaCoverage": "Agenda Coverage",
+        "decisionsMade": "Decisions Made",
+        "actionsWithOwner": "Actions with Owner",
+        "actionsWithDueDate": "Actions with Due Date",
+        "topSpeakerShare": "Top Speaker Share"
+      },
+      "flagsLabel": "Flags:"
+    },
+    "flags": {
+      "participationImbalance": "Participation Imbalance",
+      "manyUnassignedActions": "Many Unassigned Actions",
+      "fewDecisions": "Few Decisions",
+      "lightAgendaCoverage": "Light Agenda Coverage"
+    },
+    "meetingExcellenceLink": "In alignment with Momentum's Meeting Excellence"
+  },
+  "nextSteps": {
+    "headers": {
+      "department": "Department",
+      "owner": "Owner",
+      "task": "Task",
+      "dueDate": "Due Date",
+      "status": "Status",
+      "statusNotes": "Status Notes"
+    }
+  },
+  "toasts": {
+    "presetApplied": "Applied '{{presetName}}' preset",
+    "formCleared": "Form cleared",
+    "sampleDataLoaded": "Sample data loaded",
+    "notesGenerated": "Notes generated successfully",
+    "previewUpdated": "Preview updated successfully",
+    "settingsSaved": "Settings saved successfully!",
+    "botIdReset": "Bot ID has been reset to default.",
+    "fileLoaded": "Loaded transcript from {{fileName}}",
+    "fileProcessing": "Processing .docx file...",
+    "fileError": "Error reading file {{fileName}}",
+    "unsupportedFileType": "Unsupported file type. Please upload a .txt or .docx file.",
+    "docxReadError": "Could not read the .docx file.",
+    "docxLibraryError": "Could not read the .docx file or parsing library is not available.",
+    "apiConfigMissing": "API configuration is missing. Check settings and environment variables.",
+    "notesCopied": "Formatted notes copied to clipboard.",
+    "notesCopiedPlain": "Notes copied to clipboard (plain text).",
+    "printWindowBlocked": "Could not open print window. Please disable popup blockers.",
+    "emailCopied": "Email content copied. Paste into your email client.",
+    "emailCopiedPlain": "Email content copied (plain text). Paste into your email client.",
+    "noActionsToExport": "No action items to export.",
+    "csvDownloaded": "CSV downloaded successfully."
+  }
+}

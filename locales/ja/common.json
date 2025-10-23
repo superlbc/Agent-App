@@ -1,0 +1,223 @@
+{
+  "app": {
+    "title": "議事録ジェネレーター",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功"
+  },
+  "header": {
+    "title": "議事録ジェネレーター",
+    "menu": {
+      "toggleTheme": "テーマ切替",
+      "replayTutorial": "チュートリアルを再生",
+      "help": "ヘルプとガイダンス",
+      "settings": "設定",
+      "signOut": "サインアウト",
+      "about": "について"
+    },
+    "userGreeting": "こんにちは、{{name}}さん"
+  },
+  "output": {
+    "emptyState": {
+      "title": "ノートはこちらに表示されます",
+      "description": "詳細を入力して「ノート生成」をクリックしてください。"
+    }
+  },
+  "buttons": {
+    "generate": "ノート生成",
+    "regenerate": "再生成",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "reset": "リセット",
+    "export": "エクスポート",
+    "copy": "コピー",
+    "back": "戻る",
+    "next": "次へ",
+    "finish": "完了",
+    "skip": "スキップ",
+    "retry": "再試行",
+    "confirm": "確認",
+    "edit": "編集",
+    "delete": "削除",
+    "download": "ダウンロード"
+  },
+  "actions": {
+    "copyToClipboard": "クリップボードにコピー",
+    "exportToCSV": "CSVにエクスポート",
+    "exportToPDF": "PDFにエクスポート",
+    "exportToEmail": "メールでエクスポート",
+    "interrogateTranscript": "トランスクリプトを質問",
+    "viewDetails": "詳細を表示",
+    "clearForm": "フォームをクリア",
+    "loadPreset": "プリセットを読み込む",
+    "downloadPDF": "PDFをダウンロード",
+    "downloadCSVActions": "CSVアクションをダウンロード",
+    "draftEmail": "メールを下書き",
+    "clearConversation": "会話をクリア",
+    "sendQuestion": "質問を送信"
+  },
+  "status": {
+    "generating": "ノート生成中...",
+    "processing": "処理中...",
+    "saving": "保存中...",
+    "exporting": "エクスポート中...",
+    "loading": "読み込み中...",
+    "ready": "準備完了",
+    "complete": "完了",
+    "failed": "失敗",
+    "pending": "保留中"
+  },
+  "messages": {
+    "copiedToClipboard": "クリップボードにコピーしました！",
+    "exportSuccess": "エクスポートに成功しました！",
+    "saveSuccess": "保存に成功しました！",
+    "generateSuccess": "ノートの生成に成功しました！",
+    "errorOccurred": "エラーが発生しました。もう一度お試しください。",
+    "noDataAvailable": "データがありません",
+    "confirmAction": "続行してもよろしいですか？",
+    "unsavedChanges": "保存されていない変更があります。本当に終了しますか？",
+    "sessionExpired": "セッションが期限切れになりました。再度サインインしてください。"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "settings": "設定",
+    "help": "ヘルプ",
+    "about": "について"
+  },
+  "interrogate": {
+    "title": "トランスクリプトを質問",
+    "subtitle": "トランスクリプトについて質問してください。",
+    "suggestionsIntro": "トランスクリプトに基づいた提案はこちらです：",
+    "examplesIntro": "または、これらの例をお試しください：",
+    "followUpLabel": "おすすめのフォローアップ質問：",
+    "placeholder": "質問を入力してください...",
+    "defaultQuestions": {
+      "decisions": "主な決定事項は何でしたか？",
+      "topAction": "最優先のアクションの担当者と期限は？",
+      "risks": "リスクや未解決の質問をまとめてください。"
+    }
+  },
+  "common": {
+    "or": "または",
+    "and": "と",
+    "optional": "任意",
+    "required": "必須",
+    "none": "なし",
+    "all": "すべて",
+    "yes": "はい",
+    "no": "いいえ",
+    "unknown": "不明",
+    "notSpecified": "指定なし",
+    "notApplicable": "該当なし",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "warning": "警告",
+    "info": "情報"
+  },
+  "loading": {
+    "title": "ノート生成中",
+    "description": "主要な決定事項とディスカッションポイントを抽出しています...",
+    "steps": {
+      "connecting": "AIエージェントに接続中...",
+      "analyzing": "トランスクリプト構造を分析中...",
+      "extracting": "主要な決定事項とディスカッションポイントを抽出しています...",
+      "identifying": "アクションアイテムと担当者を特定中...",
+      "applying": "各アクションにRAGステータスを適用中...",
+      "formatting": "最終ドキュメントをフォーマット中...",
+      "polishing": "もう少しです、ノートを仕上げています..."
+    }
+  },
+  "about": {
+    "title": "について",
+    "appName": "議事録ジェネレーター",
+    "version": "バージョン {{version}} ベータ版",
+    "developedBy": "開発者",
+    "organization": "組織",
+    "orgName": "Momentum グローバルテクノロジーチーム",
+    "initiative": "AI リテラシープログラムイニシアチブ",
+    "copyright": "© {{year}} 議事録ジェネレーター"
+  },
+  "auth": {
+    "signIn": {
+      "welcomeTo": "ようこそ",
+      "appName": "議事録ジェネレーター",
+      "tagline": "すべての会議で一貫性と影響力を推進します。",
+      "instruction": "続けるには、Momentumアカウントでサインインしてください。",
+      "button": "サインイン",
+      "popupBlocked": {
+        "title": "サインインに問題がありますか？",
+        "message": "サインインポップアップがブロックされたようです。最適なエクスペリエンスのために、このツールを新しいタブで開いて認証を完了してください。",
+        "button": "新しいタブで開いてサインイン"
+      }
+    },
+    "accessDenied": {
+      "title": "アクセス制限",
+      "message": "このアプリケーションは<strong>Momentum Worldwide</strong>ユーザーのみがアクセスできます。",
+      "signedInAs": "サインイン中：",
+      "contactAdmin": "アクセスできるはずだと思われる場合は、管理者にお問い合わせください。",
+      "signOutButton": "サインアウト"
+    }
+  },
+  "meetingCoach": {
+    "title": "ミーティングコーチ",
+    "disclaimer": "以下のミーティングコーチ分析は参考情報であり、エクスポートには含まれません。",
+    "sections": {
+      "whatWorkedWell": "うまくいったこと",
+      "nextTimeTry": "次回試すこと",
+      "facilitationTips": "ファシリテーションのヒント"
+    },
+    "healthSnapshot": {
+      "title": "健全性スナップショット",
+      "metrics": {
+        "agendaCoverage": "アジェンダカバレッジ",
+        "decisionsMade": "決定された事項",
+        "actionsWithOwner": "担当者付きアクション",
+        "actionsWithDueDate": "期限付きアクション",
+        "topSpeakerShare": "トップスピーカーの発言割合"
+      },
+      "flagsLabel": "フラグ："
+    },
+    "flags": {
+      "participationImbalance": "参加のアンバランス",
+      "manyUnassignedActions": "未割り当てアクション多数",
+      "fewDecisions": "決定事項少数",
+      "lightAgendaCoverage": "アジェンダカバレッジ不足"
+    },
+    "meetingExcellenceLink": "Momentumのミーティングエクセレンスに準拠"
+  },
+  "nextSteps": {
+    "headers": {
+      "department": "部署",
+      "owner": "担当者",
+      "task": "タスク",
+      "dueDate": "期限",
+      "status": "ステータス",
+      "statusNotes": "ステータスメモ"
+    }
+  },
+  "toasts": {
+    "presetApplied": "プリセット「{{presetName}}」を適用しました",
+    "formCleared": "フォームをクリアしました",
+    "sampleDataLoaded": "サンプルデータを読み込みました",
+    "notesGenerated": "議事録を正常に生成しました",
+    "previewUpdated": "プレビューを正常に更新しました",
+    "settingsSaved": "設定を正常に保存しました！",
+    "botIdReset": "ボットIDをデフォルト値にリセットしました。",
+    "fileLoaded": "{{fileName}}から議事録を読み込みました",
+    "fileProcessing": ".docxファイルを処理中...",
+    "fileError": "ファイル{{fileName}}の読み込みエラー",
+    "unsupportedFileType": "サポートされていないファイル形式です。.txtまたは.docxファイルをアップロードしてください。",
+    "docxReadError": ".docxファイルを読み込めませんでした。",
+    "docxLibraryError": ".docxファイルを読み込めないか、解析ライブラリが利用できません。",
+    "apiConfigMissing": "API設定がありません。設定と環境変数を確認してください。",
+    "notesCopied": "フォーマット済みの議事録をクリップボードにコピーしました。",
+    "notesCopiedPlain": "議事録をクリップボードにコピーしました（プレーンテキスト）。",
+    "printWindowBlocked": "印刷ウィンドウを開けませんでした。ポップアップブロッカーを無効にしてください。",
+    "emailCopied": "メール内容をコピーしました。メールクライアントに貼り付けてください。",
+    "emailCopiedPlain": "メール内容をコピーしました（プレーンテキスト）。メールクライアントに貼り付けてください。",
+    "noActionsToExport": "エクスポートするアクション項目がありません。",
+    "csvDownloaded": "CSVを正常にダウンロードしました。"
+  }
+}

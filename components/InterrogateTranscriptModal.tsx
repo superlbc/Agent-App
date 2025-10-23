@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from './ui/Card';
 import { Icon } from './ui/Icon';
 import { Textarea } from './ui/Textarea';
@@ -88,17 +89,18 @@ const ChatMarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 
 
 export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProps> = ({ isOpen, onClose, formState, apiConfig, addToast, suggestedQuestions }) => {
+  const { t } = useTranslation(['common']);
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const conversationEndRef = useRef<HTMLDivElement>(null);
-  
+
   const fallbackQuestions = [
-    "What were the main decisions?",
-    "Who owns the top action and by when?",
-    "Summarize risks or open questions."
+    t('common:interrogate.defaultQuestions.decisions'),
+    t('common:interrogate.defaultQuestions.topAction'),
+    t('common:interrogate.defaultQuestions.risks')
   ];
-  
+
   const questionsToDisplay = (suggestedQuestions && suggestedQuestions.length > 0)
     ? suggestedQuestions
     : fallbackQuestions;
@@ -168,15 +170,15 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
         <header className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Icon name="interrogate" className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Interrogate Transcript</h2>
+            <h2 className="text-lg font-semibold">{t('common:interrogate.title')}</h2>
           </div>
           <div className="flex items-center gap-2">
             {conversation.length > 0 && (
-                 <Tooltip content="Clear conversation">
+                 <Tooltip content={t('common:actions.clearConversation')}>
                     <button
                         onClick={() => setConversation([])}
                         className="-m-2 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                        aria-label="Clear conversation"
+                        aria-label={t('common:actions.clearConversation')}
                     >
                         <Icon name="trash" className="h-5 w-5" />
                     </button>
@@ -186,7 +188,7 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
                 id="interrogate-modal-close-button"
                 onClick={onClose}
                 className="-m-2 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                aria-label="Close"
+                aria-label={t('common:buttons.close')}
             >
                 <Icon name="close" className="h-5 w-5" />
             </button>
@@ -196,11 +198,11 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
         <div className="flex-grow p-6 overflow-y-auto space-y-6">
           {conversation.length === 0 && (
             <div className="text-center text-slate-500 dark:text-slate-400 pt-8">
-              <h3 className="text-lg font-semibold">Ask a question about the transcript.</h3>
+              <h3 className="text-lg font-semibold">{t('common:interrogate.subtitle')}</h3>
               <p className="mt-2 text-sm">
-                {(suggestedQuestions && suggestedQuestions.length > 0) 
-                  ? 'Here are some suggestions based on your transcript:'
-                  : 'Or try one of these examples:'}
+                {(suggestedQuestions && suggestedQuestions.length > 0)
+                  ? t('common:interrogate.suggestionsIntro')
+                  : t('common:interrogate.examplesIntro')}
               </p>
               <div className="mt-3 flex flex-col items-center gap-2">
                 {questionsToDisplay.map((q, i) => (
@@ -238,7 +240,7 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
           ))}
            {lastTurn && lastTurn.answer && !isLoading && lastTurn.follow_up_suggestions && lastTurn.follow_up_suggestions.length > 0 && (
               <div className="pt-4 flex flex-col items-center gap-2">
-                <p className="text-sm text-slate-500 dark:text-slate-400">Suggested follow-ups:</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('common:interrogate.followUpLabel')}</p>
                 {lastTurn.follow_up_suggestions.map((q, i) => (
                   <button key={i} onClick={() => handleAsk(q)} className="text-primary hover:underline text-sm font-medium p-1 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                     "{q}"
@@ -258,17 +260,17 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
                   value={question}
                   onChange={e => setQuestion(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAsk(question); } }}
-                  placeholder="Your question..."
+                  placeholder={t('common:interrogate.placeholder')}
                   rows={1}
                   className="resize-none"
                 />
             </div>
-            <Button 
-                size="md" 
+            <Button
+                size="md"
                 className="!p-2.5 flex-shrink-0"
                 onClick={() => handleAsk(question)}
                 disabled={isLoading || !question.trim()}
-                aria-label="Send question"
+                aria-label={t('common:actions.sendQuestion')}
             >
               <Icon name="send" className="h-5 w-5" />
             </Button>

@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from './ui/Icon.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { Card } from './ui/Card.tsx';
+import { LanguageSelector } from './LanguageSelector.tsx';
+import { AboutModal } from './AboutModal.tsx';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -28,8 +31,10 @@ const getInitials = (name?: string): string => {
 };
 
 export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onOpenHelp, onOpenSettings, onReplayTour }) => {
+  const { t } = useTranslation(['common']);
   const { user, graphData, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,13 +50,14 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
   }, []);
 
   const menuItems: MenuItem[] = [
-    { label: "Toggle Theme", icon: isDarkMode ? 'sun' : 'moon', action: onToggleDarkMode },
-    { id: 'replay-tutorial-button', label: "Replay Tutorial", icon: 'sparkles', action: onReplayTour },
-    { label: "Help & Guidance", icon: 'help', action: onOpenHelp },
-    { label: "Settings", icon: 'settings', action: onOpenSettings },
+    { label: t('common:header.menu.toggleTheme'), icon: isDarkMode ? 'sun' : 'moon', action: onToggleDarkMode },
+    { id: 'replay-tutorial-button', label: t('common:header.menu.replayTutorial'), icon: 'sparkles', action: onReplayTour },
+    { label: t('common:header.menu.help'), icon: 'help', action: onOpenHelp },
+    { label: t('common:header.menu.settings'), icon: 'settings', action: onOpenSettings },
   ];
 
   return (
+    <>
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -88,13 +94,16 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
             {isMenuOpen && (
               <div ref={menuRef} className="absolute right-0 mt-2 w-64 origin-top-right z-50 animate-fade-in">
                 <Card className="p-1.5">
-                  <div className="px-3 py-2">
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{graphData?.displayName || user?.name}</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{graphData?.mail || user?.username}</p>
-                  </div>
-                  <div className="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
                   <div className="py-1">
-                    {menuItems.map(item => (
+                    {/* Toggle Theme */}
+                    <button key={menuItems[0].label} id={menuItems[0].id} onClick={() => { menuItems[0].action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                      <Icon name={menuItems[0].icon} className="h-5 w-5 text-slate-500 dark:text-slate-400"/>
+                      <span>{menuItems[0].label}</span>
+                    </button>
+                    {/* Language Selector - inserted between Toggle Theme and Replay Tutorial */}
+                    <LanguageSelector variant="menu" />
+                    {/* Remaining menu items */}
+                    {menuItems.slice(1).map(item => (
                        <button key={item.label} id={item.id} onClick={() => { item.action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">
                           <Icon name={item.icon} className="h-5 w-5 text-slate-500 dark:text-slate-400"/>
                           <span>{item.label}</span>
@@ -103,9 +112,16 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
                   </div>
                   <div className="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
                   <div className="py-1">
+                     <button onClick={() => { setShowAbout(true); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <Icon name="info" className="h-5 w-5 text-slate-500 dark:text-slate-400"/>
+                        <span>{t('common:header.menu.about')}</span>
+                     </button>
+                  </div>
+                  <div className="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                  <div className="py-1">
                      <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20">
                         <Icon name="logout" className="h-5 w-5"/>
-                        <span>Sign Out</span>
+                        <span>{t('common:header.menu.signOut')}</span>
                      </button>
                   </div>
                 </Card>
@@ -115,5 +131,8 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
         </div>
       </div>
     </header>
+    {/* About Modal - rendered outside header */}
+    {showAbout && <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} user={user} graphData={graphData} />}
+    </>
   );
 };

@@ -1,0 +1,46 @@
+{
+  "errors": {
+    "required": "This field is required",
+    "tooShort": "Must be at least {{min}} characters",
+    "tooLong": "Must be no more than {{max}} characters",
+    "invalidFormat": "Invalid format",
+    "invalidEmail": "Invalid email address",
+    "invalidUrl": "Invalid URL",
+    "invalidDate": "Invalid date",
+    "invalidNumber": "Must be a number",
+    "min": "Must be at least {{min}}",
+    "max": "Must be no more than {{max}}",
+    "pattern": "Does not match required pattern",
+    "unique": "This value already exists",
+    "transcriptRequired": "Transcript is required to generate notes",
+    "botIdRequired": "Bot ID must be configured in settings",
+    "transcriptTooShort": "Transcript is too short. Please add more content.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "serverError": "Server error. Please try again later.",
+    "authError": "Authentication failed. Please sign in again.",
+    "generationFailed": "Failed to generate notes. Please try again.",
+    "exportFailed": "Failed to export. Please try again."
+  },
+  "warnings": {
+    "noAgenda": "No agenda provided. Workstreams will be extracted automatically.",
+    "noTitle": "No title provided. A title will be generated automatically.",
+    "shortTranscript": "Transcript is short. Notes may be limited.",
+    "noBotId": "Bot ID not configured. Please update settings.",
+    "unsavedChanges": "You have unsaved changes.",
+    "largeFile": "File is large and may take longer to process."
+  },
+  "info": {
+    "autoSaving": "Auto-saving...",
+    "saved": "Saved",
+    "processing": "Processing your request...",
+    "almostDone": "Almost done...",
+    "optional": "This field is optional"
+  },
+  "confirmations": {
+    "clearForm": "Are you sure you want to clear the form? All unsaved data will be lost.",
+    "resetSettings": "Are you sure you want to reset settings to defaults?",
+    "deleteItem": "Are you sure you want to delete this item?",
+    "signOut": "Are you sure you want to sign out?",
+    "overwriteData": "This will overwrite existing data. Continue?"
+  }
+}

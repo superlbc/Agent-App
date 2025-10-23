@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from './ui/Icon.tsx';
 import { Input } from './ui/Input.tsx';
 import { Button } from './ui/Button.tsx';
@@ -12,13 +13,14 @@ interface SettingsDrawerProps {
   setBotId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ 
-  isOpen, 
-  onClose, 
+export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
+  isOpen,
+  onClose,
   addToast,
   botId,
   setBotId
 }) => {
+  const { t } = useTranslation(['common']);
   const [isRendered, setIsRendered] = useState(false);
   const [localBotId, setLocalBotId] = useState(botId);
 
@@ -57,7 +59,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
     }
 
     setBotId(localBotId);
-    addToast('Settings saved successfully!', 'success');
+    addToast(t('common:toasts.settingsSaved'), 'success');
     onClose();
   };
 
@@ -73,7 +75,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
     });
 
     setBotId(defaultBotId);
-    addToast('Bot ID has been reset to default.', 'success');
+    addToast(t('common:toasts.botIdReset'), 'success');
     onClose();
   };
 
@@ -100,7 +102,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
             </button>
           </header>
           
-          <div className="flex-grow p-6 overflow-y-auto space-y-8">
+          <div className="flex-grow p-6 overflow-y-auto">
             <section className="space-y-4">
               <h3 className="font-semibold text-slate-800 dark:text-slate-200">API Configuration</h3>
               <Input id="bot-id" label="Bot ID" value={localBotId} onChange={e => setLocalBotId(e.target.value)} />

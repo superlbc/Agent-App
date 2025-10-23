@@ -1,0 +1,55 @@
+{
+  "title": "設定",
+  "sections": {
+    "api": {
+      "title": "API設定",
+      "botId": {
+        "label": "Bot ID",
+        "placeholder": "Bot IDを入力してください...",
+        "description": "ノート生成用のAIエージェントBot ID"
+      }
+    },
+    "regional": {
+      "title": "地域設定",
+      "language": {
+        "label": "言語",
+        "description": "希望の言語を選択してください",
+        "autoDetect": "ブラウザから自動検出"
+      },
+      "timezone": {
+        "label": "タイムゾーン",
+        "description": "現在のタイムゾーン"
+      }
+    },
+    "appearance": {
+      "title": "外観",
+      "theme": {
+        "label": "テーマ",
+        "light": "ライト",
+        "dark": "ダーク",
+        "auto": "自動（システム）"
+      }
+    },
+    "preferences": {
+      "title": "環境設定",
+      "defaultPreset": {
+        "label": "デフォルト会議プリセット",
+        "description": "新しい会議を開始するときに読み込むプリセット"
+      },
+      "autoSave": {
+        "label": "自動保存",
+        "description": "入力中にフォームデータを自動的に保存します"
+      }
+    }
+  },
+  "buttons": {
+    "save": "設定を保存",
+    "reset": "デフォルトにリセット",
+    "cancel": "キャンセル"
+  },
+  "messages": {
+    "saveSuccess": "設定が正常に保存されました！",
+    "resetSuccess": "設定がデフォルトにリセットされました",
+    "saveError": "設定の保存に失敗しました。もう一度お試しください。"
+  }
+}

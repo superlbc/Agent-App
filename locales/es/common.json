@@ -1,0 +1,223 @@
+{
+  "app": {
+    "title": "Generador de Notas de Reunión",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "header": {
+    "title": "Generador de Notas de Reunión",
+    "menu": {
+      "toggleTheme": "Cambiar Tema",
+      "replayTutorial": "Repetir Tutorial",
+      "help": "Ayuda y Orientación",
+      "settings": "Configuración",
+      "signOut": "Cerrar Sesión",
+      "about": "Acerca de"
+    },
+    "userGreeting": "Hola, {{name}}"
+  },
+  "output": {
+    "emptyState": {
+      "title": "Tus notas aparecerán aquí",
+      "description": "Completa los detalles y haz clic en \"Generar Notas\" para empezar."
+    }
+  },
+  "buttons": {
+    "generate": "Generar Notas",
+    "regenerate": "Regenerar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "reset": "Restablecer",
+    "export": "Exportar",
+    "copy": "Copiar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "skip": "Omitir",
+    "retry": "Reintentar",
+    "confirm": "Confirmar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "download": "Descargar"
+  },
+  "actions": {
+    "copyToClipboard": "Copiar al Portapapeles",
+    "exportToCSV": "Exportar a CSV",
+    "exportToPDF": "Exportar a PDF",
+    "exportToEmail": "Exportar por Correo",
+    "interrogateTranscript": "Interrogar Transcripción",
+    "viewDetails": "Ver Detalles",
+    "clearForm": "Limpiar Formulario",
+    "loadPreset": "Cargar Configuración",
+    "downloadPDF": "Descargar PDF",
+    "downloadCSVActions": "Descargar Acciones CSV",
+    "draftEmail": "Redactar Email",
+    "clearConversation": "Limpiar conversación",
+    "sendQuestion": "Enviar pregunta"
+  },
+  "status": {
+    "generating": "Generando notas...",
+    "processing": "Procesando...",
+    "saving": "Guardando...",
+    "exporting": "Exportando...",
+    "loading": "Cargando...",
+    "ready": "Listo",
+    "complete": "Completo",
+    "failed": "Fallido",
+    "pending": "Pendiente"
+  },
+  "messages": {
+    "copiedToClipboard": "¡Copiado al portapapeles!",
+    "exportSuccess": "¡Exportado con éxito!",
+    "saveSuccess": "¡Guardado con éxito!",
+    "generateSuccess": "¡Notas generadas con éxito!",
+    "errorOccurred": "Ha ocurrido un error. Por favor, inténtelo de nuevo.",
+    "noDataAvailable": "No hay datos disponibles",
+    "confirmAction": "¿Está seguro de que desea continuar?",
+    "unsavedChanges": "Tiene cambios sin guardar. ¿Está seguro de que desea salir?",
+    "sessionExpired": "Su sesión ha expirado. Por favor, inicie sesión de nuevo."
+  },
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "help": "Ayuda",
+    "about": "Acerca de"
+  },
+  "interrogate": {
+    "title": "Interrogar Transcripción",
+    "subtitle": "Haz una pregunta sobre tu transcripción.",
+    "suggestionsIntro": "Aquí hay algunas sugerencias basadas en tu transcripción:",
+    "examplesIntro": "O prueba uno de estos ejemplos:",
+    "followUpLabel": "Preguntas de seguimiento sugeridas:",
+    "placeholder": "Tu pregunta...",
+    "defaultQuestions": {
+      "decisions": "¿Cuáles fueron las decisiones principales?",
+      "topAction": "¿Quién es responsable de la acción principal y para cuándo?",
+      "risks": "Resume los riesgos o preguntas abiertas."
+    }
+  },
+  "common": {
+    "or": "o",
+    "and": "y",
+    "optional": "Opcional",
+    "required": "Obligatorio",
+    "none": "Ninguno",
+    "all": "Todos",
+    "yes": "Sí",
+    "no": "No",
+    "unknown": "Desconocido",
+    "notSpecified": "No especificado",
+    "notApplicable": "N/A",
+    "loading": "Cargando...",
+    "error": "Error",
+    "warning": "Advertencia",
+    "info": "Información"
+  },
+  "loading": {
+    "title": "Generando Notas",
+    "description": "Extrayendo decisiones clave y puntos de discusión...",
+    "steps": {
+      "connecting": "Conectando con el agente de IA...",
+      "analyzing": "Analizando la estructura de la transcripción...",
+      "extracting": "Extrayendo decisiones clave y puntos de discusión...",
+      "identifying": "Identificando elementos de acción y responsables...",
+      "applying": "Aplicando estado RAG a cada acción...",
+      "formatting": "Formateando el documento final...",
+      "polishing": "Casi listo, solo puliendo las notas..."
+    }
+  },
+  "about": {
+    "title": "Acerca de",
+    "appName": "Generador de Notas de Reunión",
+    "version": "Versión {{version}} Beta",
+    "developedBy": "Desarrollado Por",
+    "organization": "Organización",
+    "orgName": "Equipo de Tecnología Global de Momentum",
+    "initiative": "Iniciativa del Programa de Aprendizaje en IA",
+    "copyright": "© {{year}} Generador de Notas de Reunión"
+  },
+  "auth": {
+    "signIn": {
+      "welcomeTo": "Bienvenido a",
+      "appName": "Generador de Notas de Reunión",
+      "tagline": "Impulsa consistencia e impacto en cada reunión.",
+      "instruction": "Por favor, inicia sesión con tu cuenta de Momentum para continuar.",
+      "button": "Iniciar Sesión",
+      "popupBlocked": {
+        "title": "¿Tienes problemas para iniciar sesión?",
+        "message": "Parece que la ventana emergente de inicio de sesión fue bloqueada. Para la mejor experiencia, abre esta herramienta en una nueva pestaña para completar la autenticación.",
+        "button": "Abrir en Nueva Pestaña para Iniciar Sesión"
+      }
+    },
+    "accessDenied": {
+      "title": "Acceso Restringido",
+      "message": "Esta aplicación solo es accesible para usuarios de <strong>Momentum Worldwide</strong>.",
+      "signedInAs": "Sesión iniciada como:",
+      "contactAdmin": "Si crees que deberías tener acceso, ponte en contacto con tu administrador.",
+      "signOutButton": "Cerrar Sesión"
+    }
+  },
+  "meetingCoach": {
+    "title": "Coach de Reuniones",
+    "disclaimer": "El siguiente análisis del Coach de Reuniones es solo para tu información y no se incluirá en ninguna exportación.",
+    "sections": {
+      "whatWorkedWell": "Lo Que Funcionó Bien",
+      "nextTimeTry": "La Próxima Vez, Intenta",
+      "facilitationTips": "Consejos de Facilitación"
+    },
+    "healthSnapshot": {
+      "title": "Resumen de Salud",
+      "metrics": {
+        "agendaCoverage": "Cobertura de Agenda",
+        "decisionsMade": "Decisiones Tomadas",
+        "actionsWithOwner": "Acciones con Responsable",
+        "actionsWithDueDate": "Acciones con Fecha Límite",
+        "topSpeakerShare": "Participación del Orador Principal"
+      },
+      "flagsLabel": "Alertas:"
+    },
+    "flags": {
+      "participationImbalance": "Desequilibrio de Participación",
+      "manyUnassignedActions": "Muchas Acciones Sin Asignar",
+      "fewDecisions": "Pocas Decisiones",
+      "lightAgendaCoverage": "Cobertura de Agenda Ligera"
+    },
+    "meetingExcellenceLink": "En alineación con la Excelencia en Reuniones de Momentum"
+  },
+  "nextSteps": {
+    "headers": {
+      "department": "Departamento",
+      "owner": "Responsable",
+      "task": "Tarea",
+      "dueDate": "Fecha Límite",
+      "status": "Estado",
+      "statusNotes": "Notas de Estado"
+    }
+  },
+  "toasts": {
+    "presetApplied": "Se aplicó el preset '{{presetName}}'",
+    "formCleared": "Formulario limpiado",
+    "sampleDataLoaded": "Datos de ejemplo cargados",
+    "notesGenerated": "Notas generadas exitosamente",
+    "previewUpdated": "Vista previa actualizada exitosamente",
+    "settingsSaved": "¡Configuración guardada exitosamente!",
+    "botIdReset": "El ID del bot se ha restablecido a su valor predeterminado.",
+    "fileLoaded": "Transcripción cargada desde {{fileName}}",
+    "fileProcessing": "Procesando archivo .docx...",
+    "fileError": "Error al leer el archivo {{fileName}}",
+    "unsupportedFileType": "Tipo de archivo no compatible. Por favor, sube un archivo .txt o .docx.",
+    "docxReadError": "No se pudo leer el archivo .docx.",
+    "docxLibraryError": "No se pudo leer el archivo .docx o la librería de análisis no está disponible.",
+    "apiConfigMissing": "Falta la configuración de API. Revisa la configuración y las variables de entorno.",
+    "notesCopied": "Notas formateadas copiadas al portapapeles.",
+    "notesCopiedPlain": "Notas copiadas al portapapeles (texto plano).",
+    "printWindowBlocked": "No se pudo abrir la ventana de impresión. Por favor, desactiva los bloqueadores de ventanas emergentes.",
+    "emailCopied": "Contenido del correo copiado. Pégalo en tu cliente de correo.",
+    "emailCopiedPlain": "Contenido del correo copiado (texto plano). Pégalo en tu cliente de correo.",
+    "noActionsToExport": "No hay acciones para exportar.",
+    "csvDownloaded": "CSV descargado exitosamente."
+  }
+}

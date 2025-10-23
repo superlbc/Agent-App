@@ -1,0 +1,120 @@
+{
+  "input": {
+    "title": {
+      "label": "Título de la Reunión",
+      "placeholder": "Introduzca el título de la reunión...",
+      "description": "Asigne un título descriptivo a su reunión"
+    },
+    "agenda": {
+      "label": "Agenda",
+      "placeholder": "Introduzca los puntos de la agenda (uno por línea)...",
+      "description": "Enumere los temas principales o áreas de trabajo a tratar"
+    },
+    "transcript": {
+      "label": "Transcripción",
+      "placeholder": "Pegue aquí la transcripción de su reunión...",
+      "description": "Incluya la conversación completa de la reunión con los nombres de los participantes"
+    },
+    "tags": {
+      "label": "Etiquetas de Contexto",
+      "placeholder": "Añadir etiquetas...",
+      "description": "Añada etiquetas para categorizar esta reunión"
+    }
+  },
+  "controls": {
+    "title": "Controles de Generación",
+    "department": {
+      "label": "Departamento Enfocado",
+      "description": "Filtrar notas para mostrar solo los elementos de acción de un departamento"
+    },
+    "view": {
+      "label": "Modo de Vista",
+      "description": "Elija entre notas completas o solo acciones"
+    },
+    "audience": {
+      "label": "Audiencia",
+      "description": "Adapte las notas para su audiencia"
+    },
+    "tone": {
+      "label": "Tono",
+      "description": "Establezca el estilo de redacción de las notas"
+    },
+    "preset": {
+      "label": "Configuración de Reunión",
+      "description": "Configuraciones rápidas para tipos de reunión comunes"
+    },
+    "criticalLens": {
+      "label": "Lente Crítico",
+      "description": "Incluir sección de revisión crítica con brechas y riesgos"
+    },
+    "redact": {
+      "label": "Redactar PII",
+      "description": "Ocultar correos electrónicos, números de teléfono e información sensible"
+    },
+    "useIcons": {
+      "label": "Usar Iconos",
+      "description": "Añadir iconos visuales a los encabezados de sección"
+    },
+    "boldImportant": {
+      "label": "Negritas en Palabras Importantes",
+      "description": "Resaltar términos clave para facilitar el escaneo"
+    },
+    "boldKeywords": {
+      "label": "Destacar Palabras Clave",
+      "description": "Enfatiza términos y entidades importantes en el resumen"
+    },
+    "meetingCoach": {
+      "label": "Coach de Reuniones",
+      "description": "Obtenga retroalimentación sobre la eficacia de la reunión"
+    },
+    "coachingStyle": {
+      "label": "Estilo de Coaching",
+      "description": "Elija el tono de coaching"
+    }
+  },
+  "placeholders": {
+    "selectOption": "Seleccione una opción...",
+    "selectDepartment": "Seleccione departamento...",
+    "selectPreset": "Seleccione configuración...",
+    "searchPlaceholder": "Buscar...",
+    "noOptions": "No hay opciones disponibles"
+  },
+  "labels": {
+    "meetingDate": "Fecha de la Reunión",
+    "status": "Estado",
+    "owner": "Responsable",
+    "dueDate": "Fecha de Vencimiento",
+    "department": "Departamento",
+    "task": "Tarea",
+    "notes": "Notas",
+    "category": "Categoría",
+    "priority": "Prioridad"
+  },
+  "actions": {
+    "useSampleData": "Usar Datos de Ejemplo",
+    "clearForm": "Limpiar Formulario",
+    "uploadFile": "Subir .txt o .docx",
+    "showAdvancedSettings": "Mostrar Configuración Avanzada",
+    "hideAdvancedSettings": "Ocultar Configuración Avanzada",
+    "generateNotes": "Generar Notas"
+  },
+  "helperText": {
+    "agendaHelper": "Un tema por línea.",
+    "transcriptPlaceholder": "Pega la transcripción aquí, o arrastra y suelta un archivo...",
+    "characterCount": "{{count}} caracteres / {{words}} palabras"
+  },
+  "tooltips": {
+    "meetingPreset": "Selecciona un preset para aplicar rápidamente configuraciones comunes para diferentes tipos de reuniones.",
+    "contextTags": "Aplica etiquetas para ayudar a la IA a entender el contexto y la sensibilidad de la reunión.",
+    "departmentFocus": "Destaca departamentos específicos para que la IA se enfoque en sus elementos de acción y discusiones.",
+    "audience": "Adapta el nivel de detalle del resumen para una audiencia específica.",
+    "tone": "Elige el estilo de escritura para las notas generadas.",
+    "viewMode": "Selecciona 'Actas completas' para un resumen completo o 'Solo acciones' para enfocarte en los próximos pasos.",
+    "criticalLens": "Analiza brechas, riesgos y acciones no asignadas.",
+    "redact": "Oculta información personal como correos electrónicos y números de teléfono.",
+    "useIcons": "Añade iconos a los encabezados de sección para mayor claridad visual.",
+    "boldKeywords": "Enfatiza términos y entidades importantes en el resumen.",
+    "meetingCoach": "Proporciona retroalimentación sobre la facilitación y efectividad de la reunión.",
+    "coachingStyle": "'Amable' proporciona retroalimentación de apoyo. 'Directo' proporciona consejos más francos y accionables."
+  }
+}

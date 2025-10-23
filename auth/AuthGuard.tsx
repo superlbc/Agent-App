@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MsalProvider, useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { BrowserAuthError, AccountInfo } from "@azure/msal-browser";
-import { msalInstance, loginRequest, graphConfig, getRedirectUri } from './authConfig';
+import { msalInstance, loginRequest, graphConfig, getRedirectUri, REQUIRED_GROUP_ID } from './authConfig';
 import { AuthContext } from '../contexts/AuthContext';
 import { GraphData } from '../types';
 import { SignInPage } from './SignInPage';
 import { LoadingModal } from '../components/ui/LoadingModal';
+import { AccessDenied } from './AccessDenied';
+import { telemetryService, AccessDeniedEventPayload } from '../utils/telemetryService';
+import { getBrowserContext } from '../utils/browserContext';
 
 const isInAiStudio = () => {
     try {
@@ -19,26 +22,99 @@ const isInAiStudio = () => {
 };
 
 const MockAuthenticatedApp: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    // Try to get real user from MSAL if available, otherwise use mock
+    const accounts = msalInstance.getAllAccounts();
+    const realAccount = accounts.length > 0 ? accounts[0] : null;
+
+    const devEmail = realAccount ? `${realAccount.username}` : 'dev-user@localhost.com';
+    const devName = realAccount ? `${realAccount.name || 'Dev User'} (Dev)` : 'Dev User (Local)';
+
     const mockUser: AccountInfo = {
-        homeAccountId: 'mock-home-account-id',
-        environment: 'mock-env',
-        tenantId: 'mock-tenant-id',
-        username: 'developer@aistudio.google.com',
-        localAccountId: 'mock-local-account-id',
-        name: 'AI Studio Developer',
+        homeAccountId: realAccount?.homeAccountId || 'mock-home-account-id',
+        environment: realAccount?.environment || 'mock-env',
+        tenantId: realAccount?.tenantId || 'mock-tenant-id',
+        username: devEmail,
+        localAccountId: realAccount?.localAccountId || 'mock-local-account-id',
+        name: devName,
     };
 
     const mockGraphData: GraphData = {
-        displayName: 'AI Studio Developer',
-        jobTitle: 'Lead Prompt Engineer',
-        mail: 'developer@aistudio.google.com',
+        displayName: devName,
+        jobTitle: realAccount ? 'Development Mode' : 'Lead Prompt Engineer',
+        mail: devEmail,
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated: true, user: mockUser, graphData: mockGraphData, logout: () => console.log("Mock logout") }}>
+        <AuthContext.Provider value={{ isAuthenticated: true, isAuthorized: true, user: mockUser, graphData: mockGraphData, logout: () => console.log("Mock logout") }}>
             {children}
         </AuthContext.Provider>
     );
+};
+
+// Helper function to check if user is in the required Azure AD group
+const checkGroupMembership = (account: AccountInfo | null): boolean => {
+    if (!account) return false;
+
+    // Check if the idTokenClaims contains the groups claim
+    const claims = account.idTokenClaims as any;
+
+    if (claims && claims.groups && Array.isArray(claims.groups)) {
+        // Check if our required group ID is in the groups array
+        const isMember = claims.groups.includes(REQUIRED_GROUP_ID);
+        console.log('Group membership check:', {
+            userEmail: account.username,
+            requiredGroup: REQUIRED_GROUP_ID,
+            userGroups: claims.groups,
+            isMember
+        });
+
+        // Track access denied event if user is not in the required group
+        if (!isMember) {
+            trackAccessDenied(account, claims.groups || []);
+        }
+
+        return isMember;
+    }
+
+    // If groups claim is not present, deny access (token configuration may not be correct)
+    console.warn('Groups claim not found in token. User access denied by default.');
+
+    // Track access denied with empty groups array
+    trackAccessDenied(account, []);
+
+    return false;
+};
+
+// Helper function to track access denied telemetry
+const trackAccessDenied = (account: AccountInfo, userGroups: string[]): void => {
+    try {
+        // Get browser context for additional data
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const browserContext = getBrowserContext(isDarkMode);
+
+        const payload: AccessDeniedEventPayload = {
+            userName: account.name || 'Unknown',
+            userEmail: account.username,
+            userId: account.localAccountId,
+            tenantId: account.tenantId || '',
+            requiredGroupId: REQUIRED_GROUP_ID,
+            requiredGroupName: 'MOM WW All Users 1 SG',
+            userGroups: userGroups,
+            browser: browserContext.browser,
+            platform: browserContext.platform,
+            deviceType: browserContext.deviceType,
+        };
+
+        // Set user context first
+        telemetryService.setUser(account);
+
+        // Track the access denied event
+        telemetryService.trackEvent('accessDenied', payload);
+
+        console.log('📊 Access denied event tracked:', payload);
+    } catch (error) {
+        console.error('Failed to track access denied event:', error);
+    }
 };
 
 const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -47,6 +123,7 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
     const [graphData, setGraphData] = useState<GraphData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [popupBlocked, setPopupBlocked] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
     const hasFetchedGraphData = useRef(false);
 
     const handleLogin = useCallback(() => {
@@ -79,6 +156,18 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
             hasFetchedGraphData.current = true; // Prevents re-fetching on re-renders
             setIsLoading(true);
 
+            // Check group membership first
+            const authorized = checkGroupMembership(accounts[0]);
+            setIsAuthorized(authorized);
+
+            // If not authorized, stop here - don't fetch Graph data
+            if (!authorized) {
+                setIsLoading(false);
+                console.warn('User is not authorized to access this application.');
+                return;
+            }
+
+            // User is authorized, proceed with fetching Graph data
             instance.acquireTokenSilent({
                 ...loginRequest,
                 account: accounts[0]
@@ -114,11 +203,12 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
 
     const contextValue = {
         isAuthenticated,
+        isAuthorized,
         user: accounts[0] || null,
         graphData,
         logout: handleLogout
     };
-    
+
     // While checking auth state or fetching profile, show a loading screen.
     if (isLoading) {
         return <LoadingModal isOpen={true} title="Authenticating..." messages={[{ progress: 0, text: 'Verifying session...' }]} />;
@@ -126,7 +216,13 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
 
     return (
         <AuthContext.Provider value={contextValue}>
-            {isAuthenticated ? children : <SignInPage onLogin={handleLogin} popupBlocked={popupBlocked} onOpenInNewTab={() => window.open(window.location.href, '_blank')} />}
+            {!isAuthenticated ? (
+                <SignInPage onLogin={handleLogin} popupBlocked={popupBlocked} onOpenInNewTab={() => window.open(window.location.href, '_blank')} />
+            ) : !isAuthorized ? (
+                <AccessDenied userEmail={accounts[0]?.username} onSignOut={handleLogout} />
+            ) : (
+                children
+            )}
         </AuthContext.Provider>
     );
 };

@@ -1,0 +1,55 @@
+{
+  "title": "Settings",
+  "sections": {
+    "api": {
+      "title": "API Configuration",
+      "botId": {
+        "label": "Bot ID",
+        "placeholder": "Enter Bot ID...",
+        "description": "The AI agent Bot ID for generating notes"
+      }
+    },
+    "regional": {
+      "title": "Regional Settings",
+      "language": {
+        "label": "Language",
+        "description": "Choose your preferred language",
+        "autoDetect": "Auto-detect from browser"
+      },
+      "timezone": {
+        "label": "Timezone",
+        "description": "Your current timezone"
+      }
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": {
+        "label": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto (System)"
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "defaultPreset": {
+        "label": "Default Meeting Preset",
+        "description": "Preset to load when starting a new meeting"
+      },
+      "autoSave": {
+        "label": "Auto-save",
+        "description": "Automatically save form data as you type"
+      }
+    }
+  },
+  "buttons": {
+    "save": "Save Settings",
+    "reset": "Reset to Defaults",
+    "cancel": "Cancel"
+  },
+  "messages": {
+    "saveSuccess": "Settings saved successfully!",
+    "resetSuccess": "Settings reset to defaults",
+    "saveError": "Failed to save settings. Please try again."
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "errors": {
+    "required": "この項目は必須です",
+    "tooShort": "少なくとも{{min}}文字必要です",
+    "tooLong": "最大{{max}}文字までです",
+    "invalidFormat": "無効な形式です",
+    "invalidEmail": "無効なメールアドレスです",
+    "invalidUrl": "無効なURLです",
+    "invalidDate": "無効な日付です",
+    "invalidNumber": "数字である必要があります",
+    "min": "少なくとも{{min}}である必要があります",
+    "max": "最大{{max}}までです",
+    "pattern": "必要なパターンと一致しません",
+    "unique": "この値は既に存在します",
+    "transcriptRequired": "ノートを生成するにはトランスクリプトが必要です",
+    "botIdRequired": "設定でBot IDを構成する必要があります",
+    "transcriptTooShort": "トランスクリプトが短すぎます。コンテンツを追加してください。",
+    "networkError": "ネットワークエラーです。接続を確認して再試行してください。",
+    "serverError": "サーバーエラーです。後でもう一度お試しください。",
+    "authError": "認証に失敗しました。再度サインインしてください。",
+    "generationFailed": "ノートの生成に失敗しました。もう一度お試しください。",
+    "exportFailed": "エクスポートに失敗しました。もう一度お試しください。"
+  },
+  "warnings": {
+    "noAgenda": "アジェンダが提供されていません。ワークストリームは自動的に抽出されます。",
+    "noTitle": "タイトルが提供されていません。タイトルは自動的に生成されます。",
+    "shortTranscript": "トランスクリプトが短いです。ノートが制限される可能性があります。",
+    "noBotId": "Bot IDが構成されていません。設定を更新してください。",
+    "unsavedChanges": "保存されていない変更があります。",
+    "largeFile": "ファイルが大きく、処理に時間がかかる場合があります。"
+  },
+  "info": {
+    "autoSaving": "自動保存中...",
+    "saved": "保存済み",
+    "processing": "リクエストを処理中...",
+    "almostDone": "もうすぐ完了します...",
+    "optional": "この項目は任意です"
+  },
+  "confirmations": {
+    "clearForm": "フォームをクリアしてもよろしいですか？すべての保存されていないデータが失われます。",
+    "resetSettings": "設定をデフォルトにリセットしてもよろしいですか？",
+    "deleteItem": "この項目を削除してもよろしいですか？",
+    "signOut": "サインアウトしてもよろしいですか？",
+    "overwriteData": "これにより既存のデータが上書きされます。続行しますか？"
+  }
+}

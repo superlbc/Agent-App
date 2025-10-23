@@ -1,0 +1,114 @@
+{
+  "audience": {
+    "executive": "Executive (high-level)",
+    "crossFunctional": "Cross-functional team (balanced)",
+    "departmentSpecific": "Department-specific (granular)"
+  },
+  "audienceShort": {
+    "executive": "Executive",
+    "crossFunctional": "Cross-functional",
+    "departmentSpecific": "Department"
+  },
+  "tone": {
+    "professional": "Professional",
+    "concise": "Concise",
+    "clientReady": "Client-ready"
+  },
+  "view": {
+    "full": "Full Notes",
+    "actionsOnly": "Actions Only"
+  },
+  "coachingStyle": {
+    "gentle": "Gentle",
+    "direct": "Direct"
+  },
+  "departments": {
+    "BL": "Brand & Licensing",
+    "STR": "Strategy & Insights",
+    "PM": "Project Management",
+    "CR": "Creative",
+    "XD": "Experience Design",
+    "XP": "Experience Production",
+    "IPCT": "Integrated/Creative Technology",
+    "CON": "Content",
+    "STU": "Studio",
+    "General": "General"
+  },
+  "departmentDescriptions": {
+    "BL": "Client liaison, commercial stewardship, cross-discipline alignment",
+    "STR": "Insights, framing, argumentation; supports creative shaping",
+    "PM": "Workflow, timing, resourcing, coordination",
+    "CR": "Big ideas, art direction, copy",
+    "XD": "Experience blueprint, physical/digital design, renders, plans",
+    "XP": "Feasibility, vendors, on-site execution, risk/legal/sustainability",
+    "IPCT": "Technical approach, prototyping, development, innovation",
+    "CON": "Video/photo/audio production, artists/illustrators, logistics",
+    "STU": "Mechanicals, retouch, copy edit, print/premium buying",
+    "General": "Cross-functional or unclear department"
+  },
+  "presets": {
+    "clientUpdate": {
+      "name": "Client Update",
+      "description": "Polished, client-ready notes emphasizing decisions and next steps"
+    },
+    "internalSync": {
+      "name": "Internal Sync",
+      "description": "Balanced notes for cross-functional team collaboration"
+    },
+    "brainstorm": {
+      "name": "Brainstorm",
+      "description": "Creative session notes capturing ideas and action items"
+    },
+    "executiveBrief": {
+      "name": "Executive Brief",
+      "description": "High-level summary focusing on key decisions and risks"
+    },
+    "departmentStandup": {
+      "name": "Department Standup",
+      "description": "Detailed, granular notes for single department"
+    },
+    "retrospective": {
+      "name": "Retrospective",
+      "description": "Critical review enabled to identify gaps and improvements"
+    }
+  },
+  "status": {
+    "red": "Red",
+    "amber": "Amber",
+    "green": "Green",
+    "na": "N/A",
+    "blocked": "Blocked",
+    "atRisk": "At Risk",
+    "onTrack": "On Track",
+    "completed": "Completed",
+    "notStarted": "Not Started"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "ja": "日本語"
+  },
+  "regions": {
+    "US": "United States",
+    "GB": "United Kingdom",
+    "ES": "Spain",
+    "JP": "Japan",
+    "CA": "Canada"
+  },
+  "offices": {
+    "ATL-MOM": "Atlanta",
+    "CHI-MOM": "Chicago",
+    "NYC-MOM": "New York",
+    "STL-MOM": "St. Louis",
+    "LDN-MOM": "London",
+    "TOR-MOM": "Toronto",
+    "MAD-MOM": "Madrid",
+    "TYO-MOM": "Tokyo"
+  },
+  "contextTags": {
+    "clientFacing": "Client facing",
+    "internalOnly": "Internal only",
+    "sensitive": "Sensitive",
+    "executiveReview": "Executive review"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "input": {
+    "title": {
+      "label": "会議タイトル",
+      "placeholder": "会議タイトルを入力してください...",
+      "description": "会議に説明的なタイトルを付けてください"
+    },
+    "agenda": {
+      "label": "アジェンダ",
+      "placeholder": "アジェンダ項目を入力してください（1行に1項目）...",
+      "description": "議論する主なトピックまたはワークストリームをリストしてください"
+    },
+    "transcript": {
+      "label": "トランスクリプト",
+      "placeholder": "会議のトランスクリプトをここに貼り付けてください...",
+      "description": "発言者名を含む完全な会議の会話を含めてください"
+    },
+    "tags": {
+      "label": "コンテキストタグ",
+      "placeholder": "タグを追加...",
+      "description": "この会議を分類するためのタグを追加してください"
+    }
+  },
+  "controls": {
+    "title": "生成コントロール",
+    "department": {
+      "label": "フォーカス部署",
+      "description": "1つの部署のアクション項目のみを表示するようにノートをフィルタリングします"
+    },
+    "view": {
+      "label": "表示モード",
+      "description": "完全なノートまたはアクションのみを選択してください"
+    },
+    "audience": {
+      "label": "対象者",
+      "description": "対象者に合わせてノートを調整します"
+    },
+    "tone": {
+      "label": "トーン",
+      "description": "ノートの記述スタイルを設定します"
+    },
+    "preset": {
+      "label": "会議プリセット",
+      "description": "一般的な会議タイプの迅速な構成"
+    },
+    "criticalLens": {
+      "label": "クリティカルレンズ",
+      "description": "ギャップとリスクを含む重要なレビューセクションを含めます"
+    },
+    "redact": {
+      "label": "PII編集",
+      "description": "メールアドレス、電話番号、機密情報をマスクします"
+    },
+    "useIcons": {
+      "label": "アイコンを使用",
+      "description": "セクション見出しに視覚的なアイコンを追加します"
+    },
+    "boldImportant": {
+      "label": "重要な単語を太字",
+      "description": "スキャンしやすいように主要な用語を強調表示します"
+    },
+    "boldKeywords": {
+      "label": "キーワードを太字",
+      "description": "要約内の重要な用語と実体を強調します"
+    },
+    "meetingCoach": {
+      "label": "ミーティングコーチ",
+      "description": "会議の効果に関するフィードバックを取得します"
+    },
+    "coachingStyle": {
+      "label": "コーチングスタイル",
+      "description": "コーチングトーンを選択してください"
+    }
+  },
+  "placeholders": {
+    "selectOption": "オプションを選択してください...",
+    "selectDepartment": "部署を選択してください...",
+    "selectPreset": "プリセットを選択してください...",
+    "searchPlaceholder": "検索...",
+    "noOptions": "利用可能なオプションがありません"
+  },
+  "labels": {
+    "meetingDate": "会議日",
+    "status": "ステータス",
+    "owner": "担当者",
+    "dueDate": "期限",
+    "department": "部署",
+    "task": "タスク",
+    "notes": "ノート",
+    "category": "カテゴリー",
+    "priority": "優先度"
+  },
+  "actions": {
+    "useSampleData": "サンプルデータを使用",
+    "clearForm": "フォームをクリア",
+    "uploadFile": ".txtまたは.docxをアップロード",
+    "showAdvancedSettings": "詳細設定を表示",
+    "hideAdvancedSettings": "詳細設定を非表示",
+    "generateNotes": "ノートを生成"
+  },
+  "helperText": {
+    "agendaHelper": "1行に1つのトピック。",
+    "transcriptPlaceholder": "ここにトランスクリプトを貼り付けるか、ファイルをドラッグ&ドロップしてください...",
+    "characterCount": "{{count}}文字 / {{words}}単語"
+  },
+  "tooltips": {
+    "meetingPreset": "プリセットを選択して、さまざまな会議タイプの一般的な設定を迅速に適用します。",
+    "contextTags": "タグを適用して、AIが会議のコンテキストと機密性を理解できるようにします。",
+    "departmentFocus": "特定の部署を強調表示して、AIがそのアクション項目と議論に焦点を当てるようにします。",
+    "audience": "特定の対象者に合わせて要約の詳細レベルを調整します。",
+    "tone": "生成されたノートの記述スタイルを選択します。",
+    "viewMode": "完全な要約には「完全な議事録」を、次のステップに焦点を当てるには「アクションのみ」を選択してください。",
+    "criticalLens": "ギャップ、リスク、未割り当てのアクションを分析します。",
+    "redact": "メールアドレスや電話番号などの個人情報をマスクします。",
+    "useIcons": "視覚的な明瞭性のためにセクションヘッダーにアイコンを追加します。",
+    "boldKeywords": "要約内の重要な用語と実体を強調します。",
+    "meetingCoach": "会議のファシリテーションと効果に関するフィードバックを提供します。",
+    "coachingStyle": "「穏やか」は支援的なフィードバックを提供します。「直接的」はより率直で実行可能なアドバイスを提供します。"
+  }
+}

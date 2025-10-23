@@ -1,6 +1,6 @@
 #!/bin/bash
 IMAGE_NAME="nginx-cors"
-REGISTRY_URL="us-east4-docker.pkg.dev/mom-tech-staff-plan/nginx-cors"
+REGISTRY_URL="us-east4-docker.pkg.dev/mom-ai-apps/momentum-meeting-notes"
 REPOSITORY="${REGISTRY_URL}/${IMAGE_NAME}"
 
 TAG_LATEST="${REPOSITORY}:latest"

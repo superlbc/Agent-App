@@ -1,0 +1,194 @@
+{
+  "welcome": {
+    "title": "Welcome to the Note Crafter!",
+    "description": "Would you like a quick tour to learn about the main features?",
+    "buttons": {
+      "start": "Start Tour",
+      "skip": "No, thanks"
+    }
+  },
+  "steps": [
+    {
+      "title": "Meeting Input",
+      "description": "Start by entering your meeting title, agenda, and transcript. Don't worry if you don't have an agenda - we can extract it automatically from the transcript!",
+      "target": "input-panel"
+    },
+    {
+      "title": "Generation Controls",
+      "description": "Customize how your notes are generated. You can focus on specific departments, adjust the tone, and enable features like Meeting Coach for improvement insights.",
+      "target": "controls-section"
+    },
+    {
+      "title": "Meeting Presets",
+      "description": "Save time with presets! Choose from templates like 'Client Update' or 'Executive Brief' that automatically configure controls for common meeting types.",
+      "target": "preset-selector"
+    },
+    {
+      "title": "Generate Notes",
+      "description": "Once you've entered your transcript and set your preferences, click 'Generate Notes' to create structured meeting minutes with action items and RAG status.",
+      "target": "generate-button"
+    },
+    {
+      "title": "Output Panel",
+      "description": "Your generated notes appear here with workstream sections, action items, and status indicators. Scroll through to review all the extracted insights.",
+      "target": "output-panel"
+    },
+    {
+      "title": "Export Options",
+      "description": "Share your notes easily! Export to CSV for tracking in spreadsheets, PDF for documentation, or copy to clipboard for quick sharing.",
+      "target": "export-buttons"
+    },
+    {
+      "title": "Interrogate Transcript",
+      "description": "Want more details? Use this feature to ask follow-up questions about the meeting. The AI will answer based on the transcript and suggest related questions.",
+      "target": "interrogate-button"
+    },
+    {
+      "title": "Meeting Coach",
+      "description": "When enabled, Meeting Coach provides feedback on meeting effectiveness - like agenda coverage, action item clarity, and participation balance. Great for improving your team's meeting culture!",
+      "target": "coach-section"
+    },
+    {
+      "title": "Settings & Help",
+      "description": "Access settings to configure your Bot ID and preferences. The help menu provides detailed guidance on all features. You can replay this tour anytime from the menu.",
+      "target": "header-menu"
+    }
+  ],
+  "completion": {
+    "title": "You're All Set!",
+    "description": "You now know the basics of the Meeting Notes Generator. Start by pasting a transcript and generating your first set of notes. Happy meeting!",
+    "buttons": {
+      "finish": "Get Started",
+      "replay": "Replay Tour"
+    }
+  },
+  "navigation": {
+    "next": "Next",
+    "back": "Previous",
+    "skip": "End Tour",
+    "finish": "Finish",
+    "stepProgress": "Step {{current}} of {{total}}"
+  },
+  "controllerSteps": {
+    "step1": {
+      "title": "Welcome to the Note Crafter!",
+      "content": "This tour will walk you through the key features. Let's get started."
+    },
+    "step2": {
+      "title": "1. Provide Your Content",
+      "content": "Only the transcript is mandatory. If you provide an agenda, the generated notes will follow that structure."
+    },
+    "step3": {
+      "title": "Use Sample Data",
+      "content": "For this tour, we'll load some sample data to see how it works."
+    },
+    "step4": {
+      "title": "2. Select a Preset",
+      "content": "Presets are the fastest way to configure your notes. Let's look at a few common meeting types."
+    },
+    "step5": {
+      "title": "Preset: Client Update",
+      "content": "This preset is optimized for external meetings. It uses a client-ready tone and redacts personal info."
+    },
+    "step6": {
+      "title": "Preset: Internal Sync",
+      "content": "Ideal for team check-ins. This preset uses a more detailed, professional tone and enables the critical review."
+    },
+    "step7": {
+      "title": "Preset: Brainstorm",
+      "content": "Use this for creative sessions. It generates concise notes and helps identify emerging themes and actions."
+    },
+    "step8": {
+      "title": "Preset: Executive Briefing",
+      "content": "Creates a high-level summary with a concise tone, perfect for leadership updates."
+    },
+    "step9": {
+      "title": "3. Generate Notes",
+      "content": "When you're ready, click here. For the tour, we'll instantly show a sample result."
+    },
+    "step10": {
+      "title": "4. Review Your Output",
+      "content": "Here are your structured, professional notes. Let's look at the key sections."
+    },
+    "step11": {
+      "title": "Workstream Notes",
+      "content": "The agent organizes the transcript into sections based on your agenda, extracting key points, decisions, and risks."
+    },
+    "step12": {
+      "title": "Next Steps",
+      "content": "All next steps are automatically extracted into a clear, organized table with owners, due dates, and a RAG status."
+    },
+    "step13": {
+      "title": "Critical Review",
+      "content": "This section (enabled by some presets) analyzes gaps, risks, and unassigned tasks."
+    },
+    "step14": {
+      "title": "Meeting Coach",
+      "content": "Get AI-powered feedback on your meeting's effectiveness. This is for you only and won't be exported."
+    },
+    "step15": {
+      "title": "5. Export Your Notes",
+      "content": "Easily copy, download as a PDF, or draft an email with your generated notes."
+    },
+    "step16": {
+      "title": "6. Interrogate Transcript",
+      "content": "Have a specific question? Use this feature to chat with an AI agent that knows the content of your transcript."
+    },
+    "step17": {
+      "title": "Ask Anything",
+      "content": "You can ask for summaries, key decisions, or who was responsible for certain tasks. The agent will answer based only on the provided transcript."
+    },
+    "step18": {
+      "title": "Fine-Tuning the Output",
+      "content": "Next, we'll explore advanced settings to tailor your output. The form has been cleared, and we're back at the top to continue."
+    },
+    "step19": {
+      "title": "Show Advanced Settings",
+      "content": "Each preset is just a combination of these advanced settings. Let's open the panel to see them."
+    },
+    "step20": {
+      "title": "Advanced Settings Panel",
+      "content": "Here you can manually control every aspect of the output."
+    },
+    "step21": {
+      "title": "Dynamic Settings",
+      "content": "Watch how the settings in this panel change when we select the 'Client Update' preset. Note the 'Redact PII' and 'Client-Ready' tone."
+    },
+    "step22": {
+      "title": "Dynamic Settings",
+      "content": "Now let's try 'Internal Sync'. It enables the 'Critical Lens' and uses icons for better readability."
+    },
+    "step23": {
+      "title": "Context Tags",
+      "content": "Apply tags like \"Sensitive\" or \"Client facing\" to give the AI important context about the meeting content."
+    },
+    "step24": {
+      "title": "Department Focus",
+      "content": "Select one or more departments to have the AI prioritize their related discussions and action items in the summary."
+    },
+    "step25": {
+      "title": "Audience",
+      "content": "Tailor the summary's level of detail. 'Executive' is high-level, while 'Department' is more granular."
+    },
+    "step26": {
+      "title": "Tone",
+      "content": "Adjust the writing style of the notes, from professional to concise or polished for clients."
+    },
+    "step27": {
+      "title": "View Mode",
+      "content": "Choose between the full, detailed minutes or a version that shows only the action items."
+    },
+    "step28": {
+      "title": "Formatting Toggles",
+      "content": "Use these switches to enable the Critical Lens, redact personal info (PII), add icons, or bold important keywords."
+    },
+    "step29": {
+      "title": "Meeting Coach Settings",
+      "content": "You can disable the Meeting Coach or change its feedback style from supportive (\"Gentle\") to more direct."
+    },
+    "step30": {
+      "title": "You're All Set!",
+      "content": "That covers all the features. You can replay this tour any time from this menu by clicking \"Replay Tutorial\"."
+    }
+  }
+}

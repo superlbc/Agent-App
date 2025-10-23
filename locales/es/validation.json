@@ -1,0 +1,46 @@
+{
+  "errors": {
+    "required": "Este campo es obligatorio",
+    "tooShort": "Debe tener al menos {{min}} caracteres",
+    "tooLong": "No debe tener más de {{max}} caracteres",
+    "invalidFormat": "Formato no válido",
+    "invalidEmail": "Dirección de correo electrónico no válida",
+    "invalidUrl": "URL no válida",
+    "invalidDate": "Fecha no válida",
+    "invalidNumber": "Debe ser un número",
+    "min": "Debe ser al menos {{min}}",
+    "max": "No debe ser más de {{max}}",
+    "pattern": "No coincide con el patrón requerido",
+    "unique": "Este valor ya existe",
+    "transcriptRequired": "Se requiere transcripción para generar notas",
+    "botIdRequired": "El ID del Bot debe configurarse en la configuración",
+    "transcriptTooShort": "La transcripción es demasiado corta. Por favor, añade más contenido.",
+    "networkError": "Error de red. Por favor, verifica tu conexión e inténtalo de nuevo.",
+    "serverError": "Error del servidor. Por favor, inténtalo más tarde.",
+    "authError": "Error de autenticación. Por favor, inicia sesión de nuevo.",
+    "generationFailed": "Error al generar notas. Por favor, inténtalo de nuevo.",
+    "exportFailed": "Error al exportar. Por favor, inténtalo de nuevo."
+  },
+  "warnings": {
+    "noAgenda": "No se proporcionó agenda. Las áreas de trabajo se extraerán automáticamente.",
+    "noTitle": "No se proporcionó título. Se generará un título automáticamente.",
+    "shortTranscript": "La transcripción es corta. Las notas pueden ser limitadas.",
+    "noBotId": "ID del Bot no configurado. Por favor, actualiza la configuración.",
+    "unsavedChanges": "Tienes cambios sin guardar.",
+    "largeFile": "El archivo es grande y puede tardar más en procesarse."
+  },
+  "info": {
+    "autoSaving": "Guardando automáticamente...",
+    "saved": "Guardado",
+    "processing": "Procesando tu solicitud...",
+    "almostDone": "Casi listo...",
+    "optional": "Este campo es opcional"
+  },
+  "confirmations": {
+    "clearForm": "¿Estás seguro de que quieres limpiar el formulario? Se perderán todos los datos no guardados.",
+    "resetSettings": "¿Estás seguro de que quieres restablecer la configuración a los valores predeterminados?",
+    "deleteItem": "¿Estás seguro de que quieres eliminar este elemento?",
+    "signOut": "¿Estás seguro de que quieres cerrar sesión?",
+    "overwriteData": "Esto sobrescribirá los datos existentes. ¿Continuar?"
+  }
+}

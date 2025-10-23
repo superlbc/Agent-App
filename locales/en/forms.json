@@ -1,0 +1,120 @@
+{
+  "input": {
+    "title": {
+      "label": "Meeting Title",
+      "placeholder": "Enter meeting title...",
+      "description": "Give your meeting a descriptive title"
+    },
+    "agenda": {
+      "label": "Agenda",
+      "placeholder": "Enter agenda items (one per line)...",
+      "description": "List the main topics or workstreams to discuss"
+    },
+    "transcript": {
+      "label": "Transcript",
+      "placeholder": "Paste your meeting transcript here...",
+      "description": "Include the full meeting conversation with speaker names"
+    },
+    "tags": {
+      "label": "Context Tags",
+      "placeholder": "Add tags...",
+      "description": "Add tags to categorize this meeting"
+    }
+  },
+  "controls": {
+    "title": "Generation Controls",
+    "department": {
+      "label": "Focus Department",
+      "description": "Filter notes to show only one department's action items"
+    },
+    "view": {
+      "label": "View Mode",
+      "description": "Choose between full notes or actions only"
+    },
+    "audience": {
+      "label": "Audience",
+      "description": "Tailor the notes for your audience"
+    },
+    "tone": {
+      "label": "Tone",
+      "description": "Set the writing style for the notes"
+    },
+    "preset": {
+      "label": "Meeting Preset",
+      "description": "Quick configurations for common meeting types"
+    },
+    "criticalLens": {
+      "label": "Critical Lens",
+      "description": "Include critical review section with gaps and risks"
+    },
+    "redact": {
+      "label": "Redact PII",
+      "description": "Mask emails, phone numbers, and sensitive information"
+    },
+    "useIcons": {
+      "label": "Use Icons",
+      "description": "Add visual icons to section headings"
+    },
+    "boldImportant": {
+      "label": "Bold Important Words",
+      "description": "Highlight key terms for easier scanning"
+    },
+    "boldKeywords": {
+      "label": "Bold Keywords",
+      "description": "Emphasize important terms and entities in the summary"
+    },
+    "meetingCoach": {
+      "label": "Meeting Coach",
+      "description": "Get feedback on meeting effectiveness"
+    },
+    "coachingStyle": {
+      "label": "Coaching Style",
+      "description": "Choose coaching tone"
+    }
+  },
+  "placeholders": {
+    "selectOption": "Select an option...",
+    "selectDepartment": "Select department...",
+    "selectPreset": "Select preset...",
+    "searchPlaceholder": "Search...",
+    "noOptions": "No options available"
+  },
+  "labels": {
+    "meetingDate": "Meeting Date",
+    "status": "Status",
+    "owner": "Owner",
+    "dueDate": "Due Date",
+    "department": "Department",
+    "task": "Task",
+    "notes": "Notes",
+    "category": "Category",
+    "priority": "Priority"
+  },
+  "actions": {
+    "useSampleData": "Use Sample Data",
+    "clearForm": "Clear Form",
+    "uploadFile": "Upload .txt or .docx",
+    "showAdvancedSettings": "Show Advanced Settings",
+    "hideAdvancedSettings": "Hide Advanced Settings",
+    "generateNotes": "Generate Notes"
+  },
+  "helperText": {
+    "agendaHelper": "One topic per line.",
+    "transcriptPlaceholder": "Paste transcript here, or drag & drop a file...",
+    "characterCount": "{{count}} characters / {{words}} words"
+  },
+  "tooltips": {
+    "meetingPreset": "Select a preset to quickly apply common settings for different meeting types.",
+    "contextTags": "Apply tags to help the AI understand the context and sensitivity of the meeting.",
+    "departmentFocus": "Highlight specific departments to have the AI focus on their action items and discussions.",
+    "audience": "Tailor the summary's level of detail for a specific audience.",
+    "tone": "Choose the writing style for the generated notes.",
+    "viewMode": "Select 'Full minutes' for a complete summary or 'Actions only' to focus on the next steps.",
+    "criticalLens": "Analyze for gaps, risks, and unassigned actions.",
+    "redact": "Mask personal info like emails and phone numbers.",
+    "useIcons": "Add icons to section headers for visual clarity.",
+    "boldKeywords": "Emphasize important terms and entities in the summary.",
+    "meetingCoach": "Provide feedback on meeting facilitation and effectiveness.",
+    "coachingStyle": "'Gentle' provides supportive feedback. 'Direct' provides more blunt, actionable advice."
+  }
+}

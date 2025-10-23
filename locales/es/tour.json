@@ -1,0 +1,194 @@
+{
+  "welcome": {
+    "title": "¡Bienvenido a Note Crafter!",
+    "description": "¿Te gustaría un tour rápido para conocer las funciones principales?",
+    "buttons": {
+      "start": "Iniciar Tour",
+      "skip": "No, gracias"
+    }
+  },
+  "steps": [
+    {
+      "title": "Entrada de Reunión",
+      "description": "Comienza introduciendo el título de tu reunión, la agenda y la transcripción. No te preocupes si no tienes una agenda - ¡podemos extraerla automáticamente de la transcripción!",
+      "target": "input-panel"
+    },
+    {
+      "title": "Controles de Generación",
+      "description": "Personaliza cómo se generan tus notas. Puedes enfocarte en departamentos específicos, ajustar el tono y habilitar funciones como Coach de Reuniones para obtener información de mejora.",
+      "target": "controls-section"
+    },
+    {
+      "title": "Configuraciones de Reunión",
+      "description": "¡Ahorra tiempo con configuraciones predeterminadas! Elige entre plantillas como 'Actualización de Cliente' o 'Resumen Ejecutivo' que configuran automáticamente los controles para tipos de reunión comunes.",
+      "target": "preset-selector"
+    },
+    {
+      "title": "Generar Notas",
+      "description": "Una vez que hayas introducido tu transcripción y establecido tus preferencias, haz clic en 'Generar Notas' para crear actas de reunión estructuradas con elementos de acción y estado RAG.",
+      "target": "generate-button"
+    },
+    {
+      "title": "Panel de Salida",
+      "description": "Tus notas generadas aparecen aquí con secciones de áreas de trabajo, elementos de acción e indicadores de estado. Desplázate para revisar toda la información extraída.",
+      "target": "output-panel"
+    },
+    {
+      "title": "Opciones de Exportación",
+      "description": "¡Comparte tus notas fácilmente! Exporta a CSV para seguimiento en hojas de cálculo, PDF para documentación, o copia al portapapeles para compartir rápidamente.",
+      "target": "export-buttons"
+    },
+    {
+      "title": "Interrogar Transcripción",
+      "description": "¿Quieres más detalles? Usa esta función para hacer preguntas de seguimiento sobre la reunión. La IA responderá basándose en la transcripción y sugerirá preguntas relacionadas.",
+      "target": "interrogate-button"
+    },
+    {
+      "title": "Coach de Reuniones",
+      "description": "Cuando está habilitado, Coach de Reuniones proporciona retroalimentación sobre la eficacia de la reunión - como cobertura de agenda, claridad de elementos de acción y equilibrio de participación. ¡Excelente para mejorar la cultura de reuniones de tu equipo!",
+      "target": "coach-section"
+    },
+    {
+      "title": "Configuración y Ayuda",
+      "description": "Accede a la configuración para configurar tu ID de Bot y preferencias. El menú de ayuda proporciona orientación detallada sobre todas las funciones. Puedes repetir este recorrido en cualquier momento desde el menú.",
+      "target": "header-menu"
+    }
+  ],
+  "completion": {
+    "title": "¡Ya Está Todo Listo!",
+    "description": "Ahora conoces los conceptos básicos del Generador de Notas de Reunión. Comienza pegando una transcripción y generando tu primer conjunto de notas. ¡Feliz reunión!",
+    "buttons": {
+      "finish": "Comenzar",
+      "replay": "Repetir Recorrido"
+    }
+  },
+  "navigation": {
+    "next": "Siguiente",
+    "back": "Anterior",
+    "skip": "Finalizar Tour",
+    "finish": "Finalizar",
+    "stepProgress": "Paso {{current}} de {{total}}"
+  },
+  "controllerSteps": {
+    "step1": {
+      "title": "¡Bienvenido a Note Crafter!",
+      "content": "Este tour te mostrará las funciones clave. Comencemos."
+    },
+    "step2": {
+      "title": "1. Proporciona tu Contenido",
+      "content": "Solo la transcripción es obligatoria. Si proporcionas una agenda, las notas generadas seguirán esa estructura."
+    },
+    "step3": {
+      "title": "Usar Datos de Muestra",
+      "content": "Para este tour, cargaremos algunos datos de muestra para ver cómo funciona."
+    },
+    "step4": {
+      "title": "2. Selecciona una Configuración",
+      "content": "Las configuraciones son la forma más rápida de configurar tus notas. Veamos algunos tipos de reunión comunes."
+    },
+    "step5": {
+      "title": "Configuración: Actualización de Cliente",
+      "content": "Esta configuración está optimizada para reuniones externas. Usa un tono listo para el cliente y oculta información personal."
+    },
+    "step6": {
+      "title": "Configuración: Sincronización Interna",
+      "content": "Ideal para reuniones de equipo. Esta configuración usa un tono más detallado y profesional y habilita la revisión crítica."
+    },
+    "step7": {
+      "title": "Configuración: Lluvia de Ideas",
+      "content": "Usa esto para sesiones creativas. Genera notas concisas y ayuda a identificar temas emergentes y acciones."
+    },
+    "step8": {
+      "title": "Configuración: Resumen Ejecutivo",
+      "content": "Crea un resumen de alto nivel con un tono conciso, perfecto para actualizaciones de liderazgo."
+    },
+    "step9": {
+      "title": "3. Generar Notas",
+      "content": "Cuando estés listo, haz clic aquí. Para el tour, mostraremos instantáneamente un resultado de muestra."
+    },
+    "step10": {
+      "title": "4. Revisa tu Resultado",
+      "content": "Aquí están tus notas estructuradas y profesionales. Veamos las secciones clave."
+    },
+    "step11": {
+      "title": "Notas de Flujo de Trabajo",
+      "content": "El agente organiza la transcripción en secciones basadas en tu agenda, extrayendo puntos clave, decisiones y riesgos."
+    },
+    "step12": {
+      "title": "Próximos Pasos",
+      "content": "Todos los próximos pasos se extraen automáticamente en una tabla clara y organizada con responsables, fechas de vencimiento y un estado RAG."
+    },
+    "step13": {
+      "title": "Revisión Crítica",
+      "content": "Esta sección (habilitada por algunas configuraciones) analiza brechas, riesgos y tareas sin asignar."
+    },
+    "step14": {
+      "title": "Coach de Reuniones",
+      "content": "Obtén retroalimentación impulsada por IA sobre la eficacia de tu reunión. Esto es solo para ti y no se exportará."
+    },
+    "step15": {
+      "title": "5. Exporta tus Notas",
+      "content": "Copia fácilmente, descarga como PDF o redacta un correo electrónico con tus notas generadas."
+    },
+    "step16": {
+      "title": "6. Interroga la Transcripción",
+      "content": "¿Tienes una pregunta específica? Usa esta función para chatear con un agente de IA que conoce el contenido de tu transcripción."
+    },
+    "step17": {
+      "title": "Pregunta lo que Quieras",
+      "content": "Puedes pedir resúmenes, decisiones clave o quién fue responsable de ciertas tareas. El agente responderá basándose solo en la transcripción proporcionada."
+    },
+    "step18": {
+      "title": "Ajuste Fino del Resultado",
+      "content": "A continuación, exploraremos la configuración avanzada para personalizar tu resultado. El formulario se ha limpiado y estamos de vuelta arriba para continuar."
+    },
+    "step19": {
+      "title": "Mostrar Configuración Avanzada",
+      "content": "Cada configuración es solo una combinación de esta configuración avanzada. Abramos el panel para verlas."
+    },
+    "step20": {
+      "title": "Panel de Configuración Avanzada",
+      "content": "Aquí puedes controlar manualmente cada aspecto del resultado."
+    },
+    "step21": {
+      "title": "Configuración Dinámica",
+      "content": "Observa cómo cambia la configuración en este panel cuando seleccionamos la configuración 'Actualización de Cliente'. Nota el 'Ocultar PII' y el tono 'Listo para el Cliente'."
+    },
+    "step22": {
+      "title": "Configuración Dinámica",
+      "content": "Ahora probemos 'Sincronización Interna'. Habilita el 'Lente Crítico' y usa iconos para una mejor legibilidad."
+    },
+    "step23": {
+      "title": "Etiquetas de Contexto",
+      "content": "Aplica etiquetas como \"Sensible\" o \"De cara al cliente\" para dar a la IA un contexto importante sobre el contenido de la reunión."
+    },
+    "step24": {
+      "title": "Enfoque de Departamento",
+      "content": "Selecciona uno o más departamentos para que la IA priorice sus discusiones relacionadas y elementos de acción en el resumen."
+    },
+    "step25": {
+      "title": "Audiencia",
+      "content": "Adapta el nivel de detalle del resumen. 'Ejecutivo' es de alto nivel, mientras que 'Departamento' es más granular."
+    },
+    "step26": {
+      "title": "Tono",
+      "content": "Ajusta el estilo de escritura de las notas, desde profesional hasta conciso o pulido para clientes."
+    },
+    "step27": {
+      "title": "Modo de Vista",
+      "content": "Elige entre las actas completas y detalladas o una versión que muestre solo los elementos de acción."
+    },
+    "step28": {
+      "title": "Opciones de Formato",
+      "content": "Usa estos interruptores para habilitar el Lente Crítico, ocultar información personal (PII), agregar iconos o resaltar palabras clave importantes."
+    },
+    "step29": {
+      "title": "Configuración de Coach de Reuniones",
+      "content": "Puedes desactivar el Coach de Reuniones o cambiar su estilo de retroalimentación de solidario (\"Amable\") a más directo."
+    },
+    "step30": {
+      "title": "¡Ya Está Todo Listo!",
+      "content": "Eso cubre todas las funciones. Puedes repetir este tour en cualquier momento desde este menú haciendo clic en \"Repetir Tutorial\"."
+    }
+  }
+}

@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AuthGuard } from './auth/AuthGuard';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './utils/i18n';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,8 +13,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <AuthGuard>
-      <App />
-    </AuthGuard>
+    <I18nextProvider i18n={i18n}>
+      <AuthGuard>
+        <App />
+      </AuthGuard>
+    </I18nextProvider>
   </React.StrictMode>
 );

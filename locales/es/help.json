@@ -1,0 +1,115 @@
+{
+  "title": "Ayuda y Orientación",
+  "sections": {
+    "gettingStarted": {
+      "title": "Primeros Pasos",
+      "content": "¡Bienvenido al Generador de Notas de Reunión! Esta herramienta transforma tus transcripciones de reuniones en notas estructuradas con elementos de acción, decisiones e información de coaching."
+    },
+    "howToUse": {
+      "title": "Cómo Usar",
+      "steps": [
+        "Introduce el título de tu reunión (o déjalo en blanco para generación automática)",
+        "Añade puntos de agenda, uno por línea (opcional)",
+        "Pega la transcripción de tu reunión",
+        "Ajusta los controles de generación según tus necesidades",
+        "Haz clic en 'Generar Notas'",
+        "Revisa, exporta o interroga la transcripción para obtener más información"
+      ]
+    },
+    "features": {
+      "title": "Características Principales",
+      "list": [
+        {
+          "title": "Extracción Inteligente",
+          "description": "Identifica automáticamente puntos clave de discusión, decisiones, riesgos y elementos de acción de tu transcripción"
+        },
+        {
+          "title": "Estado RAG",
+          "description": "Cada elemento de acción obtiene un estado Rojo/Ámbar/Verde basado en riesgo, claridad y plazos"
+        },
+        {
+          "title": "Coach de Reuniones",
+          "description": "Obtén retroalimentación accionable sobre la eficacia de la reunión alineada con los principios de Meeting Excellence"
+        },
+        {
+          "title": "Interrogar Transcripción",
+          "description": "Haz preguntas de seguimiento sobre tu reunión y obtén respuestas impulsadas por IA"
+        },
+        {
+          "title": "Múltiples Opciones de Exportación",
+          "description": "Exporta a CSV, PDF o copia al portapapeles para compartir fácilmente"
+        }
+      ]
+    },
+    "controls": {
+      "title": "Entender los Controles",
+      "items": [
+        {
+          "control": "Departamento Enfocado",
+          "description": "Filtra elementos de acción para mostrar solo un departamento (más General). Útil para reuniones departamentales específicas."
+        },
+        {
+          "control": "Modo de Vista",
+          "description": "Notas Completas muestra todas las secciones; Solo Acciones muestra solo la tabla de Próximos Pasos."
+        },
+        {
+          "control": "Audiencia",
+          "description": "Ejecutivo = alto nivel con menos detalles; Multifuncional = equilibrado; Específico de departamento = granular."
+        },
+        {
+          "control": "Tono",
+          "description": "Profesional = lenguaje empresarial estándar; Conciso = viñetas más cortas; Listo para cliente = pulido para compartir externamente."
+        },
+        {
+          "control": "Lente Crítico",
+          "description": "Añade una sección de Revisión Crítica que destaca brechas, riesgos y tareas ambiguas."
+        },
+        {
+          "control": "Coach de Reuniones",
+          "description": "Habilita información de coaching con métricas y sugerencias para mejorar reuniones futuras."
+        }
+      ]
+    },
+    "tips": {
+      "title": "Consejos Profesionales",
+      "list": [
+        "Incluye nombres de participantes en la transcripción (ej., 'Juan: Vamos a finalizar el diseño')",
+        "Usa configuraciones predeterminadas para tipos de reunión comunes para ahorrar tiempo",
+        "Habilita Coach de Reuniones para mejorar la cultura de reuniones de tu equipo",
+        "Usa Interrogar Transcripción para profundizar en temas específicos",
+        "Activa Lente Crítico para retrospectivas o reuniones de alto riesgo",
+        "Copia códigos de departamento (BL, STR, etc.) para facilitar el filtrado de elementos de acción"
+      ]
+    },
+    "troubleshooting": {
+      "title": "Solución de Problemas",
+      "items": [
+        {
+          "problem": "Las notas son demasiado detalladas",
+          "solution": "Cambia a tono 'Conciso' o vista 'Solo Acciones'"
+        },
+        {
+          "problem": "Todos los elementos de acción son Ámbar",
+          "solution": "Asegúrate de que tu transcripción incluye responsables claros y fechas de vencimiento"
+        },
+        {
+          "problem": "Faltan puntos de discusión",
+          "solution": "Verifica que tus puntos de agenda coinciden con los temas discutidos en la transcripción"
+        },
+        {
+          "problem": "La exportación a PDF no funciona",
+          "solution": "Intenta usar Copiar al Portapapeles en su lugar, luego pega en tu editor de documentos preferido"
+        }
+      ]
+    },
+    "support": {
+      "title": "Soporte",
+      "content": "Para problemas técnicos o comentarios, contacta al Equipo IPCT o a tu administrador del sistema."
+    }
+  },
+  "buttons": {
+    "close": "Cerrar",
+    "startTour": "Iniciar Tutorial",
+    "learnMore": "Más Información"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "audience": {
+    "executive": "Ejecutivo (alto nivel)",
+    "crossFunctional": "Equipo multifuncional (equilibrado)",
+    "departmentSpecific": "Específico de departamento (granular)"
+  },
+  "audienceShort": {
+    "executive": "Ejecutivo",
+    "crossFunctional": "Multifuncional",
+    "departmentSpecific": "Departamento"
+  },
+  "tone": {
+    "professional": "Profesional",
+    "concise": "Conciso",
+    "clientReady": "Listo para cliente"
+  },
+  "view": {
+    "full": "Notas Completas",
+    "actionsOnly": "Solo Acciones"
+  },
+  "coachingStyle": {
+    "gentle": "Suave",
+    "direct": "Directo"
+  },
+  "departments": {
+    "BL": "Marca y Licencias",
+    "STR": "Estrategia e Información",
+    "PM": "Gestión de Proyectos",
+    "CR": "Creatividad",
+    "XD": "Diseño de Experiencia",
+    "XP": "Producción de Experiencia",
+    "IPCT": "Tecnología Integrada/Creativa",
+    "CON": "Contenido",
+    "STU": "Estudio",
+    "General": "General"
+  },
+  "departmentDescriptions": {
+    "BL": "Enlace con clientes, gestión comercial, alineación interdisciplinar",
+    "STR": "Información, encuadre, argumentación; apoya la configuración creativa",
+    "PM": "Flujo de trabajo, calendario, recursos, coordinación",
+    "CR": "Grandes ideas, dirección de arte, redacción",
+    "XD": "Esquema de experiencia, diseño físico/digital, renders, planos",
+    "XP": "Viabilidad, proveedores, ejecución in situ, riesgo/legal/sostenibilidad",
+    "IPCT": "Enfoque técnico, prototipado, desarrollo, innovación",
+    "CON": "Producción de vídeo/foto/audio, artistas/ilustradores, logística",
+    "STU": "Maquetación, retoque, edición de texto, compra de impresión/premium",
+    "General": "Multifuncional o departamento poco claro"
+  },
+  "presets": {
+    "clientUpdate": {
+      "name": "Actualización de Cliente",
+      "description": "Notas pulidas y listas para el cliente que enfatizan decisiones y próximos pasos"
+    },
+    "internalSync": {
+      "name": "Sincronización Interna",
+      "description": "Notas equilibradas para colaboración del equipo multifuncional"
+    },
+    "brainstorm": {
+      "name": "Lluvia de Ideas",
+      "description": "Notas de sesión creativa capturando ideas y elementos de acción"
+    },
+    "executiveBrief": {
+      "name": "Resumen Ejecutivo",
+      "description": "Resumen de alto nivel centrado en decisiones clave y riesgos"
+    },
+    "departmentStandup": {
+      "name": "Reunión Departamental",
+      "description": "Notas detalladas y granulares para un solo departamento"
+    },
+    "retrospective": {
+      "name": "Retrospectiva",
+      "description": "Revisión crítica habilitada para identificar brechas y mejoras"
+    }
+  },
+  "status": {
+    "red": "Rojo",
+    "amber": "Ámbar",
+    "green": "Verde",
+    "na": "N/A",
+    "blocked": "Bloqueado",
+    "atRisk": "En Riesgo",
+    "onTrack": "En Curso",
+    "completed": "Completado",
+    "notStarted": "No Iniciado"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "ja": "日本語"
+  },
+  "regions": {
+    "US": "Estados Unidos",
+    "GB": "Reino Unido",
+    "ES": "España",
+    "JP": "Japón",
+    "CA": "Canadá"
+  },
+  "offices": {
+    "ATL-MOM": "Atlanta",
+    "CHI-MOM": "Chicago",
+    "NYC-MOM": "Nueva York",
+    "STL-MOM": "St. Louis",
+    "LDN-MOM": "Londres",
+    "TOR-MOM": "Toronto",
+    "MAD-MOM": "Madrid",
+    "TYO-MOM": "Tokio"
+  },
+  "contextTags": {
+    "clientFacing": "De cara al cliente",
+    "internalOnly": "Solo interno",
+    "sensitive": "Sensible",
+    "executiveReview": "Revisión ejecutiva"
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
@@ -30,6 +31,7 @@ export const TourStep: React.FC<TourStepProps> = ({
   currentStepIndex,
   totalSteps
 }) => {
+  const { t } = useTranslation(['tour']);
   const { selector, title, content, placement = 'bottom' } = step;
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -165,9 +167,9 @@ export const TourStep: React.FC<TourStepProps> = ({
                 totalSteps: totalSteps
               });
               onStop();
-            }}>End Tour</Button>
+            }}>{t('tour:navigation.skip')}</Button>
             <div className="flex gap-2">
-              {!isFirst && <Button variant="outline" size="sm" onClick={onPrev}>Previous</Button>}
+              {!isFirst && <Button variant="outline" size="sm" onClick={onPrev}>{t('tour:navigation.back')}</Button>}
               <Button size="sm" onClick={() => {
                 if (isLast) {
                   // Telemetry: Track tour completed via "Finish" button
@@ -179,7 +181,7 @@ export const TourStep: React.FC<TourStepProps> = ({
                   onNext();
                 }
               }}>
-                {isLast ? 'Finish' : 'Next'}
+                {isLast ? t('tour:navigation.finish') : t('tour:navigation.next')}
               </Button>
             </div>
           </div>

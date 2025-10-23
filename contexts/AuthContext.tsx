@@ -4,6 +4,7 @@ import { GraphData } from '../types';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isAuthorized: boolean;
   user: AccountInfo | null;
   graphData: GraphData | null;
   logout: () => void;

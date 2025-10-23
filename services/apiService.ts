@@ -1,5 +1,6 @@
 // NOTE: This service handles communication with the custom Interact API ("AI Console").
 import { Payload, AgentResponse, ApiConfig, AuthToken, FormState, InterrogationResponse } from '../types.ts';
+import i18n from '../utils/i18n';
 
 const getAuthToken = async (config: ApiConfig): Promise<string> => {
     if (!config.clientId || !config.clientSecret) {
@@ -60,6 +61,9 @@ const getAuthToken = async (config: ApiConfig): Promise<string> => {
 const constructPrompt = (payload: Payload): string => {
     const { meeting_title, agenda, transcript, controls } = payload;
 
+    // Get current language from i18n (en, es, or ja)
+    const currentLanguage = i18n.language || 'en';
+
     const promptParts = [
         `<<<APP_MODE>>>`,
         `Meeting Title: ${meeting_title}`,
@@ -78,7 +82,7 @@ const constructPrompt = (payload: Payload): string => {
         ``,
         `Controls:`,
     );
-    
+
     const controlEntries = Object.entries(controls)
         .filter(([, value]) => value !== null && value !== undefined)
         .map(([key, value]) => {
@@ -88,8 +92,13 @@ const constructPrompt = (payload: Payload): string => {
             return `${key}: ${value}`;
         })
         .filter(Boolean) as string[];
-    
+
+    // Add output_language control to tell agent what language to generate in
+    controlEntries.push(`output_language: ${currentLanguage}`);
+
     promptParts.push(...controlEntries);
+
+    console.log(`📝 Sending request to agent with output_language: ${currentLanguage}`);
 
     return promptParts.join('\n');
 };

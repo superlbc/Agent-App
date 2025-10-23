@@ -122,7 +122,7 @@ const AppContent: React.FC = () => {
 
   const handleGenerate = useCallback(async (currentFormState: FormState, currentControls: Controls) => {
     if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.botId) {
-        addToast('API configuration is missing. Check settings and environment variables.', 'error');
+        addToast(t('common:toasts.apiConfigMissing'), 'error');
         return;
     }
 
@@ -165,9 +165,9 @@ const AppContent: React.FC = () => {
 
       setHasGenerated(true);
       if(hasGenerated) {
-        addToast('Preview updated successfully', 'success');
+        addToast(t('common:toasts.previewUpdated'), 'success');
       } else {
-        addToast('Notes generated successfully', 'success');
+        addToast(t('common:toasts.notesGenerated'), 'success');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -238,8 +238,8 @@ const AppContent: React.FC = () => {
               controls={controls}
               setControls={setControls}
               addToast={addToast}
-              onClearForm={() => { handleClearForm(); addToast('Form cleared', 'success'); }}
-              onUseSampleData={() => { handleUseSampleData(); addToast('Sample data loaded', 'success'); }}
+              onClearForm={() => { handleClearForm(); addToast(t('common:toasts.formCleared'), 'success'); }}
+              onUseSampleData={() => { handleUseSampleData(); addToast(t('common:toasts.sampleDataLoaded'), 'success'); }}
               isTourActive={isTourActive}
             />
           </div>

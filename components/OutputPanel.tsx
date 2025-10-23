@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep } from '../types';
 import { Card } from './ui/Card';
 import { SkeletonLoader } from './ui/SkeletonLoader';
@@ -9,6 +10,8 @@ import { Chip } from './ui/Chip';
 import { markdownToHtml } from '../utils/formatting';
 import { InterrogateTranscriptModal } from './InterrogateTranscriptModal';
 import { telemetryService } from '../utils/telemetryService';
+import { formatDate } from '../utils/dateFormatting';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface OutputPanelProps {
   output: AgentResponse | null;
@@ -42,7 +45,17 @@ const renderWithBold = (text: string): React.ReactNode => {
 };
 
 const NextStepsTable: React.FC<{ nextSteps: NextStep[]; useIcons: boolean }> = ({ nextSteps, useIcons }) => {
-    const headers = ['Department', 'Owner', 'Task', 'Due Date', 'Status', 'Status Notes'];
+    const { t } = useTranslation(['common']);
+    const { currentLanguage } = useLanguage();
+
+    const headers = [
+        t('common:nextSteps.headers.department'),
+        t('common:nextSteps.headers.owner'),
+        t('common:nextSteps.headers.task'),
+        t('common:nextSteps.headers.dueDate'),
+        t('common:nextSteps.headers.status'),
+        t('common:nextSteps.headers.statusNotes')
+    ];
 
     const renderStatus = (status: NextStep['status']): React.ReactNode => {
         if (useIcons) {
@@ -77,7 +90,7 @@ const NextStepsTable: React.FC<{ nextSteps: NextStep[]; useIcons: boolean }> = (
                                 <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.department}</td>
                                 <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.owner}</td>
                                 <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.task}</td>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.due_date}</td>
+                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{formatDate(row.due_date, currentLanguage)}</td>
                                 <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{renderStatus(row.status)}</td>
                                 <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.status_notes}</td>
                             </tr>
@@ -281,6 +294,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 
 
 const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void }> = ({ output, title, addToast, onInterrogate }) => {
+    const { t } = useTranslation(['common']);
     const markdownContent = output.markdown || '';
     const nextSteps = output.next_steps || [];
 
@@ -302,7 +316,7 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
                 format: 'richText'
             });
 
-            addToast('Formatted notes copied to clipboard.', 'success');
+            addToast(t('common:toasts.notesCopied'), 'success');
         } catch (err) {
             console.error('Failed to copy rich text, falling back to plain text:', err);
             await navigator.clipboard.writeText(markdownContent);
@@ -313,14 +327,14 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
                 format: 'plainText'
             });
 
-            addToast('Notes copied to clipboard (plain text).', 'success');
+            addToast(t('common:toasts.notesCopiedPlain'), 'success');
         }
     };
 
     const handleDownloadPdf = () => {
         const printWindow = window.open('', '_blank');
         if(!printWindow) {
-            addToast('Could not open print window. Please disable popup blockers.', 'error');
+            addToast(t('common:toasts.printWindowBlocked'), 'error');
             return;
         }
 
@@ -386,11 +400,11 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
                 'text/plain': blobText,
             });
             await navigator.clipboard.write([clipboardItem]);
-            addToast('Email content copied. Paste into your email client.', 'success');
+            addToast(t('common:toasts.emailCopied'), 'success');
         } catch (err) {
             console.error('Failed to copy rich text, falling back to plain text:', err);
             await navigator.clipboard.writeText(fullMarkdown);
-            addToast('Email content copied (plain text). Paste into your email client.', 'success');
+            addToast(t('common:toasts.emailCopiedPlain'), 'success');
         }
 
         const subject = encodeURIComponent(`Meeting Notes: ${title}`);
@@ -407,7 +421,7 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 
     const handleDownloadCsv = () => {
         if (!nextSteps || nextSteps.length === 0) {
-            addToast('No action items to export.', 'error');
+            addToast(t('common:toasts.noActionsToExport'), 'error');
             return;
         }
 
@@ -419,20 +433,20 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 
         const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         exportToCsv(nextSteps, `next_steps_${safeTitle}.csv`);
-        addToast('CSV downloaded successfully.', 'success');
+        addToast(t('common:toasts.csvDownloaded'), 'success');
     };
 
     return (
         <div id="export-bar" className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={handleCopy}><Icon name="copy" className="h-4 w-4 mr-2"/> Copy to Clipboard</Button>
-                <Button size="sm" variant="outline" onClick={handleDownloadPdf}><Icon name="pdf" className="h-4 w-4 mr-2"/> Download PDF</Button>
-                <Button size="sm" variant="outline" onClick={handleDownloadCsv}><Icon name="csv" className="h-4 w-4 mr-2"/> Download CSV Actions</Button>
-                <Button size="sm" variant="outline" onClick={handleDraftEmail}><Icon name="email" className="h-4 w-4 mr-2"/> Draft Email</Button>
+                <Button size="sm" variant="outline" onClick={handleCopy}><Icon name="copy" className="h-4 w-4 mr-2"/> {t('common:actions.copyToClipboard')}</Button>
+                <Button size="sm" variant="outline" onClick={handleDownloadPdf}><Icon name="pdf" className="h-4 w-4 mr-2"/> {t('common:actions.downloadPDF')}</Button>
+                <Button size="sm" variant="outline" onClick={handleDownloadCsv}><Icon name="csv" className="h-4 w-4 mr-2"/> {t('common:actions.downloadCSVActions')}</Button>
+                <Button size="sm" variant="outline" onClick={handleDraftEmail}><Icon name="email" className="h-4 w-4 mr-2"/> {t('common:actions.draftEmail')}</Button>
             </div>
             <div>
                  <Button id="interrogate-transcript-button" size="sm" variant="primary" onClick={onInterrogate}>
-                    <Icon name="interrogate" className="h-4 w-4 mr-2"/> Interrogate Transcript
+                    <Icon name="interrogate" className="h-4 w-4 mr-2"/> {t('common:actions.interrogateTranscript')}
                 </Button>
             </div>
         </div>
@@ -440,25 +454,26 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 };
 
 const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) => {
+    const { t } = useTranslation(['common']);
     const { strengths, improvements, facilitation_tips, metrics, flags } = insights;
-    
+
     const flagEntries = Object.entries(flags).filter(([, value]) => value === true);
 
     const flagLabels: Record<keyof CoachFlags, string> = {
-        participation_imbalance: 'Participation Imbalance',
-        many_unassigned_actions: 'Many Unassigned Actions',
-        few_decisions: 'Few Decisions',
-        light_agenda_coverage: 'Light Agenda Coverage',
+        participation_imbalance: t('common:meetingCoach.flags.participationImbalance'),
+        many_unassigned_actions: t('common:meetingCoach.flags.manyUnassignedActions'),
+        few_decisions: t('common:meetingCoach.flags.fewDecisions'),
+        light_agenda_coverage: t('common:meetingCoach.flags.lightAgendaCoverage'),
     };
 
     return (
         <>
-            <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Meeting Coach</h2>
-            
+            <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">{t('common:meetingCoach.title')}</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 {strengths && strengths.length > 0 && (
                     <Card className="p-4 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800/50">
-                        <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">What Worked Well</h3>
+                        <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">{t('common:meetingCoach.sections.whatWorkedWell')}</h3>
                         <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
                             {strengths.map((item, i) => <li key={i}>{renderWithBold(item)}</li>)}
                         </ul>
@@ -466,7 +481,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
                 )}
                 {improvements && improvements.length > 0 && (
                     <Card className="p-4 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800/50">
-                        <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">Next Time, Try</h3>
+                        <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">{t('common:meetingCoach.sections.nextTimeTry')}</h3>
                         <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
                             {improvements.map((item, i) => <li key={i}>{renderWithBold(item)}</li>)}
                         </ul>
@@ -474,7 +489,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
                 )}
                 {facilitation_tips && facilitation_tips.length > 0 && (
                      <Card className="p-4 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800/50">
-                        <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Facilitation Tips</h3>
+                        <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">{t('common:meetingCoach.sections.facilitationTips')}</h3>
                         <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
                             {facilitation_tips.map((item, i) => <li key={i}>{renderWithBold(item)}</li>)}
                         </ul>
@@ -483,32 +498,32 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
             </div>
 
             <div>
-                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">Health Snapshot</h3>
+                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('common:meetingCoach.healthSnapshot.title')}</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center">
                     <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metrics.agenda_coverage_pct}%</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Agenda Coverage</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('common:meetingCoach.healthSnapshot.metrics.agendaCoverage')}</div>
                     </div>
                      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metrics.decision_count}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Decisions Made</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('common:meetingCoach.healthSnapshot.metrics.decisionsMade')}</div>
                     </div>
                      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metrics.actions_with_owner_pct}%</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Actions with Owner</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('common:meetingCoach.healthSnapshot.metrics.actionsWithOwner')}</div>
                     </div>
                      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metrics.actions_with_due_date_pct}%</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Actions with Due Date</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('common:meetingCoach.healthSnapshot.metrics.actionsWithDueDate')}</div>
                     </div>
                      <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metrics.top_speaker_share_pct}%</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Top Speaker Share</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{t('common:meetingCoach.healthSnapshot.metrics.topSpeakerShare')}</div>
                     </div>
                 </div>
                  {flagEntries.length > 0 && (
                     <div className="mt-4 flex flex-wrap gap-2 items-center">
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Flags:</span>
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('common:meetingCoach.healthSnapshot.flagsLabel')}</span>
                         {flagEntries.map(([key]) => (
                             <Chip key={key} selected>{flagLabels[key as keyof CoachFlags]}</Chip>
                         ))}
@@ -523,7 +538,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
                     rel="noopener noreferrer"
                     className="inline-block px-3 py-1 text-xs font-medium rounded-full transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                 >
-                    In alignment with Momentum's Meeting Excellence
+                    {t('common:meetingCoach.meetingExcellenceLink')}
                 </a>
             </div>
         </>
@@ -531,6 +546,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
 };
 
 export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig }) => {
+  const { t } = useTranslation(['common']);
   const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
 
   const handleInterrogateOpen = () => {
@@ -565,8 +581,8 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
     return (
       <Card className="p-12 text-center" id="output-placeholder">
         <Icon name="document" className="h-16 w-16 mx-auto text-slate-300 dark:text-slate-600"/>
-        <h3 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-300">Your notes will appear here</h3>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Fill in the details and click "Generate Notes" to start.</p>
+        <h3 className="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-300">{t('common:output.emptyState.title')}</h3>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t('common:output.emptyState.description')}</p>
       </Card>
     );
   }
@@ -601,7 +617,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
           {output.coach_insights && (
               <div id="meeting-coach-panel" className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
                 <p className="text-center text-xs italic text-slate-500 dark:text-slate-400 mb-4 px-4">
-                  The following Meeting Coach analysis is for your information only and will not be included in any exports.
+                  {t('common:meetingCoach.disclaimer')}
                 </p>
                 <MeetingCoachPanel insights={output.coach_insights} />
               </div>

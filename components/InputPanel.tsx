@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
@@ -48,6 +49,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   onUseSampleData,
   isTourActive,
 }) => {
+  const { t } = useTranslation(['forms', 'common', 'constants']);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -71,7 +73,9 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     }));
     setFormState(prev => ({...prev, tags: config.tags}));
     if (!isTourActive) {
-      addToast(`Applied '${MEETING_PRESET_OPTIONS.find(p => p.value === preset)?.label}' preset`, 'success');
+      const presetOption = MEETING_PRESET_OPTIONS.find(p => p.value === preset);
+      const presetName = presetOption ? t(presetOption.labelKey) : preset;
+      addToast(t('common:toasts.presetApplied', { presetName }), 'success');
     }
   };
 
@@ -106,14 +110,14 @@ export const InputPanel: React.FC<InputPanelProps> = ({
       reader.onload = (e) => {
         const text = e.target?.result as string;
         setFormState(prev => ({ ...prev, transcript: text }));
-        addToast(`Loaded transcript from ${file.name}`, 'success');
+        addToast(t('common:toasts.fileLoaded', { fileName: file.name }), 'success');
       };
-      reader.onerror = () => addToast(`Error reading file ${file.name}`, 'error');
+      reader.onerror = () => addToast(t('common:toasts.fileError', { fileName: file.name }), 'error');
       reader.readAsText(file);
     } else if (file.name.endsWith('.docx')) {
       // @ts-ignore - mammoth is loaded from CDN
       if (typeof window.mammoth === 'undefined') {
-        addToast('Could not read the .docx file or parsing library is not available.', 'error');
+        addToast(t('common:toasts.docxLibraryError'), 'error');
         return;
       }
 
@@ -123,24 +127,24 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         fileName: file.name.substring(file.name.lastIndexOf('.'))
       });
 
-      addToast(`Processing .docx file...`, 'success');
+      addToast(t('common:toasts.fileProcessing'), 'success');
       reader.onload = (e) => {
         const arrayBuffer = e.target?.result as ArrayBuffer;
         // @ts-ignore
         window.mammoth.extractRawText({ arrayBuffer })
           .then((result: { value: string; }) => {
             setFormState(prev => ({ ...prev, transcript: result.value }));
-            addToast(`Loaded transcript from ${file.name}`, 'success');
+            addToast(t('common:toasts.fileLoaded', { fileName: file.name }), 'success');
           })
           .catch((err: Error) => {
             console.error(err);
-            addToast('Could not read the .docx file.', 'error');
+            addToast(t('common:toasts.docxReadError'), 'error');
           });
       };
-      reader.onerror = () => addToast(`Error reading file ${file.name}`, 'error');
+      reader.onerror = () => addToast(t('common:toasts.fileError', { fileName: file.name }), 'error');
       reader.readAsArrayBuffer(file);
     } else {
-      addToast('Unsupported file type. Please upload a .txt or .docx file.', 'error');
+      addToast(t('common:toasts.unsupportedFileType'), 'error');
     }
   };
 
@@ -165,28 +169,28 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     <Card className="p-4 sm:p-6" id="input-panel">
       <div className="space-y-6">
         <div className="space-y-4" id="transcript-input-section">
-          <Input 
+          <Input
             id="title"
-            label="Meeting Title"
+            label={t('forms:input.title.label')}
             value={formState.title}
             onChange={e => handleFormChange('title', e.target.value)}
           />
            <Textarea
             id="agenda"
-            label="Agenda"
+            label={t('forms:input.agenda.label')}
             value={formState.agenda}
             onChange={e => handleFormChange('agenda', e.target.value)}
             rows={3}
-            helperText="One topic per line."
+            helperText={t('forms:helperText.agendaHelper')}
           />
           <div>
             <Textarea
               id="transcript"
-              label="Transcript"
+              label={t('forms:input.transcript.label')}
               value={formState.transcript}
               onChange={e => handleFormChange('transcript', e.target.value)}
               rows={8}
-              placeholder="Paste transcript here, or drag & drop a file..."
+              placeholder={t('forms:helperText.transcriptPlaceholder')}
               onFileDrop={handleFileDrop}
               required
             />
@@ -199,7 +203,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
               title="Upload transcript file input"
             />
             <div className="mt-1.5 flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
-              <span>{charCount.toLocaleString()} characters / {wordCount.toLocaleString()} words</span>
+              <span>{t('forms:helperText.characterCount', { count: charCount, words: wordCount })}</span>
               <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -207,7 +211,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                   aria-label="Upload transcript file"
               >
                   <Icon name="upload" className="h-3.5 w-3.5 mr-1" />
-                  Upload .txt or .docx
+                  {t('forms:actions.uploadFile')}
               </button>
             </div>
           </div>
@@ -216,21 +220,21 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
           <div id="meeting-presets-section">
             <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Meeting Preset
-              <Tooltip content="Select a preset to quickly apply common settings for different meeting types.">
+              {t('forms:controls.preset.label')}
+              <Tooltip content={t('forms:tooltips.meetingPreset')}>
                   <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
               </Tooltip>
             </label>
             <div className="grid grid-cols-2 gap-2">
-              {MEETING_PRESET_OPTIONS.map(({ value, label }) => (
-                  <Button 
+              {MEETING_PRESET_OPTIONS.map(({ value, labelKey }) => (
+                  <Button
                       key={value}
                       id={`preset-button-${value}`}
                       variant={controls.meetingPreset === value ? 'primary' : 'outline'}
                       size="sm"
                       onClick={() => handlePresetChange(value)}
                   >
-                      {label}
+                      {t(labelKey)}
                   </Button>
               ))}
             </div>
@@ -244,7 +248,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                   className="w-full"
                   onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
               >
-                  {isAdvancedOpen ? 'Hide' : 'Show'} Advanced Settings
+                  {isAdvancedOpen ? t('forms:actions.hideAdvancedSettings') : t('forms:actions.showAdvancedSettings')}
                   <Icon name={isAdvancedOpen ? 'chevron-up' : 'chevron-down'} className="h-4 w-4 ml-2"/>
               </Button>
           </div>
@@ -253,15 +257,15 @@ export const InputPanel: React.FC<InputPanelProps> = ({
               <div id="advanced-settings-panel" className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                   <div id="context-tags-section">
                       <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Context Tags
-                         <Tooltip content="Apply tags to help the AI understand the context and sensitivity of the meeting.">
+                        {t('forms:input.tags.label')}
+                         <Tooltip content={t('forms:tooltips.contextTags')}>
                             <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
                         </Tooltip>
                       </label>
                       <div className="flex flex-wrap gap-2">
-                          {CONTEXT_TAG_OPTIONS.map(tag => (
-                              <Chip key={tag} selected={formState.tags.includes(tag)} onClick={() => handleTagToggle(tag)}>
-                                  {tag}
+                          {CONTEXT_TAG_OPTIONS.map(({ value, labelKey }) => (
+                              <Chip key={value} selected={formState.tags.includes(value)} onClick={() => handleTagToggle(value)}>
+                                  {t(labelKey)}
                               </Chip>
                           ))}
                       </div>
@@ -269,16 +273,16 @@ export const InputPanel: React.FC<InputPanelProps> = ({
 
                    <div id="department-focus-section">
                       <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Department Focus
-                         <Tooltip content="Highlight specific departments to have the AI focus on their action items and discussions.">
+                        {t('forms:controls.department.label')}
+                         <Tooltip content={t('forms:tooltips.departmentFocus')}>
                             <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
                         </Tooltip>
                       </label>
                       <div className="flex flex-wrap gap-1.5">
                           {DEPARTMENT_OPTIONS.map(dept => (
-                              <Tooltip key={dept} content={DEPARTMENT_LEGEND[dept]}>
-                                  <Chip 
-                                      selected={controls.focus_department.includes(dept)} 
+                              <Tooltip key={dept} content={t(`constants:departmentDescriptions.${dept}`)}>
+                                  <Chip
+                                      selected={controls.focus_department.includes(dept)}
                                       onClick={() => {
                                           const newDepts = controls.focus_department.includes(dept)
                                               ? controls.focus_department.filter(d => d !== dept)
@@ -295,50 +299,50 @@ export const InputPanel: React.FC<InputPanelProps> = ({
 
                   <div id="audience-section">
                     <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Audience
-                      <Tooltip content="Tailor the summary's level of detail for a specific audience.">
+                      {t('forms:controls.audience.label')}
+                      <Tooltip content={t('forms:tooltips.audience')}>
                           <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
                       </Tooltip>
                     </label>
                      <div className="grid grid-cols-3 gap-2">
-                          {AUDIENCE_BUTTON_OPTIONS.map(({ value, label }) => (
-                              <Button 
+                          {AUDIENCE_BUTTON_OPTIONS.map(({ value, labelKey }) => (
+                              <Button
                                   key={value}
                                   variant={controls.audience === value ? 'primary' : 'outline'}
                                   size="sm"
                                   onClick={() => handleControlChange('audience', value)}
                               >
-                                  {label}
+                                  {t(labelKey)}
                               </Button>
                           ))}
                       </div>
                   </div>
                    <div id="tone-section">
                       <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Tone
-                        <Tooltip content="Choose the writing style for the generated notes.">
+                        {t('forms:controls.tone.label')}
+                        <Tooltip content={t('forms:tooltips.tone')}>
                             <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
                         </Tooltip>
                       </label>
                       <div className="grid grid-cols-3 gap-2">
-                          {TONE_OPTIONS.map(({ value, label }) => (
+                          {TONE_OPTIONS.map(({ value, labelKey }) => (
                               <Button key={value} variant={controls.tone === value ? 'primary' : 'outline'} size="sm" onClick={() => handleControlChange('tone', value)}>
-                                  {label}
+                                  {t(labelKey)}
                               </Button>
                           ))}
                       </div>
                   </div>
                    <div id="view-mode-section">
                       <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        View Mode
-                         <Tooltip content="Select 'Full minutes' for a complete summary or 'Actions only' to focus on the next steps.">
+                        {t('forms:controls.view.label')}
+                         <Tooltip content={t('forms:tooltips.viewMode')}>
                             <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
                         </Tooltip>
                       </label>
                       <div className="grid grid-cols-2 gap-2">
-                          {VIEW_MODE_OPTIONS.map(({ value, label }) => (
+                          {VIEW_MODE_OPTIONS.map(({ value, labelKey }) => (
                               <Button key={value} variant={controls.view === value ? 'primary' : 'outline'} size="sm" onClick={() => handleControlChange('view', value)}>
-                                  {label}
+                                  {t(labelKey)}
                               </Button>
                           ))}
                       </div>
@@ -347,53 +351,53 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                   <div id="format-toggles-section" className="grid grid-cols-2 gap-4 pt-2">
                       <ToggleSwitch
                         id="critical-lens"
-                        label="Critical Lens"
+                        label={t('forms:controls.criticalLens.label')}
                         checked={controls.critical_lens}
                         onChange={checked => handleControlChange('critical_lens', checked)}
-                        tooltip="Analyze for gaps, risks, and unassigned actions."
+                        tooltip={t('forms:tooltips.criticalLens')}
                       />
                        <ToggleSwitch
                         id="redact"
-                        label="Redact PII"
+                        label={t('forms:controls.redact.label')}
                         checked={controls.redact}
                         onChange={checked => handleControlChange('redact', checked)}
-                        tooltip="Mask personal info like emails and phone numbers."
+                        tooltip={t('forms:tooltips.redact')}
                       />
                        <ToggleSwitch
                         id="use-icons"
-                        label="Use Icons"
+                        label={t('forms:controls.useIcons.label')}
                         checked={controls.use_icons}
                         onChange={checked => handleControlChange('use_icons', checked)}
-                        tooltip="Add icons to section headers for visual clarity."
+                        tooltip={t('forms:tooltips.useIcons')}
                       />
                       <ToggleSwitch
                         id="bold-words"
-                        label="Bold Keywords"
+                        label={t('forms:controls.boldKeywords.label')}
                         checked={controls.bold_important_words}
                         onChange={checked => handleControlChange('bold_important_words', checked)}
-                        tooltip="Emphasize important terms and entities in the summary."
+                        tooltip={t('forms:tooltips.boldKeywords')}
                       />
                   </div>
                   <div id="meeting-coach-section">
                    <ToggleSwitch
                       id="meeting-coach"
-                      label="Meeting Coach"
+                      label={t('forms:controls.meetingCoach.label')}
                       checked={controls.meeting_coach}
                       onChange={checked => handleControlChange('meeting_coach', checked)}
-                      tooltip="Provide feedback on meeting facilitation and effectiveness."
+                      tooltip={t('forms:tooltips.meetingCoach')}
                   />
                   {controls.meeting_coach && (
                       <div className="pl-6 mt-2">
                            <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                              Coaching Style
-                              <Tooltip content="'Gentle' provides supportive feedback. 'Direct' provides more blunt, actionable advice.">
+                              {t('forms:controls.coachingStyle.label')}
+                              <Tooltip content={t('forms:tooltips.coachingStyle')}>
                                   <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
                               </Tooltip>
                            </label>
                           <div className="grid grid-cols-2 gap-2">
-                              {COACHING_STYLE_OPTIONS.map(({ value, label }) => (
+                              {COACHING_STYLE_OPTIONS.map(({ value, labelKey }) => (
                                   <Button key={value} variant={controls.coaching_style === value ? 'primary' : 'outline'} size="sm" onClick={() => handleControlChange('coaching_style', value)}>
-                                      {label}
+                                      {t(labelKey)}
                                   </Button>
                               ))}
                           </div>
@@ -412,9 +416,9 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                   onClick={onUseSampleData}
                   className="text-sm font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
               >
-                  Use Sample Data
+                  {t('forms:actions.useSampleData')}
               </button>
-              <Button onClick={onClearForm} variant="secondary" size="sm">Clear Form</Button>
+              <Button onClick={onClearForm} variant="secondary" size="sm">{t('forms:actions.clearForm')}</Button>
           </div>
       </div>
     </Card>

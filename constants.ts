@@ -1,31 +1,41 @@
 import { Department, ContextTag, Audience, Tone, ViewMode, FormState, Controls, MeetingPreset, CoachingStyle } from './types.ts';
 
 export const DEPARTMENT_OPTIONS: Department[] = ["BL", "STR", "PM", "CR", "XD", "XP", "IPCT", "CON", "STU", "General"];
-export const CONTEXT_TAG_OPTIONS: ContextTag[] = ["Client facing", "Internal only", "Sensitive", "Executive review"];
-export const AUDIENCE_OPTIONS: { value: Audience; label: string }[] = [
-  { value: 'executive', label: 'Executive (high-level)' },
-  { value: 'cross-functional', label: 'Cross-functional team (balanced)' },
-  // FIX: Changed 'department' to 'department-specific' to match the Audience type.
-  { value: 'department-specific', label: 'Department-specific (granular)' },
-];
-export const AUDIENCE_BUTTON_OPTIONS: { value: Audience; label: string }[] = [
-  { value: 'executive', label: 'Executive' },
-  { value: 'cross-functional', label: 'Cross-functional' },
-  { value: 'department-specific', label: 'Department' },
-];
-export const TONE_OPTIONS: { value: Tone; label: string }[] = [
-  { value: 'professional', label: 'Professional' },
-  { value: 'concise', label: 'Concise' },
-  { value: 'client-ready', label: 'Client-ready' },
-];
-export const VIEW_MODE_OPTIONS: { value: ViewMode; label: string }[] = [
-    { value: 'full', label: 'Full minutes' },
-    { value: 'actions-only', label: 'Actions only' },
+
+// Context tags with translation keys
+export const CONTEXT_TAG_OPTIONS: { value: ContextTag; labelKey: string }[] = [
+  { value: "Client facing", labelKey: "constants:contextTags.clientFacing" },
+  { value: "Internal only", labelKey: "constants:contextTags.internalOnly" },
+  { value: "Sensitive", labelKey: "constants:contextTags.sensitive" },
+  { value: "Executive review", labelKey: "constants:contextTags.executiveReview" },
 ];
 
-export const COACHING_STYLE_OPTIONS: { value: CoachingStyle; label: string }[] = [
-  { value: 'gentle', label: 'Gentle' },
-  { value: 'direct', label: 'Direct' },
+// Legacy array for backwards compatibility
+export const CONTEXT_TAG_VALUES: ContextTag[] = ["Client facing", "Internal only", "Sensitive", "Executive review"];
+export const AUDIENCE_OPTIONS: { value: Audience; labelKey: string }[] = [
+  { value: 'executive', labelKey: 'constants:audience.executive' },
+  { value: 'cross-functional', labelKey: 'constants:audience.crossFunctional' },
+  // FIX: Changed 'department' to 'department-specific' to match the Audience type.
+  { value: 'department-specific', labelKey: 'constants:audience.departmentSpecific' },
+];
+export const AUDIENCE_BUTTON_OPTIONS: { value: Audience; labelKey: string }[] = [
+  { value: 'executive', labelKey: 'constants:audienceShort.executive' },
+  { value: 'cross-functional', labelKey: 'constants:audienceShort.crossFunctional' },
+  { value: 'department-specific', labelKey: 'constants:audienceShort.departmentSpecific' },
+];
+export const TONE_OPTIONS: { value: Tone; labelKey: string }[] = [
+  { value: 'professional', labelKey: 'constants:tone.professional' },
+  { value: 'concise', labelKey: 'constants:tone.concise' },
+  { value: 'client-ready', labelKey: 'constants:tone.clientReady' },
+];
+export const VIEW_MODE_OPTIONS: { value: ViewMode; labelKey: string }[] = [
+    { value: 'full', labelKey: 'constants:view.full' },
+    { value: 'actions-only', labelKey: 'constants:view.actionsOnly' },
+];
+
+export const COACHING_STYLE_OPTIONS: { value: CoachingStyle; labelKey: string }[] = [
+  { value: 'gentle', labelKey: 'constants:coachingStyle.gentle' },
+  { value: 'direct', labelKey: 'constants:coachingStyle.direct' },
 ];
 
 export const DEPARTMENT_LEGEND: Record<Department, string> = {
@@ -48,11 +58,11 @@ export const SAMPLE_DATA: FormState = {
   tags: ["Internal only"],
 };
 
-export const MEETING_PRESET_OPTIONS: { value: Exclude<MeetingPreset, 'custom'>; label: string }[] = [
-    { value: 'client-update', label: 'Client Update' },
-    { value: 'internal-sync', label: 'Internal Sync' },
-    { value: 'brainstorm', label: 'Brainstorm' },
-    { value: 'executive-briefing', label: 'Executive Briefing' },
+export const MEETING_PRESET_OPTIONS: { value: Exclude<MeetingPreset, 'custom'>; labelKey: string }[] = [
+    { value: 'client-update', labelKey: 'constants:presets.clientUpdate.name' },
+    { value: 'internal-sync', labelKey: 'constants:presets.internalSync.name' },
+    { value: 'brainstorm', labelKey: 'constants:presets.brainstorm.name' },
+    { value: 'executive-briefing', labelKey: 'constants:presets.executiveBrief.name' },
 ];
 
 export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Controls> & { tags: ContextTag[] }> = {

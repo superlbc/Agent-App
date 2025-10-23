@@ -1,0 +1,115 @@
+{
+  "title": "Help & Guidance",
+  "sections": {
+    "gettingStarted": {
+      "title": "Getting Started",
+      "content": "Welcome to the Meeting Notes Generator! This tool transforms your meeting transcripts into structured notes with action items, decisions, and coaching insights."
+    },
+    "howToUse": {
+      "title": "How to Use",
+      "steps": [
+        "Enter your meeting title (or leave blank for auto-generation)",
+        "Add agenda items, one per line (optional)",
+        "Paste your meeting transcript",
+        "Adjust generation controls to fit your needs",
+        "Click 'Generate Notes'",
+        "Review, export, or interrogate the transcript for more insights"
+      ]
+    },
+    "features": {
+      "title": "Key Features",
+      "list": [
+        {
+          "title": "Smart Extraction",
+          "description": "Automatically identifies key discussion points, decisions, risks, and action items from your transcript"
+        },
+        {
+          "title": "RAG Status",
+          "description": "Each action item gets a Red/Amber/Green status based on risk, clarity, and deadlines"
+        },
+        {
+          "title": "Meeting Coach",
+          "description": "Get actionable feedback on meeting effectiveness aligned with Meeting Excellence principles"
+        },
+        {
+          "title": "Interrogate Transcript",
+          "description": "Ask follow-up questions about your meeting and get AI-powered answers"
+        },
+        {
+          "title": "Multiple Export Options",
+          "description": "Export to CSV, PDF, or copy to clipboard for easy sharing"
+        }
+      ]
+    },
+    "controls": {
+      "title": "Understanding Controls",
+      "items": [
+        {
+          "control": "Focus Department",
+          "description": "Filter action items to show only one department (plus General). Useful for department-specific standups."
+        },
+        {
+          "control": "View Mode",
+          "description": "Full Notes shows all sections; Actions Only shows just the Next Steps table."
+        },
+        {
+          "control": "Audience",
+          "description": "Executive = high-level with fewer details; Cross-functional = balanced; Department-specific = granular."
+        },
+        {
+          "control": "Tone",
+          "description": "Professional = standard business language; Concise = shorter bullets; Client-ready = polished for external sharing."
+        },
+        {
+          "control": "Critical Lens",
+          "description": "Adds a Critical Review section that highlights gaps, risks, and ambiguous tasks."
+        },
+        {
+          "control": "Meeting Coach",
+          "description": "Enables coaching insights with metrics and suggestions for improving future meetings."
+        }
+      ]
+    },
+    "tips": {
+      "title": "Pro Tips",
+      "list": [
+        "Include speaker names in the transcript (e.g., 'John: Let's finalize the design')",
+        "Use presets for common meeting types to save time",
+        "Enable Meeting Coach to improve your team's meeting culture",
+        "Use Interrogate Transcript to drill down on specific topics",
+        "Turn on Critical Lens for retrospectives or high-stakes meetings",
+        "Copy department codes (BL, STR, etc.) for easier action item filtering"
+      ]
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting",
+      "items": [
+        {
+          "problem": "Notes are too verbose",
+          "solution": "Switch to 'Concise' tone or 'Actions Only' view"
+        },
+        {
+          "problem": "Action items are all Amber",
+          "solution": "Ensure your transcript includes clear owners and due dates"
+        },
+        {
+          "problem": "Missing discussion points",
+          "solution": "Check that your agenda items match the topics discussed in the transcript"
+        },
+        {
+          "problem": "Export to PDF not working",
+          "solution": "Try using Copy to Clipboard instead, then paste into your preferred document editor"
+        }
+      ]
+    },
+    "support": {
+      "title": "Support",
+      "content": "For technical issues or feedback, contact the IPCT Team or your system administrator."
+    }
+  },
+  "buttons": {
+    "close": "Close",
+    "startTour": "Start Tutorial",
+    "learnMore": "Learn More"
+  }
+}

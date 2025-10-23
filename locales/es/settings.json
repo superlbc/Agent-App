@@ -1,0 +1,55 @@
+{
+  "title": "Configuración",
+  "sections": {
+    "api": {
+      "title": "Configuración de API",
+      "botId": {
+        "label": "ID del Bot",
+        "placeholder": "Introduce ID del Bot...",
+        "description": "El ID del Bot del agente de IA para generar notas"
+      }
+    },
+    "regional": {
+      "title": "Configuración Regional",
+      "language": {
+        "label": "Idioma",
+        "description": "Elige tu idioma preferido",
+        "autoDetect": "Detectar automáticamente del navegador"
+      },
+      "timezone": {
+        "label": "Zona Horaria",
+        "description": "Tu zona horaria actual"
+      }
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "theme": {
+        "label": "Tema",
+        "light": "Claro",
+        "dark": "Oscuro",
+        "auto": "Automático (Sistema)"
+      }
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "defaultPreset": {
+        "label": "Configuración de Reunión Predeterminada",
+        "description": "Configuración a cargar al iniciar una nueva reunión"
+      },
+      "autoSave": {
+        "label": "Guardado Automático",
+        "description": "Guardar automáticamente los datos del formulario mientras escribes"
+      }
+    }
+  },
+  "buttons": {
+    "save": "Guardar Configuración",
+    "reset": "Restablecer Valores Predeterminados",
+    "cancel": "Cancelar"
+  },
+  "messages": {
+    "saveSuccess": "¡Configuración guardada con éxito!",
+    "resetSuccess": "Configuración restablecida a valores predeterminados",
+    "saveError": "Error al guardar la configuración. Por favor, inténtalo de nuevo."
+  }
+}

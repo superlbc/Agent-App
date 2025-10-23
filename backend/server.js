@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const { validateAzureADToken } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -33,7 +34,8 @@ app.get('/health', (req, res) => {
 });
 
 // Token endpoint - proxies to interact.interpublic.com/api/token
-app.post('/api/token', async (req, res) => {
+// Protected: Requires valid Azure AD token with Momentum group membership
+app.post('/api/token', validateAzureADToken, async (req, res) => {
   try {
     console.log('Token request received');
 
@@ -68,7 +70,8 @@ app.post('/api/token', async (req, res) => {
 });
 
 // Chat/Messages endpoint - proxies to interact.interpublic.com/api/chat-ai/v1/bots/{botId}/messages
-app.post('/api/chat-ai/v1/bots/:botId/messages', async (req, res) => {
+// Protected: Requires valid Azure AD token with Momentum group membership
+app.post('/api/chat-ai/v1/bots/:botId/messages', validateAzureADToken, async (req, res) => {
   try {
     const { botId } = req.params;
     const authHeader = req.headers.authorization;
@@ -123,4 +126,6 @@ app.listen(PORT, () => {
   console.log(`API Base URL: ${API_BASE_URL}`);
   console.log(`Client ID configured: ${CLIENT_ID ? 'Yes' : 'No'}`);
   console.log(`Client Secret configured: ${CLIENT_SECRET ? 'Yes' : 'No'}`);
+  console.log(`Azure AD Group Security: Enabled`);
+  console.log(`Required Group: MOM WW All Users 1 SG (2c08b5d8-7def-4845-a48c-740b987dcffb)`);
 });

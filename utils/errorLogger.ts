@@ -112,7 +112,7 @@ class ErrorLogger {
   /**
    * Handle global errors
    */
-  private handleGlobalError = (event: ErrorEvent): void {
+  private handleGlobalError = (event: ErrorEvent): void => {
     this.logError('error', [event.error || event.message]);
   };
 

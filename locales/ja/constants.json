@@ -1,0 +1,114 @@
+{
+  "audience": {
+    "executive": "エグゼクティブ（ハイレベル）",
+    "crossFunctional": "部門横断チーム（バランス型）",
+    "departmentSpecific": "部署固有（詳細）"
+  },
+  "audienceShort": {
+    "executive": "エグゼクティブ",
+    "crossFunctional": "部門横断",
+    "departmentSpecific": "部署固有"
+  },
+  "tone": {
+    "professional": "プロフェッショナル",
+    "concise": "簡潔",
+    "clientReady": "クライアント向け"
+  },
+  "view": {
+    "full": "完全なノート",
+    "actionsOnly": "アクションのみ"
+  },
+  "coachingStyle": {
+    "gentle": "穏やか",
+    "direct": "直接的"
+  },
+  "departments": {
+    "BL": "ブランド＆ライセンシング",
+    "STR": "戦略＆インサイト",
+    "PM": "プロジェクトマネジメント",
+    "CR": "クリエイティブ",
+    "XD": "エクスペリエンスデザイン",
+    "XP": "エクスペリエンスプロダクション",
+    "IPCT": "統合/クリエイティブテクノロジー",
+    "CON": "コンテンツ",
+    "STU": "スタジオ",
+    "General": "一般"
+  },
+  "departmentDescriptions": {
+    "BL": "クライアント連絡、商業スチュワードシップ、部門横断的連携",
+    "STR": "インサイト、フレーミング、論証；クリエイティブ形成をサポート",
+    "PM": "ワークフロー、タイミング、リソース配分、調整",
+    "CR": "ビッグアイデア、アートディレクション、コピー",
+    "XD": "エクスペリエンス設計、物理的/デジタルデザイン、レンダリング、計画",
+    "XP": "実行可能性、ベンダー、現場実行、リスク/法務/持続可能性",
+    "IPCT": "技術的アプローチ、プロトタイピング、開発、イノベーション",
+    "CON": "ビデオ/写真/オーディオ制作、アーティスト/イラストレーター、ロジスティクス",
+    "STU": "メカニカル、レタッチ、コピー編集、印刷/プレミアム購入",
+    "General": "部門横断的または不明確な部署"
+  },
+  "presets": {
+    "clientUpdate": {
+      "name": "クライアント更新",
+      "description": "決定と次のステップを強調したクライアント向けの洗練されたノート"
+    },
+    "internalSync": {
+      "name": "内部同期",
+      "description": "部門横断チームコラボレーションのためのバランスの取れたノート"
+    },
+    "brainstorm": {
+      "name": "ブレインストーミング",
+      "description": "アイデアとアクション項目を捕捉するクリエイティブセッションのノート"
+    },
+    "executiveBrief": {
+      "name": "エグゼクティブ概要",
+      "description": "主要な決定とリスクに焦点を当てたハイレベルの要約"
+    },
+    "departmentStandup": {
+      "name": "部署スタンドアップ",
+      "description": "単一部署のための詳細で粒度の高いノート"
+    },
+    "retrospective": {
+      "name": "振り返り",
+      "description": "ギャップと改善点を特定するための重要なレビューを有効化"
+    }
+  },
+  "status": {
+    "red": "レッド",
+    "amber": "アンバー",
+    "green": "グリーン",
+    "na": "該当なし",
+    "blocked": "ブロック中",
+    "atRisk": "リスクあり",
+    "onTrack": "順調",
+    "completed": "完了",
+    "notStarted": "未開始"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "ja": "日本語"
+  },
+  "regions": {
+    "US": "アメリカ合衆国",
+    "GB": "イギリス",
+    "ES": "スペイン",
+    "JP": "日本",
+    "CA": "カナダ"
+  },
+  "offices": {
+    "ATL-MOM": "アトランタ",
+    "CHI-MOM": "シカゴ",
+    "NYC-MOM": "ニューヨーク",
+    "STL-MOM": "セントルイス",
+    "LDN-MOM": "ロンドン",
+    "TOR-MOM": "トロント",
+    "MAD-MOM": "マドリード",
+    "TYO-MOM": "東京"
+  },
+  "contextTags": {
+    "clientFacing": "クライアント向け",
+    "internalOnly": "社内のみ",
+    "sensitive": "機密",
+    "executiveReview": "エグゼクティブレビュー"
+  }
+}
