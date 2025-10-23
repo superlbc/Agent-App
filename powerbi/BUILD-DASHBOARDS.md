@@ -178,9 +178,13 @@ Each dashboard follows the same process:
 
 **Visual 12: Tour Metrics**
 - Insert **Clustered Column Chart**
-- X-axis: Tour event types
-- Y-axis: Count
-- Columns: Started, Completed, Dismissed
+- **X-axis**: Leave empty (or add a dummy category column)
+- **Y-axis**: Add all 3 tour measures:
+  - `Tours Started`
+  - `Tours Completed`
+  - `Tours Dismissed`
+- **What this shows**: 3 side-by-side bars showing tour funnel
+- **Alternative**: Use 3 separate **Card** visuals for each measure
 
 **Visual 13: Export Rate Trend**
 - Insert **Line Chart**
