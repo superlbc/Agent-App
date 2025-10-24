@@ -475,6 +475,8 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
         many_unassigned_actions: t('common:meetingCoach.flags.manyUnassignedActions'),
         few_decisions: t('common:meetingCoach.flags.fewDecisions'),
         light_agenda_coverage: t('common:meetingCoach.flags.lightAgendaCoverage'),
+        low_participation_rate: t('common:meetingCoach.flags.lowParticipationRate', { defaultValue: 'Low Participation Rate' }),
+        silent_required_attendees: t('common:meetingCoach.flags.silentRequiredAttendees', { defaultValue: 'Silent Required Attendees' }),
     };
 
     return (

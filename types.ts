@@ -37,11 +37,33 @@ export interface CoachMetrics {
   top_speaker_share_pct: number;
 }
 
+export interface ParticipationMetrics {
+  total_attendees: number;
+  speakers_identified: number;
+  participation_rate_pct: number;
+  silent_stakeholders_count: number;
+  silent_stakeholders_names: string[];
+  required_attendees: number;
+  optional_attendees: number;
+  acceptance_breakdown: {
+    accepted: number;
+    declined: number;
+    tentative: number;
+    noResponse: number;
+    organizer: number;
+  };
+  internal_count: number;
+  external_count: number;
+  department_representation: Department[];
+}
+
 export interface CoachFlags {
   participation_imbalance: boolean;
   many_unassigned_actions: boolean;
   few_decisions: boolean;
   light_agenda_coverage: boolean;
+  low_participation_rate?: boolean;        // NEW: <50% of attendees spoke
+  silent_required_attendees?: boolean;     // NEW: Required attendees didn't speak
 }
 
 export interface CoachInsights {
@@ -51,6 +73,7 @@ export interface CoachInsights {
   improvements: string[];
   facilitation_tips: string[];
   metrics: CoachMetrics;
+  participation_metrics?: ParticipationMetrics;  // NEW: Optional attendance metrics
   flags: CoachFlags;
 }
 
@@ -111,6 +134,7 @@ export interface Payload {
     meeting_title: string;
     agenda: string[];
     transcript: string;
+    participants?: Participant[];  // NEW: Optional participant context for AI agent
     controls: Controls;
 }
 export interface InterrogationResponse {

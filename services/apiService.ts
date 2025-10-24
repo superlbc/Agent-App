@@ -1,6 +1,7 @@
 // NOTE: This service handles communication with the custom Interact API ("AI Console").
 import { Payload, AgentResponse, ApiConfig, AuthToken, FormState, InterrogationResponse } from '../types.ts';
 import i18n from '../utils/i18n';
+import { buildParticipantContext } from '../utils/participantContext';
 
 const getAuthToken = async (config: ApiConfig): Promise<string> => {
     if (!config.clientId || !config.clientSecret) {
@@ -59,7 +60,7 @@ const getAuthToken = async (config: ApiConfig): Promise<string> => {
  * including all meeting details and control settings for the agent.
  */
 const constructPrompt = (payload: Payload): string => {
-    const { meeting_title, agenda, transcript, controls } = payload;
+    const { meeting_title, agenda, transcript, participants, controls } = payload;
 
     // Get current language from i18n (en, es, or ja)
     const currentLanguage = i18n.language || 'en';
@@ -80,8 +81,24 @@ const constructPrompt = (payload: Payload): string => {
         `Transcript:`,
         transcript,
         ``,
-        `Controls:`,
     );
+
+    // NEW: Add participant context if available
+    // This provides the AI agent with structured participant data for:
+    // - Accurate department assignment in Next Steps
+    // - Speaker identification and matching
+    // - Participation metrics (if attendance data present)
+    // - Silent stakeholder identification
+    if (participants && participants.length > 0) {
+        const participantContext = buildParticipantContext(participants);
+        if (participantContext) {
+            promptParts.push(participantContext);
+            promptParts.push('');
+            console.log(`📊 Including ${participants.length} participants in agent context`);
+        }
+    }
+
+    promptParts.push(`Controls:`);
 
     const controlEntries = Object.entries(controls)
         .filter(([, value]) => value !== null && value !== undefined)

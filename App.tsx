@@ -171,6 +171,7 @@ const AppContent: React.FC = () => {
         meeting_title: currentFormState.title,
         agenda: currentFormState.agenda.split('\n').filter(line => line.trim() !== ''),
         transcript: currentFormState.transcript,
+        participants: participants.length > 0 ? participants : undefined,  // NEW: Include participants for AI context
         controls: currentControls,
       };
 
@@ -194,7 +195,11 @@ const AppContent: React.FC = () => {
         useIcons: currentControls.use_icons,
         boldKeywords: currentControls.bold_important_words,
         actionItemCount: response.next_steps?.length || 0,
-        hasTags: currentFormState.tags.length > 0
+        hasTags: currentFormState.tags.length > 0,
+        // NEW: Participant context telemetry
+        participantCount: participants.length,
+        hasParticipantContext: participants.length > 0,
+        hasParticipationMetrics: response.coach_insights?.participation_metrics !== undefined
       }, correlationId);
 
       setHasGenerated(true);
@@ -211,7 +216,7 @@ const AppContent: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [hasGenerated, apiConfig, user]);
+  }, [hasGenerated, apiConfig, user, participants]);
 
   const handleGenerateClick = () => {
     handleGenerate(formState, controls);
