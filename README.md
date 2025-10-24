@@ -16,6 +16,7 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 - [Quick Start](#quick-start)
 - [How It Works](#how-it-works)
 - [MSAL Authentication Setup](#msal-authentication-setup)
+- [Azure AD Group Security](#azure-ad-group-security)
 - [Configuration](#configuration)
 - [API Documentation](#api-documentation)
 - [Deployment](#deployment)
@@ -192,6 +193,7 @@ The application includes a comprehensive telemetry framework that tracks user in
 **Authentication Events**:
 - User login (once per session)
 - User logout
+- Access denied (user not in required Azure AD group)
 
 **Core Functionality**:
 - Notes generated (first generation)
@@ -756,6 +758,184 @@ export const graphConfig = {
 
 ---
 
+## Azure AD Group Security
+
+### Overview
+
+As of version 1.3.0 (2025-10-24), the Meeting Notes Generator enforces group-based access control to ensure only authorized Momentum Worldwide users can access the application. This security layer works at both the frontend and backend levels.
+
+### Group Information
+
+- **Group Name**: MOM WW All Users 1 SG
+- **Group ID**: `2c08b5d8-7def-4845-a48c-740b987dcffb`
+- **Type**: Security Group
+- **Membership**: Dynamic (886 members)
+- **Source**: Cloud (Azure AD)
+
+### How It Works
+
+#### Frontend Security
+
+```
+User logs in with Azure AD
+    ↓
+Azure AD returns token with groups claim
+    ↓
+Frontend checks if user is in required group
+    ↓
+┌─────────────────┬────────────────────┐
+│ IN GROUP        │ NOT IN GROUP       │
+│ ✅ Load App     │ ❌ Show Access    │
+│                 │    Denied Page    │
+└─────────────────┴────────────────────┘
+```
+
+#### Backend Security
+
+```
+API request with Bearer token
+    ↓
+Middleware validates JWT signature
+    ↓
+Middleware extracts groups claim
+    ↓
+┌──────────────────┬──────────────────┐
+│ IN GROUP         │ NOT IN GROUP     │
+│ ✅ Process      │ ❌ Return 403    │
+│    Request       │    Forbidden     │
+└──────────────────┴──────────────────┘
+```
+
+### Azure AD Configuration
+
+#### Step 1: Configure Token Claims
+
+1. Go to your Azure AD App Registration
+2. Navigate to **"Token configuration"** in the left sidebar
+3. Click **"Add groups claim"**
+4. Select **"Security groups"**
+5. Check boxes for: **ID**, **Access**, and **UserInfo**
+6. For Group ID format, choose: **"Group ID"**
+7. Click **"Add"**
+
+**Result**: The `groups` claim will now be included in tokens with the group Object IDs.
+
+#### Step 2: No Additional Permissions Needed
+
+Unlike other approaches, this implementation uses token claims only. No additional Microsoft Graph API permissions or admin consent required!
+
+### Implementation Details
+
+#### Frontend Files
+
+- **[auth/authConfig.ts](auth/authConfig.ts)**: Contains `REQUIRED_GROUP_ID` constant
+- **[auth/AuthGuard.tsx](auth/AuthGuard.tsx)**: Implements `checkGroupMembership()` function
+- **[auth/AccessDenied.tsx](auth/AccessDenied.tsx)**: Professional access denied page with Momentum branding
+- **[contexts/AuthContext.tsx](contexts/AuthContext.tsx)**: Added `isAuthorized` state
+
+#### Backend Files
+
+- **[backend/middleware/auth.js](backend/middleware/auth.js)**: JWT validation and group check middleware
+- **[backend/server.js](backend/server.js)**: Applies middleware to protected endpoints
+
+### Access Denied Experience
+
+Users not in the "MOM WW All Users 1 SG" group will see a professional access denied page featuring:
+
+- ✅ Momentum Worldwide logo
+- ✅ Clear explanation of access restriction
+- ✅ Display of their signed-in email
+- ✅ Sign out button
+- ✅ Consistent design with login page
+- ✅ Dark mode support
+
+### Access Denied Telemetry
+
+When access is denied, the application automatically tracks:
+
+| Data Point | Description | Example |
+|------------|-------------|---------|
+| **userName** | User's display name | "John Doe" |
+| **userEmail** | User's email address | "john.doe@ipg.com" |
+| **userId** | Azure AD user ID | "abc123..." |
+| **tenantId** | Azure AD tenant ID | "d026e4c1..." |
+| **requiredGroupId** | The group ID they need | "2c08b5d8..." |
+| **requiredGroupName** | Group name | "MOM WW All Users 1 SG" |
+| **userGroups** | Groups they ARE in | ["group-id-1", "group-id-2"] |
+| **browser** | Browser name | "Chrome" |
+| **platform** | Operating system | "Windows" |
+| **deviceType** | Device type | "desktop" |
+| **timestamp** | When it happened | "2025-10-24T14:30:00Z" |
+
+This data enables Power BI dashboards for:
+- Monitoring unauthorized access attempts
+- Identifying users who may need to be added to the group
+- Tracking access patterns by department/location
+- Security audit trails
+
+### Testing
+
+#### Test 1: Authorized User (Momentum Employee)
+
+1. Login with a Momentum user account
+2. **Expected**: App loads normally
+3. **Expected**: All features work
+
+#### Test 2: Unauthorized User (Non-Momentum IPG User)
+
+1. Login with an IPG user who is NOT in "MOM WW All Users 1 SG"
+2. **Expected**: See "Access Restricted" page immediately after Azure AD login
+3. **Expected**: Backend API calls return 403 Forbidden
+4. **Expected**: Access denied event logged in telemetry
+
+#### Debugging
+
+Check browser console for:
+```
+Group membership check: {
+  userEmail: "user@momentumww.com",
+  requiredGroup: "2c08b5d8-7def-4845-a48c-740b987dcffb",
+  userGroups: ["2c08b5d8-7def-4845-a48c-740b987dcffb", ...],
+  isMember: true
+}
+```
+
+Check backend console for:
+```
+User authorized: user@momentumww.com
+```
+
+### Rollback Instructions
+
+If you need to disable group security:
+
+```bash
+# View changes
+git diff
+
+# Rollback all security changes
+git restore .
+
+# Or rollback specific files
+git restore auth/authConfig.ts
+git restore auth/AuthGuard.tsx
+git restore auth/AccessDenied.tsx
+git restore contexts/AuthContext.tsx
+git restore backend/middleware/auth.js
+git restore backend/server.js
+```
+
+### Security Benefits
+
+- ✅ **Defense in Depth**: Security enforced at both frontend and backend
+- ✅ **No Additional API Calls**: Uses token claims (no Graph API calls needed)
+- ✅ **Fast Performance**: Group check happens instantly with token validation
+- ✅ **Audit Trail**: All access denials logged for security monitoring
+- ✅ **User-Friendly**: Professional access denied page with clear messaging
+- ✅ **Compliant**: Meets enterprise security requirements for role-based access control
+
+---
+
 ## Configuration
 
 ### Environment Variables
@@ -1060,11 +1240,11 @@ This section documents the deployment of Momentum Note Crafter to Google Cloud R
     │  │ Nginx + React SPA  │  │  │  │ Node.js/Express    │  │   │
     │  │ Static file server │  │  │  │ API proxy service  │  │   │
     │  │ Health: /health    │  │  │  │ Health: /health    │  │   │
-    │  └────────────────────┘  │  │  │ Stores CLIENT_     │  │   │
-    │                          │  │  │ SECRET securely    │  │   │
-    │  Frontend calls:         │  │  └────────────────────┘  │   │
-    │  backend-url/api/token   │  │                          │   │
-    │  backend-url/api/chat    │  │                          │   │
+    │  └────────────────────┘  │  │  │ JWT validation     │  │   │
+    │                          │  │  │ Group membership   │  │   │
+    │  Frontend calls:         │  │  │ Stores CLIENT_     │  │   │
+    │  backend-url/api/token   │  │  │ SECRET securely    │  │   │
+    │  backend-url/api/chat    │  │  └────────────────────┘  │   │
     └──────────────────────────┘  └────────┬─────────────────┘   │
                                            │ VPC Egress            │
                                            ▼                       │
@@ -1078,9 +1258,11 @@ This section documents the deployment of Momentum Note Crafter to Google Cloud R
 ### Why 2 Services?
 
 **Security**: Keeps `CLIENT_SECRET` server-side, never exposed to browser
+**Access Control**: Backend validates Azure AD tokens and enforces group membership
 **CORS**: Backend handles external API calls, avoiding CORS issues
 **Scalability**: Frontend and backend can scale independently
 **Best Practice**: Follows Nick's proven Staff Plan architecture
+**Defense in Depth**: Group security enforced at both frontend (UX) and backend (API) layers
 
 ### Important Architecture Notes
 
@@ -1847,8 +2029,9 @@ Access-Control-Allow-Headers: Authorization, Content-Type
 c:\Users\luis.bustos\Downloads\Momo Mettings App\
 │
 ├── 📁 auth/                          # Authentication module
-│   ├── authConfig.ts                 # MSAL configuration (client ID, tenant ID, scopes)
-│   ├── AuthGuard.tsx                 # Authentication wrapper component
+│   ├── authConfig.ts                 # MSAL configuration (client ID, tenant ID, scopes, group ID)
+│   ├── AuthGuard.tsx                 # Authentication wrapper + group membership validation
+│   ├── AccessDenied.tsx              # Access denied page (non-Momentum users)
 │   └── SignInPage.tsx                # Sign-in UI (popup blocked fallback)
 │
 ├── 📁 components/                    # React components
@@ -1897,7 +2080,8 @@ c:\Users\luis.bustos\Downloads\Momo Mettings App\
 │   ├── formatting.ts                 # Markdown to HTML conversion
 │   ├── parsing.ts                    # Text parsing utilities
 │   ├── tourHelper.ts                 # Tour helper functions
-│   ├── telemetryService.ts           # Centralized telemetry tracking service
+│   ├── telemetryService.ts           # Centralized telemetry tracking service (25 event types)
+│   ├── browserContext.ts             # Browser/device detection for telemetry
 │   └── reporting.ts                  # Legacy Power Automate flow trigger utility
 │
 ├── 📄 App.tsx                        # Main app component (layout, routing)
@@ -1915,6 +2099,19 @@ c:\Users\luis.bustos\Downloads\Momo Mettings App\
 ├── 📄 .env.local                     # Environment variables (not in git)
 ├── 📄 .env.example                   # Example environment variables template
 ├── 📄 .gitignore                     # Git ignore rules
+│
+├── 📁 backend/                       # Backend API proxy service (Node.js/Express)
+│   ├── 📁 middleware/                # Express middleware
+│   │   └── auth.js                   # JWT validation and group membership middleware
+│   ├── server.js                     # Backend server with API proxying
+│   ├── package.json                  # Backend dependencies (jsonwebtoken, jwks-rsa)
+│   ├── Dockerfile                    # Backend Docker container configuration
+│   └── .env                          # Backend environment variables
+│
+├── 📄 Dockerfile                     # Frontend Docker container configuration (Nginx + React)
+├── 📄 nginx.conf                     # Nginx configuration for SPA routing
+├── 📄 build-push-image.sh            # Docker build and push script (Linux/Mac)
+├── 📄 build-and-push.ps1             # Docker build and push script (Windows)
 │
 └── 📄 README.md                      # Project documentation (this file)
 ```
@@ -2177,7 +2374,71 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2025-10-23 (Part 2)
+### 📅 Latest Update - 2025-10-24 - Azure AD Group Security (v1.3.0)
+
+**Summary**: Implemented enterprise-grade group-based access control to restrict application access to Momentum Worldwide users only, with comprehensive access denied telemetry tracking.
+
+#### Azure AD Group Security Implementation
+
+**What's New**:
+- ✅ **Group-Based Access Control**: Only users in "MOM WW All Users 1 SG" can access the application
+- ✅ **Frontend Security**: Token claims validation checks group membership before loading app
+- ✅ **Backend Security**: JWT validation middleware verifies group membership on every API request
+- ✅ **Professional Access Denied Page**: Momentum-branded page with clear messaging
+- ✅ **Access Denied Telemetry**: Comprehensive tracking of unauthorized access attempts
+- ✅ **Zero Configuration**: Uses Azure AD token claims - no Graph API calls or admin consent needed
+- ✅ **Dev Mode Enhancement**: Local development shows real user email + " (Dev)" instead of generic mock
+
+**Key Features**:
+- Defense in depth: Security enforced at both frontend and backend layers
+- No performance impact: Group check happens instantly with token validation
+- User-friendly: Professional access denied page matching login page design
+- Audit trail: All access denials logged with user details, groups, and browser context
+- Fast implementation: Token claims only, no additional API permissions required
+
+**Files Created**:
+- 📄 [auth/AccessDenied.tsx](auth/AccessDenied.tsx) - Professional access denied page with Momentum branding
+- 📄 [backend/middleware/auth.js](backend/middleware/auth.js) - JWT validation and group membership middleware
+
+**Files Modified**:
+- [auth/authConfig.ts](auth/authConfig.ts) - Added `REQUIRED_GROUP_ID` constant and `profile` scope
+- [auth/AuthGuard.tsx](auth/AuthGuard.tsx) - Added `checkGroupMembership()` function and `trackAccessDenied()` telemetry
+- [contexts/AuthContext.tsx](contexts/AuthContext.tsx) - Added `isAuthorized` state to track authorization
+- [backend/package.json](backend/package.json) - Added `jsonwebtoken` and `jwks-rsa` dependencies
+- [backend/server.js](backend/server.js) - Applied auth middleware to protected endpoints
+- [utils/telemetryService.ts](utils/telemetryService.ts) - Added `accessDenied` event type and `AccessDeniedEventPayload` interface
+
+**Azure AD Configuration Required**:
+1. Navigate to Azure AD App Registration → Token configuration
+2. Add groups claim for Security groups
+3. Select ID, Access, and UserInfo tokens
+4. Choose Group ID format
+5. No admin consent or additional API permissions needed!
+
+**Security Benefits**:
+- Meets enterprise security requirements for role-based access control
+- Prevents unauthorized access at multiple layers (frontend + backend)
+- Provides audit trail for security monitoring
+- Fast performance with no additional API calls
+- Easy rollback with git restore
+
+**Use Cases**:
+- Restrict application access to specific departments/business units
+- Monitor unauthorized access attempts for security audits
+- Track which non-authorized users are trying to access the app
+- Identify users who may need to be added to the group
+- Compliance reporting for access control
+
+**Testing**:
+- ✅ Momentum user: App loads normally, all features work
+- ✅ Non-Momentum IPG user: Access denied page shown, 403 from backend
+- ✅ Access denied event tracked in telemetry with full context
+- ✅ TypeScript compilation: Zero errors
+- ✅ Backend dependencies installed successfully
+
+---
+
+### 📅 Previous Update - 2025-10-23 (Part 2)
 
 **Summary**: Implemented standardized user feedback system with multi-language support, reusing existing telemetry infrastructure for centralized feedback collection.
 
@@ -2474,11 +2735,19 @@ system: {
 
 ## Version Information
 
-**Version**: 1.2.0
-**Last Updated**: October 23, 2025
+**Version**: 1.3.0
+**Release Date**: October 24, 2025
+**Last Updated**: October 24, 2025
 **Status**: Production Ready ✅
 **License**: Proprietary
-**Maintained By**: Interpublic Group / IPCT Team
+**Maintained By**: Interpublic Group / IPCT Team / Momentum Worldwide
+
+### Version History
+
+- **v1.3.0** (2025-10-24): Azure AD Group Security - Restricted access to Momentum users only
+- **v1.2.0** (2025-10-23): User Feedback System with multi-language support
+- **v1.1.0** (2025-10-23): Enhanced Login Telemetry with browser/device context
+- **v1.0.0** (2025-01-22): Initial production release with full feature set
 
 ---
 

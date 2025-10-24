@@ -8,6 +8,7 @@ import { HelpModal } from './components/HelpModal';
 import { LoadingModal } from './components/ui/LoadingModal';
 import { Toast } from './components/ui/Toast';
 import { ScrollToTop } from './components/ui/ScrollToTop';
+import { TestAgentBanner } from './components/ui/TestAgentBanner';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { generateNotes } from './services/apiService';
 import { Controls, Payload, AgentResponse, FormState, ToastState, ApiConfig } from './types';
@@ -21,6 +22,8 @@ import { useAuth } from './contexts/AuthContext';
 import { telemetryService } from './utils/telemetryService';
 import { getBrowserContext } from './utils/browserContext';
 import { FeedbackButton } from './components/FeedbackButton';
+import { useParticipantExtraction } from './hooks/useParticipantExtraction';
+import { resetAllUserData } from './utils/resetUserData';
 
 const DEFAULT_CONTROLS: Controls = {
   focus_department: [],
@@ -75,6 +78,24 @@ const AppContent: React.FC = () => {
   const { startTour, isTourActive } = useTourContext();
   const { isAuthenticated, user } = useAuth();
 
+  // Check if using custom bot ID (test agent)
+  const defaultBotId = (import.meta.env)?.DEFAULT_BOT_ID || '';
+  const isUsingTestAgent = botId !== defaultBotId && botId !== '';
+
+  // Participant extraction hook
+  const {
+    participants,
+    isExtracting,
+    extractAndMatch,
+    addParticipant,
+    batchAddParticipantsFromEmails,
+    removeParticipant,
+    searchAndMatch,
+    confirmMatch,
+    markAsExternal,
+    clearParticipants
+  } = useParticipantExtraction();
+
   useEffect(() => {
     const tourCompleted = localStorage.getItem('tourCompleted');
     if (!tourCompleted) {
@@ -89,6 +110,19 @@ const AppContent: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Clear transcript on page refresh/load
+  useEffect(() => {
+    if (formState.transcript) {
+      setFormState(prev => ({
+        ...prev,
+        transcript: ''
+      }));
+      setOutput(null);
+      setHasGenerated(false);
+      clearParticipants();
+    }
+  }, []); // Empty dependency array - runs once on mount
 
   // Telemetry: Set user context when authentication changes
   useEffect(() => {
@@ -187,10 +221,11 @@ const AppContent: React.FC = () => {
     setFormState({ title: '', agenda: '', transcript: '', tags: [] });
     setOutput(null);
     setHasGenerated(false);
+    clearParticipants();
 
     // Telemetry: Track form clear
     telemetryService.trackEvent('formCleared', {});
-  }, [setFormState]);
+  }, [setFormState, clearParticipants]);
 
   const handleUseSampleData = useCallback(() => {
     setFormState(SAMPLE_DATA);
@@ -205,6 +240,154 @@ const AppContent: React.FC = () => {
     setShowWelcomeModal(true);
   };
 
+  const handleResetUserData = useCallback(() => {
+    // Confirm with user before resetting
+    if (window.confirm(t('common:resetData.confirmMessage'))) {
+      // Reset all localStorage data
+      resetAllUserData();
+
+      // Immediately clear form state and participants for visual feedback
+      setFormState({ title: '', agenda: '', transcript: '', tags: [] });
+      setOutput(null);
+      setHasGenerated(false);
+      clearParticipants();
+
+      // Telemetry: Track data reset
+      telemetryService.trackEvent('userDataReset', {});
+
+      // Show success toast
+      addToast(t('common:toasts.dataReset'), 'success');
+
+      // Reload the page to apply all defaults
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+  }, [t, addToast, setFormState, clearParticipants]);
+
+  // Keyboard shortcuts handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if Alt is pressed without Ctrl or Meta (Cmd)
+      if (!e.altKey || e.ctrlKey || e.metaKey) return;
+
+      // Prevent shortcuts when typing in inputs, textareas, or contenteditable elements
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      switch (e.key.toLowerCase()) {
+        case 'g':
+          // Alt+G: Generate Notes
+          e.preventDefault();
+          if (!isLoading && formState.transcript) {
+            handleGenerateClick();
+          }
+          break;
+
+        case 'k':
+          // Alt+K: Clear Form
+          e.preventDefault();
+          handleClearForm();
+          addToast(t('common:toasts.formCleared'), 'success');
+          break;
+
+        case 'o':
+          // Alt+O: Open File Upload
+          e.preventDefault();
+          if ((window as any).__fileUploadTrigger) {
+            (window as any).__fileUploadTrigger();
+          }
+          break;
+
+        case 'h':
+          // Alt+H: Help
+          e.preventDefault();
+          setIsHelpOpen(true);
+          break;
+
+        case 'c':
+          // Alt+C: Copy to clipboard (if output exists)
+          e.preventDefault();
+          if (output) {
+            // Trigger copy from OutputPanel
+            const copyButton = document.querySelector('[aria-label*="Copy"]') as HTMLButtonElement;
+            if (copyButton) copyButton.click();
+          }
+          break;
+
+        case 'p':
+          // Alt+P: Export to PDF (if output exists)
+          e.preventDefault();
+          if (output) {
+            const pdfButton = document.querySelector('[aria-label*="PDF"]') as HTMLButtonElement;
+            if (pdfButton) pdfButton.click();
+          }
+          break;
+
+        case 's':
+          // Alt+S: Download CSV (if output exists)
+          e.preventDefault();
+          if (output) {
+            const csvButton = document.querySelector('[aria-label*="CSV"]') as HTMLButtonElement;
+            if (csvButton) csvButton.click();
+          }
+          break;
+
+        case 'i':
+          // Alt+I: Interrogate Transcript (if output exists)
+          e.preventDefault();
+          if (output) {
+            const interrogateButton = document.querySelector('[aria-label*="Interrogate"]') as HTMLButtonElement;
+            if (interrogateButton) interrogateButton.click();
+          }
+          break;
+
+        case ',':
+          // Alt+,: Settings
+          e.preventDefault();
+          setIsSettingsOpen(true);
+          break;
+
+        case 't':
+          // Alt+T: Replay Tour
+          e.preventDefault();
+          handleReplayTour();
+          break;
+      }
+
+      // Escape key to close modals (without Alt)
+      if (e.key === 'Escape' && !e.altKey) {
+        if (isHelpOpen) {
+          e.preventDefault();
+          setIsHelpOpen(false);
+        } else if (isSettingsOpen) {
+          e.preventDefault();
+          setIsSettingsOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isLoading,
+    formState,
+    output,
+    isHelpOpen,
+    isSettingsOpen,
+    handleGenerateClick,
+    handleClearForm,
+    handleReplayTour,
+    addToast,
+    t,
+  ]);
+
   return (
     <div className="min-h-screen font-sans">
       <Header
@@ -213,8 +396,12 @@ const AppContent: React.FC = () => {
         onOpenHelp={() => setIsHelpOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onReplayTour={handleReplayTour}
+        onReset={handleResetUserData}
       />
       <main className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+        {isUsingTestAgent && (
+          <TestAgentBanner onOpenSettings={() => setIsSettingsOpen(true)} />
+        )}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="w-full lg:w-[500px] flex-shrink-0">
             <div id="generate-button-wrapper" className="sticky top-24 z-30 mb-6">
@@ -241,6 +428,16 @@ const AppContent: React.FC = () => {
               onClearForm={() => { handleClearForm(); addToast(t('common:toasts.formCleared'), 'success'); }}
               onUseSampleData={() => { handleUseSampleData(); addToast(t('common:toasts.sampleDataLoaded'), 'success'); }}
               isTourActive={isTourActive}
+              onTriggerFileUpload={() => {}}
+              participants={participants}
+              isExtracting={isExtracting}
+              onExtractAndMatch={extractAndMatch}
+              onAddParticipant={addParticipant}
+              onBatchAddParticipants={batchAddParticipantsFromEmails}
+              onRemoveParticipant={removeParticipant}
+              onSearchAndMatch={searchAndMatch}
+              onConfirmMatch={confirmMatch}
+              onMarkAsExternal={markAsExternal}
             />
           </div>
           <div id="output-panel-wrapper" className="flex-1 min-w-0 w-full">
@@ -252,6 +449,7 @@ const AppContent: React.FC = () => {
               addToast={addToast}
               formState={formState}
               apiConfig={apiConfig}
+              participants={participants}
             />
           </div>
         </div>

@@ -1,3 +1,5 @@
+# Run command "./build-and-push.ps1"
+
 # Variables
 $IMAGE_NAME = "momentum-meeting-notes"
 $REGISTRY_URL = "us-east4-docker.pkg.dev/mom-ai-apps/momentum-meeting-notes-generator"
@@ -11,3 +13,15 @@ Write-Host "Pushing images to registry" -ForegroundColor Green
 docker push "$TAG_LATEST"
 
 Write-Host "Docker image built and pushed successfully." -ForegroundColor Green
+echo ""
+echo "========================================="
+echo "✅ Success!"
+echo "========================================="
+echo "Docker image built and pushed successfully"
+echo ""
+echo "To deploy to Cloud Run:"
+echo "  gcloud run deploy note-crafter-frontend \\"
+echo "    --image: ${TAG_LATEST} \\"
+echo "    --url: ${REGISTRY_URL} \\"
+echo "    --region: us-east4 \\"
+echo "========================================="

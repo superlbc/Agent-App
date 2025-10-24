@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep } from '../types';
+import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep, Participant } from '../types';
 import { Card } from './ui/Card';
 import { SkeletonLoader } from './ui/SkeletonLoader';
 import { Icon } from './ui/Icon';
@@ -21,6 +21,7 @@ interface OutputPanelProps {
   addToast: (message: string, type?: 'success' | 'error') => void;
   formState: FormState;
   apiConfig: ApiConfig;
+  participants: Participant[];
 }
 
 const renderWithBold = (text: string): React.ReactNode => {
@@ -293,7 +294,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 };
 
 
-const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void }> = ({ output, title, addToast, onInterrogate }) => {
+const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[] }> = ({ output, title, addToast, onInterrogate, participants }) => {
     const { t } = useTranslation(['common']);
     const markdownContent = output.markdown || '';
     const nextSteps = output.next_steps || [];
@@ -386,10 +387,17 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
         const fullMarkdown = intro + markdownContent;
         const htmlBody = markdownToHtml(fullMarkdown);
 
-        // Telemetry: Track email draft export
+        // Get matched participant emails
+        const participantEmails = participants
+            .filter(p => p.matched && p.email)
+            .map(p => p.email)
+            .filter((email): email is string => email !== undefined);
+
+        // Telemetry: Track email draft export with participant count
         telemetryService.trackEvent('exportedToEmail', {
             contentLength: fullMarkdown.length,
-            actionItemCount: nextSteps.length
+            actionItemCount: nextSteps.length,
+            participantCount: participantEmails.length
         });
 
         try {
@@ -409,8 +417,11 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 
         const subject = encodeURIComponent(`Meeting Notes: ${title}`);
         const body = encodeURIComponent("Meeting notes have been copied to your clipboard. Please paste them here.");
-        const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-        
+
+        // Include participant emails in mailto link (semicolon separated)
+        const emailTo = participantEmails.length > 0 ? participantEmails.join(';') : '';
+        const mailtoLink = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+
         const a = document.createElement('a');
         a.href = mailtoLink;
         a.style.display = 'none';
@@ -545,7 +556,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
     );
 };
 
-export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig }) => {
+export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig, participants }) => {
   const { t } = useTranslation(['common']);
   const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
 
@@ -598,6 +609,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                 title={output.markdown.split('\n')[0].replace('# ', '')}
                 addToast={addToast}
                 onInterrogate={handleInterrogateOpen}
+                participants={participants}
               />
           </div>
         </div>

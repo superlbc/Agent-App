@@ -11,6 +11,7 @@
       "toggleTheme": "Cambiar Tema",
       "replayTutorial": "Repetir Tutorial",
       "help": "Ayuda y Orientación",
+      "resetData": "Restablecer Valores Predeterminados",
       "settings": "Configuración",
       "signOut": "Cerrar Sesión",
       "about": "Acerca de"
@@ -197,6 +198,22 @@
       "statusNotes": "Notas de Estado"
     }
   },
+  "testAgent": {
+    "title": "Agente de Prueba Seleccionado",
+    "description": "Estás usando un ID de Bot personalizado. Restablece al predeterminado en Configuración para eliminar esta notificación.",
+    "resetButton": "Ir a Configuración"
+  },
+  "resetData": {
+    "confirmMessage": "¿Estás seguro de que quieres restablecer los valores predeterminados? Esto borrará tu tema guardado, entradas de formulario, progreso del tutorial, ID de bot personalizado y todas las preferencias. Esta acción no se puede deshacer."
+  },
+  "participantExtraction": {
+    "promptTitle": "¿Añadir Participantes?",
+    "promptMessage": "Detectamos {{count}} participante{{count, plural, one {} other {s}}} potencial{{count, plural, one {} other {es}}} en tu transcripción. ¿Te gustaría añadirlos automáticamente a la lista de participantes de la reunión?",
+    "doNotAskAgain": "No me preguntes de nuevo",
+    "yesButton": "Sí, Añadir Participantes",
+    "noButton": "No, Los Añadiré Manualmente",
+    "helperText": "Siempre puedes añadir o eliminar participantes más tarde desde la sección Participantes de la Reunión"
+  },
   "toasts": {
     "presetApplied": "Se aplicó el preset '{{presetName}}'",
     "formCleared": "Formulario limpiado",
@@ -205,6 +222,7 @@
     "previewUpdated": "Vista previa actualizada exitosamente",
     "settingsSaved": "¡Configuración guardada exitosamente!",
     "botIdReset": "El ID del bot se ha restablecido a su valor predeterminado.",
+    "dataReset": "Todos los datos han sido restablecidos. Recargando...",
     "fileLoaded": "Transcripción cargada desde {{fileName}}",
     "fileProcessing": "Procesando archivo .docx...",
     "fileError": "Error al leer el archivo {{fileName}}",
@@ -219,5 +237,29 @@
     "emailCopiedPlain": "Contenido del correo copiado (texto plano). Pégalo en tu cliente de correo.",
     "noActionsToExport": "No hay acciones para exportar.",
     "csvDownloaded": "CSV descargado exitosamente."
+  },
+  "participants": {
+    "title": "Participantes de la Reunión",
+    "matchedCount": "{{matched}} de {{total}} coincidieron",
+    "extractedCount": "{{total}} extraídos",
+    "unmatchedCount": "{{count}} sin coincidencia",
+    "addManually": "Agregar",
+    "searching": "Buscando...",
+    "clickToMatch": "Haz Clic para Coincidir",
+    "notMatched": "Sin coincidencia",
+    "remove": "Eliminar participante",
+    "extracting": "Extrayendo participantes...",
+    "emptyState": "Pega la transcripción para identificar participantes",
+    "emptyStateHint": "O haz clic en \"Agregar\" para añadir participantes manualmente",
+    "searchTitle": "Buscar Participante",
+    "searchPlaceholder": "Buscar por nombre o correo...",
+    "searchHint": "Escribe al menos 2 caracteres para buscar",
+    "noResults": "No se encontraron usuarios",
+    "noResultsHint": "Intenta con un término de búsqueda diferente",
+    "searchPrompt": "Comienza a escribir para buscar usuarios",
+    "keyboardHint": "Usa ↑↓ para navegar, Enter para seleccionar, Esc para cerrar",
+    "autoExtracted": "Auto-extraído de la transcripción",
+    "manuallyAdded": "Agregado manualmente",
+    "emailDraft": "El correo incluirá {{count}} participantes"
   }
 }

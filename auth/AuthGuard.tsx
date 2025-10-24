@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MsalProvider, useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { BrowserAuthError, AccountInfo } from "@azure/msal-browser";
-import { msalInstance, loginRequest, graphConfig, getRedirectUri, REQUIRED_GROUP_ID } from './authConfig';
+import { msalInstance, loginRequest, graphConfig, getRedirectUri, REQUIRED_GROUP_ID, ADMIN_GROUP_ID } from './authConfig';
 import { AuthContext } from '../contexts/AuthContext';
 import { GraphData } from '../types';
 import { SignInPage } from './SignInPage';
@@ -45,7 +45,7 @@ const MockAuthenticatedApp: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated: true, isAuthorized: true, user: mockUser, graphData: mockGraphData, logout: () => console.log("Mock logout") }}>
+        <AuthContext.Provider value={{ isAuthenticated: true, isAuthorized: true, isAdmin: true, user: mockUser, graphData: mockGraphData, logout: () => console.log("Mock logout") }}>
             {children}
         </AuthContext.Provider>
     );
@@ -82,6 +82,31 @@ const checkGroupMembership = (account: AccountInfo | null): boolean => {
     // Track access denied with empty groups array
     trackAccessDenied(account, []);
 
+    return false;
+};
+
+// Helper function to check if user is in the admin Azure AD group (for settings access)
+const checkAdminMembership = (account: AccountInfo | null): boolean => {
+    if (!account) return false;
+
+    // Check if the idTokenClaims contains the groups claim
+    const claims = account.idTokenClaims as any;
+
+    if (claims && claims.groups && Array.isArray(claims.groups)) {
+        // Check if the admin group ID is in the groups array
+        const isAdmin = claims.groups.includes(ADMIN_GROUP_ID);
+        console.log('Admin membership check:', {
+            userEmail: account.username,
+            adminGroup: ADMIN_GROUP_ID,
+            userGroups: claims.groups,
+            isAdmin
+        });
+
+        return isAdmin;
+    }
+
+    // If groups claim is not present, deny admin access by default
+    console.warn('Groups claim not found in token. Admin access denied by default.');
     return false;
 };
 
@@ -124,6 +149,7 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
     const [isLoading, setIsLoading] = useState(true);
     const [popupBlocked, setPopupBlocked] = useState(false);
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const hasFetchedGraphData = useRef(false);
 
     const handleLogin = useCallback(() => {
@@ -159,6 +185,10 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
             // Check group membership first
             const authorized = checkGroupMembership(accounts[0]);
             setIsAuthorized(authorized);
+
+            // Check admin membership (for settings access)
+            const admin = checkAdminMembership(accounts[0]);
+            setIsAdmin(admin);
 
             // If not authorized, stop here - don't fetch Graph data
             if (!authorized) {
@@ -204,6 +234,7 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
     const contextValue = {
         isAuthenticated,
         isAuthorized,
+        isAdmin,
         user: accounts[0] || null,
         graphData,
         logout: handleLogout

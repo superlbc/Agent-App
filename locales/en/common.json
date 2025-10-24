@@ -11,6 +11,7 @@
       "toggleTheme": "Toggle Theme",
       "replayTutorial": "Replay Tutorial",
       "help": "Help & Guidance",
+      "resetData": "Reset to Defaults",
       "settings": "Settings",
       "about": "About",
       "signOut": "Sign Out"
@@ -197,6 +198,22 @@
       "statusNotes": "Status Notes"
     }
   },
+  "testAgent": {
+    "title": "Test Agent Selected",
+    "description": "You are using a custom Bot ID. Reset to default in Settings to remove this notification.",
+    "resetButton": "Go to Settings"
+  },
+  "resetData": {
+    "confirmMessage": "Are you sure you want to reset to defaults? This will clear your saved theme, form inputs, tutorial progress, custom bot ID, and all preferences. This action cannot be undone."
+  },
+  "participantExtraction": {
+    "promptTitle": "Populate Participants?",
+    "promptMessage": "We detected {{count}} potential participant{{count, plural, one {} other {s}}} in your transcript. Would you like to automatically add them to the meeting participants list?",
+    "doNotAskAgain": "Do not ask me again",
+    "yesButton": "Yes, Add Participants",
+    "noButton": "No, I'll Add Manually",
+    "helperText": "You can always add or remove participants later from the Meeting Participants section"
+  },
   "toasts": {
     "presetApplied": "Applied '{{presetName}}' preset",
     "formCleared": "Form cleared",
@@ -205,6 +222,7 @@
     "previewUpdated": "Preview updated successfully",
     "settingsSaved": "Settings saved successfully!",
     "botIdReset": "Bot ID has been reset to default.",
+    "dataReset": "All data has been reset to defaults. Reloading...",
     "fileLoaded": "Loaded transcript from {{fileName}}",
     "fileProcessing": "Processing .docx file...",
     "fileError": "Error reading file {{fileName}}",
@@ -219,5 +237,29 @@
     "emailCopiedPlain": "Email content copied (plain text). Paste into your email client.",
     "noActionsToExport": "No action items to export.",
     "csvDownloaded": "CSV downloaded successfully."
+  },
+  "participants": {
+    "title": "Meeting Participants",
+    "matchedCount": "{{matched}} of {{total}} matched",
+    "extractedCount": "{{total}} extracted",
+    "unmatchedCount": "{{count}} unmatched",
+    "addManually": "Add",
+    "searching": "Searching...",
+    "clickToMatch": "Click to Match",
+    "notMatched": "Not matched",
+    "remove": "Remove participant",
+    "extracting": "Extracting participants...",
+    "emptyState": "Paste transcript to identify participants",
+    "emptyStateHint": "Or click \"Add\" to manually add participants",
+    "searchTitle": "Search for Participant",
+    "searchPlaceholder": "Search by name or email...",
+    "searchHint": "Type at least 2 characters to search",
+    "noResults": "No users found",
+    "noResultsHint": "Try a different search term",
+    "searchPrompt": "Start typing to search for users",
+    "keyboardHint": "Use ↑↓ to navigate, Enter to select, Esc to close",
+    "autoExtracted": "Auto-extracted from transcript",
+    "manuallyAdded": "Manually added",
+    "emailDraft": "Email will include {{count}} participants"
   }
 }

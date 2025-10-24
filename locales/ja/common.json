@@ -11,6 +11,7 @@
       "toggleTheme": "テーマ切替",
       "replayTutorial": "チュートリアルを再生",
       "help": "ヘルプとガイダンス",
+      "resetData": "デフォルトに戻す",
       "settings": "設定",
       "signOut": "サインアウト",
       "about": "について"
@@ -197,6 +198,22 @@
       "statusNotes": "ステータスメモ"
     }
   },
+  "testAgent": {
+    "title": "テストエージェントが選択されています",
+    "description": "カスタムボットIDを使用しています。設定でデフォルトにリセットすると、この通知が削除されます。",
+    "resetButton": "設定に移動"
+  },
+  "resetData": {
+    "confirmMessage": "デフォルトに戻してもよろしいですか？保存されたテーマ、フォーム入力、チュートリアルの進行状況、カスタムボットID、およびすべての設定がクリアされます。この操作は元に戻せません。"
+  },
+  "participantExtraction": {
+    "promptTitle": "参加者を追加しますか？",
+    "promptMessage": "議事録から{{count}}人の参加者候補を検出しました。参加者リストに自動的に追加しますか？",
+    "doNotAskAgain": "今後表示しない",
+    "yesButton": "はい、参加者を追加",
+    "noButton": "いいえ、手動で追加します",
+    "helperText": "参加者は後から会議参加者セクションで追加・削除できます"
+  },
   "toasts": {
     "presetApplied": "プリセット「{{presetName}}」を適用しました",
     "formCleared": "フォームをクリアしました",
@@ -205,6 +222,7 @@
     "previewUpdated": "プレビューを正常に更新しました",
     "settingsSaved": "設定を正常に保存しました！",
     "botIdReset": "ボットIDをデフォルト値にリセットしました。",
+    "dataReset": "すべてのデータがリセットされました。再読み込みしています...",
     "fileLoaded": "{{fileName}}から議事録を読み込みました",
     "fileProcessing": ".docxファイルを処理中...",
     "fileError": "ファイル{{fileName}}の読み込みエラー",
@@ -219,5 +237,29 @@
     "emailCopiedPlain": "メール内容をコピーしました（プレーンテキスト）。メールクライアントに貼り付けてください。",
     "noActionsToExport": "エクスポートするアクション項目がありません。",
     "csvDownloaded": "CSVを正常にダウンロードしました。"
+  },
+  "participants": {
+    "title": "会議参加者",
+    "matchedCount": "{{total}}人中{{matched}}人が一致しました",
+    "extractedCount": "{{total}}人を抽出しました",
+    "unmatchedCount": "{{count}}人が未一致",
+    "addManually": "追加",
+    "searching": "検索中...",
+    "clickToMatch": "クリックして一致",
+    "notMatched": "一致していません",
+    "remove": "参加者を削除",
+    "extracting": "参加者を抽出中...",
+    "emptyState": "議事録を貼り付けて参加者を識別",
+    "emptyStateHint": "または「追加」をクリックして手動で参加者を追加",
+    "searchTitle": "参加者を検索",
+    "searchPlaceholder": "名前またはメールで検索...",
+    "searchHint": "検索するには少なくとも2文字入力してください",
+    "noResults": "ユーザーが見つかりませんでした",
+    "noResultsHint": "別の検索語句を試してください",
+    "searchPrompt": "ユーザーを検索するには入力を開始してください",
+    "keyboardHint": "↑↓で移動、Enterで選択、Escで閉じる",
+    "autoExtracted": "議事録から自動抽出",
+    "manuallyAdded": "手動で追加",
+    "emailDraft": "メールには{{count}}人の参加者が含まれます"
   }
 }

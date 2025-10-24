@@ -25,6 +25,15 @@ const getInitials = (name?: string): string => {
 // Developer information - hardcoded email to fetch from Azure AD
 const DEVELOPER_EMAIL = 'Luis.Bustos@momentumww.com';
 
+// Fallback data if Azure AD fetch fails
+const DEVELOPER_FALLBACK = {
+  displayName: 'Luis Bustos',
+  jobTitle: 'Director, AI & Technology Strategy and Architecture',
+  mail: 'Luis.Bustos@momentumww.com',
+  photoUrl: undefined,
+  linkedin: 'https://www.linkedin.com/in/lbustos/'
+};
+
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, graphData }) => {
   const { t } = useTranslation(['common']);
   const [developerData, setDeveloperData] = useState<GraphData | null>(null);
@@ -50,6 +59,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
   }, [isOpen, developerData, isLoadingDeveloper]);
 
   if (!isOpen) return null;
+
+  // Determine if we have live data or should use fallback
+  const hasLiveData = !isLoadingDeveloper && developerData !== null;
+  const displayData = hasLiveData ? developerData : DEVELOPER_FALLBACK;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50" onClick={onClose}>
@@ -82,18 +95,18 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
               <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-3">{t('common:about.developedBy')}</h4>
               <Card className="p-4 bg-slate-50 dark:bg-slate-800/50">
                 <div className="flex items-center gap-3">
-                  {/* Developer Avatar - Live from Azure AD */}
+                  {/* Developer Avatar - Live from Azure AD or fallback */}
                   {isLoadingDeveloper ? (
                     <div className="h-12 w-12 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse flex-shrink-0" />
-                  ) : developerData?.photoUrl ? (
+                  ) : displayData.photoUrl ? (
                     <img
-                      src={developerData.photoUrl}
+                      src={displayData.photoUrl}
                       alt="Developer profile"
                       className="h-12 w-12 rounded-full flex-shrink-0"
                     />
                   ) : (
                     <div className="h-12 w-12 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
-                      {getInitials(developerData?.displayName)}
+                      {getInitials(displayData.displayName)}
                     </div>
                   )}
                   {/* Developer Info - Live from Azure AD */}
@@ -106,14 +119,67 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
                     ) : (
                       <>
                         <p className="text-base font-semibold text-slate-900 dark:text-white truncate">
-                          {developerData?.displayName || 'Luis Bustos'}
+                          {displayData.displayName}
                         </p>
                         <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
-                          {developerData?.jobTitle || 'Director, AI & Technology Strategy and Architecture'}
+                          {displayData.jobTitle}
                         </p>
                       </>
                     )}
                   </div>
+                </div>
+
+                {/* Contact Actions Row */}
+                <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                  {/* Email - Only show if live data available */}
+                  {hasLiveData && displayData.mail && (
+                    <a
+                      href={`mailto:${displayData.mail}`}
+                      className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                      aria-label="Send email to Luis Bustos"
+                      title="Email Luis"
+                    >
+                      <Icon name="email" className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                      {/* Tooltip */}
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        Email Luis
+                      </span>
+                    </a>
+                  )}
+
+                  {/* Teams - Only show if live data available */}
+                  {hasLiveData && displayData.mail && (
+                    <a
+                      href={`https://teams.microsoft.com/l/chat/0/0?users=${displayData.mail}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                      aria-label="Chat with Luis Bustos on Teams"
+                      title="Chat on Teams"
+                    >
+                      <Icon name="teams-filled" className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
+                      {/* Tooltip */}
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        Chat on Teams
+                      </span>
+                    </a>
+                  )}
+
+                  {/* LinkedIn - Always show */}
+                  <a
+                    href="https://www.linkedin.com/in/lbustos/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-blue-700 dark:hover:border-blue-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                    aria-label="View Luis Bustos LinkedIn profile"
+                    title="View LinkedIn Profile"
+                  >
+                    <Icon name="linkedin" className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-700 dark:group-hover:text-blue-500 transition-colors" />
+                    {/* Tooltip */}
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      View LinkedIn Profile
+                    </span>
+                  </a>
                 </div>
               </Card>
             </div>

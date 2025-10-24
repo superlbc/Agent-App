@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
@@ -14,7 +14,12 @@ import {
   Department,
   MeetingPreset,
   ContextTag,
+  Participant,
+  GraphData,
 } from '../types';
+import { ParticipantsPanel } from './participants/ParticipantsPanel';
+import { ParsedContact } from '../utils/emailListParser';
+import { BatchAddResult, BatchAddProgress } from '../hooks/useParticipantExtraction';
 import {
   DEPARTMENT_OPTIONS,
   CONTEXT_TAG_OPTIONS,
@@ -37,6 +42,21 @@ interface InputPanelProps {
   onClearForm: () => void;
   onUseSampleData: () => void;
   isTourActive: boolean;
+  onTriggerFileUpload?: () => void;
+  // Participant management
+  participants: Participant[];
+  isExtracting: boolean;
+  onExtractAndMatch: (transcript: string) => Promise<void>;
+  onAddParticipant: (graphData: GraphData) => void;
+  onBatchAddParticipants?: (
+    contacts: ParsedContact[],
+    source: 'emailList' | 'csv',
+    onProgress?: (progress: BatchAddProgress) => void
+  ) => Promise<BatchAddResult>;
+  onRemoveParticipant: (id: string) => void;
+  onSearchAndMatch: (participantId: string, searchQuery: string) => Promise<GraphData[]>;
+  onConfirmMatch: (participantId: string, graphData: GraphData) => void;
+  onMarkAsExternal: (participantId: string, email: string) => void;
 }
 
 export const InputPanel: React.FC<InputPanelProps> = ({
@@ -48,10 +68,39 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   onClearForm,
   onUseSampleData,
   isTourActive,
+  onTriggerFileUpload,
+  participants,
+  isExtracting,
+  onExtractAndMatch,
+  onAddParticipant,
+  onBatchAddParticipants,
+  onRemoveParticipant,
+  onSearchAndMatch,
+  onConfirmMatch,
+  onMarkAsExternal,
 }) => {
   const { t } = useTranslation(['forms', 'common', 'constants']);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Expose file upload trigger to parent via callback
+  useEffect(() => {
+    if (onTriggerFileUpload && fileInputRef.current) {
+      onTriggerFileUpload();
+    }
+  }, []);
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Call parent callback with our trigger function when it's provided
+  useEffect(() => {
+    if (onTriggerFileUpload) {
+      // Store the trigger function reference in the parent
+      (window as any).__fileUploadTrigger = triggerFileUpload;
+    }
+  }, []);
   
   // When a preset is selected, update the relevant controls and tags.
   const handlePresetChange = (preset: Exclude<MeetingPreset, 'custom'>) => {
@@ -216,7 +265,23 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             </div>
           </div>
         </div>
-        
+
+        {/* Participants Panel */}
+        <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
+          <ParticipantsPanel
+            transcript={formState.transcript}
+            participants={participants}
+            isExtracting={isExtracting}
+            onExtractAndMatch={onExtractAndMatch}
+            onAddParticipant={onAddParticipant}
+            onBatchAddParticipants={onBatchAddParticipants}
+            onRemoveParticipant={onRemoveParticipant}
+            onSearchAndMatch={onSearchAndMatch}
+            onConfirmMatch={onConfirmMatch}
+            onMarkAsExternal={onMarkAsExternal}
+          />
+        </div>
+
         <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
           <div id="meeting-presets-section">
             <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">

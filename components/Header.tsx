@@ -12,6 +12,7 @@ interface HeaderProps {
   onOpenHelp: () => void;
   onOpenSettings: () => void;
   onReplayTour: () => void;
+  onReset: () => void;
 }
 
 interface MenuItem {
@@ -30,9 +31,9 @@ const getInitials = (name?: string): string => {
   return name.substring(0, 2).toUpperCase();
 };
 
-export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onOpenHelp, onOpenSettings, onReplayTour }) => {
+export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onOpenHelp, onOpenSettings, onReplayTour, onReset }) => {
   const { t } = useTranslation(['common']);
-  const { user, graphData, logout } = useAuth();
+  const { user, graphData, logout, isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -49,11 +50,14 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
     };
   }, []);
 
+  // Build menu items array, conditionally including settings for admin users only
   const menuItems: MenuItem[] = [
     { label: t('common:header.menu.toggleTheme'), icon: isDarkMode ? 'sun' : 'moon', action: onToggleDarkMode },
     { id: 'replay-tutorial-button', label: t('common:header.menu.replayTutorial'), icon: 'sparkles', action: onReplayTour },
     { label: t('common:header.menu.help'), icon: 'help', action: onOpenHelp },
-    { label: t('common:header.menu.settings'), icon: 'settings', action: onOpenSettings },
+    { label: t('common:header.menu.resetData'), icon: 'refresh', action: onReset },
+    // Settings is only available to admin users
+    ...(isAdmin ? [{ label: t('common:header.menu.settings'), icon: 'settings', action: onOpenSettings }] : []),
   ];
 
   return (

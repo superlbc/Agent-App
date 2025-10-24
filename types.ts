@@ -1,7 +1,11 @@
 
 export interface GraphData {
+  id?: string;               // Graph API user ID for presence lookup
   displayName?: string;
   jobTitle?: string;
+  department?: string;
+  companyName?: string;
+  officeLocation?: string;
   mail?: string;
   photoUrl?: string;
 }
@@ -123,3 +127,58 @@ export interface ChatMessage {
   follow_up_suggestions?: string[];
   isError?: boolean;
 }
+
+// Participant extraction and matching types
+export interface ExtractedParticipant {
+  rawText: string;           // Original text from transcript (e.g., "Bustos, Luis (LDN-MOM)")
+  parsedName?: string;       // Parsed display name (e.g., "Luis Bustos")
+  email?: string;            // Extracted email if present
+  source: 'transcript-name' | 'transcript-email';
+  isExternal?: boolean;      // True if external email (not @momentumww.com)
+}
+
+export interface Participant {
+  id: string;                // Unique ID for React keys
+  extractedText: string;     // Original text from transcript
+  matched: boolean;          // Successfully matched to Graph API
+  matchConfidence?: 'high' | 'medium' | 'low';
+  isExternal?: boolean;      // True if external participant
+  participantType?: 'internal' | 'external' | 'unknown';  // User-defined type for unmatched
+
+  // Graph API data (if matched) OR external participant data
+  graphId?: string;          // Graph API user ID for presence lookup
+  displayName?: string;
+  jobTitle?: string;
+  department?: string;
+  companyName?: string;
+  officeLocation?: string;
+  email?: string;
+  photoUrl?: string;
+
+  // Presence info (from Graph API)
+  presence?: PresenceData;
+
+  // CSV import data
+  acceptanceStatus?: 'accepted' | 'declined' | 'tentative' | 'noResponse' | 'organizer';
+  attendanceType?: 'required' | 'optional';
+  source?: 'transcript' | 'csv' | 'manual' | 'emailList';
+
+  // UI state
+  isSearching?: boolean;
+  searchError?: string;
+}
+
+export interface PresenceData {
+  availability: 'Available' | 'AvailableIdle' | 'Away' | 'BeRightBack' | 'Busy' | 'BusyIdle' | 'DoNotDisturb' | 'Offline' | 'PresenceUnknown';
+  activity?: string;
+  lastUpdated?: number;      // Timestamp for cache invalidation
+}
+
+export interface CSVParticipant {
+  name: string;              // Full name from CSV (e.g., "Bustos, Luis (WW-MOM)")
+  email: string;
+  acceptanceStatus: 'accepted' | 'declined' | 'tentative' | 'noResponse';
+  attendanceType: 'required' | 'optional';
+}
+
+export type ParticipantInputMethod = 'transcript' | 'emailList' | 'csv';
