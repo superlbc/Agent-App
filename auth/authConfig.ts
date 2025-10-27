@@ -60,9 +60,31 @@ export const msalInstance = new PublicClientApplication(msalConfig);
 // IMPORTANT: User.Read.All requires admin consent from IPG IT
 // When approved, change User.ReadBasic.All to User.Read.All below to enable full profile data
 // (job title, department, company, office location) for all users
+
+// Combined scopes for all features - user consents once at login
 export const loginRequest = {
-    scopes: ["User.Read", "User.ReadBasic.All", "Presence.Read.All", "profile"]
-    // scopes: ["User.Read", "User.Read.All", "Presence.Read.All", "profile"] // Uncomment when admin consent granted
+    scopes: [
+        "User.Read",                        // Sign in and read user profile
+        "User.Read.All",                    // Read full profiles of all users (participant matching) - ADMIN APPROVED
+        "Presence.Read.All",                // Read presence status (participant matching)
+        "Calendars.Read",                   // Read user's calendar (meeting selection)
+        "OnlineMeetings.Read",              // Read meeting details (meeting selection)
+        "OnlineMeetingTranscript.Read.All", // Read meeting transcripts (Graph API) - ADMIN APPROVED
+        "Files.Read",                       // Read OneDrive/Teams Files (transcript retrieval fallback)
+        "profile"                           // OpenID Connect profile
+    ]
+};
+
+// Alias for meeting selection feature - uses same scopes as loginRequest
+// Kept for backwards compatibility with code that references this
+export const meetingSelectionScopes = {
+    scopes: [
+        "User.Read",                        // User profile
+        "Calendars.Read",                   // Read user's calendar
+        "OnlineMeetings.Read",              // Read meeting details
+        "OnlineMeetingTranscript.Read.All", // Read meeting transcripts - ADMIN APPROVED
+        "Files.Read"                        // Read OneDrive/Teams Files (for transcripts)
+    ]
 };
 
 export const graphConfig = {

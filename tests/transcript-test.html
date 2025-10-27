@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transcript API Test</title>
+    <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover { background: #005a9e; }
+        #output {
+            background: #252526;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .success { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .info { color: #9cdcfe; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Transcript API Test - October 27, 2025 Meeting</h1>
+    <p>Testing transcript retrieval for meeting with Joseph Clemente at 3 PM UK time</p>
+
+    <button onclick="login()">1. Login</button>
+    <button onclick="findMeeting()">2. Find Oct 27 Meeting</button>
+    <button onclick="getTranscript()">3. Get Transcript</button>
+    <button onclick="clearOutput()">Clear</button>
+
+    <div id="output"></div>
+
+    <script>
+        const msalConfig = {
+            auth: {
+                clientId: "5fa64631-ea56-4676-b6d5-433d322a4da1",
+                authority: "https://login.microsoftonline.com/d026e4c1-5892-497a-b9da-ee493c9f0364",
+                redirectUri: window.location.origin
+            }
+        };
+
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+        let accessToken = null;
+        let foundMeeting = null;
+        let onlineMeetingId = null;
+
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = `[${new Date().toLocaleTimeString()}] ${message}\n`;
+            output.appendChild(span);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        async function login() {
+            try {
+                log('🔐 Logging in...', 'info');
+                const response = await msalInstance.loginPopup({
+                    scopes: [
+                        "User.Read",
+                        "Calendars.Read",
+                        "OnlineMeetings.Read",
+                        "OnlineMeetingTranscript.Read.All"
+                    ]
+                });
+
+                accessToken = response.accessToken;
+                log('✅ Login successful!', 'success');
+                log(`User: ${response.account.username}`, 'info');
+            } catch (error) {
+                log(`❌ Login failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function findMeeting() {
+            if (!accessToken) {
+                log('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                log('🔍 Searching for October 27, 2025 meetings...', 'info');
+
+                // Search for meetings on Oct 27, 2025 (3 PM UK time = 2 PM UTC)
+                const startDateTime = '2025-10-27T00:00:00Z';
+                const endDateTime = '2025-10-27T23:59:59Z';
+
+                const url = `https://graph.microsoft.com/v1.0/me/calendar/calendarView?startDateTime=${startDateTime}&endDateTime=${endDateTime}`;
+
+                log(`Fetching: ${url}`, 'info');
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.value && data.value.length > 0) {
+                    log(`✅ Found ${data.value.length} meeting(s)`, 'success');
+
+                    // Find meeting with Joseph Clemente
+                    foundMeeting = data.value.find(m =>
+                        m.subject && (
+                            m.subject.toLowerCase().includes('joseph') ||
+                            m.subject.toLowerCase().includes('clemente') ||
+                            JSON.stringify(m.attendees).toLowerCase().includes('joseph')
+                        )
+                    );
+
+                    if (foundMeeting) {
+                        log(`\n📅 Found meeting: "${foundMeeting.subject}"`, 'success');
+                        log(`   Time: ${foundMeeting.start.dateTime}`, 'info');
+                        log(`   ID: ${foundMeeting.id}`, 'info');
+                        log(`   Organizer: ${foundMeeting.organizer.emailAddress.name}`, 'info');
+
+                        if (foundMeeting.onlineMeeting) {
+                            log(`   Join URL: ${foundMeeting.onlineMeeting.joinUrl}`, 'info');
+
+                            // Try to get online meeting ID from join URL
+                            await resolveOnlineMeetingId(foundMeeting.onlineMeeting.joinUrl);
+                        } else {
+                            log(`   ⚠️ No online meeting data`, 'error');
+                        }
+                    } else {
+                        log(`⚠️ No meeting found with Joseph Clemente on Oct 27`, 'error');
+                        log(`Available meetings:`, 'info');
+                        data.value.forEach(m => {
+                            log(`  - ${m.subject} (${m.start.dateTime})`, 'info');
+                        });
+                    }
+                } else {
+                    log(`❌ No meetings found on October 27, 2025`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function resolveOnlineMeetingId(joinUrl) {
+            try {
+                log(`\n🔗 Resolving online meeting ID from join URL...`, 'info');
+
+                const filterUrl = `https://graph.microsoft.com/v1.0/me/onlineMeetings?$filter=JoinWebUrl eq '${joinUrl}'`;
+
+                const response = await fetch(filterUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'ConsistencyLevel': 'eventual'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.value && data.value.length > 0) {
+                    onlineMeetingId = data.value[0].id;
+                    log(`✅ Resolved online meeting ID: ${onlineMeetingId}`, 'success');
+                } else {
+                    log(`❌ Could not resolve online meeting ID`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error resolving meeting ID: ${error.message}`, 'error');
+            }
+        }
+
+        async function getTranscript() {
+            if (!onlineMeetingId) {
+                log('❌ Please find a meeting first', 'error');
+                return;
+            }
+
+            try {
+                log(`\n📝 Fetching transcripts for meeting...`, 'info');
+
+                const url = `https://graph.microsoft.com/v1.0/me/onlineMeetings/${onlineMeetingId}/transcripts`;
+
+                log(`URL: ${url}`, 'info');
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.value && data.value.length > 0) {
+                    log(`✅ Found ${data.value.length} transcript(s)`, 'success');
+
+                    const transcript = data.value[0];
+                    log(`\nTranscript details:`, 'info');
+                    log(`  ID: ${transcript.id}`, 'info');
+                    log(`  Created: ${transcript.createdDateTime}`, 'info');
+
+                    // Try to fetch content
+                    log(`\n📥 Fetching transcript content...`, 'info');
+
+                    const contentUrl = `https://graph.microsoft.com/v1.0/me/onlineMeetings/${onlineMeetingId}/transcripts/${transcript.id}/content`;
+
+                    const contentResponse = await fetch(contentUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Accept': 'text/vtt'
+                        }
+                    });
+
+                    if (contentResponse.ok) {
+                        const content = await contentResponse.text();
+                        log(`✅ Transcript retrieved! Length: ${content.length} characters`, 'success');
+                        log(`\nFirst 500 characters:\n${content.substring(0, 500)}...`, 'info');
+                    } else {
+                        const error = await contentResponse.text();
+                        log(`❌ Failed to fetch content: ${contentResponse.status} ${contentResponse.statusText}`, 'error');
+                        log(`Error: ${error}`, 'error');
+                    }
+                } else {
+                    log(`❌ No transcripts found for this meeting`, 'error');
+                    log(`Response: ${JSON.stringify(data, null, 2)}`, 'info');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize MSAL
+        msalInstance.initialize().then(() => {
+            log('✅ MSAL initialized', 'success');
+        });
+    </script>
+</body>
+</html>

@@ -134,6 +134,41 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 - Follow-up question recommendations
 - Real-time responses from the AI agent
 
+### 📅 Calendar Meeting Selection
+
+✅ **Automatic Meeting Import from Teams**
+- Browse your Teams calendar directly in the app (±4 weeks from today)
+- Visual calendar picker with meeting count indicators on each date
+- See all meetings for a selected day with time, duration, and transcript availability badges
+- One-click meeting selection with automatic data retrieval
+
+✅ **Automatic Transcript Retrieval**
+- Fetches meeting transcripts directly from Microsoft Graph API
+- Uses OnlineMeetingTranscript.Read.All permission (admin-approved)
+- Processes transcripts in WebVTT format with speaker identification
+- Transcript availability typically 5-10 minutes after meeting ends
+- Graceful fallback for meetings without transcripts (manual paste option)
+
+✅ **Intelligent Auto-Population**
+- **Meeting Title**: Automatically filled from calendar event
+- **Agenda**: Extracted from meeting description (boilerplate filtering enabled)
+- **Transcript**: Full conversation with speaker names and timestamps
+- **Participants**: All attendees and organizer automatically added with profile data
+- No manual data entry required - ready to generate notes immediately
+
+✅ **Smart Features**
+- **Boilerplate Detection**: Filters out Microsoft Teams join links and generic meeting instructions
+- **Organizer Inclusion**: Always includes meeting organizer in participant list (even if not in attendees)
+- **Transcript Likelihood Badge**: Visual indicator showing if transcript is likely available
+- **Collapsed View**: Clean UI showing selected meeting with option to change selection
+- **Profile Enrichment**: Fetches full profile data (job title, department, photo) for all participants
+
+✅ **Permissions & Security**
+- Requires user consent for Calendars.Read, OnlineMeetings.Read, and OnlineMeetingTranscript.Read.All
+- Admin-approved permissions ensure compliance with organizational policies
+- Transcript access respects Teams meeting security settings
+- Only meetings where user is organizer or attendee are accessible
+
 ### 📤 Export Capabilities
 
 ✅ **Multiple Export Formats**
@@ -580,7 +615,8 @@ Click the **"Load Sample Meeting"** button to populate the form with example dat
 ### Data Flow
 
 1. **User Input** → Form data collected in `InputPanel.tsx`
-   - Meeting title, agenda, transcript
+   - **Calendar Meeting Selection** (automatic): Browse Teams calendar, select meeting, auto-fetch title, agenda, transcript, and participants
+   - **Manual Input** (alternative): Type or paste meeting title, agenda, and transcript
    - Context tags (client-facing, internal, sensitive)
 
 2. **Control Selection** → User configures output preferences
@@ -643,12 +679,26 @@ This application uses **Microsoft Authentication Library (MSAL)** to authenticat
 3. Select **"Microsoft Graph"**
 4. Choose **"Delegated permissions"**
 5. Add the following permissions:
-   - ✅ `User.Read` - Read user profile information (display name, email, job title)
+
+   **Authentication & User Profile**:
+   - ✅ `User.Read` - Read signed-in user profile (display name, email, job title)
    - ✅ `profile` - View user's basic profile
    - ✅ `openid` - Sign in and read user profile
 
+   **Calendar Meeting Selection** (required for automatic meeting import):
+   - ✅ `Calendars.Read` - Read user's calendar events
+   - ✅ `OnlineMeetings.Read` - Read online meeting details
+   - ✅ `OnlineMeetingTranscript.Read.All` - Read meeting transcripts (⚠️ requires admin consent)
+   - ✅ `Files.Read` - Read OneDrive/Teams files (fallback for transcript retrieval)
+
+   **Participant Matching** (required for auto-populating meeting participants):
+   - ✅ `User.Read.All` - Read full profiles of all users (⚠️ requires admin consent)
+   - ✅ `Presence.Read.All` - Read presence status of users
+
 6. Click **"Add permissions"**
-7. (Optional) Click **"Grant admin consent"** if you have admin privileges (recommended)
+7. **IMPORTANT**: Click **"Grant admin consent"** to approve permissions marked with ⚠️
+   - `OnlineMeetingTranscript.Read.All` and `User.Read.All` require admin approval
+   - Without admin consent, calendar meeting selection will not work
 
 ### Step 3: Configure Authentication Settings
 

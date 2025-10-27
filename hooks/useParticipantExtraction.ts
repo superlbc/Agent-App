@@ -228,17 +228,13 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
 
     /**
      * Manually adds a participant from Graph API data
+     * Uses functional state updates to prevent race conditions when adding multiple participants
      */
     const addParticipant = useCallback(async (graphData: GraphData) => {
-        // Check if participant already exists by email
-        const exists = participants.some(p => p.email === graphData.mail);
-        if (exists) {
-            console.warn('Participant already exists:', graphData.mail);
-            return;
-        }
+        console.log(`[useParticipantExtraction] Adding participant: ${graphData.mail}`);
 
         const newParticipant: Participant = {
-            id: `participant-manual-${Date.now()}`,
+            id: `participant-manual-${Date.now()}-${Math.random()}`, // Ensure unique IDs
             extractedText: graphData.displayName || graphData.mail || 'Unknown',
             matched: true,
             matchConfidence: 'high',
@@ -250,16 +246,24 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
             officeLocation: graphData.officeLocation,
             email: graphData.mail,
             photoUrl: graphData.photoUrl,
-            source: 'manual'
+            source: (graphData as any).source || 'manual' // Preserve source if provided
         };
 
-        const updatedList = [...participants, newParticipant];
-        setParticipants(updatedList);
+        // Use functional state update to avoid race conditions
+        setParticipants(prev => {
+            // Check if participant already exists by email using LATEST state
+            const exists = prev.some(p => p.email === graphData.mail);
+            if (exists) {
+                console.warn('[useParticipantExtraction] Participant already exists:', graphData.mail);
+                return prev; // Return unchanged state
+            }
 
-        // Fetch presence
-        const withPresence = await fetchPresenceForParticipants(updatedList);
-        setParticipants(withPresence);
-    }, [participants, fetchPresenceForParticipants]);
+            console.log(`[useParticipantExtraction] ✅ Added participant: ${graphData.displayName || graphData.mail}`);
+            return [...prev, newParticipant];
+        });
+
+        // Note: Presence fetching will be handled separately to avoid race conditions
+    }, [fetchPresenceForParticipants]);
 
     /**
      * Removes a participant from the list

@@ -86,8 +86,9 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
             }
 
             // Check if participants were manually added (have source field)
+            // 'meeting' source means participants were added from calendar meeting selection
             const hasManualParticipants = participants.some(p =>
-                p.source === 'csv' || p.source === 'emailList' || p.source === 'manual'
+                p.source === 'csv' || p.source === 'emailList' || p.source === 'manual' || p.source === 'meeting'
             );
 
             // Check if any transcript-based participants already exist

@@ -14,7 +14,12 @@
       "Bash(node -e:*)",
       "Bash(timeout 10 npx tsc:*)",
       "Bash(timeout 3 bash:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(start graph-api-test.html)",
+      "Bash(start http://localhost:3000/graph-api-test.html)",
+      "Bash(copy graph-api-test.html index.html)",
+      "Bash(start http://localhost:3000)",
+      "Bash(start http://localhost:3000/transcript-test.html)"
     ],
     "deny": [],
     "ask": []

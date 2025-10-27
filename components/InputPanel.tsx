@@ -20,6 +20,8 @@ import {
 import { ParticipantsPanel } from './participants/ParticipantsPanel';
 import { ParsedContact } from '../utils/emailListParser';
 import { BatchAddResult, BatchAddProgress } from '../hooks/useParticipantExtraction';
+import { MeetingSelectionPanel } from './meeting/MeetingSelectionPanel';
+import { MeetingWithTranscript } from '../services/meetingService';
 import {
   DEPARTMENT_OPTIONS,
   CONTEXT_TAG_OPTIONS,
@@ -32,6 +34,7 @@ import {
   DEPARTMENT_LEGEND,
 } from '../constants';
 import { telemetryService } from '../utils/telemetryService';
+import { searchUserByEmail } from '../utils/graphSearchService';
 
 interface InputPanelProps {
   formState: FormState;
@@ -59,6 +62,8 @@ interface InputPanelProps {
   onMarkAsExternal: (participantId: string, email: string) => void;
 }
 
+type InputMode = 'selectMeeting' | 'pasteTranscript';
+
 export const InputPanel: React.FC<InputPanelProps> = ({
   formState,
   setFormState,
@@ -81,6 +86,9 @@ export const InputPanel: React.FC<InputPanelProps> = ({
 }) => {
   const { t } = useTranslation(['forms', 'common', 'constants']);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [inputMode, setInputMode] = useState<InputMode>('selectMeeting');
+  const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
+  const [pendingMeetingData, setPendingMeetingData] = useState<MeetingWithTranscript | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Expose file upload trigger to parent via callback
@@ -143,6 +151,170 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     // Also set meetingPreset to 'custom' when tags are manually changed
     setControls(prev => ({...prev, meetingPreset: 'custom'}));
     handleFormChange('tags', newTags);
+  };
+
+  const handleMeetingSelected = async (meetingData: MeetingWithTranscript) => {
+    console.log('[InputPanel] Meeting data received:', meetingData);
+    console.log('[InputPanel] Transcript length:', meetingData.transcript?.content?.length || 0);
+    console.log('[InputPanel] Attendees count:', meetingData.attendees?.length || 0);
+
+    // Filter out boilerplate Microsoft Teams agenda
+    const isBoilerplateAgenda = (agenda: string): boolean => {
+      if (!agenda || agenda.trim().length === 0) return false;
+
+      const boilerplateKeywords = [
+        'microsoft teams need help',
+        'join the meeting now',
+        'meeting id:',
+        'passcode:',
+        'dial in by phone',
+        'find a local number',
+        'reset dial-in pin',
+        'learn more about teams',
+        'meeting options'
+      ];
+
+      const lowerAgenda = agenda.toLowerCase();
+      const matchCount = boilerplateKeywords.filter(keyword => lowerAgenda.includes(keyword)).length;
+
+      // If more than 3 boilerplate keywords found, consider it boilerplate
+      return matchCount >= 3;
+    };
+
+    const cleanAgenda = meetingData.agenda && !isBoilerplateAgenda(meetingData.agenda)
+      ? meetingData.agenda
+      : '';
+
+    const transcriptContent = meetingData.transcript?.content || '';
+
+    console.log('[InputPanel] Setting form state with:');
+    console.log('[InputPanel]   - Title:', meetingData.subject);
+    console.log('[InputPanel]   - Agenda:', cleanAgenda ? 'Yes' : 'No (boilerplate filtered)');
+    console.log('[InputPanel]   - Transcript:', transcriptContent.length, 'characters');
+
+    // Auto-populate form fields
+    setFormState(prev => ({
+      ...prev,
+      title: meetingData.subject || '',
+      agenda: cleanAgenda,
+      transcript: transcriptContent
+    }));
+
+    // Auto-populate participants from attendees - use proper Graph API lookup
+    // Mark them with source: 'meeting' to prevent auto-extract dialog
+    // IMPORTANT: Wait for ALL participants to be added before continuing
+    if (meetingData.attendees && meetingData.attendees.length > 0) {
+      console.log('[InputPanel] Adding participants from meeting...');
+
+      // Use Promise.all to wait for all participant lookups to complete
+      await Promise.all(
+        meetingData.attendees.map(async (attendee) => {
+          try {
+            // Look up the user by exact email to get complete profile
+            console.log(`[InputPanel] Looking up attendee: ${attendee.email}`);
+            const graphData = await searchUserByEmail(attendee.email);
+
+            if (graphData) {
+              // Add participant with full Graph data and meeting source
+              console.log(`[InputPanel] Found Graph data for ${attendee.email}:`, graphData.displayName);
+              onAddParticipant({ ...graphData, source: 'meeting' } as any);
+            } else {
+              // User not found in directory - add as basic data
+              console.warn(`[InputPanel] User not found in directory: ${attendee.email}`);
+              onAddParticipant({
+                id: attendee.email,
+                displayName: attendee.name,
+                mail: attendee.email,
+                userPrincipalName: attendee.email,
+                jobTitle: '',
+                department: '',
+                companyName: '',
+                officeLocation: '',
+                presence: { availability: 'Unknown', activity: 'Unknown' },
+                photoUrl: null,
+                source: 'meeting'
+              } as any);
+            }
+          } catch (error) {
+            console.error(`[InputPanel] Error looking up ${attendee.email}:`, error);
+            // Fallback to basic data on error
+            onAddParticipant({
+              id: attendee.email,
+              displayName: attendee.name,
+              mail: attendee.email,
+              userPrincipalName: attendee.email,
+              jobTitle: '',
+              department: '',
+              companyName: '',
+              officeLocation: '',
+              presence: { availability: 'Unknown', activity: 'Unknown' },
+              photoUrl: null,
+              source: 'meeting'
+            } as any);
+          }
+        })
+      );
+
+      console.log('[InputPanel] All participants added successfully');
+    }
+
+    // Check if transcript is available
+    if (!transcriptContent || transcriptContent.trim().length === 0) {
+      // Show dialog asking if user wants to continue without transcript
+      setPendingMeetingData(meetingData);
+      setShowTranscriptDialog(true);
+      return;
+    }
+
+    // Switch to paste transcript tab
+    setInputMode('pasteTranscript');
+
+    // Show success toast
+    addToast('Meeting data and transcript loaded successfully!', 'success');
+
+    // Telemetry: Track meeting selection
+    telemetryService.trackEvent('meetingSelected', {
+      hasTranscript: true,
+      hasAgenda: !!cleanAgenda,
+      attendeeCount: meetingData.attendees?.length || 0
+    });
+  };
+
+  const handleContinueWithoutTranscript = () => {
+    // User confirmed to continue without transcript
+    setShowTranscriptDialog(false);
+    setInputMode('pasteTranscript');
+    addToast('Meeting data loaded. You can paste the transcript manually.', 'success');
+
+    // Telemetry: Track meeting selection without transcript
+    if (pendingMeetingData) {
+      telemetryService.trackEvent('meetingSelected', {
+        hasTranscript: false,
+        hasAgenda: !!pendingMeetingData.agenda,
+        attendeeCount: pendingMeetingData.attendees?.length || 0
+      });
+    }
+
+    setPendingMeetingData(null);
+  };
+
+  const handleCancelMeetingSelection = () => {
+    // User cancelled - stay on meeting selection tab
+    setShowTranscriptDialog(false);
+    setPendingMeetingData(null);
+
+    // Clear form data
+    setFormState(prev => ({
+      ...prev,
+      title: '',
+      agenda: '',
+      transcript: ''
+    }));
+
+    // Clear participants - remove all participants
+    participants.forEach(participant => {
+      onRemoveParticipant(participant.id);
+    });
   };
 
   const processTranscriptFile = (file: File) => {
@@ -217,7 +389,44 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   return (
     <Card className="p-4 sm:p-6" id="input-panel">
       <div className="space-y-6">
-        <div className="space-y-4" id="transcript-input-section">
+        {/* Tab Navigation */}
+        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          <button
+            onClick={() => setInputMode('selectMeeting')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+              inputMode === 'selectMeeting'
+                ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Icon name="calendar" className="w-4 h-4 inline-block mr-2" />
+            Select Meeting
+          </button>
+          <button
+            onClick={() => setInputMode('pasteTranscript')}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+              inputMode === 'pasteTranscript'
+                ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Icon name="edit" className="w-4 h-4 inline-block mr-2" />
+            Paste Transcript
+          </button>
+        </div>
+
+        {/* Meeting Selection Panel */}
+        {inputMode === 'selectMeeting' && (
+          <MeetingSelectionPanel
+            onMeetingSelected={handleMeetingSelected}
+            onError={(error) => addToast(error, 'error')}
+          />
+        )}
+
+        {/* Tab Content - Title, Agenda, Transcript, Participants */}
+        {inputMode === 'pasteTranscript' && (
+          <>
+            <div className="space-y-4" id="transcript-input-section">
           <Input
             id="title"
             label={t('forms:input.title.label')}
@@ -281,7 +490,10 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             onMarkAsExternal={onMarkAsExternal}
           />
         </div>
+          </>
+        )}
 
+        {/* Meeting Presets & Advanced Settings - Always visible outside tabs */}
         <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
           <div id="meeting-presets-section">
             <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -472,20 +684,67 @@ export const InputPanel: React.FC<InputPanelProps> = ({
               </div>
           )}
         </div>
-      </div>
-      <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-700">
+
+        {/* Bottom Actions - Always visible */}
+        <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-700">
           <div className="flex justify-between items-center">
-              <button
-                  id="use-sample-data-button"
-                  type="button"
-                  onClick={onUseSampleData}
-                  className="text-sm font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-              >
-                  {t('forms:actions.useSampleData')}
-              </button>
-              <Button onClick={onClearForm} variant="secondary" size="sm">{t('forms:actions.clearForm')}</Button>
+            <button
+              id="use-sample-data-button"
+              type="button"
+              onClick={onUseSampleData}
+              className="text-sm font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+            >
+              {t('forms:actions.useSampleData')}
+            </button>
+            <Button onClick={onClearForm} variant="secondary" size="sm">{t('forms:actions.clearForm')}</Button>
           </div>
+        </div>
       </div>
+
+      {/* Transcript Unavailable Dialog */}
+      {showTranscriptDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="p-6 max-w-md mx-4">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                <Icon name="error" className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                  Transcript Not Available
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  The transcript for this meeting is not available. This could be because:
+                </p>
+                <ul className="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside space-y-1 mb-4">
+                  <li>The meeting recording wasn't enabled</li>
+                  <li>The transcript is still being processed (takes 5-10 minutes)</li>
+                  <li>You don't have permission to access it</li>
+                </ul>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Would you like to continue and enter the transcript manually?
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCancelMeetingSelection}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleContinueWithoutTranscript}
+              >
+                Continue
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </Card>
   );
 };

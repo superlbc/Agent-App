@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microsoft Graph API Endpoint Tester</title>
+  <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+    }
+
+    h1 {
+      color: #2d3748;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #718096;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .auth-section {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .auth-section.authenticated {
+      background: #f0fff4;
+      border-color: #48bb78;
+    }
+
+    .button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 10px;
+    }
+
+    .button:hover {
+      background: #5568d3;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .button.danger {
+      background: #f56565;
+    }
+
+    .button.danger:hover {
+      background: #e53e3e;
+      box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+      padding: 12px;
+      background: white;
+      border-radius: 6px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #667eea;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+
+    .test-section {
+      margin-bottom: 30px;
+    }
+
+    .test-card {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.2s;
+    }
+
+    .test-card.testing {
+      border-color: #fbbf24;
+      background: #fffbeb;
+    }
+
+    .test-card.success {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+
+    .test-card.error {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .test-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    .test-status {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .test-status.pending { color: #718096; }
+    .test-status.testing { color: #f59e0b; }
+    .test-status.success { color: #48bb78; }
+    .test-status.error { color: #f56565; }
+
+    .test-description {
+      color: #4a5568;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .test-details {
+      background: white;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 10px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .endpoint-url {
+      color: #805ad5;
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+
+    .result-data {
+      color: #2d3748;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .error-message {
+      color: #f56565;
+      font-weight: 600;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .summary h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .summary-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 6px;
+      padding: 15px;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .export-button {
+      background: rgba(255, 255, 255, 0.2);
+      margin-top: 20px;
+    }
+
+    .export-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .config-section {
+      background: #fffbeb;
+      border: 2px solid #fbbf24;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .config-section h3 {
+      color: #92400e;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .config-section h3::before {
+      content: "⚠️";
+      margin-right: 10px;
+    }
+
+    .config-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #fde68a;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .config-label {
+      display: block;
+      font-weight: 600;
+      color: #78350f;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,0.1);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Microsoft Graph API Endpoint Tester</h1>
+    <p class="subtitle">Test which Graph API endpoints work in your Microsoft 365 tenant</p>
+
+    <!-- Configuration Section -->
+    <div class="config-section">
+      <h3>Configuration (Hardcoded for Testing)</h3>
+      <label class="config-label">Client ID (Application/Client ID from Azure AD)</label>
+      <input type="text" id="clientId" class="config-input" value="52f33915-e345-4af8-afc4-fa16dde29755" readonly style="background: #fef3c7; cursor: not-allowed;" />
+
+      <label class="config-label">Tenant ID (Directory/Tenant ID from Azure AD)</label>
+      <input type="text" id="tenantId" class="config-input" value="d026e4c1-5892-497a-b9da-ee493c9f0364" readonly style="background: #fef3c7; cursor: not-allowed;" />
+
+      <p style="color: #92400e; font-size: 13px; margin-top: 10px;">
+        ✅ <strong>Credentials pre-configured!</strong> These values are hardcoded for testing. Ready to authenticate!
+      </p>
+    </div>
+
+    <!-- Authentication Section -->
+    <div class="auth-section" id="authSection">
+      <h3 style="margin-bottom: 15px;">Step 1: Authenticate</h3>
+      <button class="button" id="loginButton" onclick="login()">🔐 Sign in with Microsoft</button>
+      <button class="button danger" id="logoutButton" onclick="logout()" style="display: none;">🚪 Sign out</button>
+      <div id="userInfo" style="display: none;"></div>
+    </div>
+
+    <!-- Test Section -->
+    <div class="test-section" id="testSection" style="display: none;">
+      <h3 style="margin-bottom: 20px;">Step 2: Run Tests</h3>
+      <button class="button" onclick="runAllTests()">▶️ Run All Tests</button>
+      <button class="button" onclick="clearResults()">🗑️ Clear Results</button>
+
+      <div style="margin-top: 30px;">
+        <!-- Test 1: User Profile -->
+        <div class="test-card" id="test-user">
+          <div class="test-header">
+            <div class="test-title">1️⃣ User Profile</div>
+            <div class="test-status pending" id="status-user">Pending</div>
+          </div>
+          <div class="test-description">GET /me - Basic user profile (email, name)</div>
+          <div class="test-details" id="details-user" style="display: none;"></div>
+          <button class="button" onclick="runTest('user')" style="margin-top: 10px;">Run Test</button>
+        </div>
+
+        <!-- Test 2: Calendar View -->
+        <div class="test-card" id="test-calendar">
+          <div class="test-header">
+            <div class="test-title">2️⃣ Calendar Events</div>
+            <div class="test-status pending" id="status-calendar">Pending</div>
+          </div>
+          <div class="test-description">GET /me/calendar/calendarView - List calendar events</div>
+          <div class="test-details" id="details-calendar" style="display: none;"></div>
+          <button class="button" onclick="runTest('calendar')" style="margin-top: 10px;">Run Test</button>
+        </div>
+
+        <!-- Test 3: Meeting Details -->
+        <div class="test-card" id="test-meeting">
+          <div class="test-header">
+            <div class="test-title">3️⃣ Meeting Details</div>
+            <div class="test-status pending" id="status-meeting">Pending</div>
+          </div>
+          <div class="test-description">GET /me/events/{id} - Get meeting details with attendees</div>
+          <div class="test-details" id="details-meeting" style="display: none;"></div>
+          <button class="button" onclick="runTest('meeting')" style="margin-top: 10px;">Run Test</button>
+        </div>
+
+        <!-- Test 4: Online Meeting Transcript (Strategy 1) -->
+        <div class="test-card" id="test-transcript1">
+          <div class="test-header">
+            <div class="test-title">4️⃣ Transcript (Strategy 1: OnlineMeetings API)</div>
+            <div class="test-status pending" id="status-transcript1">Pending</div>
+          </div>
+          <div class="test-description">GET /me/onlineMeetings/{id}/transcripts - Direct transcript access (⚠️ Requires admin consent for OnlineMeetingTranscript.Read.All)</div>
+          <div class="test-details" id="details-transcript1" style="display: none;"></div>
+          <button class="button" onclick="runTest('transcript1')" style="margin-top: 10px;">Run Test</button>
+        </div>
+
+        <!-- Test 5: OneDrive Transcript (Strategy 2) -->
+        <div class="test-card" id="test-transcript2">
+          <div class="test-header">
+            <div class="test-title">5️⃣ Transcript (Strategy 2: OneDrive)</div>
+            <div class="test-status pending" id="status-transcript2">Pending</div>
+          </div>
+          <div class="test-description">GET /me/drive/root:/Recordings:/children - Search OneDrive for transcript files</div>
+          <div class="test-details" id="details-transcript2" style="display: none;"></div>
+          <button class="button" onclick="runTest('transcript2')" style="margin-top: 10px;">Run Test</button>
+        </div>
+
+        <!-- Test 6: Teams Chat Files (Strategy 3) -->
+        <div class="test-card" id="test-transcript3">
+          <div class="test-header">
+            <div class="test-title">6️⃣ Transcript (Strategy 3: Teams Chat Files)</div>
+            <div class="test-status pending" id="status-transcript3">Pending</div>
+          </div>
+          <div class="test-description">GET /me/drive/root:/Microsoft Teams Chat Files:/children - Search Teams folder</div>
+          <div class="test-details" id="details-transcript3" style="display: none;"></div>
+          <button class="button" onclick="runTest('transcript3')" style="margin-top: 10px;">Run Test</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary" id="summary" style="display: none;">
+      <h2>📊 Test Results Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-label">Tests Passed</div>
+          <div class="summary-value" id="passedCount">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Tests Failed</div>
+          <div class="summary-value" id="failedCount">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Transcript Access</div>
+          <div class="summary-value" id="transcriptStatus">Unknown</div>
+        </div>
+      </div>
+      <button class="button export-button" onclick="exportResults()">💾 Export Results as JSON</button>
+      <button class="button export-button" onclick="copyMarkdown()">📋 Copy Markdown Report</button>
+    </div>
+  </div>
+
+  <script>
+    // HARDCODED TEST CREDENTIALS
+    const TEST_CLIENT_ID = '52f33915-e345-4af8-afc4-fa16dde29755';
+    const TEST_TENANT_ID = 'd026e4c1-5892-497a-b9da-ee493c9f0364';
+
+    let msalInstance;
+    let accessToken;
+    let testResults = {};
+    let selectedMeetingId = null;
+    let isInitialized = false;
+
+    const msalConfig = {
+      auth: {
+        clientId: TEST_CLIENT_ID,
+        authority: `https://login.microsoftonline.com/${TEST_TENANT_ID}`,
+        redirectUri: window.location.origin
+      },
+      cache: {
+        cacheLocation: 'sessionStorage',
+        storeAuthStateInCookie: false
+      }
+    };
+
+    const loginRequest = {
+      scopes: [
+        'User.Read',
+        'Calendars.Read',
+        'OnlineMeetings.Read',
+        'Files.Read'
+        // Note: OnlineMeetingTranscript.Read.All requires admin consent
+        // We'll test transcript access separately to see if it works
+      ]
+    };
+
+    async function initMsal() {
+      if (isInitialized) return true;
+
+      try {
+        msalInstance = new msal.PublicClientApplication(msalConfig);
+        await msalInstance.initialize();
+        isInitialized = true;
+        return true;
+      } catch (error) {
+        console.error('MSAL initialization failed:', error);
+        return false;
+      }
+    }
+
+    async function login() {
+      if (!await initMsal()) return;
+
+      try {
+        // Clear any existing interaction states
+        sessionStorage.removeItem('msal.interaction.status');
+
+        // Use redirect flow instead of popup (more reliable, no CORS issues)
+        await msalInstance.loginRedirect(loginRequest);
+      } catch (error) {
+        console.error('❌ Authentication failed:', error);
+
+        // If interaction_in_progress, clear it and retry
+        if (error.errorCode === 'interaction_in_progress') {
+          sessionStorage.clear();
+          alert('⚠️ Authentication was interrupted. Please click Sign In again.');
+        } else {
+          alert('Authentication failed: ' + error.message);
+        }
+      }
+    }
+
+    async function logout() {
+      await msalInstance.logoutRedirect();
+    }
+
+    // Handle redirect response on page load
+    async function handleRedirectResponse() {
+      if (!await initMsal()) return;
+
+      try {
+        const response = await msalInstance.handleRedirectPromise();
+
+        if (response) {
+          // Successfully authenticated
+          accessToken = response.accessToken;
+
+          document.getElementById('authSection').classList.add('authenticated');
+          document.getElementById('loginButton').style.display = 'none';
+          document.getElementById('logoutButton').style.display = 'inline-block';
+          document.getElementById('testSection').style.display = 'block';
+
+          // Display user info
+          const userInfo = document.getElementById('userInfo');
+          userInfo.style.display = 'block';
+          userInfo.innerHTML = `
+            <div class="user-info">
+              <div class="user-avatar">${response.account.name.charAt(0)}</div>
+              <div>
+                <div style="font-weight: 600; color: #2d3748;">${response.account.name}</div>
+                <div style="font-size: 13px; color: #718096;">${response.account.username}</div>
+              </div>
+            </div>
+          `;
+
+          console.log('✅ Authenticated successfully');
+        } else {
+          // Check if user is already logged in
+          const accounts = msalInstance.getAllAccounts();
+          if (accounts.length > 0) {
+            // User is already authenticated, get token silently
+            const silentRequest = {
+              ...loginRequest,
+              account: accounts[0]
+            };
+
+            const silentResponse = await msalInstance.acquireTokenSilent(silentRequest);
+            accessToken = silentResponse.accessToken;
+
+            document.getElementById('authSection').classList.add('authenticated');
+            document.getElementById('loginButton').style.display = 'none';
+            document.getElementById('logoutButton').style.display = 'inline-block';
+            document.getElementById('testSection').style.display = 'block';
+
+            const userInfo = document.getElementById('userInfo');
+            userInfo.style.display = 'block';
+            userInfo.innerHTML = `
+              <div class="user-info">
+                <div class="user-avatar">${accounts[0].name.charAt(0)}</div>
+                <div>
+                  <div style="font-weight: 600; color: #2d3748;">${accounts[0].name}</div>
+                  <div style="font-size: 13px; color: #718096;">${accounts[0].username}</div>
+                </div>
+              </div>
+            `;
+
+            console.log('✅ Already authenticated');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Authentication error:', error);
+      }
+    }
+
+    // Call handleRedirectResponse on page load
+    window.addEventListener('DOMContentLoaded', handleRedirectResponse);
+
+    async function callGraphAPI(endpoint, method = 'GET') {
+      try {
+        const response = await fetch(`https://graph.microsoft.com/v1.0${endpoint}`, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw {
+            status: response.status,
+            statusText: response.statusText,
+            error: data.error
+          };
+        }
+
+        return { success: true, data, status: response.status };
+      } catch (error) {
+        return {
+          success: false,
+          error: error.error || error,
+          status: error.status || 'Network Error'
+        };
+      }
+    }
+
+    async function runTest(testName) {
+      const card = document.getElementById(`test-${testName}`);
+      const status = document.getElementById(`status-${testName}`);
+      const details = document.getElementById(`details-${testName}`);
+
+      // Update UI to testing state
+      card.classList.remove('success', 'error');
+      card.classList.add('testing');
+      status.classList.remove('pending', 'success', 'error');
+      status.classList.add('testing');
+      status.innerHTML = '<span class="spinner"></span>Testing...';
+      details.style.display = 'block';
+
+      let result;
+      let endpoint = '';
+
+      switch (testName) {
+        case 'user':
+          endpoint = '/me?$select=displayName,mail,userPrincipalName,jobTitle';
+          result = await callGraphAPI(endpoint);
+          break;
+
+        case 'calendar':
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7);
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 7);
+
+          endpoint = `/me/calendar/calendarView?startDateTime=${startDate.toISOString()}&endDateTime=${endDate.toISOString()}&$select=subject,start,end,organizer,attendees,onlineMeeting,isOrganizer&$top=10`;
+          result = await callGraphAPI(endpoint);
+
+          // Store first meeting ID for subsequent tests
+          if (result.success && result.data.value && result.data.value.length > 0) {
+            const teamsMeeting = result.data.value.find(m => m.onlineMeeting);
+            if (teamsMeeting) {
+              selectedMeetingId = teamsMeeting.id;
+              console.log('📌 Selected meeting for transcript tests:', selectedMeetingId);
+            }
+          }
+          break;
+
+        case 'meeting':
+          if (!selectedMeetingId) {
+            result = {
+              success: false,
+              error: { message: 'No Teams meeting found in calendar. Please run Calendar test first.' }
+            };
+          } else {
+            endpoint = `/me/events/${selectedMeetingId}?$select=subject,start,end,organizer,attendees,body,location,onlineMeeting`;
+            result = await callGraphAPI(endpoint);
+          }
+          break;
+
+        case 'transcript1':
+          if (!selectedMeetingId) {
+            result = {
+              success: false,
+              error: { message: 'No meeting selected. Please run Calendar and Meeting tests first.' }
+            };
+          } else {
+            // Try to extract online meeting ID
+            const meetingResult = await callGraphAPI(`/me/events/${selectedMeetingId}?$select=onlineMeeting`);
+
+            if (meetingResult.success && meetingResult.data.onlineMeeting) {
+              const joinUrl = meetingResult.data.onlineMeeting.joinUrl;
+              // Extract meeting ID from join URL (this is tricky and may not always work)
+              // For now, try direct endpoint
+              endpoint = `/me/onlineMeetings?$filter=joinWebUrl eq '${joinUrl}'`;
+              result = await callGraphAPI(endpoint);
+
+              if (result.success && result.data.value && result.data.value.length > 0) {
+                const onlineMeetingId = result.data.value[0].id;
+                endpoint = `/me/onlineMeetings/${onlineMeetingId}/transcripts`;
+                result = await callGraphAPI(endpoint);
+              }
+            } else {
+              result = {
+                success: false,
+                error: { message: 'Could not extract online meeting ID from calendar event.' }
+              };
+            }
+          }
+          break;
+
+        case 'transcript2':
+          endpoint = '/me/drive/root:/Recordings:/children';
+          result = await callGraphAPI(endpoint);
+          break;
+
+        case 'transcript3':
+          endpoint = '/me/drive/root:/Microsoft Teams Chat Files:/children';
+          result = await callGraphAPI(endpoint);
+          break;
+      }
+
+      // Store result
+      testResults[testName] = {
+        endpoint,
+        success: result.success,
+        status: result.status,
+        data: result.success ? result.data : result.error,
+        timestamp: new Date().toISOString()
+      };
+
+      // Update UI
+      card.classList.remove('testing');
+      details.innerHTML = `
+        <div class="endpoint-url">Endpoint: ${endpoint}</div>
+        <div class="result-data">${result.success
+          ? `✅ Success (${result.status})\n\n${JSON.stringify(result.data, null, 2)}`
+          : `❌ Failed (${result.status})\n\n${JSON.stringify(result.error, null, 2)}`
+        }</div>
+      `;
+
+      if (result.success) {
+        card.classList.add('success');
+        status.classList.remove('testing');
+        status.classList.add('success');
+        status.textContent = '✅ Passed';
+      } else {
+        card.classList.add('error');
+        status.classList.remove('testing');
+        status.classList.add('error');
+        status.textContent = '❌ Failed';
+      }
+
+      updateSummary();
+    }
+
+    async function runAllTests() {
+      await runTest('user');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await runTest('calendar');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await runTest('meeting');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await runTest('transcript1');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await runTest('transcript2');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await runTest('transcript3');
+
+      document.getElementById('summary').style.display = 'block';
+    }
+
+    function updateSummary() {
+      const passed = Object.values(testResults).filter(r => r.success).length;
+      const failed = Object.values(testResults).filter(r => !r.success).length;
+
+      document.getElementById('passedCount').textContent = passed;
+      document.getElementById('failedCount').textContent = failed;
+
+      // Determine transcript access
+      const transcript1 = testResults['transcript1']?.success;
+      const transcript2 = testResults['transcript2']?.success;
+      const transcript3 = testResults['transcript3']?.success;
+
+      let transcriptStatus = '❌ None';
+      if (transcript1) transcriptStatus = '✅ API';
+      else if (transcript2) transcriptStatus = '✅ OneDrive';
+      else if (transcript3) transcriptStatus = '✅ Teams Files';
+
+      document.getElementById('transcriptStatus').textContent = transcriptStatus;
+
+      document.getElementById('summary').style.display = 'block';
+    }
+
+    function clearResults() {
+      testResults = {};
+      document.querySelectorAll('.test-card').forEach(card => {
+        card.classList.remove('testing', 'success', 'error');
+      });
+      document.querySelectorAll('.test-status').forEach(status => {
+        status.className = 'test-status pending';
+        status.textContent = 'Pending';
+      });
+      document.querySelectorAll('.test-details').forEach(details => {
+        details.style.display = 'none';
+      });
+      document.getElementById('summary').style.display = 'none';
+    }
+
+    function exportResults() {
+      const blob = new Blob([JSON.stringify(testResults, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `graph-api-test-results-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+
+    function copyMarkdown() {
+      const passed = Object.values(testResults).filter(r => r.success).length;
+      const failed = Object.values(testResults).filter(r => !r.success).length;
+
+      let markdown = `# Microsoft Graph API Test Results\n\n`;
+      markdown += `**Date:** ${new Date().toISOString()}\n`;
+      markdown += `**Tenant:** ${document.getElementById('tenantId').value}\n`;
+      markdown += `**Tests Passed:** ${passed} / ${passed + failed}\n\n`;
+      markdown += `## Summary\n\n`;
+      markdown += `| Test | Status | Endpoint |\n`;
+      markdown += `|------|--------|----------|\n`;
+
+      Object.entries(testResults).forEach(([name, result]) => {
+        markdown += `| ${name} | ${result.success ? '✅ Passed' : '❌ Failed'} | \`${result.endpoint}\` |\n`;
+      });
+
+      markdown += `\n## Recommendations\n\n`;
+
+      if (testResults.transcript1?.success) {
+        markdown += `✅ **Use Strategy 1 (OnlineMeetings API)** - Direct transcript access works!\n`;
+      } else if (testResults.transcript2?.success) {
+        markdown += `✅ **Use Strategy 2 (OneDrive)** - Transcripts stored in OneDrive/Recordings folder\n`;
+      } else if (testResults.transcript3?.success) {
+        markdown += `✅ **Use Strategy 3 (Teams Files)** - Transcripts stored in Teams Chat Files\n`;
+      } else {
+        markdown += `❌ **No automatic transcript access** - Will need Power Automate fallback or manual paste\n`;
+      }
+
+      navigator.clipboard.writeText(markdown);
+      alert('✅ Markdown report copied to clipboard!');
+    }
+  </script>
+</body>
+</html>
