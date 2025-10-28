@@ -9,11 +9,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    // Expose non-VITE_ prefixed environment variables to the client
+    // Expose environment variables to the client (Vite automatically handles VITE_ prefixed vars)
+    // These are fallback overrides for non-VITE_ prefixed vars (legacy support)
     define: {
-      'import.meta.env.CLIENT_ID': JSON.stringify(env.CLIENT_ID),
-      'import.meta.env.CLIENT_SECRET': JSON.stringify(env.CLIENT_SECRET),
-      'import.meta.env.DEFAULT_BOT_ID': JSON.stringify(env.DEFAULT_BOT_ID),
+      'import.meta.env.CLIENT_ID': JSON.stringify(env.VITE_CLIENT_ID || env.CLIENT_ID),
+      'import.meta.env.CLIENT_SECRET': JSON.stringify(env.VITE_CLIENT_SECRET || env.CLIENT_SECRET),
+      'import.meta.env.VITE_CLIENT_ID': JSON.stringify(env.VITE_CLIENT_ID),
+      'import.meta.env.VITE_CLIENT_SECRET': JSON.stringify(env.VITE_CLIENT_SECRET),
+      'import.meta.env.VITE_DEFAULT_NOTES_AGENT_ID': JSON.stringify(env.VITE_DEFAULT_NOTES_AGENT_ID),
+      'import.meta.env.VITE_DEFAULT_INTERROGATION_AGENT_ID': JSON.stringify(env.VITE_DEFAULT_INTERROGATION_AGENT_ID),
     },
     server: {
       port: 5173,

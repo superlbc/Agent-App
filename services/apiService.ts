@@ -148,6 +148,11 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', `Bearer ${accessToken}`);
 
+        console.log('🚀 ========== SENDING TO AGENT ==========');
+        console.log('🎯 Agent URL:', agentUrl);
+        console.log('📝 Prompt length:', prompt.length, 'characters');
+        console.log('📋 Prompt preview (first 500 chars):\n', prompt.substring(0, 500));
+
         const response = await fetch(agentUrl, {
             method: 'POST',
             headers: headers,
@@ -159,22 +164,159 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
             const errorBody = await response.text();
             throw new Error(`Agent API request failed: ${response.status} ${response.statusText}. Details: ${errorBody}`);
         }
-        
+
         const responseData = await response.json();
+
+        console.log('📥 ========== RAW RESPONSE FROM AGENT ==========');
+        console.log('📦 Response object keys:', Object.keys(responseData));
+        console.log('💬 Message type:', typeof responseData.message);
+        console.log('💬 Message length:', responseData.message?.length || 0, 'characters');
 
         if (typeof responseData.message !== 'string') {
           throw new Error(`Expected agent response 'message' to be a string, but got ${typeof responseData.message}.`);
         }
-        
+
         const raw = String(responseData.message);
+        console.log('📄 Raw message (first 1000 chars):\n', raw.substring(0, 1000));
+        console.log('📄 Raw message (last 500 chars):\n', raw.substring(Math.max(0, raw.length - 500)));
         let agentResponse: AgentResponse;
-        
-        // First, try to find a properly fenced JSON block.
+
+        // FIRST: Check if the response is a fenced JSON block (```json {...} ```)
+        // Extract the JSON content if it's fenced
+        let trimmedRaw = raw.trim();
+        const fencedMatch = trimmedRaw.match(/^```(?:json|jsonc|json5)?\s*([\s\S]+?)\s*```$/);
+        if (fencedMatch && fencedMatch[1]) {
+            console.log('🔓 Detected fenced JSON block, extracting content...');
+            trimmedRaw = fencedMatch[1].trim();
+        }
+        // NOW: Try to parse the (possibly unwrapped) JSON
+        console.log('🔍 Checking if response is JSON-only format...');
+        console.log('   Starts with {:', trimmedRaw.startsWith('{'));
+        console.log('   Ends with }:', trimmedRaw.endsWith('}'));
+
+        if (trimmedRaw.startsWith('{') && trimmedRaw.endsWith('}')) {
+            try {
+                const parsedJson = JSON.parse(trimmedRaw);
+                console.log('✅ Successfully parsed as JSON');
+                console.log('   Has "markdown" field:', 'markdown' in parsedJson);
+                console.log('   Has "meeting_title" field (old format):', 'meeting_title' in parsedJson);
+                console.log('   Has "workstream_notes" field (old format):', 'workstream_notes' in parsedJson);
+                console.log('   Has "next_steps" field:', 'next_steps' in parsedJson);
+
+                // Check if it's NEW format with markdown field
+                if (parsedJson && typeof parsedJson === 'object' && 'markdown' in parsedJson) {
+                    console.log('✅ ========== DETECTED NEW JSON-ONLY FORMAT ==========');
+                    agentResponse = {
+                        markdown: parsedJson.markdown || '',
+                        next_steps: parsedJson.next_steps || [],
+                        coach_insights: parsedJson.coach_insights || undefined,
+                        suggested_questions: parsedJson.suggested_questions || [],
+                    };
+                    console.log('📊 Parsed Response:');
+                    console.log('   Markdown length:', agentResponse.markdown?.length || 0);
+                    console.log('   Markdown preview (first 200 chars):', agentResponse.markdown?.substring(0, 200));
+                    console.log('   Next steps count:', agentResponse.next_steps?.length || 0);
+                    console.log('   Has coach insights:', !!agentResponse.coach_insights);
+                    console.log('   Suggested questions count:', agentResponse.suggested_questions?.length || 0);
+                    return agentResponse;
+                }
+
+                // Check if it's OLD format with meeting_title and workstream_notes - CONVERT IT!
+                if (parsedJson && typeof parsedJson === 'object' && 'meeting_title' in parsedJson && 'workstream_notes' in parsedJson) {
+                    console.log('🔄 ========== DETECTED OLD STRUCTURED FORMAT - CONVERTING TO MARKDOWN ==========');
+
+                    // Convert old structured format to markdown
+                    let markdown = '';
+
+                    // Title
+                    if (parsedJson.meeting_title) {
+                        markdown += `# ${parsedJson.meeting_title}\n\n`;
+                    }
+
+                    // Purpose
+                    if (parsedJson.meeting_purpose) {
+                        markdown += `**Meeting Purpose:** ${parsedJson.meeting_purpose}\n\n`;
+                    }
+
+                    // Workstream notes
+                    if (parsedJson.workstream_notes && Array.isArray(parsedJson.workstream_notes)) {
+                        markdown += `---\n\n`;
+
+                        parsedJson.workstream_notes.forEach((workstream: any) => {
+                            if (workstream.workstream_name) {
+                                markdown += `## 🔸 ${workstream.workstream_name}\n\n`;
+                            }
+
+                            // Key discussion points
+                            if (workstream.key_discussion_points && workstream.key_discussion_points.length > 0) {
+                                markdown += `### 🎯 KEY DISCUSSION POINTS\n\n`;
+                                workstream.key_discussion_points.forEach((point: any) => {
+                                    if (point.text) {
+                                        markdown += `- ${point.text}\n`;
+                                    }
+                                });
+                                markdown += `\n`;
+                            }
+
+                            // Decisions made
+                            if (workstream.decisions_made && workstream.decisions_made.length > 0) {
+                                markdown += `### ✅ DECISIONS MADE\n\n`;
+                                workstream.decisions_made.forEach((decision: any) => {
+                                    if (decision.text) {
+                                        markdown += `- ${decision.text}\n`;
+                                    }
+                                });
+                                markdown += `\n`;
+                            }
+
+                            // Risks or open questions
+                            if (workstream.risks_or_open_questions && workstream.risks_or_open_questions.length > 0) {
+                                markdown += `### ❓ RISKS OR OPEN QUESTIONS\n\n`;
+                                workstream.risks_or_open_questions.forEach((risk: any) => {
+                                    if (risk.text) {
+                                        markdown += `- ${risk.text}\n`;
+                                    }
+                                });
+                                markdown += `\n`;
+                            }
+                        });
+                    }
+
+                    agentResponse = {
+                        markdown: markdown,
+                        next_steps: parsedJson.next_steps || [],
+                        coach_insights: parsedJson.coach_insights || undefined,
+                        suggested_questions: parsedJson.suggested_questions || [],
+                    };
+
+                    console.log('✅ Successfully converted old format to markdown!');
+                    console.log('   Markdown length:', agentResponse.markdown?.length || 0);
+                    console.log('   Markdown preview (first 300 chars):', agentResponse.markdown?.substring(0, 300));
+                    console.log('   Next steps count:', agentResponse.next_steps?.length || 0);
+                    console.log('   Suggested questions count:', agentResponse.suggested_questions?.length || 0);
+                    return agentResponse;
+                }
+
+                console.log('⚠️ JSON parsed but unrecognized format, trying legacy parsing');
+
+            } catch (e) {
+                // Not valid JSON, continue with legacy parsing
+                console.log('⚠️ Response looks like JSON but failed to parse:', e);
+                console.log('   Trying legacy format...');
+            }
+        } else {
+            console.log('❌ Not JSON-only format (doesn\'t start/end with braces), trying legacy format');
+        }
+
+        // LEGACY: Try to find a properly fenced JSON block at the end (markdown + JSON format)
+        console.log('🔍 Trying legacy format parsing...');
         const fencedJsonRegex = /```(?:json|jsonc|json5)?\s*({[\s\S]+?})\s*```\s*$/;
         let match = raw.match(fencedJsonRegex);
-        
+        console.log('   Fenced JSON block found:', !!match);
+
         // If not found, try to find an unfenced JSON object at the end.
         if (!match) {
+            console.log('   Trying unfenced JSON detection...');
             const nextStepsKeyIndex = raw.lastIndexOf('"next_steps":');
             if (nextStepsKeyIndex > -1) {
                 const jsonStartIndex = raw.lastIndexOf('{', nextStepsKeyIndex);
@@ -200,9 +342,18 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
             try {
                 const jsonString = match[1].trim();
                 const parsedJson = JSON.parse(jsonString);
-                
+
                 // The markdown is the raw response with the entire matched block removed.
-                const markdownContent = raw.substring(0, raw.lastIndexOf(match[0])).trim();
+                const jsonBlockIndex = raw.lastIndexOf(match[0]);
+                let markdownContent = raw.substring(0, jsonBlockIndex).trim();
+
+                // FIX: If markdown is empty but JSON has a markdown field, use it
+                if (!markdownContent && parsedJson.markdown) {
+                    console.log('⚠️ Empty markdown extracted, using markdown field from JSON');
+                    markdownContent = parsedJson.markdown;
+                }
+
+                console.log('📝 Parsed legacy format - Markdown length:', markdownContent.length, 'Actions:', parsedJson.next_steps?.length || 0);
 
                 agentResponse = {
                     markdown: markdownContent,
@@ -211,24 +362,34 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                     suggested_questions: parsedJson.suggested_questions || [],
                 };
             } catch (e) {
-                console.warn("Found a JSON-like block but failed to parse it. Stripping it from the markdown view.", e, 'Raw content:', raw);
+                console.warn("Found a JSON-like block but failed to parse it. Stripping it from the markdown view.", e);
                 const markdownContent = raw.substring(0, raw.lastIndexOf(match[0])).trim();
                 agentResponse = {
-                    markdown: markdownContent,
+                    markdown: markdownContent || raw, // Fallback to full raw if empty
                     next_steps: [],
                     coach_insights: undefined,
                     suggested_questions: [],
                 };
             }
         } else {
-            // No JSON block found
+            // No JSON block found - treat entire response as markdown
+            console.log('⚠️ No JSON block found, treating entire response as markdown');
             agentResponse = {
                 markdown: raw,
-                next_steps: [], 
+                next_steps: [],
                 coach_insights: undefined,
                 suggested_questions: [],
             };
         }
+
+        console.log('🎉 ========== FINAL PARSED RESPONSE ==========');
+        console.log('📊 AgentResponse object:');
+        console.log('   markdown:', agentResponse.markdown ? `${agentResponse.markdown.length} chars` : 'EMPTY OR UNDEFINED');
+        console.log('   markdown preview:', agentResponse.markdown?.substring(0, 200));
+        console.log('   next_steps:', agentResponse.next_steps?.length || 0, 'items');
+        console.log('   coach_insights:', agentResponse.coach_insights ? 'present' : 'absent');
+        console.log('   suggested_questions:', agentResponse.suggested_questions?.length || 0, 'items');
+        console.log('===========================================');
 
         return agentResponse;
 
