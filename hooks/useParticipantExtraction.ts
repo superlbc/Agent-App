@@ -4,6 +4,7 @@ import { extractAllParticipants, calculateMatchConfidence, deduplicateParticipan
 import { searchUsersByDisplayName, searchUserByEmail } from '../utils/graphSearchService';
 import { fetchBatchPresence } from '../utils/presenceService';
 import { ParsedContact, isExternalEmail } from '../utils/emailListParser';
+import { telemetryService } from '../utils/telemetryService';
 
 export interface BatchAddResult {
     added: number;
@@ -220,8 +221,31 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
             // Fetch presence for matched participants
             const participantsWithPresence = await fetchPresenceForParticipants(matchedParticipants);
             setParticipants(participantsWithPresence);
+
+            // Telemetry: Track participant extraction
+            const matchedCount = participantsWithPresence.filter(p => p.matched).length;
+            const externalCount = participantsWithPresence.filter(p => p.isExternal).length;
+            telemetryService.trackEvent('participantsExtracted', {
+                totalExtracted: unique.length,
+                matchedCount: matchedCount,
+                unmatchedCount: unique.length - matchedCount,
+                externalCount: externalCount,
+                transcriptLength: transcript.length,
+                success: true
+            });
         } catch (error) {
             console.error('Error extracting participants:', error);
+
+            // Telemetry: Track extraction failure
+            telemetryService.trackEvent('participantsExtracted', {
+                totalExtracted: 0,
+                matchedCount: 0,
+                unmatchedCount: 0,
+                externalCount: 0,
+                transcriptLength: transcript.length,
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
         } finally {
             setIsExtracting(false);
         }
@@ -265,6 +289,15 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
             }
 
             console.log(`[useParticipantExtraction] ✅ Added participant: ${graphData.displayName || graphData.mail}`);
+
+            // Telemetry: Track manual participant addition
+            telemetryService.trackEvent('participantAdded', {
+                source: newParticipant.source,
+                hasGraphData: !!graphData.id,
+                hasPhoto: !!graphData.photoUrl,
+                department: graphData.department || 'Unknown',
+                companyName: graphData.companyName || 'Unknown'
+            });
 
             const newList = [...prev, newParticipant];
 
@@ -578,6 +611,18 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
         setParticipants(withPresence);
 
         console.log(`[BatchAdd] Complete:`, result);
+
+        // Telemetry: Track batch import
+        telemetryService.trackEvent('participantBatchImported', {
+            source: source,
+            totalContacts: total,
+            added: result.added,
+            matched: result.matched,
+            external: result.external,
+            skipped: result.skipped,
+            success: true
+        });
+
         return result;
     }, [participants, fetchPresenceForParticipants]);
 

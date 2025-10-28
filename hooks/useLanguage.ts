@@ -98,18 +98,19 @@ export const useLanguage = () => {
   }, [currentLanguage]);
 
   // Track initial language on mount (once)
-  useEffect(() => {
-    const hasTrackedLanguage = sessionStorage.getItem('hasTrackedLanguage');
-    if (!hasTrackedLanguage) {
-      telemetryService.trackEvent('languageDetected', {
-        language: currentLanguage,
-        source: getLanguageSource(),
-        browserLanguage: navigator.language,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-      sessionStorage.setItem('hasTrackedLanguage', 'true');
-    }
-  }, []); // Only run once on mount
+  // Telemetry: DISABLED - languageDetected fires automatically and is redundant with languageChanged
+  // useEffect(() => {
+  //   const hasTrackedLanguage = sessionStorage.getItem('hasTrackedLanguage');
+  //   if (!hasTrackedLanguage) {
+  //     telemetryService.trackEvent('languageDetected', {
+  //       language: currentLanguage,
+  //       source: getLanguageSource(),
+  //       browserLanguage: navigator.language,
+  //       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  //     });
+  //     sessionStorage.setItem('hasTrackedLanguage', 'true');
+  //   }
+  // }, []); // Only run once on mount
 
   return {
     currentLanguage,

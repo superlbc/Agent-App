@@ -1,0 +1,294 @@
+{
+  "meeting_title": "ACL Weekly Team Status – 8/26",
+  "meeting_purpose": "The team discussed the status of various aspects of the ACL event, including the main footprint, side stage, and ACL Nights show. Key action items were assigned to ensure timely completion of tasks.",
+  "workstream_notes": [
+    {
+      "workstream_name": "ACL Nights Show",
+      "key_discussion_points": [
+        {
+          "text": "Casey to mock up blanket and hat designs, due date is 2025-09-02.",
+          "emphasis": [
+            {
+              "start": 0,
+              "end": 5,
+              "type": "person",
+              "value": "Casey"
+            },
+            {
+              "start": 45,
+              "end": 55,
+              "type": "date",
+              "value": "2025-09-02"
+            }
+          ]
+        }
+      ],
+      "decisions_made": [],
+      "risks_or_open_questions": []
+    },
+    {
+      "workstream_name": "Main Footprint",
+      "key_discussion_points": [
+        {
+          "text": "John reports we are green on talent booking.",
+          "emphasis": [
+            {
+              "start": 0,
+              "end": 4,
+              "type": "person",
+              "value": "John"
+            },
+            {
+              "start": 18,
+              "end": 23,
+              "type": "status",
+              "value": "green"
+            }
+          ]
+        }
+      ],
+      "decisions_made": [],
+      "risks_or_open_questions": []
+    },
+    {
+      "workstream_name": "Side Stage",
+      "key_discussion_points": [
+        {
+          "text": "We need to finalize the audio vendor by EOD Friday.",
+          "emphasis": [
+            {
+              "start": 38,
+              "end": 48,
+              "type": "date",
+              "value": "EOD Friday"
+            },
+            {
+              "start": 20,
+              "end": 35,
+              "type": "task",
+              "value": "audio vendor"
+            }
+          ]
+        }
+      ],
+      "decisions_made": [],
+      "risks_or_open_questions": []
+    },
+    {
+      "workstream_name": "General",
+      "key_discussion_points": [],
+      "decisions_made": [
+        {
+          "text": "Bob will own the decision on catering.",
+          "emphasis": [
+            {
+              "start": 0,
+              "end": 3,
+              "type": "person",
+              "value": "Bob"
+            }
+          ]
+        }
+      ],
+      "risks_or_open_questions": [
+        {
+          "text": "We need a decision on the catering options for the VIP area. That's a key risk if we don't lock it down.",
+          "emphasis": [
+            {
+              "start": 48,
+              "end": 52,
+              "type": "risk",
+              "value": "risk"
+            }
+          ],
+          "risk_level": "HIGH"
+        }
+      ]
+    }
+  ],
+  "next_steps": [
+    {
+      "department": "General",
+      "owner": "Casey",
+      "task": "Mock up blanket and hat designs",
+      "due_date": "2025-09-02",
+      "status": "NA",
+      "status_notes": "No status specified"
+    },
+    {
+      "department": "General",
+      "owner": "Sarah",
+      "task": "Coordinate with the city on permits",
+      "due_date": "Not specified",
+      "status": "AMBER",
+      "status_notes": "Missing due date"
+    },
+    {
+      "department": "General",
+      "owner": "Bob",
+      "task": "Own the decision on catering",
+      "due_date": "Not specified",
+      "status": "AMBER",
+      "status_notes": "Missing due date"
+    }
+  ],
+  "critical_review": {
+    "gaps_missing_topics": [],
+    "risk_assessment": [
+      {
+        "level": "HIGH",
+        "description": "The lack of a decision on catering options for the VIP area poses a significant risk to the event's success."
+      }
+    ],
+    "unassigned_ambiguous_tasks": []
+  },
+  "current_status": [
+    {
+      "area": "Overall",
+      "status": "AMBER",
+      "notes": "Several action items are missing due dates, and a high risk related to catering options needs to be addressed."
+    },
+    {
+      "area": "ACL Nights Show",
+      "status": "NA",
+      "notes": "No status specified"
+    },
+    {
+      "area": "Main Footprint",
+      "status": "GREEN",
+      "notes": "Talent booking is reported as green."
+    },
+    {
+      "area": "Side Stage",
+      "status": "NA",
+      "notes": "No status specified"
+    },
+    {
+      "area": "General",
+      "status": "AMBER",
+      "notes": "Catering decision is a high risk."
+    }
+  ],
+  "suggested_questions": [
+    "What is the status of finalizing the audio vendor for the side stage?",
+    "When will the decision on catering options for the VIP area be made?",
+    "Can Sarah provide an update on the permit coordination with the city?"
+  ],
+  "coach_insights": {
+    "initiative": "Meeting Excellence",
+    "style": "gentle",
+    "strengths": [
+      {
+        "text": "The meeting had clear action items assigned to specific owners, such as Casey and Sarah.",
+        "emphasis": [
+          {
+            "start": 65,
+            "end": 70,
+            "type": "person",
+            "value": "Casey"
+          },
+          {
+            "start": 75,
+            "end": 80,
+            "type": "person",
+            "value": "Sarah"
+          }
+        ]
+      }
+    ],
+    "improvements": [
+      {
+        "text": "Consider assigning due dates to all action items to ensure timely completion. Currently, 2 out of 3 actions are missing a due date.",
+        "emphasis": [
+          {
+            "start": 0,
+            "end": 8,
+            "type": "general",
+            "value": "Consider"
+          },
+          {
+            "start": 20,
+            "end": 30,
+            "type": "deadline",
+            "value": "due dates"
+          },
+          {
+            "start": 100,
+            "end": 101,
+            "type": "general",
+            "value": "2"
+          },
+          {
+            "start": 105,
+            "end": 106,
+            "type": "general",
+            "value": "3"
+          },
+          {
+            "start": 114,
+            "end": 122,
+            "type": "deadline",
+            "value": "due date"
+          }
+        ]
+      },
+      {
+        "text": "Aim to mitigate the high risk associated with the catering decision for the VIP area to ensure a smooth event.",
+        "emphasis": [
+          {
+            "start": 0,
+            "end": 3,
+            "type": "general",
+            "value": "Aim"
+          },
+          {
+            "start": 16,
+            "end": 25,
+            "type": "risk",
+            "value": "high risk"
+          },
+          {
+            "start": 39,
+            "end": 47,
+            "type": "task",
+            "value": "catering"
+          }
+        ]
+      }
+    ],
+    "facilitation_tips": [
+      {
+        "text": "To improve meeting efficiency, try time-boxing each agenda item to keep the discussion focused and on schedule.",
+        "emphasis": [
+          {
+            "start": 35,
+            "end": 44,
+            "type": "general",
+            "value": "time-boxing"
+          },
+          {
+            "start": 45,
+            "end": 49,
+            "type": "task",
+            "value": "agenda"
+          }
+        ]
+      }
+    ],
+    "metrics": {
+      "agenda_coverage_pct": 100,
+      "decision_count": 1,
+      "action_count": 3,
+      "actions_with_owner_pct": 100,
+      "actions_with_due_date_pct": 33,
+      "participants_estimated": 4,
+      "top_speaker_share_pct": 100
+    },
+    "flags": {
+      "participation_imbalance": true,
+      "many_unassigned_actions": false,
+      "few_decisions": false,
+      "light_agenda_coverage": false
+    }
+  }
+}

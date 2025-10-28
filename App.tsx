@@ -290,17 +290,17 @@ const AppContent: React.FC = () => {
     setHasGenerated(false);
     clearParticipants();
 
-    // Telemetry: Track form clear
-    telemetryService.trackEvent('formCleared', {});
+    // Telemetry: DISABLED - formCleared generates too many events with low analytical value
+    // telemetryService.trackEvent('formCleared', {});
   }, [setFormState, clearParticipants]);
 
   const handleUseSampleData = useCallback(() => {
     setFormState(SAMPLE_DATA);
 
-    // Telemetry: Track sample data load
-    telemetryService.trackEvent('sampleDataLoaded', {
-      sampleTitle: SAMPLE_DATA.title
-    });
+    // Telemetry: DISABLED - sampleDataLoaded only useful during testing phase
+    // telemetryService.trackEvent('sampleDataLoaded', {
+    //   sampleTitle: SAMPLE_DATA.title
+    // });
   }, [setFormState]);
   
   const handleReplayTour = () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep, Participant } from '../types';
 import { Card } from './ui/Card';
@@ -469,6 +469,18 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
     const { strengths, improvements, facilitation_tips, metrics, flags } = insights;
 
     const flagEntries = Object.entries(flags).filter(([, value]) => value === true);
+
+    // Telemetry: Track coach panel viewed (on mount)
+    useEffect(() => {
+        telemetryService.trackEvent('meetingCoachViewed', {
+            hasStrengths: (strengths?.length || 0) > 0,
+            hasImprovements: (improvements?.length || 0) > 0,
+            hasFacilitationTips: (facilitation_tips?.length || 0) > 0,
+            flagCount: flagEntries.length,
+            agendaCoveragePct: metrics.agenda_coverage_pct,
+            decisionCount: metrics.decision_count
+        });
+    }, []); // Run once on mount
 
     const flagLabels: Record<keyof CoachFlags, string> = {
         participation_imbalance: t('common:meetingCoach.flags.participationImbalance'),

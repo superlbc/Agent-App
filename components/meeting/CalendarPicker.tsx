@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Meeting } from '../../services/meetingService';
+import { telemetryService } from '../../utils/telemetryService';
 
 interface CalendarPickerProps {
   selectedDate: Date;
@@ -53,10 +54,26 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
     setCurrentWeek(newWeek);
   };
 
+  // Helper to track date selection
+  const handleDateSelect = (date: Date, source: 'click' | 'today-button') => {
+    const meetingCount = getMeetingCount(date);
+
+    // Telemetry: Track calendar date selected
+    telemetryService.trackEvent('calendarDateSelected', {
+      date: date.toISOString(),
+      dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'long' }),
+      isToday: isToday(date),
+      meetingCount: meetingCount,
+      source: source
+    });
+
+    onSelectDate(date);
+  };
+
   const goToToday = () => {
     const today = new Date();
     setCurrentWeek(getWeekStart(today));
-    onSelectDate(today);
+    handleDateSelect(today, 'today-button');
   };
 
   const isToday = (date: Date): boolean => {
@@ -159,7 +176,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
           return (
             <button
               key={date.toISOString()}
-              onClick={() => onSelectDate(date)}
+              onClick={() => handleDateSelect(date, 'click')}
               className={`
                 relative flex flex-col items-center justify-center p-2 rounded-lg aspect-square
                 transition-all duration-200 cursor-pointer

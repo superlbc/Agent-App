@@ -10,6 +10,7 @@ import { ParticipantsPanel } from './ParticipantsPanel';
 import { Participant, GraphData } from '../../types';
 import { ParsedContact } from '../../utils/emailListParser';
 import { BatchAddResult, BatchAddProgress } from '../../hooks/useParticipantExtraction';
+import { telemetryService } from '../../utils/telemetryService';
 
 interface ParticipantsModalProps {
   isOpen: boolean;
@@ -50,13 +51,22 @@ export const ParticipantsModal: React.FC<ParticipantsModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+
+      // Telemetry: Track modal opened
+      const matchedCount = participants.filter(p => p.matched).length;
+      telemetryService.trackEvent('participantsModalOpened', {
+        participantCount: participants.length,
+        matchedCount: matchedCount,
+        unmatchedCount: participants.length - matchedCount,
+        hasTranscript: transcript.length > 0
+      });
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
+  }, [isOpen, participants, transcript.length]);
 
   // Handle escape key
   useEffect(() => {

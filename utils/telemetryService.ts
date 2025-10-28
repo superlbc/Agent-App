@@ -46,7 +46,21 @@ export type EventType =
   | 'userDataReset'
   // Meeting selection
   | 'meetingSelected'
-  | 'switchedToManualMode';
+  | 'switchedToManualMode'
+  | 'calendarDateSelected'
+  // Transcript viewer
+  | 'transcriptViewerOpened'
+  | 'transcriptIterationSwitched'
+  | 'transcriptLazyLoaded'
+  // Participants
+  | 'participantsExtracted'
+  | 'participantAdded'
+  | 'participantBatchImported'
+  | 'participantsPanelOpened'
+  | 'participantsModalOpened'
+  // User notes
+  | 'userNotesOpened'
+  | 'userNotesSaved';
 
 // Login event payload structure
 export interface LoginEventPayload {

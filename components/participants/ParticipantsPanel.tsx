@@ -13,6 +13,7 @@ import { ParsedContact } from '../../utils/emailListParser';
 import { BatchAddResult, BatchAddProgress } from '../../hooks/useParticipantExtraction';
 import { AuthContext } from '../../contexts/AuthContext';
 import { isParticipantExtractionDisabled, setParticipantExtractionDisabled } from '../../utils/resetUserData';
+import { telemetryService } from '../../utils/telemetryService';
 
 interface ParticipantsPanelProps {
     transcript: string;
@@ -179,7 +180,19 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        onClick={() => {
+                            const newCollapsedState = !isCollapsed;
+                            setIsCollapsed(newCollapsedState);
+
+                            // Telemetry: Track panel opened
+                            if (!newCollapsedState) {
+                                telemetryService.trackEvent('participantsPanelOpened', {
+                                    participantCount: participants.length,
+                                    hasTranscript: transcript.length > 0,
+                                    transcriptLength: transcript.length
+                                });
+                            }
+                        }}
                         className="flex items-center gap-1.5 flex-1 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded p-1 -ml-1"
                     >
                         <Icon

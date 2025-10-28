@@ -10,6 +10,7 @@ import { Icon } from '../ui/Icon';
 import { Button } from '../ui/Button';
 import { TranscriptViewer } from './TranscriptViewer';
 import { Participant } from '../../types';
+import { telemetryService } from '../../utils/telemetryService';
 
 export interface TranscriptIteration {
   id: string;
@@ -51,6 +52,14 @@ export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
   // Find the iteration that matches the selected meeting date and load initial transcripts
   useEffect(() => {
     if (isOpen && iterations && iterations.length > 0) {
+      // Telemetry: Track transcript viewer opened
+      telemetryService.trackEvent('transcriptViewerOpened', {
+        meetingName: meetingName || 'Unknown',
+        hasMultipleIterations: iterations.length > 1,
+        iterationCount: iterations.length,
+        transcriptLength: transcript.length
+      });
+
       // Clear loaded transcripts when modal opens
       const newLoadedMap = new Map<number, string>();
 
@@ -85,8 +94,16 @@ export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
       } else {
         setSelectedIterationIndex(0);
       }
+    } else if (isOpen) {
+      // Single iteration (no carousel)
+      telemetryService.trackEvent('transcriptViewerOpened', {
+        meetingName: meetingName || 'Unknown',
+        hasMultipleIterations: false,
+        iterationCount: 1,
+        transcriptLength: transcript.length
+      });
     }
-  }, [isOpen, iterations, meetingDate]);
+  }, [isOpen, iterations, meetingDate, meetingName, transcript.length]);
 
   // Handle tab click - lazy load transcript if not already loaded
   const handleTabClick = async (index: number) => {
@@ -99,6 +116,15 @@ export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
     if (loadedTranscripts.has(index)) {
       console.log(`[TranscriptViewer] Using cached transcript for index ${index}`);
       setSelectedIterationIndex(index);
+
+      // Telemetry: Track iteration switched (from cache)
+      telemetryService.trackEvent('transcriptIterationSwitched', {
+        fromIndex: selectedIterationIndex,
+        toIndex: index,
+        wasCached: true,
+        iterationDate: iterations[index].createdDateTime
+      });
+
       return;
     }
 
@@ -129,13 +155,49 @@ export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
         setLoadedTranscripts(newMap);
         setSelectedIterationIndex(index);
         console.log(`[TranscriptViewer] ✅ Transcript loaded successfully`);
+
+        // Telemetry: Track lazy load success
+        telemetryService.trackEvent('transcriptLazyLoaded', {
+          iterationIndex: index,
+          iterationDate: iteration.createdDateTime,
+          contentLength: result.content.length,
+          success: true
+        });
+
+        // Telemetry: Track iteration switched (after lazy load)
+        telemetryService.trackEvent('transcriptIterationSwitched', {
+          fromIndex: selectedIterationIndex,
+          toIndex: index,
+          wasCached: false,
+          iterationDate: iteration.createdDateTime
+        });
       } else {
         console.error(`[TranscriptViewer] ❌ Failed to load transcript:`, result.error);
+
+        // Telemetry: Track lazy load failure
+        telemetryService.trackEvent('transcriptLazyLoaded', {
+          iterationIndex: index,
+          iterationDate: iteration.createdDateTime,
+          contentLength: 0,
+          success: false,
+          error: result.error
+        });
+
         // Still switch to tab, show error message
         setSelectedIterationIndex(index);
       }
     } catch (error) {
       console.error(`[TranscriptViewer] ❌ Error lazy loading transcript:`, error);
+
+      // Telemetry: Track lazy load error
+      telemetryService.trackEvent('transcriptLazyLoaded', {
+        iterationIndex: index,
+        iterationDate: iteration.createdDateTime,
+        contentLength: 0,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       setSelectedIterationIndex(index);
     } finally {
       setIsLoadingTranscript(false);

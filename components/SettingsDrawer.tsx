@@ -29,8 +29,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       setIsRendered(true);
       setLocalBotId(botId); // Sync form with stored config when opened
 
-      // Telemetry: Track settings opened
-      telemetryService.trackEvent('settingsOpened', {});
+      // Telemetry: DISABLED - settingsOpened too frequent, low analytical value
+      // telemetryService.trackEvent('settingsOpened', {});
     } else {
       const timer = setTimeout(() => setIsRendered(false), 300); // match animation duration
       return () => clearTimeout(timer);

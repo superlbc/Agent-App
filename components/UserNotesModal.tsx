@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './ui/Icon';
+import { telemetryService } from '../utils/telemetryService';
 
 interface UserNotesModalProps {
   isOpen: boolean;
@@ -23,6 +24,12 @@ export const UserNotesModal: React.FC<UserNotesModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setNotes(currentNotes);
+
+      // Telemetry: Track modal opened
+      telemetryService.trackEvent('userNotesOpened', {
+        hasExistingNotes: currentNotes.length > 0,
+        existingNotesLength: currentNotes.length
+      });
     }
   }, [isOpen, currentNotes]);
 
@@ -56,7 +63,17 @@ export const UserNotesModal: React.FC<UserNotesModalProps> = ({
   };
 
   const handleSave = () => {
-    onSave(notes.trim());
+    const trimmedNotes = notes.trim();
+
+    // Telemetry: Track notes saved
+    telemetryService.trackEvent('userNotesSaved', {
+      notesLength: trimmedNotes.length,
+      wordCount: trimmedNotes ? trimmedNotes.split(/\s+/).filter(Boolean).length : 0,
+      wasEmpty: trimmedNotes.length === 0,
+      changed: trimmedNotes !== currentNotes.trim()
+    });
+
+    onSave(trimmedNotes);
     onClose();
   };
 
