@@ -59,19 +59,23 @@ const AppContent: React.FC = () => {
   });
 
   // Dual Agent Architecture: Separate IDs for meeting notes and interrogation
+  // Hard-coded defaults with env override capability
+  const DEFAULT_NOTES_AGENT_ID = (import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
+  const DEFAULT_INTERROGATION_AGENT_ID = (import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
+
   const [notesAgentId, setNotesAgentId] = useLocalStorage<string>(
     'notesAgentId',
-    (import.meta.env)?.DEFAULT_NOTES_AGENT_ID || ''
+    DEFAULT_NOTES_AGENT_ID
   );
   const [interrogationAgentId, setInterrogationAgentId] = useLocalStorage<string>(
     'interrogationAgentId',
-    (import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID || ''
+    DEFAULT_INTERROGATION_AGENT_ID
   );
 
   const apiConfig: ApiConfig = {
     hostname: 'https://interact.interpublic.com',
-    clientId: (import.meta.env)?.CLIENT_ID || '',
-    clientSecret: (import.meta.env)?.CLIENT_SECRET || '',
+    clientId: (import.meta.env)?.VITE_CLIENT_ID || '',
+    clientSecret: (import.meta.env)?.VITE_CLIENT_SECRET || '',
     notesAgentId: notesAgentId,
     interrogationAgentId: interrogationAgentId,
   };
@@ -95,11 +99,9 @@ const AppContent: React.FC = () => {
   const lastGenerateTimeRef = useRef<number>(0);
 
   // Check if using custom agent IDs (test agents)
-  const defaultNotesAgentId = (import.meta.env)?.DEFAULT_NOTES_AGENT_ID || '';
-  const defaultInterrogationAgentId = (import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID || '';
   const isUsingTestAgent =
-    (notesAgentId !== defaultNotesAgentId && notesAgentId !== '') ||
-    (interrogationAgentId !== defaultInterrogationAgentId && interrogationAgentId !== '');
+    (notesAgentId !== DEFAULT_NOTES_AGENT_ID && notesAgentId !== '') ||
+    (interrogationAgentId !== DEFAULT_INTERROGATION_AGENT_ID && interrogationAgentId !== '');
 
   // Participant extraction hook
   const {

@@ -55,13 +55,17 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       return Math.abs(hash).toString(16);
     };
 
+    // Hard-coded defaults with env override capability
+    const defaultNotesAgentId = (import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
+    const defaultInterrogationAgentId = (import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
+
     // Telemetry: Track agent ID changes
     if (localNotesAgentId !== notesAgentId) {
       telemetryService.trackEvent('botIdChanged', {
         agentType: 'notes',
         oldBotIdHash: hashString(notesAgentId),
         newBotIdHash: hashString(localNotesAgentId),
-        wasDefault: notesAgentId === (import.meta.env)?.DEFAULT_NOTES_AGENT_ID
+        wasDefault: notesAgentId === defaultNotesAgentId
       });
     }
     if (localInterrogationAgentId !== interrogationAgentId) {
@@ -69,7 +73,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
         agentType: 'interrogation',
         oldBotIdHash: hashString(interrogationAgentId),
         newBotIdHash: hashString(localInterrogationAgentId),
-        wasDefault: interrogationAgentId === (import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID
+        wasDefault: interrogationAgentId === defaultInterrogationAgentId
       });
     }
 
@@ -80,8 +84,9 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   };
 
   const handleReset = () => {
-    const defaultNotesAgentId = (import.meta.env)?.DEFAULT_NOTES_AGENT_ID || '';
-    const defaultInterrogationAgentId = (import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID || '';
+    // Hard-coded defaults with env override capability
+    const defaultNotesAgentId = (import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
+    const defaultInterrogationAgentId = (import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
 
     // Telemetry: Track agent ID reset
     telemetryService.trackEvent('botIdChanged', {
@@ -133,7 +138,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 label="Meeting Notes Agent ID"
                 value={localNotesAgentId}
                 onChange={e => setLocalNotesAgentId(e.target.value)}
-                placeholder={(import.meta.env)?.DEFAULT_NOTES_AGENT_ID || ''}
+                placeholder={(import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45'}
               />
 
               <Input
@@ -141,7 +146,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 label="Interrogation Agent ID"
                 value={localInterrogationAgentId}
                 onChange={e => setLocalInterrogationAgentId(e.target.value)}
-                placeholder={(import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID || ''}
+                placeholder={(import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044'}
               />
 
               <div className="flex items-center gap-2">
