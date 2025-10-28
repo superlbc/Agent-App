@@ -487,24 +487,24 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
                 {strengths && strengths.length > 0 && (
                     <Card className="p-4 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800/50">
                         <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">{t('common:meetingCoach.sections.whatWorkedWell')}</h3>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                            {strengths.map((item, i) => <li key={i}>{renderWithBold(item)}</li>)}
+                        <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+                            {strengths.map((item, i) => <li key={i} className="pl-1">{renderWithBold(item)}</li>)}
                         </ul>
                     </Card>
                 )}
                 {improvements && improvements.length > 0 && (
                     <Card className="p-4 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800/50">
                         <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">{t('common:meetingCoach.sections.nextTimeTry')}</h3>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                            {improvements.map((item, i) => <li key={i}>{renderWithBold(item)}</li>)}
+                        <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+                            {improvements.map((item, i) => <li key={i} className="pl-1">{renderWithBold(item)}</li>)}
                         </ul>
                     </Card>
                 )}
                 {facilitation_tips && facilitation_tips.length > 0 && (
                      <Card className="p-4 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800/50">
                         <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">{t('common:meetingCoach.sections.facilitationTips')}</h3>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                            {facilitation_tips.map((item, i) => <li key={i}>{renderWithBold(item)}</li>)}
+                        <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+                            {facilitation_tips.map((item, i) => <li key={i} className="pl-1">{renderWithBold(item)}</li>)}
                         </ul>
                     </Card>
                 )}

@@ -17,6 +17,13 @@ interface MeetingCardProps {
   isLoadingTranscript?: boolean;
   isExpanded?: boolean;
   onProcessMeeting?: () => void;
+  isSelected?: boolean;
+  hasTranscript?: boolean;
+  hasParticipants?: boolean;
+  participantsCount?: number;
+  onViewTranscript?: () => void;
+  onViewParticipants?: () => void;
+  onChangeSelection?: () => void;
 }
 
 export const MeetingCard: React.FC<MeetingCardProps> = ({
@@ -25,7 +32,14 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   transcriptLikely,
   isLoadingTranscript = false,
   isExpanded = false,
-  onProcessMeeting
+  onProcessMeeting,
+  isSelected = false,
+  hasTranscript = false,
+  hasParticipants = false,
+  participantsCount = 0,
+  onViewTranscript,
+  onViewParticipants,
+  onChangeSelection
 }) => {
   const { t } = useTranslation('common');
 
@@ -118,9 +132,11 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
           ? 'cursor-wait opacity-75 animate-pulse border-primary'
           : isFuture
           ? 'opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-900/50'
+          : isSelected
+          ? 'bg-green-50/30 dark:bg-green-900/10 border-green-300 dark:border-green-800' // Passive green for selected meeting
           : 'cursor-pointer hover:border-primary hover:shadow-lg hover:scale-[1.02] hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:ring-2 hover:ring-primary/20'
       }`}
-      onClick={isFuture || isLoadingTranscript ? undefined : onClick}
+      onClick={isFuture || isLoadingTranscript || isSelected ? undefined : onClick}
     >
       {isLoadingTranscript && (
         <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-[2px] rounded-2xl flex items-center justify-center z-10">
@@ -132,48 +148,114 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
           </div>
         </div>
       )}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex gap-3">
+        {/* Selection Indicator - Show when selected */}
+        {isSelected && (
+          <div className="flex-shrink-0 pt-1.5">
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+          </div>
+        )}
+
         <div className="flex-1 min-w-0">
-          {/* Time */}
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-1">
-            <Icon name="clock" className="w-4 h-4 flex-shrink-0 text-slate-500 dark:text-slate-400" />
-            <span className="font-medium">{formatTime(meeting.start)} - {formatTime(meeting.end)}</span>
-          </div>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              {/* Time */}
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-1">
+                <Icon name="clock" className="w-4 h-4 flex-shrink-0 text-slate-500 dark:text-slate-400" />
+                <span className="font-medium">{formatTime(meeting.start)} - {formatTime(meeting.end)}</span>
+              </div>
 
-          {/* Subject */}
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 truncate">
-            {meeting.subject}
-          </h3>
+              {/* Subject */}
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 truncate">
+                {meeting.subject}
+              </h3>
 
-          {/* Organizer */}
-          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-            <Icon name="user" className="w-4 h-4" />
-            <span className="truncate">{meeting.organizer.name}</span>
-            {meeting.isOrganizer && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                You
-              </span>
-            )}
-          </div>
+              {/* Organizer */}
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-1">
+                <Icon name="user" className="w-4 h-4" />
+                <span className="truncate">{meeting.organizer.name}</span>
+                {meeting.isOrganizer && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                    You
+                  </span>
+                )}
+              </div>
 
-          {/* Attendees count */}
-          {meeting.attendees.length > 0 && (
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 mt-1">
-              <Icon name="users" className="w-3 h-3" />
-              <span>{t('meetings.attendees', { count: meeting.attendees.length })}</span>
+              {/* Attendees count */}
+              {meeting.attendees.length > 0 && (
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  <Icon name="users" className="w-3 h-3" />
+                  <span>{t('meetings.attendees', { count: meeting.attendees.length })}</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Transcript Badge */}
-        <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${badge.className}`}>
-          <Icon name={badge.icon} className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{badge.text}</span>
+            {/* Right column - Transcript Badge (top) + Change Button (bottom, aligned with attendees) */}
+            <div className="flex-shrink-0 flex flex-col justify-between items-end self-stretch">
+              {/* Transcript Badge */}
+              <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${badge.className}`}>
+                <Icon name={badge.icon} className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{badge.text}</span>
+              </div>
+
+              {/* Change Meeting Button - Aligned right, vertically with attendees */}
+              {isSelected && onChangeSelection && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChangeSelection();
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors cursor-pointer"
+                  title={t('meetings.changeMeeting', 'Change Meeting')}
+                  aria-label={t('meetings.changeMeeting', 'Change Meeting')}
+                >
+                  <Icon name="refresh" className="w-3 h-3" />
+                  <span className="font-medium">{t('meetings.change', 'Change')}</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Expanded View - Attendees and Process Button */}
-      {isExpanded && !isLoadingTranscript && (
+      {/* Action Buttons for Selected Meeting - Show below main content, not in expanded view */}
+      {isSelected && (hasTranscript || hasParticipants) && (
+        <div className="mt-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex flex-wrap gap-2">
+            {hasTranscript && onViewTranscript && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewTranscript();
+                }}
+                className="flex-1 min-w-[140px]"
+              >
+                <Icon name="file-text" className="w-4 h-4 mr-1.5" />
+                {t('common:actions.viewTranscript', 'View Transcript')}
+              </Button>
+            )}
+            {hasParticipants && onViewParticipants && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewParticipants();
+                }}
+                className="flex-1 min-w-[140px]"
+              >
+                <Icon name="users" className="w-4 h-4 mr-1.5" />
+                {t('common:actions.viewParticipants', 'View Participants')} ({participantsCount})
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Expanded View - Only show when NOT selected (for preview) */}
+      {isExpanded && !isLoadingTranscript && !isSelected && (
         <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 animate-in slide-in-from-top duration-300">
           {/* Attendees Section */}
           {meeting.attendees.length > 0 && (
@@ -240,7 +322,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
             </div>
           )}
 
-          {/* Process Meeting Button */}
+          {/* Process Meeting Buttons */}
           <div className="flex items-center justify-between gap-3">
             <Button
               variant="outline"

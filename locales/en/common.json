@@ -51,7 +51,12 @@
     "downloadCSVActions": "Download CSV Actions",
     "draftEmail": "Draft Email",
     "clearConversation": "Clear conversation",
-    "sendQuestion": "Send question"
+    "sendQuestion": "Send question",
+    "viewTranscript": "View Transcript",
+    "viewParticipants": "View Participants",
+    "downloadTranscript": "Download Transcript",
+    "close": "Close",
+    "addYourNotes": "Add Your Notes"
   },
   "status": {
     "generating": "Generating notes...",
@@ -114,7 +119,7 @@
   },
   "output": {
     "emptyState": {
-      "title": "Your notes will appear here",
+      "title": "Generated meeting notes will appear here",
       "description": "Fill in the details and click \"Generate Notes\" to start."
     }
   },
@@ -236,6 +241,8 @@
     "printWindowBlocked": "Could not open print window. Please disable popup blockers.",
     "emailCopied": "Email content copied. Paste into your email client.",
     "emailCopiedPlain": "Email content copied (plain text). Paste into your email client.",
+    "generationCancelled": "Generation cancelled",
+    "pleasewait": "Please wait a few seconds before trying again",
     "noActionsToExport": "No action items to export.",
     "csvDownloaded": "CSV downloaded successfully.",
     "userNotesSaved": "User notes saved successfully",
@@ -275,7 +282,11 @@
       "processing": "Processing",
       "none": "None"
     },
-    "note": "Note: Transcripts are usually available 5-10 minutes after a meeting ends. You can only access transcripts for meetings you organized (due to tenant security settings). For other meetings, use the manual paste option."
+    "note": "Note: Transcripts are usually available 5-10 minutes after a meeting ends. You can only access transcripts for meetings you organized (due to tenant security settings). For other meetings, use the manual paste option.",
+    "processMeeting": "Process This Meeting",
+    "collapse": "Collapse",
+    "changeMeeting": "Change Meeting",
+    "change": "Change"
   },
   "participants": {
     "title": "Meeting Participants",

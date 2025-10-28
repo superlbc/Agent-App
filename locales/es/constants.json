@@ -29,6 +29,7 @@
     "CR": "Creatividad",
     "XD": "Diseño de Experiencia",
     "XP": "Producción de Experiencia",
+    "TECH": "Tecnología Global",
     "IPCT": "Tecnología Integrada/Creativa",
     "CON": "Contenido",
     "STU": "Estudio",
@@ -41,7 +42,8 @@
     "CR": "Grandes ideas, dirección de arte, redacción",
     "XD": "Esquema de experiencia, diseño físico/digital, renders, planos",
     "XP": "Viabilidad, proveedores, ejecución in situ, riesgo/legal/sostenibilidad",
-    "IPCT": "Enfoque técnico, prototipado, desarrollo, innovación",
+    "TECH": "Ingenieros de software empresarial, desarrolladores, arquitectura de sistemas, ingeniería de plataformas",
+    "IPCT": "Prototipos creativos, proyectos de innovación, instalaciones interactivas, tecnología emergente",
     "CON": "Producción de vídeo/foto/audio, artistas/ilustradores, logística",
     "STU": "Maquetación, retoque, edición de texto, compra de impresión/premium",
     "General": "Multifuncional o departamento poco claro"
@@ -49,19 +51,23 @@
   "presets": {
     "clientUpdate": {
       "name": "Actualización de Cliente",
-      "description": "Notas pulidas y listas para el cliente que enfatizan decisiones y próximos pasos"
+      "description": "Notas pulidas y listas para el cliente que enfatizan decisiones y próximos pasos",
+      "tooltip": "Para reuniones con clientes • Salida pulida y profesional • Datos sensibles redactados • Vista multifuncional • Coach de reuniones activo"
     },
     "internalSync": {
       "name": "Sincronización Interna",
-      "description": "Notas equilibradas para colaboración del equipo multifuncional"
+      "description": "Notas equilibradas para colaboración del equipo multifuncional",
+      "tooltip": "Para reuniones internas del equipo • Detalles granulares para tu departamento • Tono profesional • Incluye revisión crítica • Puntos clave destacados • Coach de reuniones proporciona consejos de facilitación"
     },
     "brainstorm": {
       "name": "Lluvia de Ideas",
-      "description": "Notas de sesión creativa capturando ideas y elementos de acción"
+      "description": "Notas de sesión creativa capturando ideas y elementos de acción",
+      "tooltip": "Para sesiones creativas • Formato conciso enfocado en ideas • Revisión crítica habilitada • Perspectiva del equipo multifuncional • Puntos clave destacados • Coach de reuniones activo"
     },
-    "executiveBrief": {
+    "executiveBriefing": {
       "name": "Resumen Ejecutivo",
-      "description": "Resumen de alto nivel centrado en decisiones clave y riesgos"
+      "description": "Resumen de alto nivel centrado en decisiones clave y riesgos",
+      "tooltip": "Para actualizaciones de liderazgo • Formato de resumen ejecutivo • Datos sensibles redactados • Revisión crítica incluida • Decisiones clave destacadas • Coach de reuniones activo"
     },
     "departmentStandup": {
       "name": "Reunión Departamental",

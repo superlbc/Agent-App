@@ -10,7 +10,7 @@ export interface GraphData {
   photoUrl?: string;
 }
 
-export type Department = "BL" | "STR" | "PM" | "CR" | "XD" | "XP" | "IPCT" | "CON" | "STU" | "General";
+export type Department = "BL" | "STR" | "PM" | "CR" | "XD" | "XP" | "TECH" | "IPCT" | "CON" | "STU" | "General";
 export type ContextTag = "Client facing" | "Internal only" | "Sensitive" | "Executive review";
 export type Audience = 'executive' | 'cross-functional' | 'department-specific';
 export type Tone = 'professional' | 'concise' | 'client-ready';
@@ -178,7 +178,7 @@ export interface Participant {
   graphId?: string;          // Graph API user ID for presence lookup
   displayName?: string;
   jobTitle?: string;
-  department?: string;
+  department?: string;       // Full department name (e.g., "Global Technology", "Experience Design")
   companyName?: string;
   officeLocation?: string;
   email?: string;

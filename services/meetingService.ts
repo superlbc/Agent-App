@@ -14,12 +14,26 @@
 import { GraphService, Meeting, MeetingDetails, Attendee } from './graphService';
 import { TranscriptService, TranscriptSearchResult } from './transcriptService';
 
+// Re-export Meeting type for UI components
+export type { Meeting } from './graphService';
+
+export interface TranscriptIteration {
+  id: string;
+  content: string;
+  createdDateTime: string;
+  meetingDate?: Date; // The actual meeting date this transcript is from (for recurring meetings)
+}
+
 export interface MeetingWithTranscript extends MeetingDetails {
   transcript?: {
     available: boolean;
-    content?: string;
+    content?: string; // Primary/current transcript content
     source?: string;
     error?: string;
+    iterations?: TranscriptIteration[]; // All transcript iterations (for recurring meetings)
+    currentIterationIndex?: number; // Index of the currently displayed iteration
+    onlineMeetingId?: string; // For lazy loading additional transcripts
+    joinWebUrl?: string; // For lazy loading additional transcripts
   };
 }
 
@@ -39,7 +53,7 @@ export class MeetingService {
   private static readonly CACHE_VERSION = 2; // Increment when changing date range logic
 
   constructor() {
-    this.graphService = new GraphService();
+    this.graphService = GraphService.getInstance();
     this.transcriptService = new TranscriptService(this.graphService);
   }
 
@@ -106,9 +120,12 @@ export class MeetingService {
       console.log('Searching for transcript...');
       console.log('Meeting has onlineMeetingId:', meetingDetails.onlineMeetingId);
       console.log('Meeting has joinUrl:', meetingDetails.joinUrl);
+
+      // Pass the meeting's start date for filtering recurring meeting transcripts
+      // The transcript service will use this to match the correct instance
       const transcriptResult = await this.transcriptService.searchTranscript(
         meetingDetails.subject,
-        meetingDetails.start,
+        meetingDetails.start, // Using start date for filtering window calculation
         meetingDetails.onlineMeetingId,
         meetingDetails.joinUrl
       );
@@ -119,7 +136,11 @@ export class MeetingService {
           available: transcriptResult.found,
           content: transcriptResult.content,
           source: transcriptResult.source,
-          error: transcriptResult.error
+          error: transcriptResult.error,
+          iterations: transcriptResult.iterations, // Pass through all transcript iterations
+          currentIterationIndex: 0, // Default to most recent (first in array)
+          onlineMeetingId: transcriptResult.onlineMeetingId, // For lazy loading
+          joinWebUrl: transcriptResult.joinWebUrl // For lazy loading
         }
       };
     } catch (error) {

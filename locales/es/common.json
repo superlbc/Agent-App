@@ -21,7 +21,7 @@
   },
   "output": {
     "emptyState": {
-      "title": "Tus notas aparecerán aquí",
+      "title": "Las notas de reunión generadas aparecerán aquí",
       "description": "Completa los detalles y haz clic en \"Generar Notas\" para empezar."
     }
   },
@@ -57,7 +57,12 @@
     "downloadCSVActions": "Descargar Acciones CSV",
     "draftEmail": "Redactar Email",
     "clearConversation": "Limpiar conversación",
-    "sendQuestion": "Enviar pregunta"
+    "sendQuestion": "Enviar pregunta",
+    "viewTranscript": "Ver Transcripción",
+    "viewParticipants": "Ver Participantes",
+    "downloadTranscript": "Descargar Transcripción",
+    "close": "Cerrar",
+    "addYourNotes": "Añadir Tus Notas"
   },
   "status": {
     "generating": "Generando notas...",
@@ -236,6 +241,8 @@
     "printWindowBlocked": "No se pudo abrir la ventana de impresión. Por favor, desactiva los bloqueadores de ventanas emergentes.",
     "emailCopied": "Contenido del correo copiado. Pégalo en tu cliente de correo.",
     "emailCopiedPlain": "Contenido del correo copiado (texto plano). Pégalo en tu cliente de correo.",
+    "generationCancelled": "Generación cancelada",
+    "pleasewait": "Por favor espere unos segundos antes de intentar nuevamente",
     "noActionsToExport": "No hay acciones para exportar.",
     "csvDownloaded": "CSV descargado exitosamente.",
     "userNotesSaved": "Notas de usuario guardadas exitosamente",
@@ -275,7 +282,11 @@
       "processing": "Procesando",
       "none": "Ninguno"
     },
-    "note": "Nota: Las transcripciones suelen estar disponibles 5-10 minutos después de que finaliza una reunión. Solo puede acceder a las transcripciones de las reuniones que organizó (debido a la configuración de seguridad del inquilino). Para otras reuniones, use la opción de pegado manual."
+    "note": "Nota: Las transcripciones suelen estar disponibles 5-10 minutos después de que finaliza una reunión. Solo puede acceder a las transcripciones de las reuniones que organizó (debido a la configuración de seguridad del inquilino). Para otras reuniones, use la opción de pegado manual.",
+    "processMeeting": "Procesar Esta Reunión",
+    "collapse": "Colapsar",
+    "changeMeeting": "Cambiar Reunión",
+    "change": "Cambiar"
   },
   "participants": {
     "title": "Participantes de la Reunión",

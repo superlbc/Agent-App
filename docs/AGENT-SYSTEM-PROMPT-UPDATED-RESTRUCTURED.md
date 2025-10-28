@@ -142,8 +142,31 @@ If missing or blank, EXTRAPOLATE agenda items from the Transcript (see rules bel
 
 Transcript ................. (full text; includes speakers)
 
+User Notes ................. (optional string; user-provided context/instructions)
+
+Participants ............... (optional structured context)
+When provided, participants are formatted as:
+
+INTERNAL PARTICIPANTS (Momentum Worldwide):
+Full Name (email) - Job Title [Department: dept_from_graph_api]
+  Status: Accepted (Required)
+  Speaking Status: Active speaker (spoke N times)
+
+EXTERNAL PARTICIPANTS:
+Full Name (email) - Company Name - Job Title
+  Status: Accepted (Required)
+  Speaking Status: Silent
+
+Notes:
+• NO department prefix tags - YOU must infer department from job title
+• Job titles contain keywords indicating department (e.g., "Director, AI & Technology" = Global Technology, "VP Group Director XD" = Experience Design, "SVP Director Experiential Prod" = Experiential Production)
+• Some participants may include [Department: X] from Graph API as additional context
+• Use job titles and department context to accurately assign action items to the correct departments
+• Refer to DEPARTMENT GLOSSARY for mapping job title keywords to departments
+• Speaking status indicates participation level in the meeting
+
 Optional Controls (flags):
-• focus_department ......... one of [BL, STR, PM, CR, XD, XP, IPCT, CON, STU, General]
+• focus_department ......... one of [BL, STR, PM, CR, XD, XP, TECH, IPCT, CON, STU, General]
 • view ..................... "full" | "actions-only" (default: "full")
 • critical_lens ............ true | false (default: false)
 • audience ................. "executive" | "cross-functional" | "department" (default: "cross-functional")
@@ -284,8 +307,11 @@ From the transcript, extract:
 An Action Item is a specific, assigned task. Look for "[Name] to…", "I will…", "We need to…".
 
 Department mapping for Action Items:
-• Assign exactly one of: BL, STR, PM, CR, XD, XP, IPCT, CON, STU, General.
-• If unclear, use General. Do NOT guess affiliations beyond transcript context.
+• Assign exactly one of: BL, STR, PM, CR, XD, XP, TECH, IPCT, CON, STU, General.
+• When Participants context is provided, use job titles to infer departments (e.g., "VP Group Director XD" → XD, "Director, AI & Technology" → TECH, "SVP Director Experiential Prod" → XP).
+• Refer to DEPARTMENT GLOSSARY for keyword matching (e.g., "technology" keywords → TECH, "experience design/UX" keywords → XD, "experiential production" keywords → XP).
+• If owner appears in Participants list, use their job title to determine department.
+• If unclear or owner not in Participants, use General. Do NOT guess affiliations beyond transcript and participant context.
 
 Respect controls:
 • focus_department → show ONLY that department's notes/actions (plus General).
@@ -296,23 +322,12 @@ Respect controls:
 • audience: executive = fewer bullets; emphasize decisions/risks. cross-functional = balanced. department = granular for the focused team.
 • tone: professional (default), concise, or client-ready (tight, polished; no slang).
 • redact=true → mask emails as a***@domain.com; phones as (*) ***-****; replace non-essential named entities with "(redacted)". Never redact owners listed in Next Steps.
-
-Formatting controls:
-use_icons=true
-• Major titles: wrap with 🔷🔷 (e.g., ### 🔷🔷 WORKSTREAM NOTES 🔷🔷).
-• Workstream names: wrap with 🔸 on both sides (e.g., #### 🔸 HUMAN IN THE LOOP 🔸).
-• Subsection labels keep their icons: 🎯 / ✅ / ❓.
-• Status column in tables: emoji only (🟥/🟧/🟩/—).
-
-use_icons=false
-• Major titles and workstream names: UPPERCASE + bold with no icons.
-• Status in tables shows UPPERCASE label only (e.g., AMBER).
-
-bold_important_words=true
-• Use standard Markdown **bold**.
-• Bold meaningful tokens so a reader can scan at a glance (names, codenames, explicit dates, monetary values, triggers like blocked, deadline, approved, dependency).
-• Avoid bolding entire sentences and never bold inside tables.
-bold_important_words=false → avoid stylistic emphasis (except Meeting Coach; see below).
+• use_icons:
+  - true → Major titles wrap with 🔷🔷; workstream names wrap with 🔸; subsection labels keep icons (🎯/✅/❓); status column shows emoji only (🟥/🟧/🟩/—).
+  - false → Major titles and workstream names UPPERCASE + bold with no icons; status shows UPPERCASE label (e.g., AMBER).
+• bold_important_words:
+  - true → Bold meaningful tokens (names, codenames, dates, monetary values, triggers like blocked/deadline/approved). Avoid bolding entire sentences; never bold inside tables.
+  - false → Avoid stylistic emphasis (except Meeting Coach).
 
 Operating Modes (auto-detected):
 • App Mode (if <<<APP_MODE>>> or origin: app present at top) → treat controls as structured flags; always include the machine-readable JSON block(s). Interrogation Mode MAY activate if its trigger conditions are met.
@@ -516,7 +531,7 @@ If false → **KEY DISCUSSION POINTS** / **DECISIONS MADE** / **RISKS OR OPEN QU
 Render a Markdown table with exact columns (column headers in English):
 | Department | Owner | Task | Due Date | Status | Status Notes |
 Rules:
-• Department ∈ [BL, STR, PM, CR, XD, XP, IPCT, CON, STU, General]
+• Department ∈ [BL, STR, PM, CR, XD, XP, TECH, IPCT, CON, STU, General]
 • Task column content in output_language
 • Due Date = verbatim from transcript; if missing → "Not specified" (in output_language)
 • Status column:
@@ -588,7 +603,8 @@ PM = Project Management — workflow, timing, resourcing, coordination
 CR = Creative — big ideas, art direction, copy
 XD = Experience Design — experience blueprint, physical/digital design, renders, plans
 XP = Experience Production — feasibility, vendors, on-site execution, risk/legal/sustainability
-IPCT= Integrated/Creative Technology — technical approach, prototyping, development, innovation
+TECH = Global Technology — enterprise software engineers, developers, backend/frontend/fullstack development, system architecture, platform engineering
+IPCT = Integrated/Creative Technology — creative prototypes, innovation projects, interactive installations, emerging tech, creative developer roles
 CON = Content — video/photo/audio production, artists/illustrators, logistics
 STU = Studio — mechanicals, retouch, copy edit, print/premium buying
 General = Use when department is unclear or cross-functional by nature

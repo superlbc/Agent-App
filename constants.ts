@@ -1,6 +1,6 @@
 import { Department, ContextTag, Audience, Tone, ViewMode, FormState, Controls, MeetingPreset, CoachingStyle } from './types.ts';
 
-export const DEPARTMENT_OPTIONS: Department[] = ["BL", "STR", "PM", "CR", "XD", "XP", "IPCT", "CON", "STU", "General"];
+export const DEPARTMENT_OPTIONS: Department[] = ["BL", "STR", "PM", "CR", "XD", "XP", "TECH", "IPCT", "CON", "STU", "General"];
 
 // Context tags with translation keys
 export const CONTEXT_TAG_OPTIONS: { value: ContextTag; labelKey: string }[] = [
@@ -39,15 +39,16 @@ export const COACHING_STYLE_OPTIONS: { value: CoachingStyle; labelKey: string }[
 ];
 
 export const DEPARTMENT_LEGEND: Record<Department, string> = {
-  BL: "Brand & Licensing",
-  STR: "Strategy & Insights",
-  PM: "Product Management",
-  CR: "Creative Direction",
+  BL: "Business Leadership",
+  STR: "Strategy",
+  PM: "Project Management",
+  CR: "Creative",
   XD: "Experience Design",
   XP: "Experience Production",
-  IPCT: "IP & Content",
-  CON: "Consumer Insights",
-  STU: "Studio Operations",
+  TECH: "Global Technology",
+  IPCT: "Creative Technology",
+  CON: "Content",
+  STU: "Studio",
   General: "General / Cross-functional",
 };
 
@@ -60,13 +61,13 @@ export const SAMPLE_DATA: FormState = {
 };
 
 export const MEETING_PRESET_OPTIONS: { value: Exclude<MeetingPreset, 'custom'>; labelKey: string }[] = [
-    { value: 'client-update', labelKey: 'constants:presets.clientUpdate.name' },
     { value: 'internal-sync', labelKey: 'constants:presets.internalSync.name' },
+    { value: 'client-update', labelKey: 'constants:presets.clientUpdate.name' },
     { value: 'brainstorm', labelKey: 'constants:presets.brainstorm.name' },
-    { value: 'executive-briefing', labelKey: 'constants:presets.executiveBrief.name' },
+    { value: 'executive-briefing', labelKey: 'constants:presets.executiveBriefing.name' },
 ];
 
-export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Controls> & { tags: ContextTag[] }> = {
+export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Controls> & { tags: ContextTag[]; description: string }> = {
     'client-update': {
         audience: 'cross-functional',
         tone: 'client-ready',
@@ -77,6 +78,7 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         meeting_coach: true,
         coaching_style: 'gentle',
         tags: ["Client facing"],
+        description: "For client-facing meetings • Polished and professional output • Sensitive data redacted • Cross-functional view • Meeting coach active",
     },
     'internal-sync': {
         audience: 'department-specific',
@@ -84,10 +86,11 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         redact: false,
         critical_lens: true,
         use_icons: true,
-        bold_important_words: false,
+        bold_important_words: true,
         meeting_coach: true,
         coaching_style: 'gentle',
         tags: ["Internal only"],
+        description: "For internal team meetings • Granular details for your department • Professional tone • Includes critical review • Key points highlighted • Meeting coach provides facilitation tips",
     },
     brainstorm: {
         audience: 'cross-functional',
@@ -99,6 +102,7 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         meeting_coach: true,
         coaching_style: 'gentle',
         tags: ["Internal only"],
+        description: "For creative sessions • Concise format focusing on ideas • Critical review enabled • Cross-team perspective • Key points highlighted • Meeting coach active",
     },
     'executive-briefing': {
         audience: 'executive',
@@ -110,5 +114,6 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         meeting_coach: true,
         coaching_style: 'gentle',
         tags: ["Executive review", "Sensitive"],
+        description: "For leadership updates • Executive summary format • Sensitive data redacted • Critical review included • Key decisions highlighted • Meeting coach active",
     }
 };

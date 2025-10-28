@@ -3,7 +3,7 @@ import { Payload, AgentResponse, ApiConfig, AuthToken, FormState, InterrogationR
 import i18n from '../utils/i18n';
 import { buildParticipantContext } from '../utils/participantContext';
 
-const getAuthToken = async (config: ApiConfig): Promise<string> => {
+const getAuthToken = async (config: ApiConfig, signal?: AbortSignal): Promise<string> => {
     if (!config.clientId || !config.clientSecret) {
         throw new Error('Client ID or Client Secret is missing from config.');
     }
@@ -15,13 +15,13 @@ const getAuthToken = async (config: ApiConfig): Promise<string> => {
             return token.accessToken;
         }
     }
-    
+
     // Always use relative path to leverage proxy (Vite in dev, nginx in production).
     // This avoids CORS issues by keeping requests on the same origin.
     // Note: Direct hostname usage is not supported - always use proxy.
     const baseUrl = '';
     const tokenUrl = `${baseUrl}/api/token`;
-    
+
     // Debugging log to confirm the URL being used
     console.log('tokenUrl →', tokenUrl);
 
@@ -35,6 +35,7 @@ const getAuthToken = async (config: ApiConfig): Promise<string> => {
             'Authorization': `Basic ${credentials}`,
         },
         body: new URLSearchParams({ grant_type: 'client_credentials' }),
+        signal, // Add AbortSignal support
     });
 
 
@@ -60,7 +61,7 @@ const getAuthToken = async (config: ApiConfig): Promise<string> => {
  * including all meeting details and control settings for the agent.
  */
 const constructPrompt = (payload: Payload): string => {
-    const { meeting_title, agenda, transcript, participants, controls } = payload;
+    const { meeting_title, agenda, transcript, user_notes, participants, controls } = payload;
 
     // Get current language from i18n (en, es, or ja)
     const currentLanguage = i18n.language || 'en';
@@ -82,6 +83,15 @@ const constructPrompt = (payload: Payload): string => {
         transcript,
         ``,
     );
+
+    // Add user notes if provided
+    // These are additional context/instructions from the user to guide the AI
+    if (user_notes && user_notes.trim().length > 0) {
+        promptParts.push(`User Notes:`);
+        promptParts.push(user_notes.trim());
+        promptParts.push('');
+        console.log(`📝 Including user notes in agent context (${user_notes.trim().split(/\s+/).length} words)`);
+    }
 
     // NEW: Add participant context if available
     // This provides the AI agent with structured participant data for:
@@ -121,14 +131,14 @@ const constructPrompt = (payload: Payload): string => {
 };
 
 
-export const generateNotes = async (payload: Payload, apiConfig: ApiConfig): Promise<AgentResponse> => {
+export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, signal?: AbortSignal): Promise<AgentResponse> => {
     if (!apiConfig.botId) {
         throw new Error('Bot ID is missing from config.');
     }
-    
+
     try {
-        const accessToken = await getAuthToken(apiConfig);
-        
+        const accessToken = await getAuthToken(apiConfig, signal);
+
         // Always use relative path to leverage proxy (Vite in dev, nginx in production).
         const baseUrl = '';
         const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.botId}/messages`;
@@ -142,6 +152,7 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig): Pro
             method: 'POST',
             headers: headers,
             body: JSON.stringify({ message: prompt }),
+            signal, // Add AbortSignal support
         });
 
         if (!response.ok) {
@@ -224,10 +235,15 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig): Pro
     } catch (error) {
         console.error('Error in generateNotes:', error);
 
+        // Handle AbortError specifically
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new Error('GENERATION_CANCELLED');
+        }
+
         if (error instanceof TypeError && error.message === 'Failed to fetch') {
             throw new Error("Network request failed due to a browser security policy (CORS). This is not an application bug. Please ask the API administrator to add your origin to the server's CORS allowlist.");
         }
-        
+
         if (error instanceof Error && error.message.includes('authenticate')) {
             localStorage.removeItem('authToken');
         }

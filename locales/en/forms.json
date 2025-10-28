@@ -27,7 +27,8 @@
     "modalDescription": "Add your own notes or additional context that will be sent to the AI agent. You can type, paste, or upload a file.",
     "placeholder": "Type or paste your notes here...",
     "uploadFile": "Upload file",
-    "infoNote": "These notes will be labeled as \"User Provided Notes\" when sent to the AI agent, helping distinguish them from the meeting transcript."
+    "infoNote": "These notes will be labeled as \"User Provided Notes\" when sent to the AI agent, helping distinguish them from the meeting transcript.",
+    "tooltipHelper": "Add additional notes that you took, and those will be used for generating the minutes"
   },
   "tabs": {
     "selectMeeting": "Select Meeting",
@@ -129,6 +130,16 @@
     "useIcons": "Add icons to section headers for visual clarity.",
     "boldKeywords": "Emphasize important terms and entities in the summary.",
     "meetingCoach": "Provide feedback on meeting facilitation and effectiveness.",
-    "coachingStyle": "'Gentle' provides supportive feedback. 'Direct' provides more blunt, actionable advice."
+    "coachingStyle": "'Gentle' provides supportive feedback. 'Direct' provides more blunt, actionable advice.",
+    "audienceExecutive": "High-level summary with fewer bullets, emphasizing key decisions and risks for leadership.",
+    "audienceCrossFunctional": "Balanced view with moderate detail, suitable for cross-team collaboration and coordination.",
+    "audienceDepartmentSpecific": "Granular, detailed notes focused on your team's specific actions and discussions.",
+    "toneProfessional": "Standard business tone with clear, professional language for all audiences.",
+    "toneConcise": "Brief, tight output that focuses on essential information only.",
+    "toneClientReady": "Polished, client-facing language with no internal jargon or casual expressions.",
+    "viewFull": "Complete meeting notes including title, purpose, discussion points, decisions, risks, and action items.",
+    "viewActionsOnly": "Shows only the Next Steps table with action items, owners, due dates, and status.",
+    "coachingGentle": "Supportive coaching with positive framing and constructive suggestions (e.g., 'Consider adding', 'Try to').",
+    "coachingDirect": "Direct, actionable coaching with imperative language and concrete targets (e.g., 'Assign owners', 'Define due dates')."
   }
 }

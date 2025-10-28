@@ -77,25 +77,37 @@ function parseVTTFormat(vttContent: string): ConversationBlock[] {
       continue;
     }
 
-    // Check for speaker line (e.g., "<v John Smith>Message text")
-    const speakerMatch = line.match(/<v\s+([^>]+)>(.*)/);
-    if (speakerMatch && speakerMatch[1]) {
-      const speaker = speakerMatch[1].trim();
-      const messageText = speakerMatch[2].trim();
+    // Handle multiple <v Speaker>text</v> patterns in a single line
+    // Match all occurrences of <v Speaker>text</v> or <v Speaker>text
+    const vtagPattern = /<v\s+([^>]+)>(.*?)(?:<\/v>|(?=<v\s)|$)/g;
+    let match;
+    const segments: { speaker: string; text: string }[] = [];
+
+    while ((match = vtagPattern.exec(line)) !== null) {
+      const speaker = match[1].trim();
+      const text = match[2].trim();
+      if (text) {
+        segments.push({ speaker, text });
+      }
+    }
+
+    // Process each segment
+    for (const segment of segments) {
+      const { speaker, text } = segment;
 
       // Check if we should merge with previous block (same speaker, within 5 seconds)
       const lastBlock = blocks[blocks.length - 1];
       if (lastBlock &&
           lastBlock.speaker === speaker &&
           currentStartTime - lastBlock.startTime < 5) {
-        // Merge with previous block
-        lastBlock.message += ' ' + messageText;
+        // Merge with previous block, adding a line break between segments
+        lastBlock.message += '\n' + text;
       } else {
         // Create new block
         blocks.push({
           speaker,
           timestamp: currentTimestamp,
-          message: messageText,
+          message: text,
           startTime: currentStartTime
         });
       }

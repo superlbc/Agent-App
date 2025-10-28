@@ -23,11 +23,19 @@ import { Icon } from '../ui/Icon';
 interface MeetingSelectionPanelProps {
   onMeetingSelected: (data: MeetingWithTranscript) => void;
   onError: (error: string) => void;
+  selectedMeetingTranscript?: string;
+  selectedMeetingParticipants?: Array<{ name: string; email: string; role?: string }>;
+  onViewTranscript?: () => void;
+  onViewParticipants?: () => void;
 }
 
 export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   onMeetingSelected,
-  onError
+  onError,
+  selectedMeetingTranscript,
+  selectedMeetingParticipants,
+  onViewTranscript,
+  onViewParticipants
 }) => {
   const { t } = useTranslation('common');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -42,33 +50,60 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   const [graphService] = useState(() => GraphService.getInstance());
   const [selectedMeeting, setSelectedMeeting] = useState<MeetingWithTranscript | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hasUserClickedDate, setHasUserClickedDate] = useState(false); // Track if user actively clicked a date
 
   // Ref for debouncing transcript checks
   const transcriptCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch meetings when date changes
+  // Fetch meetings when date changes - only if user has clicked a date
   useEffect(() => {
-    loadMeetingsForDate(selectedDate);
-  }, [selectedDate]);
+    if (hasUserClickedDate) {
+      loadMeetingsForDate(selectedDate);
+    }
+  }, [selectedDate, hasUserClickedDate]);
 
-  // Preload calendar on mount
+  // Preload calendar on mount - load meetings for calendar counts immediately
   useEffect(() => {
-    preloadCalendar();
+    loadMeetingsForCalendar();
   }, []);
 
-  const preloadCalendar = async () => {
+  /**
+   * Load meetings for calendar display (counts on dates)
+   * This runs on mount to show meeting counts immediately
+   */
+  const loadMeetingsForCalendar = async () => {
     try {
-      await meetingService.preloadCalendar();
+      const today = new Date();
+      const rangeStart = new Date(today);
+      rangeStart.setDate(rangeStart.getDate() - 28); // 4 weeks back
+      rangeStart.setHours(0, 0, 0, 0);
+
+      const rangeEnd = new Date(today);
+      rangeEnd.setDate(rangeEnd.getDate() + 28); // 4 weeks forward
+      rangeEnd.setHours(23, 59, 59, 999);
+
+      const allCalendarMeetings = await meetingService.getCalendarMeetings(
+        rangeStart,
+        rangeEnd
+      );
+
+      // Store all meetings for calendar counts
+      setAllMeetings(allCalendarMeetings);
+      console.log(`[MeetingSelection] Preloaded ${allCalendarMeetings.length} meetings for calendar display`);
     } catch (error) {
-      console.error('Failed to preload calendar:', error);
-      // Non-critical error - don't show to user
+      console.error('Failed to preload calendar meetings:', error);
+      // Don't show error to user - this is a background operation
     }
   };
+
 
   /**
    * Checks transcript availability for an array of meetings
    * Updates meeting.transcriptStatus for each meeting
    * Runs in parallel for performance
+   *
+   * IMPORTANT: For recurring meetings, filters transcripts by meeting date
+   * to ensure we only show "available" if a transcript exists for THIS specific occurrence
    */
   const checkTranscriptAvailability = useCallback(async (meetingsToCheck: Meeting[]) => {
     if (!meetingsToCheck || meetingsToCheck.length === 0) {
@@ -98,7 +133,7 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     // Check each meeting in parallel
     const checkPromises = onlineMeetings.map(async (meeting) => {
       try {
-        console.log(`[TranscriptCheck]   Checking: ${meeting.subject}`);
+        console.log(`[TranscriptCheck]   Checking: ${meeting.subject} (${meeting.start.toISOString()})`);
 
         // Call listTranscripts API (lightweight - only returns metadata, not content)
         const transcripts = await graphService.listTranscripts(
@@ -106,13 +141,47 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
           meeting.joinUrl
         );
 
-        const hasTranscript = transcripts && transcripts.length > 0;
-        console.log(`[TranscriptCheck]   ${hasTranscript ? '✅' : '❌'} ${meeting.subject}: ${transcripts?.length || 0} transcript(s)`);
+        if (!transcripts || transcripts.length === 0) {
+          console.log(`[TranscriptCheck]   ❌ ${meeting.subject}: No transcripts found`);
+          return {
+            meetingId: meeting.id,
+            transcriptStatus: 'unavailable' as const,
+            transcriptCount: 0
+          };
+        }
+
+        console.log(`[TranscriptCheck]   📋 ${meeting.subject}: Found ${transcripts.length} total transcript(s)`);
+
+        // For recurring meetings, show "available" if ANY transcript exists in the series
+        // Users can browse all iterations via tabs - no need to filter by date here
+        if (transcripts.length > 1) {
+          console.log(`[TranscriptCheck]   🔄 Recurring meeting detected - ${transcripts.length} iterations available`);
+          transcripts.forEach((t, i) => {
+            console.log(`[TranscriptCheck]      Iteration ${i + 1}: ${new Date(t.createdDateTime).toLocaleDateString()}`);
+          });
+        }
+
+        // Check if ANY transcript exists within reasonable time of the selected date
+        // (to determine badge status - we still want to show "unavailable" if no transcript for THIS instance)
+        const meetingStart = new Date(meeting.start);
+        const searchWindowStart = new Date(meetingStart);
+        searchWindowStart.setHours(searchWindowStart.getHours() - 1);
+
+        const searchWindowEnd = new Date(meetingStart);
+        searchWindowEnd.setHours(searchWindowEnd.getHours() + 24);
+
+        const hasTranscriptForThisInstance = transcripts.some(t => {
+          const transcriptDate = new Date(t.createdDateTime);
+          return transcriptDate >= searchWindowStart && transcriptDate <= searchWindowEnd;
+        });
+
+        console.log(`[TranscriptCheck]   ${hasTranscriptForThisInstance ? '✅' : '❌'} ${meeting.subject}: ${hasTranscriptForThisInstance ? 'HAS' : 'NO'} transcript for ${meetingStart.toLocaleDateString()}`);
 
         return {
           meetingId: meeting.id,
-          transcriptStatus: hasTranscript ? ('available' as const) : ('unavailable' as const),
-          transcriptCount: transcripts?.length || 0
+          transcriptStatus: hasTranscriptForThisInstance ? ('available' as const) : ('unavailable' as const),
+          transcriptCount: transcripts.length, // Total count across all iterations
+          transcripts: transcripts // Store ALL transcripts for multi-iteration viewer
         };
       } catch (error) {
         console.error(`[TranscriptCheck]   ❌ Error checking ${meeting.subject}:`, error);
@@ -136,14 +205,15 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     console.log(`[TranscriptCheck]   Unavailable: ${unavailable}/${onlineMeetings.length}`);
     console.log('[TranscriptCheck] ============================================');
 
-    // Update meetings with transcript status
+    // Update meetings with transcript status and metadata
     setMeetings(prev => prev.map(meeting => {
       const result = results.find(r => r.meetingId === meeting.id);
       return result
         ? {
             ...meeting,
             transcriptStatus: result.transcriptStatus,
-            transcriptCount: result.transcriptCount
+            transcriptCount: result.transcriptCount,
+            transcripts: result.transcripts // Store transcript metadata for multi-iteration viewer
           }
         : meeting;
     }));
@@ -247,10 +317,10 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
         meeting.id
       );
 
-      // Store selected meeting and collapse the view
+      // Store selected meeting and keep it expanded to show action buttons
       setSelectedMeeting(meetingWithTranscript);
-      setIsCollapsed(true);
-      setExpandedMeetingId(undefined); // Collapse the expanded card
+      // Keep the card expanded to show View Transcript/Participants buttons
+      // setExpandedMeetingId remains as the selected meeting to show the buttons
 
       // Notify parent component
       onMeetingSelected(meetingWithTranscript);
@@ -275,15 +345,13 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     }
   };
 
-  const handleChangeSelection = () => {
-    setIsCollapsed(false);
-    setSelectedMeeting(null);
-  };
-
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
     setMeetings([]); // Clear previous meetings
     setExpandedMeetingId(undefined); // Collapse any expanded meeting
+    setSelectedMeeting(null); // Clear selection to show new meetings
+    setIsCollapsed(false); // Expand panel to show meetings for new date
+    setHasUserClickedDate(true); // User has actively clicked a date
   };
 
   const isTranscriptLikely = (meeting: Meeting): boolean => {
@@ -298,18 +366,26 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
            date.getFullYear() === today.getFullYear();
   };
 
+  // Function to change meeting selection
+  // Keep the selected meeting visible but show the meeting list again
+  const handleChangeSelection = () => {
+    setIsCollapsed(false);
+    // Don't clear selectedMeeting - keep it so it shows with green styling
+    setExpandedMeetingId(undefined);
+  };
+
   // Show collapsed view if meeting is selected
   if (isCollapsed && selectedMeeting) {
     return (
       <Card className="p-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg flex-shrink-0">
               <Icon name="check-circle" className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-0.5">
-                Meeting Selected
+                {t('meetings.meetingSelected', 'Meeting Selected')}
               </p>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
                 {selectedMeeting.subject}
@@ -332,7 +408,8 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
             onClick={handleChangeSelection}
             className="flex-shrink-0"
           >
-            Change
+            <Icon name="refresh" className="w-4 h-4 mr-1.5" />
+            {t('meetings.changeMeeting', 'Change Meeting')}
           </Button>
         </div>
       </Card>
@@ -340,22 +417,7 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start gap-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <Icon name="calendar" className="w-5 h-5 text-primary" />
-        </div>
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-            {t('meetings.headerTitle')}
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            {t('meetings.headerDescription')}
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       {/* Calendar Picker */}
       <Card className="p-4">
         <CalendarPicker
@@ -365,53 +427,74 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
         />
       </Card>
 
-      {/* Meetings List */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            {t('meetings.title')} {selectedDate.toLocaleDateString(undefined, {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </h3>
-          <div className="flex items-center gap-2">
-            {meetings.length > 0 && (
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                {t('meetings.meetingCount', { count: meetings.length })}
-              </span>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => loadMeetingsForDate(selectedDate)}
-              disabled={isLoadingCalendar}
-              className="h-7 px-2"
-            >
-              <Icon name="refresh" className="w-3.5 h-3.5" />
-            </Button>
+      {/* Meetings List - Only show after user has clicked a date */}
+      {hasUserClickedDate && (
+        <>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                {selectedMeeting ? (
+                  t('meetings.selectedMeeting', 'Selected Meeting')
+                ) : (
+                  <>
+                    {t('meetings.title')} {selectedDate.toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </>
+                )}
+              </h3>
+              {!selectedMeeting && (
+                <div className="flex items-center gap-2">
+                  {meetings.length > 0 && (
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {t('meetings.meetingCount', { count: meetings.length })}
+                    </span>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setHasUserClickedDate(true);
+                      loadMeetingsForDate(selectedDate);
+                    }}
+                    disabled={isLoadingCalendar}
+                    className="h-7 px-2"
+                  >
+                    <Icon name="refresh" className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <MeetingList
+              meetings={meetings}
+              onSelectMeeting={handleToggleExpand}
+              isTranscriptLikely={isTranscriptLikely}
+              isLoading={isLoadingCalendar}
+              loadingMeetingId={loadingMeetingId}
+              expandedMeetingId={expandedMeetingId}
+              onProcessMeeting={handleProcessMeeting}
+              selectedMeetingId={selectedMeeting?.id}
+              selectedMeetingTranscript={selectedMeetingTranscript}
+              selectedMeetingParticipants={selectedMeetingParticipants}
+              onViewTranscript={onViewTranscript}
+              onViewParticipants={onViewParticipants}
+              onChangeSelection={handleChangeSelection}
+            />
           </div>
-        </div>
 
-        <MeetingList
-          meetings={meetings}
-          onSelectMeeting={handleToggleExpand}
-          isTranscriptLikely={isTranscriptLikely}
-          isLoading={isLoadingCalendar}
-          loadingMeetingId={loadingMeetingId}
-          expandedMeetingId={expandedMeetingId}
-          onProcessMeeting={handleProcessMeeting}
-        />
-      </div>
-
-      {/* Info message - only show for today's meetings */}
-      {!isLoadingCalendar && meetings.length > 0 && isToday(selectedDate) && (
-        <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <Icon name="info" className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-blue-700 dark:text-blue-300">
-            {t('meetings.note')}
-          </p>
-        </div>
+          {/* Info message - only show for today's meetings */}
+          {!isLoadingCalendar && meetings.length > 0 && isToday(selectedDate) && (
+            <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <Icon name="info" className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-blue-700 dark:text-blue-300">
+                {t('meetings.note')}
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

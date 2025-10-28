@@ -29,6 +29,7 @@
     "CR": "Creative",
     "XD": "Experience Design",
     "XP": "Experience Production",
+    "TECH": "Global Technology",
     "IPCT": "Integrated/Creative Technology",
     "CON": "Content",
     "STU": "Studio",
@@ -41,7 +42,8 @@
     "CR": "Big ideas, art direction, copy",
     "XD": "Experience blueprint, physical/digital design, renders, plans",
     "XP": "Feasibility, vendors, on-site execution, risk/legal/sustainability",
-    "IPCT": "Technical approach, prototyping, development, innovation",
+    "TECH": "Enterprise software engineers, developers, system architecture, platform engineering",
+    "IPCT": "Creative prototypes, innovation projects, interactive installations, emerging tech",
     "CON": "Video/photo/audio production, artists/illustrators, logistics",
     "STU": "Mechanicals, retouch, copy edit, print/premium buying",
     "General": "Cross-functional or unclear department"
@@ -49,19 +51,23 @@
   "presets": {
     "clientUpdate": {
       "name": "Client Update",
-      "description": "Polished, client-ready notes emphasizing decisions and next steps"
+      "description": "Polished, client-ready notes emphasizing decisions and next steps",
+      "tooltip": "For client-facing meetings • Polished and professional output • Sensitive data redacted • Cross-functional view • Meeting coach active"
     },
     "internalSync": {
       "name": "Internal Sync",
-      "description": "Balanced notes for cross-functional team collaboration"
+      "description": "Balanced notes for cross-functional team collaboration",
+      "tooltip": "For internal team meetings • Granular details for your department • Professional tone • Includes critical review • Key points highlighted • Meeting coach provides facilitation tips"
     },
     "brainstorm": {
       "name": "Brainstorm",
-      "description": "Creative session notes capturing ideas and action items"
+      "description": "Creative session notes capturing ideas and action items",
+      "tooltip": "For creative sessions • Concise format focusing on ideas • Critical review enabled • Cross-team perspective • Key points highlighted • Meeting coach active"
     },
-    "executiveBrief": {
+    "executiveBriefing": {
       "name": "Executive Brief",
-      "description": "High-level summary focusing on key decisions and risks"
+      "description": "High-level summary focusing on key decisions and risks",
+      "tooltip": "For leadership updates • Executive summary format • Sensitive data redacted • Critical review included • Key decisions highlighted • Meeting coach active"
     },
     "departmentStandup": {
       "name": "Department Standup",

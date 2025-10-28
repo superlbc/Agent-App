@@ -29,6 +29,7 @@ export interface Meeting {
   onlineMeetingId?: string; // Microsoft Teams online meeting ID for transcript access
   transcriptStatus?: 'unknown' | 'checking' | 'available' | 'unavailable'; // Transcript availability (checked per day)
   transcriptCount?: number; // Number of transcripts found (0 = unavailable, 1+ = available)
+  transcripts?: Transcript[]; // All available transcripts for this meeting (for recurring meetings with multiple iterations)
 }
 
 export interface MeetingDetails extends Meeting {
@@ -456,7 +457,7 @@ export class GraphService {
 
       if (joinUrl && !onlineMeetingId) {
         console.log(`[Graph API] No meeting ID provided, resolving from joinUrl...`);
-        resolvedMeetingId = await this.resolveOnlineMeetingId(joinUrl);
+        resolvedMeetingId = await this.getOnlineMeetingIdFromUrl(joinUrl);
       }
 
       if (!resolvedMeetingId) {

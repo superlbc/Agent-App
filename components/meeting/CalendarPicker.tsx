@@ -20,7 +20,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onSelectDate,
   allMeetings = []
 }) => {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const [currentWeek, setCurrentWeek] = useState(() => getWeekStart(selectedDate));
 
   // Get the start of the week (Monday)
@@ -79,7 +79,9 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   };
 
   const formatMonthYear = (): string => {
-    return currentWeek.toLocaleDateString('en-US', {
+    // Use current i18n language for date formatting
+    const locale = i18n.language || 'en-US';
+    return currentWeek.toLocaleDateString(locale, {
       month: 'long',
       year: 'numeric'
     });
@@ -159,12 +161,12 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
               key={date.toISOString()}
               onClick={() => onSelectDate(date)}
               className={`
-                relative flex flex-col items-center justify-center p-3 rounded-lg
+                relative flex flex-col items-center justify-center p-2 rounded-lg aspect-square
                 transition-all duration-200 cursor-pointer
                 ${selected
                   ? 'bg-primary text-white shadow-md scale-105'
                   : today
-                  ? 'bg-primary/10 text-primary border-2 border-primary hover:scale-105 hover:shadow-lg'
+                  ? 'border-2 border-primary text-primary bg-white dark:bg-slate-800 hover:scale-105 hover:shadow-lg'
                   : isWeekend
                   ? 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100 hover:border-primary hover:shadow-lg hover:scale-105'
                   : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary hover:shadow-lg hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-700'
@@ -172,7 +174,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
               `}
             >
               {/* Day name */}
-              <span className={`text-xs font-medium mb-1 ${
+              <span className={`text-[10px] font-medium mb-0.5 ${
                 selected
                   ? 'text-white'
                   : 'text-slate-600 dark:text-slate-400'
@@ -181,7 +183,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
               </span>
 
               {/* Date number */}
-              <span className={`text-lg font-bold ${
+              <span className={`text-base font-bold ${
                 selected
                   ? 'text-white'
                   : today
@@ -209,18 +211,6 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
             </button>
           );
         })}
-      </div>
-
-      {/* Selected date display */}
-      <div className="text-sm text-slate-600 dark:text-slate-400 text-center">
-        {t('meetings.selected')} <span className="font-medium text-slate-900 dark:text-white">
-          {selectedDate.toLocaleDateString(undefined, {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-          })}
-        </span>
       </div>
     </div>
   );

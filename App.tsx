@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { InputPanel } from './components/InputPanel';
@@ -75,9 +75,15 @@ const AppContent: React.FC = () => {
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [generateTrigger, setGenerateTrigger] = useState(0); // Trigger for collapsing Advanced Settings
 
   const { startTour, isTourActive } = useTourContext();
   const { isAuthenticated, user } = useAuth();
+
+  // AbortController ref for cancelling requests
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const lastGenerateTimeRef = useRef<number>(0);
 
   // Check if using custom bot ID (test agent)
   const defaultBotId = (import.meta.env)?.DEFAULT_BOT_ID || '';
@@ -156,14 +162,51 @@ const AppContent: React.FC = () => {
     }, 4000);
   };
 
+  const handleCancelGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+    setIsLoading(false);
+    addToast(t('common:toasts.generationCancelled'), 'error');
+
+    // Telemetry: Track cancellation
+    telemetryService.trackEvent('generationCancelled', {});
+  }, [t, addToast]);
+
   const handleGenerate = useCallback(async (currentFormState: FormState, currentControls: Controls) => {
     if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.botId) {
         addToast(t('common:toasts.apiConfigMissing'), 'error');
         return;
     }
 
+    // Cooldown check: prevent rapid repeated requests (3 seconds)
+    const now = Date.now();
+    const timeSinceLastGenerate = now - lastGenerateTimeRef.current;
+    if (timeSinceLastGenerate < 3000) {
+      addToast(t('common:toasts.pleasewait'), 'error');
+      return;
+    }
+    lastGenerateTimeRef.current = now;
+
     setIsLoading(true);
     setError(null);
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
+    // Set up 3-minute (180 seconds) timeout
+    timeoutIdRef.current = setTimeout(() => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    }, 180000);
 
     // Generate correlation ID for tracking related events
     const correlationId = crypto.randomUUID();
@@ -178,7 +221,7 @@ const AppContent: React.FC = () => {
         controls: currentControls,
       };
 
-      const response = await generateNotes(payload, apiConfig);
+      const response = await generateNotes(payload, apiConfig, signal);
       setOutput(response);
 
       // Telemetry: Track notes generation with details
@@ -212,16 +255,32 @@ const AppContent: React.FC = () => {
         addToast(t('common:toasts.notesGenerated'), 'success');
       }
     } catch (err) {
+      // Handle cancellation separately
+      if (err instanceof Error && err.message === 'GENERATION_CANCELLED') {
+        // Cancellation already handled by handleCancelGeneration
+        // Don't show additional error toast
+        return;
+      }
+
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(errorMessage);
       setOutput(null);
       addToast(errorMessage, 'error');
     } finally {
+      // Clean up AbortController and timeout
+      if (abortControllerRef.current) {
+        abortControllerRef.current = null;
+      }
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
       setIsLoading(false);
     }
-  }, [hasGenerated, apiConfig, user, participants]);
+  }, [hasGenerated, apiConfig, user, participants, t, addToast]);
 
   const handleGenerateClick = () => {
+    setGenerateTrigger(prev => prev + 1); // Increment to trigger Advanced Settings collapse
     handleGenerate(formState, controls);
   };
 
@@ -447,6 +506,7 @@ const AppContent: React.FC = () => {
               onConfirmMatch={confirmMatch}
               onMarkAsExternal={markAsExternal}
               onUpdateParticipant={updateParticipant}
+              generateTrigger={generateTrigger}
             />
           </div>
           <div id="output-panel-wrapper" className="flex-1 min-w-0 w-full">
@@ -471,8 +531,8 @@ const AppContent: React.FC = () => {
         setBotId={setBotId}
       />
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
-      
-      <LoadingModal isOpen={isLoading} />
+
+      <LoadingModal isOpen={isLoading} onCancel={handleCancelGeneration} />
 
       <div className="fixed bottom-4 right-4 z-50 space-y-2">
         {toasts.map(toast => (

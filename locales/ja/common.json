@@ -20,7 +20,7 @@
   },
   "output": {
     "emptyState": {
-      "title": "ノートはこちらに表示されます",
+      "title": "生成された会議議事録がここに表示されます",
       "description": "詳細を入力して「ノート生成」をクリックしてください。"
     }
   },
@@ -56,7 +56,12 @@
     "downloadCSVActions": "CSVアクションをダウンロード",
     "draftEmail": "メールを下書き",
     "clearConversation": "会話をクリア",
-    "sendQuestion": "質問を送信"
+    "sendQuestion": "質問を送信",
+    "viewTranscript": "トランスクリプトを表示",
+    "viewParticipants": "参加者を表示",
+    "downloadTranscript": "トランスクリプトをダウンロード",
+    "close": "閉じる",
+    "addYourNotes": "メモを追加"
   },
   "status": {
     "generating": "ノート生成中...",
@@ -235,6 +240,8 @@
     "printWindowBlocked": "印刷ウィンドウを開けませんでした。ポップアップブロッカーを無効にしてください。",
     "emailCopied": "メール内容をコピーしました。メールクライアントに貼り付けてください。",
     "emailCopiedPlain": "メール内容をコピーしました（プレーンテキスト）。メールクライアントに貼り付けてください。",
+    "generationCancelled": "生成がキャンセルされました",
+    "pleasewait": "数秒待ってから再度お試しください",
     "noActionsToExport": "エクスポートするアクション項目がありません。",
     "csvDownloaded": "CSVを正常にダウンロードしました。",
     "userNotesSaved": "ユーザーノートを正常に保存しました",
@@ -274,7 +281,11 @@
       "processing": "処理中",
       "none": "なし"
     },
-    "note": "注記：トランスクリプトは通常、会議終了後5〜10分で利用可能になります。テナントセキュリティ設定により、主催した会議のトランスクリプトにのみアクセスできます。他の会議の場合は、手動貼り付けオプションを使用してください。"
+    "note": "注記：トランスクリプトは通常、会議終了後5〜10分で利用可能になります。テナントセキュリティ設定により、主催した会議のトランスクリプトにのみアクセスできます。他の会議の場合は、手動貼り付けオプションを使用してください。",
+    "processMeeting": "この会議を処理",
+    "collapse": "折りたたむ",
+    "changeMeeting": "会議を変更",
+    "change": "変更"
   },
   "participants": {
     "title": "会議参加者",

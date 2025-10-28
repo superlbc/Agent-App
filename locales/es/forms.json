@@ -27,7 +27,8 @@
     "modalDescription": "Añada sus propias notas o contexto adicional que se enviará al agente de IA. Puede escribir, pegar o cargar un archivo.",
     "placeholder": "Escriba o pegue sus notas aquí...",
     "uploadFile": "Cargar archivo",
-    "infoNote": "Estas notas se etiquetarán como \"Notas Proporcionadas por el Usuario\" cuando se envíen al agente de IA, ayudando a distinguirlas de la transcripción de la reunión."
+    "infoNote": "Estas notas se etiquetarán como \"Notas Proporcionadas por el Usuario\" cuando se envíen al agente de IA, ayudando a distinguirlas de la transcripción de la reunión.",
+    "tooltipHelper": "Añada notas adicionales que haya tomado, y estas se utilizarán para generar las actas"
   },
   "tabs": {
     "selectMeeting": "Seleccionar Reunión",
@@ -129,6 +130,16 @@
     "useIcons": "Añade iconos a los encabezados de sección para mayor claridad visual.",
     "boldKeywords": "Enfatiza términos y entidades importantes en el resumen.",
     "meetingCoach": "Proporciona retroalimentación sobre la facilitación y efectividad de la reunión.",
-    "coachingStyle": "'Amable' proporciona retroalimentación de apoyo. 'Directo' proporciona consejos más francos y accionables."
+    "coachingStyle": "'Amable' proporciona retroalimentación de apoyo. 'Directo' proporciona consejos más francos y accionables.",
+    "audienceExecutive": "Resumen de alto nivel con menos viñetas, enfatizando decisiones clave y riesgos para el liderazgo.",
+    "audienceCrossFunctional": "Vista equilibrada con detalle moderado, adecuada para colaboración y coordinación entre equipos.",
+    "audienceDepartmentSpecific": "Notas granulares y detalladas enfocadas en las acciones y discusiones específicas de tu equipo.",
+    "toneProfessional": "Tono empresarial estándar con lenguaje claro y profesional para todas las audiencias.",
+    "toneConcise": "Salida breve y concisa que se enfoca solo en la información esencial.",
+    "toneClientReady": "Lenguaje pulido para el cliente sin jerga interna ni expresiones informales.",
+    "viewFull": "Actas de reunión completas incluyendo título, propósito, puntos de discusión, decisiones, riesgos y elementos de acción.",
+    "viewActionsOnly": "Muestra solo la tabla de Próximos Pasos con elementos de acción, responsables, fechas límite y estado.",
+    "coachingGentle": "Coaching de apoyo con encuadre positivo y sugerencias constructivas (ej. 'Considera añadir', 'Intenta').",
+    "coachingDirect": "Coaching directo y accionable con lenguaje imperativo y objetivos concretos (ej. 'Asigna responsables', 'Define fechas límite')."
   }
 }

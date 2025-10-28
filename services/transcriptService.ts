@@ -13,11 +13,20 @@
 
 import { GraphService } from './graphService';
 
+export interface TranscriptIteration {
+  id: string;
+  content: string;
+  createdDateTime: string;
+}
+
 export interface TranscriptSearchResult {
   found: boolean;
-  content?: string;
+  content?: string; // Primary/current transcript content
   source?: 'graph-api';
   error?: string;
+  iterations?: TranscriptIteration[]; // All transcript iterations (for recurring meetings)
+  onlineMeetingId?: string; // For lazy loading additional transcripts
+  joinWebUrl?: string; // For lazy loading additional transcripts
 }
 
 export class TranscriptService {
@@ -59,7 +68,7 @@ export class TranscriptService {
 
     try {
       console.log(`[Transcript] Calling Graph API...`);
-      const graphResult = await this.searchViaGraphAPI(onlineMeetingId, joinWebUrl);
+      const graphResult = await this.searchViaGraphAPI(onlineMeetingId, joinWebUrl, meetingDate);
 
       if (graphResult.found) {
         console.log(`[Transcript] ✅ SUCCESS! Found transcript via Graph API`);
@@ -83,11 +92,16 @@ export class TranscriptService {
   /**
    * Search for transcript using official Graph API
    * This is the preferred method as it directly accesses transcript data
+   *
+   * IMPORTANT: For recurring meetings, this filters transcripts to match the specific meeting date.
+   * Recurring meetings share the same onlineMeetingId, so we need to filter by creation time
+   * to ensure we get the transcript for the correct instance.
    */
-  private async searchViaGraphAPI(onlineMeetingId: string, joinWebUrl?: string): Promise<TranscriptSearchResult> {
+  private async searchViaGraphAPI(onlineMeetingId: string, joinWebUrl?: string, meetingDate?: Date): Promise<TranscriptSearchResult> {
     console.log(`[Transcript] searchViaGraphAPI called`);
     console.log(`[Transcript]   - Meeting ID: ${onlineMeetingId}`);
     console.log(`[Transcript]   - Join URL: ${joinWebUrl ? 'provided' : 'not provided'}`);
+    console.log(`[Transcript]   - Meeting Date: ${meetingDate?.toISOString() || 'not provided'}`);
 
     try {
       // List all transcripts for this meeting
@@ -99,21 +113,90 @@ export class TranscriptService {
         return { found: false };
       }
 
-      console.log(`[Transcript] ✅ Found ${transcripts.length} transcript(s)`);
+      console.log(`[Transcript] ✅ Found ${transcripts.length} transcript(s) for this meeting series`);
 
-      // Use the most recent transcript
-      const latestTranscript = transcripts.sort((a, b) =>
-        new Date(b.createdDateTime).getTime() - new Date(a.createdDateTime).getTime()
-      )[0];
+      // Log all transcripts with their creation dates
+      transcripts.forEach((t, i) => {
+        console.log(`[Transcript]   Transcript ${i + 1}: Created ${t.createdDateTime}`);
+      });
 
-      console.log(`[Transcript] Step 2: Using latest transcript ID: ${latestTranscript.id}`);
-      console.log(`[Transcript]   - Created: ${latestTranscript.createdDateTime}`);
+      // For recurring meetings, return metadata only (no content download)
+      // Content will be fetched lazily when user clicks on a specific tab
+      if (transcripts.length > 1) {
+        console.log(`[Transcript] 🔄 Recurring meeting detected - returning metadata for ${transcripts.length} iterations (lazy loading)`);
 
-      // Download transcript content
+        // Sort transcripts by creation date (newest first)
+        const sortedTranscripts = transcripts.sort((a, b) =>
+          new Date(b.createdDateTime).getTime() - new Date(a.createdDateTime).getTime()
+        );
+
+        // Return metadata only - no content download yet
+        const iterationsMetadata: TranscriptIteration[] = sortedTranscripts.map(t => ({
+          id: t.id,
+          content: '', // Empty - will be fetched on demand
+          createdDateTime: t.createdDateTime
+        }));
+
+        // Find the iteration closest to the selected meeting date (if provided)
+        let primaryIterationIndex = 0; // Default to most recent
+
+        if (meetingDate) {
+          const meetingTime = new Date(meetingDate).getTime();
+          let closestDiff = Infinity;
+
+          iterationsMetadata.forEach((iteration, index) => {
+            const iterationTime = new Date(iteration.createdDateTime).getTime();
+            const diff = Math.abs(iterationTime - meetingTime);
+
+            if (diff < closestDiff) {
+              closestDiff = diff;
+              primaryIterationIndex = index;
+            }
+          });
+
+          console.log(`[Transcript] 📍 Selected meeting date: ${meetingDate.toISOString()}`);
+          console.log(`[Transcript] 📍 Closest transcript: ${iterationsMetadata[primaryIterationIndex].createdDateTime} (index ${primaryIterationIndex})`);
+        }
+
+        // Download ONLY the primary transcript content (the one matching selected date)
+        console.log(`[Transcript] 📥 Downloading primary transcript: ${sortedTranscripts[primaryIterationIndex].createdDateTime}`);
+
+        try {
+          const primaryContent = await this.graphService.getTranscriptContent(
+            onlineMeetingId,
+            sortedTranscripts[primaryIterationIndex].id,
+            joinWebUrl
+          );
+
+          const parsedPrimaryContent = this.parseVTT(primaryContent);
+          iterationsMetadata[primaryIterationIndex].content = parsedPrimaryContent;
+
+          console.log(`[Transcript] ✅ Downloaded ${parsedPrimaryContent.length} characters for primary transcript`);
+        } catch (error) {
+          console.error(`[Transcript] ❌ Failed to download primary transcript:`, error);
+          return { found: false };
+        }
+
+        // Return primary transcript content plus metadata for all iterations
+        return {
+          found: true,
+          content: iterationsMetadata[primaryIterationIndex].content,
+          iterations: iterationsMetadata,
+          onlineMeetingId: onlineMeetingId, // Pass meeting ID for lazy loading
+          joinWebUrl: joinWebUrl // Pass join URL for lazy loading
+        };
+      }
+
+      // Single meeting - download just one transcript
+      const singleTranscript = transcripts[0];
+      console.log(`[Transcript] Step 2: Using transcript ID: ${singleTranscript.id}`);
+      console.log(`[Transcript]   - Created: ${singleTranscript.createdDateTime}`);
+
+      // Download single transcript content
       console.log(`[Transcript] Step 3: Downloading transcript content...`);
       const content = await this.graphService.getTranscriptContent(
         onlineMeetingId,
-        latestTranscript.id,
+        singleTranscript.id,
         joinWebUrl
       );
 
@@ -138,7 +221,6 @@ export class TranscriptService {
       return { found: false };
     }
   }
-
 
   /**
    * Parse WebVTT format transcript
@@ -243,6 +325,41 @@ export class TranscriptService {
     text = text.trim();
 
     return text;
+  }
+
+  /**
+   * Fetch a single transcript by ID (for lazy loading)
+   * Used when user clicks on a tab to load that specific transcript
+   */
+  async fetchTranscriptById(
+    onlineMeetingId: string,
+    transcriptId: string,
+    joinWebUrl?: string
+  ): Promise<{ success: boolean; content?: string; error?: string }> {
+    console.log(`[Transcript] 🔄 Lazy loading transcript: ${transcriptId}`);
+
+    try {
+      const content = await this.graphService.getTranscriptContent(
+        onlineMeetingId,
+        transcriptId,
+        joinWebUrl
+      );
+
+      const parsedContent = this.parseVTT(content);
+
+      console.log(`[Transcript] ✅ Lazy loaded ${parsedContent.length} characters`);
+
+      return {
+        success: true,
+        content: parsedContent
+      };
+    } catch (error) {
+      console.error(`[Transcript] ❌ Failed to lazy load transcript:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
   }
 
   /**

@@ -170,10 +170,10 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className={`p-4 mb-3 rounded-lg transition-colors ${
+      className={`mb-3 rounded-lg transition-all ${
         isCurrentMatch
-          ? 'bg-amber-50 dark:bg-amber-900/20 ring-2 ring-amber-400 dark:ring-amber-600'
-          : 'bg-slate-50 dark:bg-slate-800/50'
+          ? 'bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-600 p-[14px]'
+          : 'bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent p-4'
       }`}
     >
       {/* Speaker Header */}
@@ -227,7 +227,7 @@ export const ConversationCard: React.FC<ConversationCardProps> = ({
       </div>
 
       {/* Message Content */}
-      <div className="ml-13 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+      <div className="ml-13 text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
         {searchQuery ? highlightText(message, searchQuery, isCurrentMatch) : message}
       </div>
     </div>

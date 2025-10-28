@@ -29,6 +29,7 @@ interface ParticipantsPanelProps {
     onSearchAndMatch: (participantId: string, searchQuery: string) => Promise<GraphData[]>;
     onConfirmMatch: (participantId: string, graphData: GraphData) => void;
     onMarkAsExternal: (participantId: string, email: string) => void;
+    initialCollapsed?: boolean;
 }
 
 export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
@@ -41,11 +42,12 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
     onRemoveParticipant,
     onSearchAndMatch,
     onConfirmMatch,
-    onMarkAsExternal
+    onMarkAsExternal,
+    initialCollapsed = true
 }) => {
     const { t } = useTranslation(['common']);
     const authContext = useContext(AuthContext);
-    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [searchModalParticipantId, setSearchModalParticipantId] = useState<string | null>(null);
     const [searchModalInitialQuery, setSearchModalInitialQuery] = useState('');
@@ -272,7 +274,7 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
                                         })}
                                     </p>
                                 )}
-                                <div className="space-y-2 max-h-[168px] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg p-2">
+                                <div className="space-y-2 max-h-[60vh] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg p-2">
                                     {sortedParticipants.map((participant, idx) => {
                                         const isLoggedUser = !!(loggedUserEmail && participant.email?.toLowerCase() === loggedUserEmail);
                                         return (

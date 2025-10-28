@@ -9,12 +9,14 @@ interface LoadingModalProps {
   isOpen: boolean;
   title?: string;
   messages?: { progress: number; text: string }[];
+  onCancel?: () => void;
 }
 
 export const LoadingModal: React.FC<LoadingModalProps> = ({
   isOpen,
   title,
-  messages
+  messages,
+  onCancel
 }) => {
   const { t } = useTranslation(['common']);
 
@@ -140,6 +142,16 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
                 </div>
                 <p className="mt-6 text-lg font-semibold text-slate-700 dark:text-slate-200">{displayTitle}</p>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 min-h-[40px]">{currentMessage}</p>
+
+                {onCancel && (
+                  <button
+                    onClick={onCancel}
+                    className="mt-6 px-6 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 border border-slate-300 dark:border-slate-600"
+                    aria-label={t('common:buttons.cancel')}
+                  >
+                    {t('common:buttons.cancel')}
+                  </button>
+                )}
             </div>
         </Card>
     </div>

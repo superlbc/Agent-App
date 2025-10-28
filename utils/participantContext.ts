@@ -4,80 +4,91 @@
 import { Participant, Department } from '../types';
 
 /**
- * Infer department code from job title using keyword matching heuristics.
+ * Infer department name from job title using keyword matching heuristics.
  *
- * This function maps common job titles to Momentum department codes:
- * - BL (Business Leadership): Account, Client Service, Business, Commercial
- * - STR (Strategy): Strategy, Insights, Research, Planning
- * - PM (Project Management): Project Manager, Producer, Coordinator, PMO
- * - CR (Creative): Creative, Art Director, Copywriter, Designer
- * - XD (Experience Design): UX, Service Design, Interaction Design
- * - XP (Experience Production): Production, Fabrication, Build
- * - IPCT (Technology): Developer, Engineer, Software, Technical
- * - CON (Content): Video, Photo, Film, Content Production
- * - STU (Studio): Studio, Retoucher, Artworker, Print
- * - General (fallback): External participants or unclear roles
+ * Returns FULL department names (not acronyms) for sending to the AI agent.
+ *
+ * This function maps common job titles to Momentum departments:
+ * - Business Leadership: Account, Client Service, Business, Commercial
+ * - Strategy: Strategy, Insights, Research, Planning
+ * - Project Management: Project Manager, Producer, Coordinator, PMO
+ * - Creative: Creative, Art Director, Copywriter, Designer
+ * - Experience Design: UX, Service Design, Interaction Design
+ * - Experiential Production: Production, Fabrication, Build
+ * - Global Technology: Software Engineer, Developer, Full-Stack, Backend, Frontend
+ * - Creative Technology: Prototypes, Innovation, Creative Tech, Interactive
+ * - Content: Video, Photo, Film, Content Production
+ * - Studio: Studio, Retoucher, Artworker, Print
+ * - General: External participants or unclear roles
  *
  * @param jobTitle - The participant's job title
- * @returns Department code (BL, STR, PM, CR, XD, XP, IPCT, CON, STU, General)
+ * @returns Full department name (e.g., "Global Technology", "Experience Design")
  */
-export function inferDepartmentFromRole(jobTitle?: string): Department {
+export function inferDepartmentFromRole(jobTitle?: string): string {
   if (!jobTitle) return 'General';
 
   const title = jobTitle.toLowerCase();
 
-  // BL: Business Leadership
+  // Business Leadership
   // Keywords: account, client service, business, commercial, managing director
   if (/account|client service|client director|business|commercial|managing director/.test(title)) {
-    return 'BL';
+    return 'Business Leadership';
   }
 
-  // STR: Strategy
+  // Strategy
   // Keywords: strategy, strategic, insight, research, planning, strategist
   if (/strateg|insight|research|planning/.test(title)) {
-    return 'STR';
+    return 'Strategy';
   }
 
-  // PM: Project Management
+  // Project Management
   // Keywords: project manager, producer, coordinator, program manager, delivery, pmo, traffic
   if (/project manager|producer|coordinator|program manager|delivery|pmo|traffic/.test(title)) {
-    return 'PM';
+    return 'Project Management';
   }
 
-  // CR: Creative
+  // Creative
   // Keywords: creative, art director, copywriter, design director, writer, designer
   if (/creative|art director|copywriter|design director|writer|designer/.test(title)) {
-    return 'CR';
+    return 'Creative';
   }
 
-  // XD: Experience Design
+  // Experience Design
   // Keywords: experience design, service design, ux, user experience, interaction design
   if (/experience design|service design|ux|user experience|interaction design/.test(title)) {
-    return 'XD';
+    return 'Experience Design';
   }
 
-  // XP: Experience Production
+  // Experiential Production
   // Keywords: experience production, production manager, technical production, fabrication, build
-  if (/experience production|technical production|fabrication|build/.test(title)) {
-    return 'XP';
+  if (/experience production|experiential production|technical production|fabrication|build/.test(title)) {
+    return 'Experiential Production';
   }
 
-  // IPCT: Integrated/Creative Technology
-  // Keywords: developer, engineer, technology, technical, software, front-end, back-end, full-stack, innovation, prototype
-  if (/developer|engineer|technology|technical|software|front-end|back-end|full-stack|innovation|prototype/.test(title)) {
-    return 'IPCT';
+  // Global Technology (standard development roles)
+  // Keywords: software engineer, developer, tech lead, backend, frontend, full-stack, platform engineer, systems engineer
+  // This should match BEFORE Creative Technology to capture general development roles
+  if (/software engineer|developer|tech lead|backend|frontend|front-end|back-end|full-stack|platform engineer|systems engineer|software development|web developer|application developer/.test(title)) {
+    return 'Global Technology';
   }
 
-  // CON: Content
+  // Creative Technology (creative tech, prototypes, innovation)
+  // Keywords: creative technology, innovation, prototype, interactive, installation, creative developer, technical artist
+  // This matches AFTER Global Technology to capture only creative/innovation-specific roles
+  if (/creative technolog|innovation|prototype|interactive|installation|creative developer|technical artist|emerging tech/.test(title)) {
+    return 'Creative Technology';
+  }
+
+  // Content
   // Keywords: content, video, photo, film, editor, motion, cinematographer, photographer, post-production
   if (/content|video|photo|film|editor|motion|cinematographer|photographer|post-production/.test(title)) {
-    return 'CON';
+    return 'Content';
   }
 
-  // STU: Studio
+  // Studio
   // Keywords: studio, retoucher, artworker, graphic design, print, mechanical, production artist
   if (/studio|retoucher|artworker|graphic design|print|mechanical|production artist/.test(title)) {
-    return 'STU';
+    return 'Studio';
   }
 
   // Fallback to General if no keywords match
@@ -145,16 +156,21 @@ export function buildParticipantContext(participants: Participant[]): string {
     context += 'INTERNAL PARTICIPANTS (Momentum Worldwide):\n';
 
     internal.forEach(p => {
-      // Determine department: use explicit department if available, otherwise infer from job title
-      const dept = p.department || inferDepartmentFromRole(p.jobTitle);
       const name = p.displayName || p.extractedText || 'Unknown';
       const email = p.email || '';
       const title = p.jobTitle || '';
+      const dept = p.department || ''; // Graph API department if available
 
-      // Format: [DEPT] Name (email) - Job Title
-      context += `[${dept}] ${name}`;
+      // Log participant for debugging
+      console.log(`👤 ${name} | ${title || 'No title'} | ${dept ? 'Dept: ' + dept : 'No dept from Graph'}`);
+
+      // Format: Name (email) - Job Title
+      // NO department prefix - let the AI agent infer department from job title
+      context += `${name}`;
       if (email) context += ` (${email})`;
       if (title) context += ` - ${title}`;
+      // Include Graph API department field if available (for additional context)
+      if (dept) context += ` [Department: ${dept}]`;
       context += '\n';
 
       // Add attendance information if available (from CSV import)

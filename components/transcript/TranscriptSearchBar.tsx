@@ -6,7 +6,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../ui/Icon';
-import { Button } from '../ui/Button';
 
 interface TranscriptSearchBarProps {
   query: string;
@@ -65,40 +64,34 @@ export const TranscriptSearchBar: React.FC<TranscriptSearchBarProps> = ({
         {/* Navigation Buttons */}
         {matchCount > 0 && (
           <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => onNavigate('prev')}
               disabled={matchCount === 0}
-              className="p-1 h-7 w-7"
+              className="p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('transcript.previousMatch', 'Previous match')}
             >
               <Icon name="chevron-up" className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <button
               onClick={() => onNavigate('next')}
               disabled={matchCount === 0}
-              className="p-1 h-7 w-7"
+              className="p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label={t('transcript.nextMatch', 'Next match')}
             >
               <Icon name="chevron-down" className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
         )}
 
         {/* Clear Button */}
         {query && (
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={onClear}
-            className="p-1 h-7 w-7"
+            className="p-1.5 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             aria-label={t('transcript.clearSearch', 'Clear search')}
           >
             <Icon name="x" className="w-4 h-4" />
-          </Button>
+          </button>
         )}
       </div>
 

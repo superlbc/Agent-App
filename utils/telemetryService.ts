@@ -12,6 +12,7 @@ export type EventType =
   // Core functionality
   | 'notesGenerated'
   | 'notesRegenerated'
+  | 'generationCancelled'
   // Exports
   | 'exportedToCSV'
   | 'exportedToPDF'
@@ -40,7 +41,12 @@ export type EventType =
   | 'tourDismissed'
   // Coach
   | 'meetingCoachViewed'
-  | 'coachInsightsExpanded';
+  | 'coachInsightsExpanded'
+  // User data
+  | 'userDataReset'
+  // Meeting selection
+  | 'meetingSelected'
+  | 'switchedToManualMode';
 
 // Login event payload structure
 export interface LoginEventPayload {

@@ -25,6 +25,8 @@ import { MeetingWithTranscript } from '../services/meetingService';
 import { UserNotesModal } from './UserNotesModal';
 import { GraphService } from '../services/graphService';
 import { TranscriptViewer } from './transcript/TranscriptViewer';
+import { TranscriptViewerModal } from './transcript/TranscriptViewerModal';
+import { ParticipantsModal } from './participants/ParticipantsModal';
 import {
   DEPARTMENT_OPTIONS,
   CONTEXT_TAG_OPTIONS,
@@ -66,6 +68,7 @@ interface InputPanelProps {
   onConfirmMatch: (participantId: string, graphData: GraphData) => void;
   onMarkAsExternal: (participantId: string, email: string) => void;
   onUpdateParticipant: (participantId: string, updates: Partial<Participant>) => void;
+  generateTrigger?: number; // Trigger to collapse Advanced Settings when Generate Notes is clicked
 }
 
 type InputMode = 'selectMeeting' | 'pasteTranscript';
@@ -90,6 +93,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   onConfirmMatch,
   onMarkAsExternal,
   onUpdateParticipant,
+  generateTrigger,
 }) => {
   const { t } = useTranslation(['forms', 'common', 'constants']);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -97,7 +101,24 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   const [showTranscriptDialog, setShowTranscriptDialog] = useState(false);
   const [pendingMeetingData, setPendingMeetingData] = useState<MeetingWithTranscript | null>(null);
   const [showUserNotesModal, setShowUserNotesModal] = useState(false);
+  const [showTranscriptModal, setShowTranscriptModal] = useState(false);
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+  const [transcriptIterations, setTranscriptIterations] = useState<Array<{id: string, content: string, createdDateTime: string}> | undefined>(undefined);
+  const [transcriptMeetingId, setTranscriptMeetingId] = useState<string | undefined>(undefined);
+  const [transcriptJoinUrl, setTranscriptJoinUrl] = useState<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-collapse Advanced Settings when switching tabs
+  useEffect(() => {
+    setIsAdvancedOpen(false);
+  }, [inputMode]);
+
+  // Auto-collapse Advanced Settings when Generate Notes is clicked
+  useEffect(() => {
+    if (generateTrigger !== undefined && generateTrigger > 0) {
+      setIsAdvancedOpen(false);
+    }
+  }, [generateTrigger]);
 
   // Expose file upload trigger to parent via callback
   useEffect(() => {
@@ -227,6 +248,18 @@ export const InputPanel: React.FC<InputPanelProps> = ({
       importedMeetingDate: meetingData.start,   // Store meeting date for display
       userNotes: undefined  // Clear user notes when switching meetings
     }));
+
+    // Store transcript iterations for multi-transcript viewer (recurring meetings)
+    if (meetingData.transcript?.iterations && meetingData.transcript.iterations.length > 1) {
+      console.log(`[InputPanel] 📚 Storing ${meetingData.transcript.iterations.length} transcript iterations for multi-viewer`);
+      setTranscriptIterations(meetingData.transcript.iterations);
+      setTranscriptMeetingId(meetingData.transcript.onlineMeetingId);
+      setTranscriptJoinUrl(meetingData.transcript.joinWebUrl);
+    } else {
+      setTranscriptIterations(undefined);
+      setTranscriptMeetingId(undefined);
+      setTranscriptJoinUrl(undefined);
+    }
 
     // Try to fetch actual attendance report (who actually attended vs who was invited)
     // This uses OnlineMeetings.ReadWrite permission (read-only usage)
@@ -457,9 +490,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
       return;
     }
 
-    // Switch to paste transcript tab
-    setInputMode('pasteTranscript');
-
     // Show success toast with attendance info
     const successMessage = attendanceSource === 'attendance_report'
       ? `Meeting loaded! Using actual attendees (${actualAttendees.length} attended vs ${meetingData.attendees.length} invited)`
@@ -479,8 +509,17 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   const handleContinueWithoutTranscript = () => {
     // User confirmed to continue without transcript
     setShowTranscriptDialog(false);
+
+    // Switch to Paste Transcript mode
     setInputMode('pasteTranscript');
-    addToast('Meeting data loaded. You can paste the transcript manually.', 'success');
+
+    // Set transcript source to manual so it's editable
+    setFormState(prev => ({
+      ...prev,
+      transcriptSource: 'manual'
+    }));
+
+    addToast('Meeting data loaded. Please paste the transcript manually.', 'success');
 
     // Telemetry: Track meeting selection without transcript
     if (pendingMeetingData) {
@@ -488,6 +527,9 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         hasTranscript: false,
         hasAgenda: !!pendingMeetingData.agenda,
         attendeeCount: pendingMeetingData.attendees?.length || 0
+      });
+      telemetryService.trackEvent('switchedToManualMode', {
+        reason: 'no_transcript_available'
       });
     }
 
@@ -528,6 +570,40 @@ export const InputPanel: React.FC<InputPanelProps> = ({
       telemetryService.trackEvent('switchedToManualMode', {
         transcriptLength: formState.transcript.length
       });
+    }
+  };
+
+  const handleSwitchToPasteTranscript = () => {
+    // Switch to Paste Transcript mode
+    setInputMode('pasteTranscript');
+
+    // If there's an imported transcript, clear it and switch to manual mode
+    // This ensures the user always gets a clean, editable textarea when clicking "Paste Transcript"
+    if (formState.transcriptSource === 'imported') {
+      setFormState(prev => ({
+        ...prev,
+        transcript: '', // Clear the imported transcript
+        transcriptSource: 'manual', // Enable editing
+        importedMeetingName: undefined, // Clear meeting metadata
+        importedMeetingDate: undefined
+      }));
+
+      // Clear transcript iterations (for recurring meetings)
+      setTranscriptIterations(undefined);
+      setTranscriptMeetingId(undefined);
+      setTranscriptJoinUrl(undefined);
+
+      // Clear participants when manually switching to Paste Transcript
+      // NOTE: This does NOT happen when coming from "no transcript" dialog (handleContinueWithoutTranscript)
+      participants.forEach(participant => {
+        onRemoveParticipant(participant.id);
+      });
+    } else if (formState.transcriptSource === 'manual' && formState.transcript === '') {
+      // Already in manual mode with empty transcript - ensure it's manual
+      setFormState(prev => ({
+        ...prev,
+        transcriptSource: 'manual'
+      }));
     }
   };
 
@@ -617,7 +693,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             {t('forms:tabs.selectMeeting')}
           </button>
           <button
-            onClick={() => setInputMode('pasteTranscript')}
+            onClick={handleSwitchToPasteTranscript}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
               inputMode === 'pasteTranscript'
                 ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
@@ -631,10 +707,36 @@ export const InputPanel: React.FC<InputPanelProps> = ({
 
         {/* Meeting Selection Panel */}
         {inputMode === 'selectMeeting' && (
-          <MeetingSelectionPanel
-            onMeetingSelected={handleMeetingSelected}
-            onError={(error) => addToast(error, 'error')}
-          />
+          <>
+            <MeetingSelectionPanel
+              onMeetingSelected={handleMeetingSelected}
+              onError={(error) => addToast(error, 'error')}
+              selectedMeetingTranscript={formState.transcript}
+              selectedMeetingParticipants={participants}
+              onViewTranscript={() => setShowTranscriptModal(true)}
+              onViewParticipants={() => setShowParticipantsModal(true)}
+            />
+
+            {/* User Notes Button - Only show when a meeting is selected */}
+            {formState.transcript && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowUserNotesModal(true)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                  title={t('forms:userNotes.tooltipHelper', 'Add additional notes that you took, and those will be used for generating the minutes')}
+                >
+                  <Icon name="file-text" className="h-3.5 w-3.5" />
+                  <span>{t('common:actions.addYourNotes', 'Add Your Notes')}</span>
+                  {formState.userNotes && (
+                    <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 rounded">
+                      {formState.userNotes.trim().split(/\s+/).filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Tab Content - Title, Agenda, Transcript, Participants */}
@@ -722,13 +824,14 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             <button
               type="button"
               onClick={() => setShowUserNotesModal(true)}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/30 border border-teal-200 dark:border-teal-800 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              title={t('forms:userNotes.tooltipHelper', 'Add additional notes that you took, and those will be used for generating the minutes')}
             >
-              <Icon name="file-text" className="h-4 w-4" />
-              <span>{t('forms:userNotes.addButton', 'Add User Notes')}</span>
+              <Icon name="file-text" className="h-3.5 w-3.5" />
+              <span>{t('common:actions.addYourNotes', 'Add Your Notes')}</span>
               {formState.userNotes && (
-                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-semibold text-teal-700 dark:text-teal-300 bg-teal-200 dark:bg-teal-800 rounded">
-                  {formState.userNotes.trim().split(/\s+/).filter(Boolean).length} words
+                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 rounded">
+                  {formState.userNotes.trim().split(/\s+/).filter(Boolean).length}
                 </span>
               )}
             </button>
@@ -763,17 +866,43 @@ export const InputPanel: React.FC<InputPanelProps> = ({
               </Tooltip>
             </label>
             <div className="grid grid-cols-2 gap-2">
-              {MEETING_PRESET_OPTIONS.map(({ value, labelKey }) => (
-                  <Button
+              {MEETING_PRESET_OPTIONS.map(({ value, labelKey }) => {
+                // Get localized tooltip from locale files
+                // Convert 'internal-sync' to 'internalSync', 'client-update' to 'clientUpdate', etc.
+                const camelCaseValue = value.replace(/-./g, x => x[1].toUpperCase());
+                const tooltipKey = `constants:presets.${camelCaseValue}.tooltip`;
+                const description = t(tooltipKey, { defaultValue: '' });
+
+                // Format description with line breaks for bullet points
+                const parts = description.split(' • ');
+                const formattedDescription = description ? (
+                  <div className="text-left text-xs leading-relaxed">
+                    <div className="mb-1">{parts[0]}</div>
+                    {parts.slice(1).map((part, i) => (
+                      <div key={i} className="ml-0">• {part}</div>
+                    ))}
+                  </div>
+                ) : null;
+
+                return (
+                  <Tooltip
                       key={value}
-                      id={`preset-button-${value}`}
-                      variant={controls.meetingPreset === value ? 'primary' : 'outline'}
-                      size="sm"
-                      onClick={() => handlePresetChange(value)}
+                      content={formattedDescription}
+                      delay={1000}
+                      className="w-full"
                   >
-                      {t(labelKey)}
-                  </Button>
-              ))}
+                      <Button
+                          id={`preset-button-${value}`}
+                          variant={controls.meetingPreset === value ? 'primary' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePresetChange(value)}
+                          className="w-full"
+                      >
+                          {t(labelKey)}
+                      </Button>
+                  </Tooltip>
+                );
+              })}
             </div>
           </div>
           
@@ -842,16 +971,29 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                       </Tooltip>
                     </label>
                      <div className="grid grid-cols-3 gap-2">
-                          {AUDIENCE_BUTTON_OPTIONS.map(({ value, labelKey }) => (
-                              <Button
+                          {AUDIENCE_BUTTON_OPTIONS.map(({ value, labelKey }) => {
+                            // Convert value to camelCase for tooltip key (e.g., 'cross-functional' -> 'audienceCrossFunctional')
+                            const tooltipKey = `audience${value.split('-').map((word, i) =>
+                              i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) :
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join('')}`;
+                            return (
+                              <Tooltip
                                   key={value}
-                                  variant={controls.audience === value ? 'primary' : 'outline'}
-                                  size="sm"
-                                  onClick={() => handleControlChange('audience', value)}
+                                  content={t(`forms:tooltips.${tooltipKey}`)}
+                                  delay={1000}
                               >
-                                  {t(labelKey)}
-                              </Button>
-                          ))}
+                                  <Button
+                                      variant={controls.audience === value ? 'primary' : 'outline'}
+                                      size="sm"
+                                      onClick={() => handleControlChange('audience', value)}
+                                      className="w-full"
+                                  >
+                                      {t(labelKey)}
+                                  </Button>
+                              </Tooltip>
+                            );
+                          })}
                       </div>
                   </div>
                    <div id="tone-section">
@@ -862,11 +1004,29 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                         </Tooltip>
                       </label>
                       <div className="grid grid-cols-3 gap-2">
-                          {TONE_OPTIONS.map(({ value, labelKey }) => (
-                              <Button key={value} variant={controls.tone === value ? 'primary' : 'outline'} size="sm" onClick={() => handleControlChange('tone', value)}>
-                                  {t(labelKey)}
-                              </Button>
-                          ))}
+                          {TONE_OPTIONS.map(({ value, labelKey }) => {
+                            // Convert value to camelCase for tooltip key (e.g., 'client-ready' -> 'toneClientReady')
+                            const tooltipKey = `tone${value.split('-').map((word, i) =>
+                              i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) :
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join('')}`;
+                            return (
+                              <Tooltip
+                                  key={value}
+                                  content={t(`forms:tooltips.${tooltipKey}`)}
+                                  delay={1000}
+                              >
+                                  <Button
+                                      variant={controls.tone === value ? 'primary' : 'outline'}
+                                      size="sm"
+                                      onClick={() => handleControlChange('tone', value)}
+                                      className="w-full"
+                                  >
+                                      {t(labelKey)}
+                                  </Button>
+                              </Tooltip>
+                            );
+                          })}
                       </div>
                   </div>
                    <div id="view-mode-section">
@@ -877,11 +1037,29 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                         </Tooltip>
                       </label>
                       <div className="grid grid-cols-2 gap-2">
-                          {VIEW_MODE_OPTIONS.map(({ value, labelKey }) => (
-                              <Button key={value} variant={controls.view === value ? 'primary' : 'outline'} size="sm" onClick={() => handleControlChange('view', value)}>
-                                  {t(labelKey)}
-                              </Button>
-                          ))}
+                          {VIEW_MODE_OPTIONS.map(({ value, labelKey }) => {
+                            // Convert value to camelCase for tooltip key (e.g., 'actions-only' -> 'viewActionsOnly')
+                            const tooltipKey = `view${value.split('-').map((word, i) =>
+                              i === 0 ? word.charAt(0).toUpperCase() + word.slice(1) :
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join('')}`;
+                            return (
+                              <Tooltip
+                                  key={value}
+                                  content={t(`forms:tooltips.${tooltipKey}`)}
+                                  delay={1000}
+                              >
+                                  <Button
+                                      variant={controls.view === value ? 'primary' : 'outline'}
+                                      size="sm"
+                                      onClick={() => handleControlChange('view', value)}
+                                      className="w-full"
+                                  >
+                                      {t(labelKey)}
+                                  </Button>
+                              </Tooltip>
+                            );
+                          })}
                       </div>
                   </div>
                   
@@ -932,11 +1110,26 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                               </Tooltip>
                            </label>
                           <div className="grid grid-cols-2 gap-2">
-                              {COACHING_STYLE_OPTIONS.map(({ value, labelKey }) => (
-                                  <Button key={value} variant={controls.coaching_style === value ? 'primary' : 'outline'} size="sm" onClick={() => handleControlChange('coaching_style', value)}>
-                                      {t(labelKey)}
-                                  </Button>
-                              ))}
+                              {COACHING_STYLE_OPTIONS.map(({ value, labelKey }) => {
+                                // Convert value to camelCase for tooltip key (e.g., 'gentle' -> 'coachingGentle')
+                                const tooltipKey = `coaching${value.charAt(0).toUpperCase() + value.slice(1)}`;
+                                return (
+                                  <Tooltip
+                                      key={value}
+                                      content={t(`forms:tooltips.${tooltipKey}`)}
+                                      delay={1000}
+                                  >
+                                      <Button
+                                          variant={controls.coaching_style === value ? 'primary' : 'outline'}
+                                          size="sm"
+                                          onClick={() => handleControlChange('coaching_style', value)}
+                                          className="w-full"
+                                      >
+                                          {t(labelKey)}
+                                      </Button>
+                                  </Tooltip>
+                                );
+                              })}
                           </div>
                       </div>
                   )}
@@ -948,14 +1141,19 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         {/* Bottom Actions - Always visible */}
         <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-700">
           <div className="flex justify-between items-center">
-            <button
-              id="use-sample-data-button"
-              type="button"
-              onClick={onUseSampleData}
-              className="text-sm font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-            >
-              {t('forms:actions.useSampleData')}
-            </button>
+            {/* Only show "Use Sample Data" button when in Paste Transcript mode */}
+            {inputMode === 'pasteTranscript' && (
+              <button
+                id="use-sample-data-button"
+                type="button"
+                onClick={onUseSampleData}
+                className="text-sm font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+              >
+                {t('forms:actions.useSampleData')}
+              </button>
+            )}
+            {/* Spacer when not showing Use Sample Data button */}
+            {inputMode !== 'pasteTranscript' && <div />}
             <Button onClick={onClearForm} variant="secondary" size="sm">{t('forms:actions.clearForm')}</Button>
           </div>
         </div>
@@ -1012,6 +1210,35 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         onClose={() => setShowUserNotesModal(false)}
         currentNotes={formState.userNotes || ''}
         onSave={handleSaveUserNotes}
+      />
+
+      {/* Transcript Viewer Modal */}
+      <TranscriptViewerModal
+        isOpen={showTranscriptModal}
+        onClose={() => setShowTranscriptModal(false)}
+        transcript={formState.transcript}
+        participants={participants}
+        meetingName={formState.importedMeetingName}
+        meetingDate={formState.importedMeetingDate}
+        iterations={transcriptIterations}
+        onlineMeetingId={transcriptMeetingId}
+        joinWebUrl={transcriptJoinUrl}
+      />
+
+      {/* Participants Modal */}
+      <ParticipantsModal
+        isOpen={showParticipantsModal}
+        onClose={() => setShowParticipantsModal(false)}
+        transcript={formState.transcript}
+        participants={participants}
+        isExtracting={isExtracting}
+        onExtractAndMatch={onExtractAndMatch}
+        onAddParticipant={onAddParticipant}
+        onBatchAddParticipants={onBatchAddParticipants}
+        onRemoveParticipant={onRemoveParticipant}
+        onSearchAndMatch={onSearchAndMatch}
+        onConfirmMatch={onConfirmMatch}
+        onMarkAsExternal={onMarkAsExternal}
       />
     </Card>
   );

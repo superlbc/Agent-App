@@ -1,21 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface TooltipProps {
   content: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  delay?: number; // Delay in milliseconds before showing tooltip
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ content, children, className }) => {
+export const Tooltip: React.FC<TooltipProps> = ({ content, children, className, delay = 0 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (delay > 0) {
+      timeoutRef.current = setTimeout(() => {
+        setIsVisible(true);
+      }, delay);
+    } else {
+      setIsVisible(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsVisible(false);
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div
       className={`relative inline-flex items-center ${className}`}
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
-      onFocus={() => setIsVisible(true)}
-      onBlur={() => setIsVisible(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleMouseEnter}
+      onBlur={handleMouseLeave}
     >
       {children}
       <div

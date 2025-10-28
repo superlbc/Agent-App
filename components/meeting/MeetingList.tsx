@@ -17,6 +17,12 @@ interface MeetingListProps {
   loadingMeetingId?: string;
   expandedMeetingId?: string;
   onProcessMeeting?: (meeting: Meeting) => void;
+  selectedMeetingId?: string;
+  selectedMeetingTranscript?: string;
+  selectedMeetingParticipants?: Array<{ name: string; email: string; role?: string }>;
+  onViewTranscript?: () => void;
+  onViewParticipants?: () => void;
+  onChangeSelection?: () => void;
 }
 
 export const MeetingList: React.FC<MeetingListProps> = ({
@@ -26,7 +32,13 @@ export const MeetingList: React.FC<MeetingListProps> = ({
   isLoading,
   loadingMeetingId,
   expandedMeetingId,
-  onProcessMeeting
+  onProcessMeeting,
+  selectedMeetingId,
+  selectedMeetingTranscript,
+  selectedMeetingParticipants,
+  onViewTranscript,
+  onViewParticipants,
+  onChangeSelection
 }) => {
   const { t } = useTranslation('common');
 
@@ -63,29 +75,37 @@ export const MeetingList: React.FC<MeetingListProps> = ({
     );
   }
 
+  // Filter meetings - if one is selected, only show that one
+  const displayedMeetings = selectedMeetingId
+    ? meetings.filter(m => m.id === selectedMeetingId)
+    : meetings;
+
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          {t('meetings.meetingsFound', { count: meetings.length })}
-        </p>
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <span>{t('meetings.legend.available')}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-            <span>{t('meetings.legend.processing')}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-            <span>{t('meetings.legend.none')}</span>
+      {/* Only show header and legend if no meeting is selected */}
+      {!selectedMeetingId && (
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            {t('meetings.meetingsFound', { count: meetings.length })}
+          </p>
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <span>{t('meetings.legend.available')}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+              <span>{t('meetings.legend.processing')}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+              <span>{t('meetings.legend.none')}</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {meetings.map((meeting) => (
+      {displayedMeetings.map((meeting) => (
         <MeetingCard
           key={meeting.id}
           meeting={meeting}
@@ -94,6 +114,13 @@ export const MeetingList: React.FC<MeetingListProps> = ({
           isLoadingTranscript={loadingMeetingId === meeting.id}
           isExpanded={expandedMeetingId === meeting.id}
           onProcessMeeting={onProcessMeeting ? () => onProcessMeeting(meeting) : undefined}
+          isSelected={selectedMeetingId === meeting.id}
+          hasTranscript={!!selectedMeetingTranscript && selectedMeetingId === meeting.id}
+          hasParticipants={!!selectedMeetingParticipants && selectedMeetingParticipants.length > 0 && selectedMeetingId === meeting.id}
+          participantsCount={selectedMeetingId === meeting.id ? selectedMeetingParticipants?.length : 0}
+          onViewTranscript={onViewTranscript}
+          onViewParticipants={onViewParticipants}
+          onChangeSelection={onChangeSelection}
         />
       ))}
     </div>
