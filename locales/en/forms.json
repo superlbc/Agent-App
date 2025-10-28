@@ -21,6 +21,18 @@
       "description": "Add tags to categorize this meeting"
     }
   },
+  "userNotes": {
+    "addButton": "Add User Notes",
+    "modalTitle": "Add User Notes",
+    "modalDescription": "Add your own notes or additional context that will be sent to the AI agent. You can type, paste, or upload a file.",
+    "placeholder": "Type or paste your notes here...",
+    "uploadFile": "Upload file",
+    "infoNote": "These notes will be labeled as \"User Provided Notes\" when sent to the AI agent, helping distinguish them from the meeting transcript."
+  },
+  "tabs": {
+    "selectMeeting": "Select Meeting",
+    "pasteTranscript": "Paste Transcript"
+  },
   "controls": {
     "title": "Generation Controls",
     "department": {
@@ -96,8 +108,10 @@
     "uploadFile": "Upload .txt or .docx",
     "showAdvancedSettings": "Show Advanced Settings",
     "hideAdvancedSettings": "Hide Advanced Settings",
-    "generateNotes": "Generate Notes"
+    "generateNotes": "Generate Notes",
+    "switchToManualEdit": "Switch to Manual Edit"
   },
+  "confirmSwitchToManual": "Switch to manual edit mode? The transcript will become editable as plain text.",
   "helperText": {
     "agendaHelper": "One topic per line.",
     "transcriptPlaceholder": "Paste transcript here, or drag & drop a file...",

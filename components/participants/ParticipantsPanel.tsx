@@ -77,9 +77,14 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({
         if (debouncedTranscript && debouncedTranscript.trim().length > 0 && transcript && transcript.trim().length > 0) {
             // Check if user has disabled participant extraction prompts
             if (isParticipantExtractionDisabled()) {
-                // Auto-extract without prompting
+                // Auto-extract without prompting - BUT only if no manual/meeting participants exist
+                const hasManualOrMeetingParticipants = participants.some(p =>
+                    p.source === 'csv' || p.source === 'emailList' || p.source === 'manual' || p.source === 'meeting'
+                );
                 const hasTranscriptParticipants = participants.some(p => p.source === 'transcript');
-                if (!hasTranscriptParticipants) {
+
+                // Do NOT extract if participants came from meeting selection or were manually added
+                if (!hasManualOrMeetingParticipants && !hasTranscriptParticipants) {
                     onExtractAndMatch(debouncedTranscript);
                 }
                 return;

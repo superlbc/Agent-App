@@ -236,7 +236,45 @@
     "emailCopied": "メール内容をコピーしました。メールクライアントに貼り付けてください。",
     "emailCopiedPlain": "メール内容をコピーしました（プレーンテキスト）。メールクライアントに貼り付けてください。",
     "noActionsToExport": "エクスポートするアクション項目がありません。",
-    "csvDownloaded": "CSVを正常にダウンロードしました。"
+    "csvDownloaded": "CSVを正常にダウンロードしました。",
+    "userNotesSaved": "ユーザーノートを正常に保存しました",
+    "userNotesCleared": "ユーザーノートをクリアしました",
+    "switchedToManual": "手動編集モードに切り替えました"
+  },
+  "meetings": {
+    "title": "会議選択",
+    "selectDate": "日付を選択",
+    "today": "今日",
+    "thisWeek": "今週",
+    "lastWeek": "先週",
+    "nextWeek": "来週",
+    "weeksAgo": "{{count}}週間前",
+    "inWeeks": "{{count}}週間後",
+    "noMeetings": "会議が見つかりませんでした",
+    "noMeetingsDescription": "選択した日付のTeams会議が見つかりませんでした。別の日付を選択するか、手動貼り付けオプションを使用してください。",
+    "meetingsFound": "{{count}}件の会議が見つかりました",
+    "meetingsFound_plural": "{{count}}件の会議が見つかりました",
+    "loading": "会議を読み込み中...",
+    "attendees": "{{count}}人の出席者",
+    "attendee": "出席者",
+    "transcriptAvailable": "トランスクリプト利用可能",
+    "transcriptUnavailable": "トランスクリプトなし",
+    "transcriptChecking": "確認中...",
+    "transcriptUnknown": "不明",
+    "transcriptLikely": "トランスクリプトあるかも",
+    "upcoming": "予定",
+    "meetingCount": "{{count}}件の会議",
+    "organizer": "主催者",
+    "organizerYou": "あなた",
+    "selected": "選択済み:",
+    "headerTitle": "カレンダーから会議を選択",
+    "headerDescription": "日付を選択してTeams会議を表示します。会議を選択すると、詳細とトランスクリプトを自動取得します。",
+    "legend": {
+      "available": "利用可能",
+      "processing": "処理中",
+      "none": "なし"
+    },
+    "note": "注記：トランスクリプトは通常、会議終了後5〜10分で利用可能になります。テナントセキュリティ設定により、主催した会議のトランスクリプトにのみアクセスできます。他の会議の場合は、手動貼り付けオプションを使用してください。"
   },
   "participants": {
     "title": "会議参加者",
@@ -261,5 +299,22 @@
     "autoExtracted": "議事録から自動抽出",
     "manuallyAdded": "手動で追加",
     "emailDraft": "メールには{{count}}人の参加者が含まれます"
+  },
+  "transcript": {
+    "importedFrom": "インポート元:",
+    "readonly": "読み取り専用",
+    "readonlyTooltip": "この議事録はカレンダーからインポートされたため編集できません。編集するには手動モードに切り替えてください。",
+    "readonlyExplanation": "この議事録はカレンダー会議からインポートされたため、直接編集することはできません。議事録を編集するには、上の「手動編集モードに切り替え」ボタンを使用してください。",
+    "importedMeeting": "インポートされた会議",
+    "searchPlaceholder": "議事録を検索...",
+    "of": "件中",
+    "previousMatch": "前の一致",
+    "nextMatch": "次の一致",
+    "clearSearch": "検索をクリア",
+    "noMatches": "一致するものが見つかりませんでした",
+    "noContent": "議事録のコンテンツがありません",
+    "noSpeakerInfo": "話者情報なし",
+    "noSpeakerInfoDescription": "この議事録には話者情報が含まれていません。プレーンテキストとして表示しています。",
+    "noMessages": "会話メッセージが見つかりませんでした"
   }
 }

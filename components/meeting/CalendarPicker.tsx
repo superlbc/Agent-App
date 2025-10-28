@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Meeting } from '../../services/meetingService';
@@ -19,6 +20,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   onSelectDate,
   allMeetings = []
 }) => {
+  const { t } = useTranslation('common');
   const [currentWeek, setCurrentWeek] = useState(() => getWeekStart(selectedDate));
 
   // Get the start of the week (Monday)
@@ -92,11 +94,11 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
     const diffMs = currentWeek.getTime() - todayWeekStart.getTime();
     const diffWeeks = Math.round(diffMs / (1000 * 60 * 60 * 24 * 7));
 
-    if (diffWeeks === 0) return 'This week';
-    if (diffWeeks === -1) return 'Last week';
-    if (diffWeeks === 1) return 'Next week';
-    if (diffWeeks < 0) return `${Math.abs(diffWeeks)} weeks ago`;
-    return `${diffWeeks} weeks from now`;
+    if (diffWeeks === 0) return t('meetings.thisWeek');
+    if (diffWeeks === -1) return t('meetings.lastWeek');
+    if (diffWeeks === 1) return t('meetings.nextWeek');
+    if (diffWeeks < 0) return t('meetings.weeksAgo', { count: Math.abs(diffWeeks) });
+    return t('meetings.inWeeks', { count: diffWeeks });
   };
 
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -121,7 +123,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
             onClick={goToToday}
             className="text-xs h-9 px-3"
           >
-            Today
+            {t('meetings.today')}
           </Button>
 
           <div className="flex items-center gap-1">
@@ -158,14 +160,14 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
               onClick={() => onSelectDate(date)}
               className={`
                 relative flex flex-col items-center justify-center p-3 rounded-lg
-                transition-all duration-200
+                transition-all duration-200 cursor-pointer
                 ${selected
-                  ? 'bg-primary text-white shadow-md'
+                  ? 'bg-primary text-white shadow-md scale-105'
                   : today
-                  ? 'bg-primary/10 text-primary border-2 border-primary'
+                  ? 'bg-primary/10 text-primary border-2 border-primary hover:scale-105 hover:shadow-lg'
                   : isWeekend
-                  ? 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100 hover:border-primary hover:shadow-sm'
-                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary hover:shadow-sm'
+                  ? 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100 hover:border-primary hover:shadow-lg hover:scale-105'
+                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary hover:shadow-lg hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }
               `}
             >
@@ -191,12 +193,12 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
               {/* Meeting count */}
               {getMeetingCount(date) > 0 && (
-                <span className={`text-[10px] mt-0.5 leading-tight ${
+                <span className={`text-[8px] mt-0.5 leading-tight font-medium ${
                   selected
-                    ? 'text-white/70'
-                    : 'text-slate-400 dark:text-slate-500'
+                    ? 'text-white/80'
+                    : 'text-slate-500 dark:text-slate-400'
                 }`}>
-                  {getMeetingCount(date)} {getMeetingCount(date) === 1 ? 'mtg' : 'mtgs'}
+                  {getMeetingCount(date)}m
                 </span>
               )}
 
@@ -211,8 +213,8 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
       {/* Selected date display */}
       <div className="text-sm text-slate-600 dark:text-slate-400 text-center">
-        Selected: <span className="font-medium text-slate-900 dark:text-white">
-          {selectedDate.toLocaleDateString('en-US', {
+        {t('meetings.selected')} <span className="font-medium text-slate-900 dark:text-white">
+          {selectedDate.toLocaleDateString(undefined, {
             weekday: 'long',
             month: 'long',
             day: 'numeric',

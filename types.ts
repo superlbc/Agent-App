@@ -108,6 +108,10 @@ export interface FormState {
   title: string;
   agenda: string;
   transcript: string;
+  transcriptSource: 'manual' | 'imported';  // Track if transcript was imported or manually entered
+  importedMeetingName?: string;              // Meeting name for context display
+  importedMeetingDate?: Date;                // Meeting date for context display
+  userNotes?: string;  // User-provided additional notes/context
   tags: ContextTag[];
 }
 
@@ -134,6 +138,7 @@ export interface Payload {
     meeting_title: string;
     agenda: string[];
     transcript: string;
+    user_notes?: string;  // Optional user-provided additional notes/context
     participants?: Participant[];  // NEW: Optional participant context for AI agent
     controls: Controls;
 }
@@ -182,10 +187,16 @@ export interface Participant {
   // Presence info (from Graph API)
   presence?: PresenceData;
 
-  // CSV import data
+  // CSV import data & Attendance tracking
   acceptanceStatus?: 'accepted' | 'declined' | 'tentative' | 'noResponse' | 'organizer';
   attendanceType?: 'required' | 'optional';
-  source?: 'transcript' | 'csv' | 'manual' | 'emailList';
+  attended?: boolean;  // True if actually attended (from attendance report)
+  attendanceDurationMinutes?: number;  // How long they attended (from attendance report)
+  source?: 'transcript' | 'csv' | 'manual' | 'emailList' | 'meeting';
+
+  // Speaker identification (from transcript analysis)
+  spokeInMeeting?: boolean;  // True if speaker name found in VTT transcript
+  speakerMentionCount?: number;  // How many times they spoke in transcript (optional)
 
   // UI state
   isSearching?: boolean;

@@ -119,7 +119,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 
     const flushList = () => {
         if (inList && listItems.length > 0) {
-            elements.push(<ul key={`list-${elements.length}`} className="list-disc pl-5 space-y-2 my-3">{listItems}</ul>);
+            elements.push(<ul key={`list-${elements.length}`} className="list-disc pl-8 space-y-3 my-4 text-slate-700 dark:text-slate-300">{listItems}</ul>);
             listItems = [];
         }
         inList = false;
@@ -231,7 +231,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
             flushList();
             const titleText = majorHeaderMatch[2].trim();
             const id = titleText.toLowerCase().replace(/\s+/g, '-');
-            elements.push(<h2 key={key} id={`${id}-section`} className="text-2xl font-semibold mt-8 mb-4 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-3 text-slate-800 dark:text-slate-200">{renderWithBold(titleText)}</h2>);
+            elements.push(<h2 key={key} id={`${id}-section`} className="text-2xl font-semibold mt-10 mb-5 border-b-2 border-slate-200 dark:border-slate-700 pb-3 flex items-center gap-3 text-slate-800 dark:text-slate-200">{renderWithBold(titleText)}</h2>);
             continue;
         }
         
@@ -252,7 +252,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
             flushList();
             const icon = subSectionMatch[1] || '';
             const title = subSectionMatch[2].trim();
-            elements.push(<h4 key={key} className="text-base font-semibold mt-4 mb-2 flex items-center gap-2 text-slate-700 dark:text-slate-300">{icon} {renderWithBold(title)}</h4>);
+            elements.push(<h4 key={key} className="text-base font-semibold mt-6 mb-3 flex items-center gap-2 text-slate-700 dark:text-slate-300">{icon} {renderWithBold(title)}</h4>);
             inList = true; // Any non-empty, non-header line after this is a list item
             continue;
         }
@@ -280,7 +280,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
                  continue;
             }
             const content = trimmed.startsWith('- ') ? trimmed.substring(2) : trimmed;
-            listItems.push(<li key={key}>{renderWithBold(content)}</li>);
+            listItems.push(<li key={key} className="leading-relaxed">{renderWithBold(content)}</li>);
         } else if (trimmed.length > 0) {
             flushList();
             elements.push(<p key={key} className="my-3">{renderWithBold(trimmed)}</p>);
@@ -290,7 +290,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
     flushList();
     flushTable();
 
-    return <div className="text-base leading-relaxed text-slate-700 dark:text-slate-300">{elements}</div>;
+    return <div className="text-base leading-loose text-slate-700 dark:text-slate-300">{elements}</div>;
 };
 
 

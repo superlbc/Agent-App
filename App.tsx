@@ -54,6 +54,7 @@ const AppContent: React.FC = () => {
     title: '',
     agenda: '',
     transcript: '',
+    transcriptSource: 'manual',
     tags: ["Internal only"],
   });
 
@@ -93,6 +94,7 @@ const AppContent: React.FC = () => {
     searchAndMatch,
     confirmMatch,
     markAsExternal,
+    updateParticipant,
     clearParticipants
   } = useParticipantExtraction();
 
@@ -171,6 +173,7 @@ const AppContent: React.FC = () => {
         meeting_title: currentFormState.title,
         agenda: currentFormState.agenda.split('\n').filter(line => line.trim() !== ''),
         transcript: currentFormState.transcript,
+        user_notes: currentFormState.userNotes,  // Include user-provided notes
         participants: participants.length > 0 ? participants : undefined,  // NEW: Include participants for AI context
         controls: currentControls,
       };
@@ -223,7 +226,7 @@ const AppContent: React.FC = () => {
   };
 
   const handleClearForm = useCallback(() => {
-    setFormState({ title: '', agenda: '', transcript: '', tags: [] });
+    setFormState({ title: '', agenda: '', transcript: '', transcriptSource: 'manual', userNotes: undefined, tags: [] });
     setOutput(null);
     setHasGenerated(false);
     clearParticipants();
@@ -252,7 +255,7 @@ const AppContent: React.FC = () => {
       resetAllUserData();
 
       // Immediately clear form state and participants for visual feedback
-      setFormState({ title: '', agenda: '', transcript: '', tags: [] });
+      setFormState({ title: '', agenda: '', transcript: '', transcriptSource: 'manual', tags: [] });
       setOutput(null);
       setHasGenerated(false);
       clearParticipants();
@@ -443,6 +446,7 @@ const AppContent: React.FC = () => {
               onSearchAndMatch={searchAndMatch}
               onConfirmMatch={confirmMatch}
               onMarkAsExternal={markAsExternal}
+              onUpdateParticipant={updateParticipant}
             />
           </div>
           <div id="output-panel-wrapper" className="flex-1 min-w-0 w-full">

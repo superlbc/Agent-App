@@ -55,6 +55,7 @@ export const SAMPLE_DATA: FormState = {
   title: "ACL Weekly Team Status – 8/26",
   agenda: "ACL Nights Show\nMain Footprint\nSide Stage",
   transcript: "Alright team, let's kick off. Main footprint status? John reports we are green on talent booking. Let's talk about the side stage. We need to finalize the audio vendor by EOD Friday. Casey to mock up blanket and hat designs, due date is 2025-09-02. This is for the ACL Nights show. Sarah, can you please coordinate with the city on permits? Make sure to check with legal@example.com before signing anything. Their number is (555) 123-4567. We need a decision on the catering options for the VIP area. That's a key risk if we don't lock it down. Bob will own the decision on catering.",
+  transcriptSource: 'manual',
   tags: ["Internal only"],
 };
 

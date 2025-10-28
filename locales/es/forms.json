@@ -21,6 +21,18 @@
       "description": "Añada etiquetas para categorizar esta reunión"
     }
   },
+  "userNotes": {
+    "addButton": "Añadir Notas de Usuario",
+    "modalTitle": "Añadir Notas de Usuario",
+    "modalDescription": "Añada sus propias notas o contexto adicional que se enviará al agente de IA. Puede escribir, pegar o cargar un archivo.",
+    "placeholder": "Escriba o pegue sus notas aquí...",
+    "uploadFile": "Cargar archivo",
+    "infoNote": "Estas notas se etiquetarán como \"Notas Proporcionadas por el Usuario\" cuando se envíen al agente de IA, ayudando a distinguirlas de la transcripción de la reunión."
+  },
+  "tabs": {
+    "selectMeeting": "Seleccionar Reunión",
+    "pasteTranscript": "Pegar Transcripción"
+  },
   "controls": {
     "title": "Controles de Generación",
     "department": {
@@ -96,8 +108,10 @@
     "uploadFile": "Subir .txt o .docx",
     "showAdvancedSettings": "Mostrar Configuración Avanzada",
     "hideAdvancedSettings": "Ocultar Configuración Avanzada",
-    "generateNotes": "Generar Notas"
+    "generateNotes": "Generar Notas",
+    "switchToManualEdit": "Cambiar a Edición Manual"
   },
+  "confirmSwitchToManual": "¿Cambiar al modo de edición manual? La transcripción se volverá editable como texto plano.",
   "helperText": {
     "agendaHelper": "Un tema por línea.",
     "transcriptPlaceholder": "Pega la transcripción aquí, o arrastra y suelta un archivo...",

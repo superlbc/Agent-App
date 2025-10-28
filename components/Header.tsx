@@ -84,7 +84,14 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
               aria-expanded={isMenuOpen}
             >
                 <div className="hidden sm:flex flex-col text-right">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{graphData?.displayName || user?.name}</span>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{graphData?.displayName || user?.name}</span>
+                      {isAdmin && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-500 text-white">
+                          {t('common:header.adminBadge')}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-slate-500 dark:text-slate-400">{graphData?.jobTitle || graphData?.mail || user?.username}</span>
                 </div>
               {graphData?.photoUrl ? (
@@ -98,6 +105,34 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
             {isMenuOpen && (
               <div ref={menuRef} className="absolute right-0 mt-2 w-64 origin-top-right z-50 animate-fade-in">
                 <Card className="p-1.5">
+                  {/* User Info Header */}
+                  <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3">
+                      {graphData?.photoUrl ? (
+                        <img src={graphData.photoUrl} alt="User profile" className="h-10 w-10 rounded-full" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-semibold text-slate-600 dark:text-slate-300">
+                          {getInitials(graphData?.displayName || user?.name)}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                            {graphData?.displayName || user?.name}
+                          </p>
+                          {isAdmin && (
+                            <span className="flex-shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500 text-white">
+                              <Icon name="settings" className="h-3 w-3" />
+                              {t('common:header.adminBadge')}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {graphData?.jobTitle || graphData?.mail || user?.username}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   <div className="py-1">
                     {/* Toggle Theme */}
                     <button key={menuItems[0].label} id={menuItems[0].id} onClick={() => { menuItems[0].action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MeetingCard } from './MeetingCard';
 import { Meeting } from '../../services/graphService';
 import { Icon } from '../ui/Icon';
@@ -13,14 +14,22 @@ interface MeetingListProps {
   onSelectMeeting: (meeting: Meeting) => void;
   isTranscriptLikely: (meeting: Meeting) => boolean;
   isLoading?: boolean;
+  loadingMeetingId?: string;
+  expandedMeetingId?: string;
+  onProcessMeeting?: (meeting: Meeting) => void;
 }
 
 export const MeetingList: React.FC<MeetingListProps> = ({
   meetings,
   onSelectMeeting,
   isTranscriptLikely,
-  isLoading
+  isLoading,
+  loadingMeetingId,
+  expandedMeetingId,
+  onProcessMeeting
 }) => {
+  const { t } = useTranslation('common');
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -45,10 +54,10 @@ export const MeetingList: React.FC<MeetingListProps> = ({
           <Icon name="calendar" className="w-8 h-8 text-slate-400" />
         </div>
         <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
-          No meetings found
+          {t('meetings.noMeetings')}
         </h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
-          No Teams meetings found for the selected date. Try selecting a different date or use the manual paste option.
+          {t('meetings.noMeetingsDescription')}
         </p>
       </div>
     );
@@ -58,20 +67,20 @@ export const MeetingList: React.FC<MeetingListProps> = ({
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-2">
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          {meetings.length} meeting{meetings.length !== 1 ? 's' : ''} found
+          {t('meetings.meetingsFound', { count: meetings.length })}
         </p>
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            <span>Available</span>
+            <span>{t('meetings.legend.available')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-            <span>Processing</span>
+            <span>{t('meetings.legend.processing')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-            <span>None</span>
+            <span>{t('meetings.legend.none')}</span>
           </div>
         </div>
       </div>
@@ -82,6 +91,9 @@ export const MeetingList: React.FC<MeetingListProps> = ({
           meeting={meeting}
           onClick={() => onSelectMeeting(meeting)}
           transcriptLikely={isTranscriptLikely(meeting)}
+          isLoadingTranscript={loadingMeetingId === meeting.id}
+          isExpanded={expandedMeetingId === meeting.id}
+          onProcessMeeting={onProcessMeeting ? () => onProcessMeeting(meeting) : undefined}
         />
       ))}
     </div>

@@ -166,6 +166,15 @@ export function buildParticipantContext(participants: Participant[]): string {
       if (p.source) {
         context += `  Source: ${p.source}\n`;
       }
+
+      // Add speaker status (from transcript analysis)
+      if (p.spokeInMeeting !== undefined) {
+        context += `  Speaking Status: ${p.spokeInMeeting ? 'Active speaker' : 'Silent'}`;
+        if (p.spokeInMeeting && p.speakerMentionCount) {
+          context += ` (spoke ${p.speakerMentionCount} times)`;
+        }
+        context += '\n';
+      }
     });
     context += '\n';
   }
@@ -195,6 +204,15 @@ export function buildParticipantContext(participants: Participant[]): string {
       // Add source metadata
       if (p.source) {
         context += `  Source: ${p.source}\n`;
+      }
+
+      // Add speaker status (from transcript analysis)
+      if (p.spokeInMeeting !== undefined) {
+        context += `  Speaking Status: ${p.spokeInMeeting ? 'Active speaker' : 'Silent'}`;
+        if (p.spokeInMeeting && p.speakerMentionCount) {
+          context += ` (spoke ${p.speakerMentionCount} times)`;
+        }
+        context += '\n';
       }
     });
   }

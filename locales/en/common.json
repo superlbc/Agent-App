@@ -7,6 +7,7 @@
   },
   "header": {
     "title": "Meeting Notes Generator",
+    "adminBadge": "Admin",
     "menu": {
       "toggleTheme": "Toggle Theme",
       "replayTutorial": "Replay Tutorial",
@@ -236,7 +237,45 @@
     "emailCopied": "Email content copied. Paste into your email client.",
     "emailCopiedPlain": "Email content copied (plain text). Paste into your email client.",
     "noActionsToExport": "No action items to export.",
-    "csvDownloaded": "CSV downloaded successfully."
+    "csvDownloaded": "CSV downloaded successfully.",
+    "userNotesSaved": "User notes saved successfully",
+    "userNotesCleared": "User notes cleared",
+    "switchedToManual": "Switched to manual edit mode"
+  },
+  "meetings": {
+    "title": "Select Meeting",
+    "selectDate": "Select a date",
+    "today": "Today",
+    "thisWeek": "This week",
+    "lastWeek": "Last week",
+    "nextWeek": "Next week",
+    "weeksAgo": "{{count}} weeks ago",
+    "inWeeks": "In {{count}} weeks",
+    "noMeetings": "No meetings found",
+    "noMeetingsDescription": "No Teams meetings found for the selected date. Try selecting a different date or use the manual paste option.",
+    "meetingsFound": "{{count}} meeting found",
+    "meetingsFound_plural": "{{count}} meetings found",
+    "loading": "Loading meetings...",
+    "attendees": "{{count}} attendees",
+    "attendee": "attendee",
+    "transcriptAvailable": "Transcript Available",
+    "transcriptUnavailable": "No Transcript",
+    "transcriptChecking": "Checking...",
+    "transcriptUnknown": "Unknown",
+    "transcriptLikely": "May Have Transcript",
+    "upcoming": "Upcoming",
+    "meetingCount": "{{count}} meetings",
+    "organizer": "Organizer",
+    "organizerYou": "You",
+    "selected": "Selected:",
+    "headerTitle": "Select Meeting from Calendar",
+    "headerDescription": "Choose a date to see your Teams meetings. Select a meeting to auto-fetch details and transcript.",
+    "legend": {
+      "available": "Available",
+      "processing": "Processing",
+      "none": "None"
+    },
+    "note": "Note: Transcripts are usually available 5-10 minutes after a meeting ends. You can only access transcripts for meetings you organized (due to tenant security settings). For other meetings, use the manual paste option."
   },
   "participants": {
     "title": "Meeting Participants",
@@ -261,5 +300,22 @@
     "autoExtracted": "Auto-extracted from transcript",
     "manuallyAdded": "Manually added",
     "emailDraft": "Email will include {{count}} participants"
+  },
+  "transcript": {
+    "importedFrom": "Imported from:",
+    "readonly": "Read-only",
+    "readonlyTooltip": "This transcript was imported from your calendar and cannot be edited. Switch to manual mode to edit.",
+    "readonlyExplanation": "This transcript was imported from your calendar meeting and cannot be edited directly. To edit the transcript, use the \"Switch to Manual Edit Mode\" button above.",
+    "importedMeeting": "Imported Meeting",
+    "searchPlaceholder": "Search in transcript...",
+    "of": "of",
+    "previousMatch": "Previous match",
+    "nextMatch": "Next match",
+    "clearSearch": "Clear search",
+    "noMatches": "No matches found",
+    "noContent": "No transcript content available",
+    "noSpeakerInfo": "No Speaker Information",
+    "noSpeakerInfoDescription": "This transcript does not contain speaker information. Showing as plain text.",
+    "noMessages": "No conversation messages found"
   }
 }

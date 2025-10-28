@@ -7,6 +7,7 @@
   },
   "header": {
     "title": "Generador de Notas de Reunión",
+    "adminBadge": "Admin",
     "menu": {
       "toggleTheme": "Cambiar Tema",
       "replayTutorial": "Repetir Tutorial",
@@ -236,7 +237,45 @@
     "emailCopied": "Contenido del correo copiado. Pégalo en tu cliente de correo.",
     "emailCopiedPlain": "Contenido del correo copiado (texto plano). Pégalo en tu cliente de correo.",
     "noActionsToExport": "No hay acciones para exportar.",
-    "csvDownloaded": "CSV descargado exitosamente."
+    "csvDownloaded": "CSV descargado exitosamente.",
+    "userNotesSaved": "Notas de usuario guardadas exitosamente",
+    "userNotesCleared": "Notas de usuario eliminadas",
+    "switchedToManual": "Cambiado a modo de edición manual"
+  },
+  "meetings": {
+    "title": "Seleccionar Reunión",
+    "selectDate": "Seleccione una fecha",
+    "today": "Hoy",
+    "thisWeek": "Esta semana",
+    "lastWeek": "Semana pasada",
+    "nextWeek": "Próxima semana",
+    "weeksAgo": "Hace {{count}} semanas",
+    "inWeeks": "En {{count}} semanas",
+    "noMeetings": "No se encontraron reuniones",
+    "noMeetingsDescription": "No se encontraron reuniones de Teams para la fecha seleccionada. Intente seleccionar una fecha diferente o use la opción de pegado manual.",
+    "meetingsFound": "{{count}} reunión encontrada",
+    "meetingsFound_plural": "{{count}} reuniones encontradas",
+    "loading": "Cargando reuniones...",
+    "attendees": "{{count}} asistentes",
+    "attendee": "asistente",
+    "transcriptAvailable": "Transcripción Disponible",
+    "transcriptUnavailable": "Sin Transcripción",
+    "transcriptChecking": "Verificando...",
+    "transcriptUnknown": "Desconocido",
+    "transcriptLikely": "Puede Tener Transcripción",
+    "upcoming": "Próxima",
+    "meetingCount": "{{count}} reuniones",
+    "organizer": "Organizador",
+    "organizerYou": "Tú",
+    "selected": "Seleccionado:",
+    "headerTitle": "Seleccionar Reunión del Calendario",
+    "headerDescription": "Elija una fecha para ver sus reuniones de Teams. Seleccione una reunión para obtener detalles y transcripción automáticamente.",
+    "legend": {
+      "available": "Disponible",
+      "processing": "Procesando",
+      "none": "Ninguno"
+    },
+    "note": "Nota: Las transcripciones suelen estar disponibles 5-10 minutos después de que finaliza una reunión. Solo puede acceder a las transcripciones de las reuniones que organizó (debido a la configuración de seguridad del inquilino). Para otras reuniones, use la opción de pegado manual."
   },
   "participants": {
     "title": "Participantes de la Reunión",
@@ -261,5 +300,22 @@
     "autoExtracted": "Auto-extraído de la transcripción",
     "manuallyAdded": "Agregado manualmente",
     "emailDraft": "El correo incluirá {{count}} participantes"
+  },
+  "transcript": {
+    "importedFrom": "Importado de:",
+    "readonly": "Solo lectura",
+    "readonlyTooltip": "Esta transcripción fue importada de tu calendario y no se puede editar. Cambia al modo manual para editarla.",
+    "readonlyExplanation": "Esta transcripción fue importada de tu reunión de calendario y no se puede editar directamente. Para editar la transcripción, utiliza el botón \"Cambiar a Modo de Edición Manual\" arriba.",
+    "importedMeeting": "Reunión Importada",
+    "searchPlaceholder": "Buscar en la transcripción...",
+    "of": "de",
+    "previousMatch": "Coincidencia anterior",
+    "nextMatch": "Siguiente coincidencia",
+    "clearSearch": "Limpiar búsqueda",
+    "noMatches": "No se encontraron coincidencias",
+    "noContent": "No hay contenido de transcripción disponible",
+    "noSpeakerInfo": "Sin Información del Orador",
+    "noSpeakerInfoDescription": "Esta transcripción no contiene información del orador. Mostrando como texto plano.",
+    "noMessages": "No se encontraron mensajes de conversación"
   }
 }

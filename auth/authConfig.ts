@@ -16,9 +16,9 @@ const MSAL_TENANT_ID = "d026e4c1-5892-497a-b9da-ee493c9f0364";
 export const REQUIRED_GROUP_ID = "2c08b5d8-7def-4845-a48c-740b987dcffb";
 
 // Azure AD Security Group for Admin users (Settings Access)
-// TODO: Replace with actual admin security group ID when created
-// Currently using the same group as REQUIRED_GROUP_ID as a placeholder
-export const ADMIN_GROUP_ID = "2c08b5d8-7def-4845-a48c-740b987dcffb";
+// Group Name: "MOM Tech Admin Users SG"
+// Object ID: 1322ab5f-d86d-4c9e-b863-fba031615857
+export const ADMIN_GROUP_ID = "1322ab5f-d86d-4c9e-b863-fba031615857";
 
 export const msalConfig: Configuration = {
     auth: {

@@ -21,6 +21,18 @@
       "description": "この会議を分類するためのタグを追加してください"
     }
   },
+  "userNotes": {
+    "addButton": "ユーザーノートを追加",
+    "modalTitle": "ユーザーノートを追加",
+    "modalDescription": "AIエージェントに送信される独自のノートや追加のコンテキストを追加します。入力、貼り付け、またはファイルをアップロードできます。",
+    "placeholder": "ここにノートを入力または貼り付けてください...",
+    "uploadFile": "ファイルをアップロード",
+    "infoNote": "これらのノートは、AIエージェントに送信される際に「ユーザー提供ノート」としてラベル付けされ、会議のトランスクリプトと区別されます。"
+  },
+  "tabs": {
+    "selectMeeting": "会議を選択",
+    "pasteTranscript": "トランスクリプトを貼り付け"
+  },
   "controls": {
     "title": "生成コントロール",
     "department": {
@@ -96,8 +108,10 @@
     "uploadFile": ".txtまたは.docxをアップロード",
     "showAdvancedSettings": "詳細設定を表示",
     "hideAdvancedSettings": "詳細設定を非表示",
-    "generateNotes": "ノートを生成"
+    "generateNotes": "ノートを生成",
+    "switchToManualEdit": "手動編集に切り替え"
   },
+  "confirmSwitchToManual": "手動編集モードに切り替えますか？議事録はプレーンテキストとして編集可能になります。",
   "helperText": {
     "agendaHelper": "1行に1つのトピック。",
     "transcriptPlaceholder": "ここにトランスクリプトを貼り付けるか、ファイルをドラッグ&ドロップしてください...",

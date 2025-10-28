@@ -27,6 +27,8 @@ export interface Meeting {
   hasOnlineMeeting: boolean;
   joinUrl?: string;
   onlineMeetingId?: string; // Microsoft Teams online meeting ID for transcript access
+  transcriptStatus?: 'unknown' | 'checking' | 'available' | 'unavailable'; // Transcript availability (checked per day)
+  transcriptCount?: number; // Number of transcripts found (0 = unavailable, 1+ = available)
 }
 
 export interface MeetingDetails extends Meeting {
@@ -39,6 +41,7 @@ export interface Attendee {
   name: string;
   email: string;
   type: 'required' | 'optional' | 'organizer';
+  response?: 'accepted' | 'declined' | 'tentative' | 'notResponded' | 'organizer';
 }
 
 export interface DriveItem {
@@ -50,6 +53,22 @@ export interface DriveItem {
   webUrl: string;
 }
 
+export interface AttendanceRecord {
+  email: string;
+  name: string;
+  role: 'organizer' | 'presenter' | 'attendee' | string;
+  totalAttendanceInSeconds: number;
+  joinDateTime?: string;
+  leaveDateTime?: string;
+}
+
+export interface AttendanceReport {
+  meetingId: string;
+  reportId: string;
+  totalParticipantCount: number;
+  attendees: AttendanceRecord[];
+}
+
 export interface Transcript {
   id: string;
   createdDateTime: string;
@@ -57,9 +76,10 @@ export interface Transcript {
 }
 
 export class GraphService {
+  private static instance: GraphService;
   private client: Client;
 
-  constructor() {
+  private constructor() {
     this.client = Client.init({
       authProvider: async (done) => {
         try {
@@ -88,6 +108,13 @@ export class GraphService {
         }
       }
     });
+  }
+
+  public static getInstance(): GraphService {
+    if (!GraphService.instance) {
+      GraphService.instance = new GraphService();
+    }
+    return GraphService.instance;
   }
 
   /**
@@ -405,6 +432,114 @@ export class GraphService {
     throw new Error('Unable to fetch transcript content from any Graph API endpoint');
   }
 
+  // ========== ATTENDANCE REPORT METHODS ==========
+
+  /**
+   * Get attendance report for a meeting
+   *
+   * IMPORTANT: This uses OnlineMeetings.ReadWrite permission (read-only usage)
+   * We ONLY read attendance data - NO write operations are performed
+   *
+   * NOTE: Attendance reports are only available for:
+   * - Meetings that have ended
+   * - Meetings where attendance tracking was enabled
+   * - Meetings organized by the authenticated user (in most tenants)
+   */
+  async getAttendanceReport(onlineMeetingId: string, joinUrl?: string): Promise<AttendanceReport | null> {
+    console.log(`[Graph API] ============================================`);
+    console.log(`[Graph API] Getting attendance report for meeting`);
+    console.log(`[Graph API] Online Meeting ID: ${onlineMeetingId?.substring(0, 50)}...`);
+
+    try {
+      // Step 1: Resolve the correct online meeting ID if needed
+      let resolvedMeetingId = onlineMeetingId;
+
+      if (joinUrl && !onlineMeetingId) {
+        console.log(`[Graph API] No meeting ID provided, resolving from joinUrl...`);
+        resolvedMeetingId = await this.resolveOnlineMeetingId(joinUrl);
+      }
+
+      if (!resolvedMeetingId) {
+        console.log(`[Graph API] ❌ Cannot get attendance report: No valid meeting ID`);
+        return null;
+      }
+
+      // Step 2: Get list of attendance reports for this meeting
+      console.log(`[Graph API] Fetching attendance reports list...`);
+      const reportsResponse = await this.client
+        .api(`/me/onlineMeetings/${resolvedMeetingId}/attendanceReports`)
+        .get();
+
+      console.log(`[Graph API] Found ${reportsResponse.value?.length || 0} attendance reports`);
+
+      if (!reportsResponse.value || reportsResponse.value.length === 0) {
+        console.log(`[Graph API] ⚠️ No attendance reports available for this meeting`);
+        console.log(`[Graph API] This might mean:`);
+        console.log(`[Graph API]   - Meeting hasn't ended yet`);
+        console.log(`[Graph API]   - Attendance tracking wasn't enabled`);
+        console.log(`[Graph API]   - You're not the meeting organizer`);
+        return null;
+      }
+
+      // Step 3: Get the most recent attendance report (usually there's only one)
+      const latestReport = reportsResponse.value[0];
+      const reportId = latestReport.id;
+
+      console.log(`[Graph API] Fetching detailed attendance for report: ${reportId}`);
+
+      // Step 4: Get detailed attendance records
+      const attendanceResponse = await this.client
+        .api(`/me/onlineMeetings/${resolvedMeetingId}/attendanceReports/${reportId}/attendanceRecords`)
+        .get();
+
+      console.log(`[Graph API] ✅ Retrieved ${attendanceResponse.value?.length || 0} attendance records`);
+
+      // Step 5: Map to our AttendanceReport interface
+      const attendees: AttendanceRecord[] = (attendanceResponse.value || []).map((record: any) => ({
+        email: record.emailAddress || record.identity?.userPrincipalName || '',
+        name: record.identity?.displayName || 'Unknown',
+        role: record.role?.toLowerCase() || 'attendee',
+        totalAttendanceInSeconds: record.totalAttendanceInSeconds || 0,
+        joinDateTime: record.attendanceIntervals?.[0]?.joinDateTime,
+        leaveDateTime: record.attendanceIntervals?.[record.attendanceIntervals.length - 1]?.leaveDateTime
+      }));
+
+      console.log(`[Graph API] Attendance summary:`);
+      attendees.forEach(a => {
+        const minutes = Math.floor(a.totalAttendanceInSeconds / 60);
+        console.log(`[Graph API]   - ${a.name} (${a.email}): ${minutes} minutes`);
+      });
+
+      return {
+        meetingId: resolvedMeetingId,
+        reportId: reportId,
+        totalParticipantCount: attendees.length,
+        attendees
+      };
+
+    } catch (error: any) {
+      console.error(`[Graph API] ❌ Error fetching attendance report:`, error.message);
+      console.error(`[Graph API] Error details:`, {
+        status: error.statusCode,
+        code: error.code,
+        message: error.message
+      });
+
+      // Common errors and what they mean
+      if (error.statusCode === 404) {
+        console.log(`[Graph API] ℹ️ 404 error likely means:`);
+        console.log(`[Graph API]   - Meeting hasn't ended yet (reports generate after meeting ends)`);
+        console.log(`[Graph API]   - Attendance reports not available for this meeting`);
+      } else if (error.statusCode === 403) {
+        console.log(`[Graph API] ℹ️ 403 error likely means:`);
+        console.log(`[Graph API]   - You're not the meeting organizer`);
+        console.log(`[Graph API]   - Attendance report access restricted by tenant policy`);
+      }
+
+      return null;
+    }
+  }
+
   // ========== PRIVATE HELPER METHODS ==========
 
   /**
@@ -420,7 +555,8 @@ export class GraphService {
     const attendees = (event.attendees || []).map((a: any) => ({
       name: a.emailAddress.name,
       email: a.emailAddress.address,
-      type: a.type.toLowerCase()
+      type: a.type.toLowerCase(),
+      response: a.status?.response?.toLowerCase() || 'notResponded'
     }));
 
     // IMPORTANT: Always include the organizer in the attendees list
@@ -438,7 +574,8 @@ export class GraphService {
         attendees.unshift({
           name: organizerName || 'Unknown',
           email: organizerEmail,
-          type: 'organizer'
+          type: 'organizer',
+          response: 'organizer'
         });
       }
     }

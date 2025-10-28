@@ -33,6 +33,7 @@ export interface UseParticipantExtractionReturn {
     confirmMatch: (participantId: string, graphData: GraphData) => void;
     markAsExternal: (participantId: string, email: string) => void;
     rematchParticipant: (participantId: string) => void;
+    updateParticipant: (participantId: string, updates: Partial<Participant>) => void;
     clearParticipants: () => void;
 }
 
@@ -246,7 +247,12 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
             officeLocation: graphData.officeLocation,
             email: graphData.mail,
             photoUrl: graphData.photoUrl,
-            source: (graphData as any).source || 'manual' // Preserve source if provided
+            source: (graphData as any).source || 'manual', // Preserve source if provided
+            // Preserve attendance fields from meeting data
+            attendanceType: (graphData as any).attendanceType,
+            acceptanceStatus: (graphData as any).acceptanceStatus,
+            attended: (graphData as any).attended,
+            attendanceDurationMinutes: (graphData as any).attendanceDurationMinutes
         };
 
         // Use functional state update to avoid race conditions
@@ -259,10 +265,28 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
             }
 
             console.log(`[useParticipantExtraction] ✅ Added participant: ${graphData.displayName || graphData.mail}`);
-            return [...prev, newParticipant];
-        });
 
-        // Note: Presence fetching will be handled separately to avoid race conditions
+            const newList = [...prev, newParticipant];
+
+            // Fetch presence asynchronously for the new participant only
+            // Use functional update to merge presence data without overwriting the list
+            fetchPresenceForParticipants([newParticipant]).then((withPresence) => {
+                if (withPresence.length > 0 && withPresence[0].presence) {
+                    // Merge presence data for this specific participant
+                    setParticipants(currentList =>
+                        currentList.map(p =>
+                            p.email === withPresence[0].email
+                                ? { ...p, presence: withPresence[0].presence }
+                                : p
+                        )
+                    );
+                }
+            }).catch((error) => {
+                console.error('[useParticipantExtraction] Failed to fetch presence:', error);
+            });
+
+            return newList;
+        });
     }, [fetchPresenceForParticipants]);
 
     /**
@@ -558,6 +582,20 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
     }, [participants, fetchPresenceForParticipants]);
 
     /**
+     * Updates specific fields of a participant
+     * Used for enriching participant data (e.g., adding speaker status)
+     */
+    const updateParticipant = useCallback((participantId: string, updates: Partial<Participant>) => {
+        setParticipants(prev =>
+            prev.map(p =>
+                p.id === participantId
+                    ? { ...p, ...updates }
+                    : p
+            )
+        );
+    }, []);
+
+    /**
      * Clears all participants
      */
     const clearParticipants = useCallback(() => {
@@ -575,6 +613,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
         confirmMatch,
         markAsExternal,
         rematchParticipant,
+        updateParticipant,
         clearParticipants
     };
 };

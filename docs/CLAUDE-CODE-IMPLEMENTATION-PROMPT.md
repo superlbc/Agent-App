@@ -28,8 +28,8 @@ Implement the following authentication system:
 ```typescript
 MSAL_CLIENT_ID = "5fa64631-ea56-4676-b6d5-433d322a4da1"
 MSAL_TENANT_ID = "d026e4c1-5892-497a-b9da-ee493c9f0364"
-REQUIRED_GROUP_ID = "2c08b5d8-7def-4845-a48c-740b987dcffb"  // General access
-ADMIN_GROUP_ID = "2c08b5d8-7def-4845-a48c-740b987dcffb"     // Admin access (currently same)
+REQUIRED_GROUP_ID = "2c08b5d8-7def-4845-a48c-740b987dcffb"  // General access (MOM WW All Users 1 SG)
+ADMIN_GROUP_ID = "1322ab5f-d86d-4c9e-b863-fba031615857"     // Admin access (MOM Tech Admin Users SG)
 ```
 
 **Files to Create:**
