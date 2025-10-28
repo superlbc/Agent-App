@@ -6,6 +6,10 @@ interface ImportMetaEnv {
   readonly DEV: boolean;
   readonly CLIENT_ID: string;
   readonly CLIENT_SECRET: string;
+  // Dual Agent Architecture
+  readonly DEFAULT_NOTES_AGENT_ID: string;
+  readonly DEFAULT_INTERROGATION_AGENT_ID: string;
+  // Legacy (deprecated)
   readonly DEFAULT_BOT_ID: string;
 }
 

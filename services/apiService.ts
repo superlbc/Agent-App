@@ -132,8 +132,8 @@ const constructPrompt = (payload: Payload): string => {
 
 
 export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, signal?: AbortSignal): Promise<AgentResponse> => {
-    if (!apiConfig.botId) {
-        throw new Error('Bot ID is missing from config.');
+    if (!apiConfig.notesAgentId) {
+        throw new Error('Meeting Notes Agent ID is missing from config.');
     }
 
     try {
@@ -141,7 +141,7 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
 
         // Always use relative path to leverage proxy (Vite in dev, nginx in production).
         const baseUrl = '';
-        const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.botId}/messages`;
+        const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.notesAgentId}/messages`;
         const prompt = constructPrompt(payload);
 
         const headers = new Headers();
@@ -256,8 +256,8 @@ export const interrogateTranscript = async (
     question: string,
     apiConfig: ApiConfig
 ): Promise<InterrogationResponse> => {
-    if (!apiConfig.botId) {
-        throw new Error('Bot ID is missing from config.');
+    if (!apiConfig.interrogationAgentId) {
+        throw new Error('Interrogation Agent ID is missing from config.');
     }
 
     try {
@@ -265,7 +265,7 @@ export const interrogateTranscript = async (
 
         // Always use relative path to leverage proxy (Vite in dev, nginx in production).
         const baseUrl = '';
-        const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.botId}/messages`;
+        const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${apiConfig.interrogationAgentId}/messages`;
 
         const payload: Payload = {
             meeting_title: formState.title,

@@ -58,13 +58,22 @@ const AppContent: React.FC = () => {
     tags: ["Internal only"],
   });
 
-  const [botId, setBotId] = useLocalStorage<string>('botId', (import.meta.env)?.DEFAULT_BOT_ID || '');
+  // Dual Agent Architecture: Separate IDs for meeting notes and interrogation
+  const [notesAgentId, setNotesAgentId] = useLocalStorage<string>(
+    'notesAgentId',
+    (import.meta.env)?.DEFAULT_NOTES_AGENT_ID || ''
+  );
+  const [interrogationAgentId, setInterrogationAgentId] = useLocalStorage<string>(
+    'interrogationAgentId',
+    (import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID || ''
+  );
 
   const apiConfig: ApiConfig = {
     hostname: 'https://interact.interpublic.com',
     clientId: (import.meta.env)?.CLIENT_ID || '',
     clientSecret: (import.meta.env)?.CLIENT_SECRET || '',
-    botId: botId,
+    notesAgentId: notesAgentId,
+    interrogationAgentId: interrogationAgentId,
   };
 
   const [controls, setControls] = useState<Controls>(DEFAULT_CONTROLS);
@@ -85,9 +94,12 @@ const AppContent: React.FC = () => {
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const lastGenerateTimeRef = useRef<number>(0);
 
-  // Check if using custom bot ID (test agent)
-  const defaultBotId = (import.meta.env)?.DEFAULT_BOT_ID || '';
-  const isUsingTestAgent = botId !== defaultBotId && botId !== '';
+  // Check if using custom agent IDs (test agents)
+  const defaultNotesAgentId = (import.meta.env)?.DEFAULT_NOTES_AGENT_ID || '';
+  const defaultInterrogationAgentId = (import.meta.env)?.DEFAULT_INTERROGATION_AGENT_ID || '';
+  const isUsingTestAgent =
+    (notesAgentId !== defaultNotesAgentId && notesAgentId !== '') ||
+    (interrogationAgentId !== defaultInterrogationAgentId && interrogationAgentId !== '');
 
   // Participant extraction hook
   const {
@@ -179,7 +191,7 @@ const AppContent: React.FC = () => {
   }, [t, addToast]);
 
   const handleGenerate = useCallback(async (currentFormState: FormState, currentControls: Controls) => {
-    if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.botId) {
+    if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.notesAgentId || !apiConfig.interrogationAgentId) {
         addToast(t('common:toasts.apiConfigMissing'), 'error');
         return;
     }
@@ -523,12 +535,14 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       </main>
-      <SettingsDrawer 
-        isOpen={isSettingsOpen} 
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         addToast={addToast}
-        botId={botId}
-        setBotId={setBotId}
+        notesAgentId={notesAgentId}
+        setNotesAgentId={setNotesAgentId}
+        interrogationAgentId={interrogationAgentId}
+        setInterrogationAgentId={setInterrogationAgentId}
       />
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 

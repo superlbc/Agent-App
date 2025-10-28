@@ -121,12 +121,13 @@ export interface ToastState {
   type: 'success' | 'error';
 }
 
-// Kept for apiService.ts compatibility
+// API Configuration for dual agent architecture
 export interface ApiConfig {
   hostname: string;
   clientId: string;
-  clientSecret:string;
-  botId: string;
+  clientSecret: string;
+  notesAgentId: string;          // Meeting Notes Generation Agent
+  interrogationAgentId: string;  // Interrogation Q&A Agent
 }
 
 export interface AuthToken {
