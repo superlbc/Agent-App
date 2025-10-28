@@ -9,8 +9,9 @@
 
 import fs from 'fs';
 
-// Test Agent Configuration
-const TEST_AGENT_ID = 'b8460071-daee-4820-8198-5224fdc99e45';
+// Agent Configuration
+const NOTES_AGENT_ID = 'b8460071-daee-4820-8198-5224fdc99e45';  // Meeting Notes Generation Agent
+const INTERROGATION_AGENT_ID = 'f8bf98dc-997c-4993-bbd6-02245b8b0044';  // Interrogation Q&A Agent
 const API_BASE_URL = 'https://interact.interpublic.com';
 
 // Sample Meeting Data (from constants.ts)
@@ -116,11 +117,11 @@ async function testNormalMode(accessToken) {
 
   const prompt = constructPrompt(payload);
 
-  console.log('📤 Sending request to test agent...');
-  console.log(`Agent ID: ${TEST_AGENT_ID}`);
+  console.log('📤 Sending request to Meeting Notes Agent...');
+  console.log(`Agent ID: ${NOTES_AGENT_ID}`);
   console.log(`Prompt length: ${prompt.length} characters\n`);
 
-  const agentUrl = `${API_BASE_URL}/api/chat-ai/v1/bots/${TEST_AGENT_ID}/messages`;
+  const agentUrl = `${API_BASE_URL}/api/chat-ai/v1/bots/${NOTES_AGENT_ID}/messages`;
 
   const response = await fetch(agentUrl, {
     method: 'POST',
@@ -252,10 +253,11 @@ async function testInterrogationMode(accessToken) {
   const prompt = constructPrompt(payload);
 
   console.log('📤 Sending interrogation request...');
+  console.log(`Agent ID: ${INTERROGATION_AGENT_ID}`);
   console.log(`Question: "${question}"`);
   console.log(`Prompt length: ${prompt.length} characters\n`);
 
-  const agentUrl = `${API_BASE_URL}/api/chat-ai/v1/bots/${TEST_AGENT_ID}/messages`;
+  const agentUrl = `${API_BASE_URL}/api/chat-ai/v1/bots/${INTERROGATION_AGENT_ID}/messages`;
 
   const response = await fetch(agentUrl, {
     method: 'POST',
@@ -352,7 +354,9 @@ async function testInterrogationMode(accessToken) {
 // Main execution
 async function main() {
   console.log('🚀 Starting Agent Test Runner\n');
-  console.log(`Test Agent ID: ${TEST_AGENT_ID}`);
+  console.log('Agent IDs:');
+  console.log(`  Meeting Notes Agent: ${NOTES_AGENT_ID}`);
+  console.log(`  Interrogation Agent: ${INTERROGATION_AGENT_ID}`);
   console.log(`API Base URL: ${API_BASE_URL}\n`);
 
   // Get credentials from environment or use defaults from .env.local
