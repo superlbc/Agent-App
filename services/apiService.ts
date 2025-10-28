@@ -221,11 +221,11 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                     return agentResponse;
                 }
 
-                // Check if it's OLD format with meeting_title and workstream_notes - CONVERT IT!
+                // Check if it's NEW STRUCTURED format with meeting_title and workstream_notes
                 if (parsedJson && typeof parsedJson === 'object' && 'meeting_title' in parsedJson && 'workstream_notes' in parsedJson) {
-                    console.log('🔄 ========== DETECTED OLD STRUCTURED FORMAT - CONVERTING TO MARKDOWN ==========');
+                    console.log('🔄 ========== DETECTED NEW STRUCTURED JSON FORMAT - CONVERTING TO MARKDOWN ==========');
 
-                    // Convert old structured format to markdown
+                    // Convert structured JSON format to markdown for rendering
                     let markdown = '';
 
                     // Title
@@ -251,8 +251,10 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                             if (workstream.key_discussion_points && workstream.key_discussion_points.length > 0) {
                                 markdown += `### 🎯 KEY DISCUSSION POINTS\n\n`;
                                 workstream.key_discussion_points.forEach((point: any) => {
-                                    if (point.text) {
-                                        markdown += `- ${point.text}\n`;
+                                    // Ensure we extract the text string, not the entire object
+                                    const textContent = typeof point === 'string' ? point : (point.text || '');
+                                    if (textContent) {
+                                        markdown += `- ${String(textContent)}\n`;
                                     }
                                 });
                                 markdown += `\n`;
@@ -262,8 +264,9 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                             if (workstream.decisions_made && workstream.decisions_made.length > 0) {
                                 markdown += `### ✅ DECISIONS MADE\n\n`;
                                 workstream.decisions_made.forEach((decision: any) => {
-                                    if (decision.text) {
-                                        markdown += `- ${decision.text}\n`;
+                                    const textContent = typeof decision === 'string' ? decision : (decision.text || '');
+                                    if (textContent) {
+                                        markdown += `- ${String(textContent)}\n`;
                                     }
                                 });
                                 markdown += `\n`;
@@ -273,8 +276,9 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                             if (workstream.risks_or_open_questions && workstream.risks_or_open_questions.length > 0) {
                                 markdown += `### ❓ RISKS OR OPEN QUESTIONS\n\n`;
                                 workstream.risks_or_open_questions.forEach((risk: any) => {
-                                    if (risk.text) {
-                                        markdown += `- ${risk.text}\n`;
+                                    const textContent = typeof risk === 'string' ? risk : (risk.text || '');
+                                    if (textContent) {
+                                        markdown += `- ${String(textContent)}\n`;
                                     }
                                 });
                                 markdown += `\n`;
@@ -282,18 +286,68 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                         });
                     }
 
+                    // Add NEXT STEPS header so the NextStepsTable renders
+                    if (parsedJson.next_steps && parsedJson.next_steps.length > 0) {
+                        markdown += `\n---\n\n## 🔷 NEXT STEPS\n\n`;
+                        markdown += `_(Action items table will appear below)_\n\n`;
+                    }
+
+                    // Ensure markdown is a valid string
+                    const validMarkdown = typeof markdown === 'string' ? markdown : '';
+
+                    // Filter suggested_questions to ensure they're all strings (no objects)
+                    const validSuggestedQuestions = Array.isArray(parsedJson.suggested_questions)
+                        ? parsedJson.suggested_questions.filter((q: any) => typeof q === 'string')
+                        : [];
+
+                    // CRITICAL FIX: Convert coach_insights arrays from {text, emphasis} objects to plain strings
+                    let processedCoachInsights = parsedJson.coach_insights;
+                    if (processedCoachInsights) {
+                        const extractTextFromArray = (arr: any[]) => {
+                            if (!Array.isArray(arr)) return arr;
+                            return arr.map((item: any) => {
+                                if (typeof item === 'string') return item;
+                                if (item && typeof item === 'object' && 'text' in item) {
+                                    return String(item.text); // Extract .text field from {text, emphasis} objects
+                                }
+                                return String(item);
+                            });
+                        };
+
+                        processedCoachInsights = {
+                            ...processedCoachInsights,
+                            strengths: extractTextFromArray(processedCoachInsights.strengths || []),
+                            improvements: extractTextFromArray(processedCoachInsights.improvements || []),
+                            facilitation_tips: extractTextFromArray(processedCoachInsights.facilitation_tips || []),
+                        };
+
+                        console.log('🔄 Converted coach_insights from structured objects to strings');
+                    }
+
                     agentResponse = {
-                        markdown: markdown,
-                        next_steps: parsedJson.next_steps || [],
-                        coach_insights: parsedJson.coach_insights || undefined,
-                        suggested_questions: parsedJson.suggested_questions || [],
+                        markdown: validMarkdown,
+                        next_steps: Array.isArray(parsedJson.next_steps) ? parsedJson.next_steps : [],
+                        coach_insights: processedCoachInsights,
+                        suggested_questions: validSuggestedQuestions,
                     };
 
-                    console.log('✅ Successfully converted old format to markdown!');
+                    console.log('✅ Successfully converted structured JSON to markdown for rendering!');
                     console.log('   Markdown length:', agentResponse.markdown?.length || 0);
+                    console.log('   Markdown type:', typeof agentResponse.markdown);
                     console.log('   Markdown preview (first 300 chars):', agentResponse.markdown?.substring(0, 300));
+                    console.log('   Workstreams processed:', parsedJson.workstream_notes?.length || 0);
                     console.log('   Next steps count:', agentResponse.next_steps?.length || 0);
+                    console.log('   Next steps are array:', Array.isArray(agentResponse.next_steps));
                     console.log('   Suggested questions count:', agentResponse.suggested_questions?.length || 0);
+                    console.log('   Suggested questions are array:', Array.isArray(agentResponse.suggested_questions));
+                    console.log('   Suggested questions filtered from:', parsedJson.suggested_questions?.length || 0);
+
+                    // Critical: Verify agentResponse structure before returning
+                    if (typeof agentResponse.markdown !== 'string') {
+                        console.error('❌ CRITICAL: markdown is not a string!', typeof agentResponse.markdown);
+                        throw new Error('Markdown conversion failed - result is not a string');
+                    }
+
                     return agentResponse;
                 }
 
