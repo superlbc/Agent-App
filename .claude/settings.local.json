@@ -20,7 +20,10 @@
       "Bash(copy graph-api-test.html index.html)",
       "Bash(start http://localhost:3000)",
       "Bash(start http://localhost:3000/transcript-test.html)",
-      "Bash(node test-agent-runner.js:*)"
+      "Bash(node test-agent-runner.js:*)",
+      "Bash(echo:*)",
+      "Bash(node scripts/generate-version.js:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

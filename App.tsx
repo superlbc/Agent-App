@@ -24,6 +24,8 @@ import { getBrowserContext } from './utils/browserContext';
 import { FeedbackButton } from './components/FeedbackButton';
 import { useParticipantExtraction } from './hooks/useParticipantExtraction';
 import { resetAllUserData } from './utils/resetUserData';
+import { useVersionCheck } from './hooks/useVersionCheck';
+import { VersionUpdateBanner } from './components/ui/VersionUpdateBanner';
 
 const DEFAULT_CONTROLS: Controls = {
   focus_department: [],
@@ -93,6 +95,9 @@ const AppContent: React.FC = () => {
 
   const { startTour, isTourActive } = useTourContext();
   const { isAuthenticated, user } = useAuth();
+
+  // Version checking for update notifications
+  const { updateAvailable, currentVersion, serverVersion, dismissUpdate } = useVersionCheck();
 
   // AbortController ref for cancelling requests
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -481,6 +486,13 @@ const AppContent: React.FC = () => {
         onReset={handleResetUserData}
       />
       <main className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
+        {updateAvailable && currentVersion && serverVersion && (
+          <VersionUpdateBanner
+            currentVersion={currentVersion.version}
+            serverVersion={serverVersion.version}
+            onDismiss={dismissUpdate}
+          />
+        )}
         {isUsingTestAgent && (
           <TestAgentBanner onOpenSettings={() => setIsSettingsOpen(true)} />
         )}
