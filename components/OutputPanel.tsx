@@ -391,7 +391,7 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 };
 
 
-const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[], showEmphasis: boolean, toggleEmphasis: () => void, groupingMode: 'by-topic' | 'by-type', setGroupingMode: (mode: 'by-topic' | 'by-type') => void }> = ({ output, title, addToast, onInterrogate, participants, showEmphasis, toggleEmphasis, groupingMode, setGroupingMode }) => {
+const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[], showEmphasis: boolean, toggleEmphasis: () => void }> = ({ output, title, addToast, onInterrogate, participants, showEmphasis, toggleEmphasis }) => {
     const { t } = useTranslation(['common']);
     const { graphData } = useAuth();
     const markdownContent = output.markdown || '';
@@ -599,56 +599,17 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 
     return (
         <div id="export-bar" className="flex flex-wrap items-center justify-between gap-2">
+            {/* Left: Export Actions */}
             <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" onClick={handleCopy}><Icon name="copy" className="h-4 w-4 mr-2"/> {t('common:actions.copyToClipboard')}</Button>
                 <Button size="sm" variant="outline" onClick={handleDownloadPdf}><Icon name="pdf" className="h-4 w-4 mr-2"/> {t('common:actions.downloadPDF')}</Button>
                 <Button size="sm" variant="outline" onClick={handleDownloadCsv}><Icon name="csv" className="h-4 w-4 mr-2"/> {t('common:actions.downloadCSVActions')}</Button>
                 <Button size="sm" variant="outline" onClick={handleDraftEmail}><Icon name="email" className="h-4 w-4 mr-2"/> {t('common:actions.draftEmail')}</Button>
             </div>
-            <div className="flex items-center gap-2">
-                {/* Grouping Mode Toggle - Segmented Control */}
-                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-md p-0.5">
-                  <Tooltip content={
-                    <div className="text-center">
-                      <div className="font-semibold">Group by Topic</div>
-                      <div className="text-xs mt-1 opacity-90">Organize notes by workstream/topic</div>
-                    </div>
-                  }>
-                    <button
-                      onClick={() => setGroupingMode('by-topic')}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
-                        groupingMode === 'by-topic'
-                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                      }`}
-                      aria-label="Group by Topic"
-                    >
-                      <span>📊</span>
-                      <span>By Topic</span>
-                    </button>
-                  </Tooltip>
-                  <Tooltip content={
-                    <div className="text-center">
-                      <div className="font-semibold">Group by Type</div>
-                      <div className="text-xs mt-1 opacity-90">Organize by content type (discussions, decisions, risks)</div>
-                    </div>
-                  }>
-                    <button
-                      onClick={() => setGroupingMode('by-type')}
-                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
-                        groupingMode === 'by-type'
-                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
-                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                      }`}
-                      aria-label="Group by Type"
-                    >
-                      <span>📝</span>
-                      <span>By Type</span>
-                    </button>
-                  </Tooltip>
-                </div>
 
-                {/* Emphasis Toggle - Icon Only */}
+            {/* Right: Emphasis Toggle and Interrogate */}
+            <div className="flex items-center gap-2">
+                {/* Emphasis Toggle - Icon only, gray button */}
                 <Tooltip content={
                   <div className="text-center">
                     <div className="font-semibold">Toggle Emphasis</div>
@@ -658,11 +619,7 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
                 }>
                   <button
                     onClick={toggleEmphasis}
-                    className={`p-2 rounded-md transition-all duration-200 ${
-                      showEmphasis
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500 dark:ring-blue-400'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
+                    className="p-2 rounded-md transition-colors bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
                     aria-label="Toggle Emphasis Styling"
                   >
                     <Icon name={showEmphasis ? "highlight" : "text"} className="h-4 w-4" />
@@ -936,36 +893,79 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                 participants={participants}
                 showEmphasis={showEmphasis}
                 toggleEmphasis={toggleEmphasis}
-                groupingMode={groupingMode}
-                setGroupingMode={setGroupingMode}
               />
           </div>
         </div>
          <div id="generated-notes-content">
-          <div className="flex justify-end gap-2 mb-4">
-              {/* Focus Department (if selected) */}
-              {controls.focus_department.length > 0 && (
-                  <Chip className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800">
-                    {controls.focus_department.join(', ')}
+          <div className="flex items-center justify-between gap-3 mb-4">
+              {/* Left: Grouping Mode Toggle */}
+              <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-md p-0.5">
+                <Tooltip content={
+                  <div className="text-center">
+                    <div className="font-semibold">Group by Topic</div>
+                    <div className="text-xs mt-1 opacity-90">Organize notes by workstream/topic</div>
+                  </div>
+                }>
+                  <button
+                    onClick={() => setGroupingMode('by-topic')}
+                    className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                      groupingMode === 'by-topic'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                    aria-label="Group by Topic"
+                  >
+                    <span>📊</span>
+                    <span>By Topic</span>
+                  </button>
+                </Tooltip>
+                <Tooltip content={
+                  <div className="text-center">
+                    <div className="font-semibold">Group by Type</div>
+                    <div className="text-xs mt-1 opacity-90">Organize by content type (discussions, decisions, risks)</div>
+                  </div>
+                }>
+                  <button
+                    onClick={() => setGroupingMode('by-type')}
+                    className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                      groupingMode === 'by-type'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                    aria-label="Group by Type"
+                  >
+                    <span>📝</span>
+                    <span>By Type</span>
+                  </button>
+                </Tooltip>
+              </div>
+
+              {/* Right: Tags */}
+              <div className="flex gap-2">
+                  {/* Focus Department (if selected) */}
+                  {controls.focus_department.length > 0 && (
+                      <Chip className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800">
+                        {controls.focus_department.join(', ')}
+                      </Chip>
+                  )}
+
+                  {/* Tone */}
+                  <Chip className="bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-200 border-teal-200 dark:border-teal-800">
+                    {t(`constants:tone.${controls.tone === 'client-ready' ? 'clientReady' : controls.tone}`)}
                   </Chip>
-              )}
 
-              {/* Tone */}
-              <Chip className="bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-200 border-teal-200 dark:border-teal-800">
-                {t(`constants:tone.${controls.tone === 'client-ready' ? 'clientReady' : controls.tone}`)}
-              </Chip>
+                  {/* Audience */}
+                  <Chip className="bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-200 border-sky-200 dark:border-sky-800">
+                    {t(`constants:audienceShort.${controls.audience === 'department-specific' ? 'departmentSpecific' : controls.audience === 'cross-functional' ? 'crossFunctional' : controls.audience}`)}
+                  </Chip>
 
-              {/* Audience */}
-              <Chip className="bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-200 border-sky-200 dark:border-sky-800">
-                {t(`constants:audienceShort.${controls.audience === 'department-specific' ? 'departmentSpecific' : controls.audience === 'cross-functional' ? 'crossFunctional' : controls.audience}`)}
-              </Chip>
-
-              {/* Meeting Preset */}
-              <Chip className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800">
-                {controls.meetingPreset === 'custom'
-                  ? 'Custom'
-                  : t(`constants:presets.${controls.meetingPreset === 'client-update' ? 'clientUpdate' : controls.meetingPreset === 'internal-sync' ? 'internalSync' : controls.meetingPreset === 'executive-briefing' ? 'executiveBriefing' : controls.meetingPreset}.name`)}
-              </Chip>
+                  {/* Meeting Preset */}
+                  <Chip className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800">
+                    {controls.meetingPreset === 'custom'
+                      ? 'Custom'
+                      : t(`constants:presets.${controls.meetingPreset === 'client-update' ? 'clientUpdate' : controls.meetingPreset === 'internal-sync' ? 'internalSync' : controls.meetingPreset === 'executive-briefing' ? 'executiveBriefing' : controls.meetingPreset}.name`)}
+                  </Chip>
+              </div>
           </div>
           {output.structured_data ? (
             <>

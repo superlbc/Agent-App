@@ -48,7 +48,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, className, 
     >
       {children}
       <div
-        className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-sm px-3 py-2 bg-slate-800 dark:bg-slate-900 text-white text-xs rounded-md shadow-lg z-10 transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-sm px-3 py-2 bg-slate-800 dark:bg-slate-900 text-white text-xs rounded-md shadow-lg z-[9999] transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         role="tooltip"
       >
         {content}

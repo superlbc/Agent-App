@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
 
   return (
     <>
-    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800">
+    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-3">
@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
               )}
             </button>
             {isMenuOpen && (
-              <div ref={menuRef} className="absolute right-0 mt-2 w-64 origin-top-right z-50 animate-fade-in">
+              <div ref={menuRef} className="absolute right-0 mt-2 w-64 origin-top-right z-[100] animate-fade-in">
                 <Card className="p-1.5">
                   {/* User Info Header */}
                   <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-700">
