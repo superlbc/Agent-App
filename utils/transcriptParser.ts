@@ -50,6 +50,23 @@ export function parseVTTToConversation(content: string): ConversationBlock[] {
 }
 
 /**
+ * Removes XML/VTT tags from text
+ * Cleans up tags like </v>, <v >, <c>, </c>, etc.
+ */
+function cleanVTTTags(text: string): string {
+  if (!text) return text;
+
+  // Remove all XML-like tags: <v >, </v>, <c>, </c>, <i>, </i>, etc.
+  return text
+    .replace(/<\/?v[^>]*>/gi, '')  // Remove <v ...> and </v>
+    .replace(/<\/?c[^>]*>/gi, '')  // Remove <c ...> and </c>
+    .replace(/<\/?i[^>]*>/gi, '')  // Remove <i> and </i>
+    .replace(/<\/?b[^>]*>/gi, '')  // Remove <b> and </b>
+    .replace(/<\/?u[^>]*>/gi, '')  // Remove <u> and </u>
+    .trim();
+}
+
+/**
  * Parses VTT format transcript
  */
 function parseVTTFormat(vttContent: string): ConversationBlock[] {
@@ -85,7 +102,9 @@ function parseVTTFormat(vttContent: string): ConversationBlock[] {
 
     while ((match = vtagPattern.exec(line)) !== null) {
       const speaker = match[1].trim();
-      const text = match[2].trim();
+      const rawText = match[2].trim();
+      // Clean up any VTT tags within the text
+      const text = cleanVTTTags(rawText);
       if (text) {
         segments.push({ speaker, text });
       }

@@ -11,11 +11,10 @@ import { Tooltip } from './ui/Tooltip';
 import {
   Controls,
   FormState,
-  Department,
   MeetingPreset,
-  ContextTag,
   Participant,
   GraphData,
+  ApiConfig,
 } from '../types';
 import { ParticipantsPanel } from './participants/ParticipantsPanel';
 import { ParsedContact } from '../utils/emailListParser';
@@ -28,15 +27,12 @@ import { TranscriptViewer } from './transcript/TranscriptViewer';
 import { TranscriptViewerModal } from './transcript/TranscriptViewerModal';
 import { ParticipantsModal } from './participants/ParticipantsModal';
 import {
-  DEPARTMENT_OPTIONS,
-  CONTEXT_TAG_OPTIONS,
   MEETING_PRESET_OPTIONS,
   PRESET_CONFIGS,
   AUDIENCE_BUTTON_OPTIONS,
   TONE_OPTIONS,
   VIEW_MODE_OPTIONS,
   COACHING_STYLE_OPTIONS,
-  DEPARTMENT_LEGEND,
 } from '../constants';
 import { telemetryService } from '../utils/telemetryService';
 import { searchUserByEmail } from '../utils/graphSearchService';
@@ -53,6 +49,7 @@ interface InputPanelProps {
   onUseSampleData: () => void;
   isTourActive: boolean;
   onTriggerFileUpload?: () => void;
+  apiConfig: ApiConfig; // For interrogation modal in transcript viewer
   // Participant management
   participants: Participant[];
   isExtracting: boolean;
@@ -83,6 +80,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   onUseSampleData,
   isTourActive,
   onTriggerFileUpload,
+  apiConfig,
   participants,
   isExtracting,
   onExtractAndMatch,
@@ -157,7 +155,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         ...config,
         meetingPreset: preset,
     }));
-    setFormState(prev => ({...prev, tags: config.tags}));
     if (!isTourActive) {
       const presetOption = MEETING_PRESET_OPTIONS.find(p => p.value === preset);
       const presetName = presetOption ? t(presetOption.labelKey) : preset;
@@ -182,14 +179,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     }
   };
 
-  const handleTagToggle = (tag: ContextTag) => {
-    const newTags = formState.tags.includes(tag)
-      ? formState.tags.filter(t => t !== tag)
-      : [...formState.tags, tag];
-    // Also set meetingPreset to 'custom' when tags are manually changed
-    setControls(prev => ({...prev, meetingPreset: 'custom'}));
-    handleFormChange('tags', newTags);
-  };
 
   const handleMeetingSelected = async (meetingData: MeetingWithTranscript) => {
     console.log('[InputPanel] Meeting data received:', meetingData);
@@ -921,48 +910,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
           
           {isAdvancedOpen && (
               <div id="advanced-settings-panel" className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <div id="context-tags-section">
-                      <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        {t('forms:input.tags.label')}
-                         <Tooltip content={t('forms:tooltips.contextTags')}>
-                            <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
-                        </Tooltip>
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                          {CONTEXT_TAG_OPTIONS.map(({ value, labelKey }) => (
-                              <Chip key={value} selected={formState.tags.includes(value)} onClick={() => handleTagToggle(value)}>
-                                  {t(labelKey)}
-                              </Chip>
-                          ))}
-                      </div>
-                  </div>
-
-                   <div id="department-focus-section">
-                      <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        {t('forms:controls.department.label')}
-                         <Tooltip content={t('forms:tooltips.departmentFocus')}>
-                            <Icon name="info" className="h-4 w-4 ml-1.5 text-slate-400 cursor-help" />
-                        </Tooltip>
-                      </label>
-                      <div className="flex flex-wrap gap-1.5">
-                          {DEPARTMENT_OPTIONS.map(dept => (
-                              <Tooltip key={dept} content={t(`constants:departmentDescriptions.${dept}`)}>
-                                  <Chip
-                                      selected={controls.focus_department.includes(dept)}
-                                      onClick={() => {
-                                          const newDepts = controls.focus_department.includes(dept)
-                                              ? controls.focus_department.filter(d => d !== dept)
-                                              : [...controls.focus_department, dept];
-                                          handleControlChange('focus_department', newDepts as Department[]);
-                                      }}
-                                  >
-                                      {dept}
-                                  </Chip>
-                              </Tooltip>
-                          ))}
-                      </div>
-                  </div>
-
                   <div id="audience-section">
                     <label className="flex items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('forms:controls.audience.label')}
@@ -1077,20 +1024,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                         checked={controls.redact}
                         onChange={checked => handleControlChange('redact', checked)}
                         tooltip={t('forms:tooltips.redact')}
-                      />
-                       <ToggleSwitch
-                        id="use-icons"
-                        label={t('forms:controls.useIcons.label')}
-                        checked={controls.use_icons}
-                        onChange={checked => handleControlChange('use_icons', checked)}
-                        tooltip={t('forms:tooltips.useIcons')}
-                      />
-                      <ToggleSwitch
-                        id="bold-words"
-                        label={t('forms:controls.boldKeywords.label')}
-                        checked={controls.bold_important_words}
-                        onChange={checked => handleControlChange('bold_important_words', checked)}
-                        tooltip={t('forms:tooltips.boldKeywords')}
                       />
                   </div>
                   <div id="meeting-coach-section">
@@ -1223,6 +1156,8 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         iterations={transcriptIterations}
         onlineMeetingId={transcriptMeetingId}
         joinWebUrl={transcriptJoinUrl}
+        apiConfig={apiConfig}
+        addToast={addToast}
       />
 
       {/* Participants Modal */}

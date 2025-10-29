@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep, Participant } from '../types';
 import { Card } from './ui/Card';
@@ -12,6 +12,12 @@ import { InterrogateTranscriptModal } from './InterrogateTranscriptModal';
 import { telemetryService } from '../utils/telemetryService';
 import { formatDate } from '../utils/dateFormatting';
 import { useLanguage } from '../hooks/useLanguage';
+import { StructuredNotesView } from './StructuredNotesView';
+import { useTableSort } from '../hooks/useTableSort';
+import { useTableFilter } from '../hooks/useTableFilter';
+import { TableFilters } from './TableFilters';
+import { useAuth } from '../contexts/AuthContext';
+import { Tooltip } from './ui/Tooltip';
 
 interface OutputPanelProps {
   output: AgentResponse | null;
@@ -45,60 +51,151 @@ const renderWithBold = (text: string): React.ReactNode => {
     return parts.length > 1 ? parts : text;
 };
 
-const NextStepsTable: React.FC<{ nextSteps: NextStep[]; useIcons: boolean }> = ({ nextSteps, useIcons }) => {
-    const { t } = useTranslation(['common']);
-    const { currentLanguage } = useLanguage();
+const renderStatus = (status: string): React.ReactNode => {
+    const statusUpper = status?.toUpperCase();
 
-    const headers = [
-        t('common:nextSteps.headers.department'),
-        t('common:nextSteps.headers.owner'),
-        t('common:nextSteps.headers.task'),
-        t('common:nextSteps.headers.dueDate'),
-        t('common:nextSteps.headers.status'),
-        t('common:nextSteps.headers.statusNotes')
-    ];
-
-    const renderStatus = (status: NextStep['status']): React.ReactNode => {
-        if (useIcons) {
-            switch (status) {
-                case 'GREEN': return <span className="h-4 w-4 rounded-sm inline-block bg-green-500" aria-label="Green status"></span>;
-                case 'AMBER': return <span className="h-4 w-4 rounded-sm inline-block bg-amber-500" aria-label="Amber status"></span>;
-                case 'RED': return <span className="h-4 w-4 rounded-sm inline-block bg-red-500" aria-label="Red status"></span>;
-                default: return '—';
-            }
-        }
-        return status;
+    const statusStyles: Record<string, string> = {
+        'GREEN': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800',
+        'AMBER': 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+        'RED': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800',
+        'NA': 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600',
     };
 
+    const styleClass = statusStyles[statusUpper] || statusStyles['NA'];
+
     return (
-        <div id="next-steps-table" className="overflow-x-auto my-6">
-            <table className="min-w-full text-sm border-separate" style={{ borderSpacing: 0 }}>
-                <thead className="bg-slate-100 dark:bg-slate-800">
-                    <tr>
-                        {headers.map((h, i) => (
-                            <th key={i} scope="col" className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200 tracking-wider uppercase border-b border-slate-200 dark:border-slate-700">{h}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-slate-900">
-                    {nextSteps.length === 0 ? (
-                        <tr>
-                            <td colSpan={headers.length} className="px-4 py-3 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">—</td>
-                        </tr>
-                    ) : (
-                        nextSteps.map((row, i) => (
-                            <tr key={i} className={i % 2 === 1 ? 'bg-slate-50 dark:bg-slate-800/50' : ''}>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.department}</td>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.owner}</td>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.task}</td>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{formatDate(row.due_date, currentLanguage)}</td>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{renderStatus(row.status)}</td>
-                                <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.status_notes}</td>
-                            </tr>
-                        ))
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styleClass}`}>
+            {status || 'N/A'}
+        </span>
+    );
+};
+
+const NextStepsTable: React.FC<{ nextSteps: NextStep[] }> = ({ nextSteps }) => {
+    const { t } = useTranslation(['common']);
+    const { currentLanguage } = useLanguage();
+    const [showFilters, setShowFilters] = useState(false);
+
+    // Get unique values for filters
+    const uniqueDepartments = useMemo(() => Array.from(new Set(nextSteps.map(s => s.department))).sort(), [nextSteps]);
+    const uniqueOwners = useMemo(() => Array.from(new Set(nextSteps.map(s => s.owner).filter(Boolean))).sort(), [nextSteps]);
+    const uniqueStatuses = useMemo(() => ['RED', 'AMBER', 'GREEN', 'NA'], []);
+
+    // Initialize sorting
+    const { sortedData: sortedSteps, requestSort, getSortIndicator } = useTableSort<NextStep>(nextSteps);
+
+    // Initialize filtering
+    const {
+        filteredData: filteredSteps,
+        filters,
+        setFilter,
+        clearAllFilters,
+        setSearchQuery,
+        searchQuery,
+        activeFilterCount
+    } = useTableFilter<NextStep>(
+        sortedSteps,
+        ['department', 'owner', 'task', 'due_date', 'status', 'status_notes'],
+        'nextStepsTable'
+    );
+
+    const columns: { key: keyof NextStep; label: string; sortable: boolean }[] = [
+        { key: 'department', label: t('common:nextSteps.headers.department'), sortable: true },
+        { key: 'owner', label: t('common:nextSteps.headers.owner'), sortable: true },
+        { key: 'task', label: t('common:nextSteps.headers.task'), sortable: true },
+        { key: 'due_date', label: t('common:nextSteps.headers.dueDate'), sortable: true },
+        { key: 'status', label: t('common:nextSteps.headers.status'), sortable: true },
+        { key: 'status_notes', label: t('common:nextSteps.headers.statusNotes'), sortable: false },
+    ];
+
+    return (
+        <div id="next-steps-table" className="my-6 space-y-4">
+            {/* Filter Controls */}
+            <div className="flex items-center justify-between">
+                <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowFilters(!showFilters)}
+                >
+                    <Icon name="filter" className="h-4 w-4 mr-2" />
+                    Filters
+                    {activeFilterCount > 0 && (
+                        <span className="ml-2 px-1.5 py-0.5 text-xs font-medium bg-primary text-white rounded-full">
+                            {activeFilterCount}
+                        </span>
                     )}
-                </tbody>
-            </table>
+                </Button>
+                <span className="text-sm text-slate-600 dark:text-slate-400">
+                    {filteredSteps.length} of {nextSteps.length} action{nextSteps.length === 1 ? '' : 's'}
+                </span>
+            </div>
+
+            {/* Filter Panel */}
+            {showFilters && (
+                <TableFilters
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    departments={uniqueDepartments}
+                    selectedDepartments={filters.department || []}
+                    onDepartmentsChange={(depts) => setFilter('department', depts.length > 0 ? depts : undefined)}
+                    owners={uniqueOwners}
+                    selectedOwners={filters.owner || []}
+                    onOwnersChange={(owners) => setFilter('owner', owners.length > 0 ? owners : undefined)}
+                    statuses={uniqueStatuses}
+                    selectedStatuses={filters.status || []}
+                    onStatusesChange={(statuses) => setFilter('status', statuses.length > 0 ? statuses : undefined)}
+                    onClearAll={clearAllFilters}
+                    activeFilterCount={activeFilterCount}
+                />
+            )}
+
+            {/* Table */}
+            <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+                <table className="min-w-full text-sm border-separate" style={{ borderSpacing: 0 }}>
+                    <thead className="bg-slate-100 dark:bg-slate-800">
+                        <tr>
+                            {columns.map((col) => (
+                                <th
+                                    key={String(col.key)}
+                                    scope="col"
+                                    className={`px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200 tracking-wider uppercase border-b border-slate-200 dark:border-slate-700 ${
+                                        col.sortable ? 'cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 select-none' : ''
+                                    }`}
+                                    onClick={() => col.sortable && requestSort(col.key)}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span>{col.label}</span>
+                                        {col.sortable && (
+                                            <span className="text-slate-400 dark:text-slate-500">
+                                                {getSortIndicator(col.key)}
+                                            </span>
+                                        )}
+                                    </div>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-900">
+                        {filteredSteps.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                                    {nextSteps.length === 0 ? 'No action items' : 'No action items match your filters'}
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredSteps.map((row, i) => (
+                                <tr key={i} className={i % 2 === 1 ? 'bg-slate-50 dark:bg-slate-800/50' : ''}>
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.department}</td>
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.owner}</td>
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.task}</td>
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{formatDate(row.due_date, currentLanguage)}</td>
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{renderStatus(row.status)}</td>
+                                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-pre-wrap align-top border-b border-slate-200 dark:border-slate-700">{row.status_notes}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
@@ -294,8 +391,9 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 };
 
 
-const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[] }> = ({ output, title, addToast, onInterrogate, participants }) => {
+const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[], showEmphasis: boolean, toggleEmphasis: () => void, groupingMode: 'by-topic' | 'by-type', setGroupingMode: (mode: 'by-topic' | 'by-type') => void }> = ({ output, title, addToast, onInterrogate, participants, showEmphasis, toggleEmphasis, groupingMode, setGroupingMode }) => {
     const { t } = useTranslation(['common']);
+    const { graphData } = useAuth();
     const markdownContent = output.markdown || '';
     const nextSteps = output.next_steps || [];
 
@@ -384,7 +482,47 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 
     const handleDraftEmail = async () => {
         const intro = `Hi Team,\n\nPlease find the notes and action items from our recent meeting below.\n\n---\n\n`;
-        const fullMarkdown = intro + markdownContent;
+
+        // Strip out the NEXT STEPS section from markdownContent to avoid duplication
+        // We'll add our own programmatic table instead
+        let cleanedMarkdown = markdownContent;
+        const nextStepsHeaderRegex = /^(?:#{2,3}\s*)?(?:[🔷◆]+\s*)?NEXT STEPS(?:\s*[🔷◆]+)?\s*$/im;
+        const nextStepsIndex = cleanedMarkdown.search(nextStepsHeaderRegex);
+
+        if (nextStepsIndex !== -1) {
+            // Find the next major section header or end of content
+            const afterNextSteps = cleanedMarkdown.substring(nextStepsIndex);
+            const nextSectionRegex = /\n(?:#{2,3}\s*)?(?:[🔷◆]+\s*)?[A-Z\s\/]+(?:\s*[🔷◆]+)?\s*\n/;
+            const nextSectionMatch = afterNextSteps.substring(1).search(nextSectionRegex);
+
+            if (nextSectionMatch !== -1) {
+                // Remove from NEXT STEPS to the next section
+                cleanedMarkdown = cleanedMarkdown.substring(0, nextStepsIndex) +
+                                 afterNextSteps.substring(nextSectionMatch + 1);
+            } else {
+                // Remove from NEXT STEPS to end of document
+                cleanedMarkdown = cleanedMarkdown.substring(0, nextStepsIndex);
+            }
+        }
+
+        // Build Next Steps table in markdown
+        let nextStepsTable = '';
+        if (nextSteps && nextSteps.length > 0) {
+            nextStepsTable = '\n\n## Next Steps\n\n';
+            nextStepsTable += '| Department | Owner | Task | Due Date | Status | Notes |\n';
+            nextStepsTable += '|------------|-------|------|----------|--------|-------|\n';
+            nextSteps.forEach(step => {
+                const dept = step.department || 'General';
+                const owner = step.owner || 'Unassigned';
+                const task = (step.task || '').replace(/\|/g, '\\|'); // Escape pipes
+                const dueDate = step.due_date || 'Not specified';
+                const status = step.status || 'NA';
+                const notes = (step.status_notes || '').replace(/\|/g, '\\|'); // Escape pipes
+                nextStepsTable += `| ${dept} | ${owner} | ${task} | ${dueDate} | ${status} | ${notes} |\n`;
+            });
+        }
+
+        const fullMarkdown = intro + cleanedMarkdown + nextStepsTable;
         const htmlBody = markdownToHtml(fullMarkdown);
 
         // Get matched participant emails
@@ -418,9 +556,21 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
         const subject = encodeURIComponent(`Meeting Notes: ${title}`);
         const body = encodeURIComponent("Meeting notes have been copied to your clipboard. Please paste them here.");
 
-        // Include participant emails in mailto link (semicolon separated)
-        const emailTo = participantEmails.length > 0 ? participantEmails.join(';') : '';
-        const mailtoLink = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+        // Separate logged user from participants
+        const loggedUserEmail = graphData?.mail?.toLowerCase();
+
+        // To field: participants only (excluding logged user if they're in the list)
+        const toEmails = participantEmails.filter(
+            email => email.toLowerCase() !== loggedUserEmail
+        );
+
+        // CC field: logged user only
+        const ccEmails = loggedUserEmail ? [graphData!.mail!] : [];
+
+        // Build mailto link with To and CC fields
+        const emailTo = toEmails.length > 0 ? toEmails.join(';') : '';
+        const emailCc = ccEmails.length > 0 ? ccEmails.join(';') : '';
+        const mailtoLink = `mailto:${emailTo}?subject=${subject}&body=${body}${emailCc ? `&cc=${emailCc}` : ''}`;
 
         const a = document.createElement('a');
         a.href = mailtoLink;
@@ -455,8 +605,71 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
                 <Button size="sm" variant="outline" onClick={handleDownloadCsv}><Icon name="csv" className="h-4 w-4 mr-2"/> {t('common:actions.downloadCSVActions')}</Button>
                 <Button size="sm" variant="outline" onClick={handleDraftEmail}><Icon name="email" className="h-4 w-4 mr-2"/> {t('common:actions.draftEmail')}</Button>
             </div>
-            <div>
-                 <Button id="interrogate-transcript-button" size="sm" variant="primary" onClick={onInterrogate}>
+            <div className="flex items-center gap-2">
+                {/* Grouping Mode Toggle - Segmented Control */}
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-md p-0.5">
+                  <Tooltip content={
+                    <div className="text-center">
+                      <div className="font-semibold">Group by Topic</div>
+                      <div className="text-xs mt-1 opacity-90">Organize notes by workstream/topic</div>
+                    </div>
+                  }>
+                    <button
+                      onClick={() => setGroupingMode('by-topic')}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                        groupingMode === 'by-topic'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                      aria-label="Group by Topic"
+                    >
+                      <span>📊</span>
+                      <span>By Topic</span>
+                    </button>
+                  </Tooltip>
+                  <Tooltip content={
+                    <div className="text-center">
+                      <div className="font-semibold">Group by Type</div>
+                      <div className="text-xs mt-1 opacity-90">Organize by content type (discussions, decisions, risks)</div>
+                    </div>
+                  }>
+                    <button
+                      onClick={() => setGroupingMode('by-type')}
+                      className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                        groupingMode === 'by-type'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                      }`}
+                      aria-label="Group by Type"
+                    >
+                      <span>📝</span>
+                      <span>By Type</span>
+                    </button>
+                  </Tooltip>
+                </div>
+
+                {/* Emphasis Toggle - Icon Only */}
+                <Tooltip content={
+                  <div className="text-center">
+                    <div className="font-semibold">Toggle Emphasis</div>
+                    <div className="text-xs mt-1 opacity-90">{showEmphasis ? 'Hide emphasis styling' : 'Show emphasis styling'}</div>
+                    <div className="text-xs mt-1 opacity-75">Press <kbd className="px-1 py-0.5 bg-slate-700 rounded">F</kbd> to toggle</div>
+                  </div>
+                }>
+                  <button
+                    onClick={toggleEmphasis}
+                    className={`p-2 rounded-md transition-all duration-200 ${
+                      showEmphasis
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500 dark:ring-blue-400'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                    aria-label="Toggle Emphasis Styling"
+                  >
+                    <Icon name={showEmphasis ? "highlight" : "text"} className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+
+                <Button id="interrogate-transcript-button" size="sm" variant="primary" onClick={onInterrogate}>
                     <Icon name="interrogate" className="h-4 w-4 mr-2"/> {t('common:actions.interrogateTranscript')}
                 </Button>
             </div>
@@ -493,37 +706,66 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
 
     return (
         <>
-            <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">{t('common:meetingCoach.title')}</h2>
+            {/* Centered Section Title */}
+            <div className="text-center mb-8">
+                <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}>
+                    {t('common:meetingCoach.title')}
+                </h2>
+                <div className="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent dark:from-transparent dark:via-slate-600 dark:to-transparent mx-auto max-w-xs" />
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {strengths && strengths.length > 0 && (
-                    <Card className="p-4 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800/50">
-                        <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2">{t('common:meetingCoach.sections.whatWorkedWell')}</h3>
-                        <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-                            {strengths.map((item, i) => <li key={i} className="pl-1">{renderWithBold(item)}</li>)}
+                    <Card className="p-5 bg-green-50/50 dark:bg-green-900/20 border-green-200/50 dark:border-green-800/30">
+                        <h3 className="text-base font-semibold text-green-800 dark:text-green-200 mb-3" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}>
+                            {t('common:meetingCoach.sections.whatWorkedWell')}
+                        </h3>
+                        <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-300">
+                            {strengths.map((item, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                    <span className="text-green-600 dark:text-green-400 mt-0.5 select-none">•</span>
+                                    <span className="flex-1">{renderWithBold(item)}</span>
+                                </li>
+                            ))}
                         </ul>
                     </Card>
                 )}
                 {improvements && improvements.length > 0 && (
-                    <Card className="p-4 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800/50">
-                        <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">{t('common:meetingCoach.sections.nextTimeTry')}</h3>
-                        <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-                            {improvements.map((item, i) => <li key={i} className="pl-1">{renderWithBold(item)}</li>)}
+                    <Card className="p-5 bg-amber-50/50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/30">
+                        <h3 className="text-base font-semibold text-amber-800 dark:text-amber-200 mb-3" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}>
+                            {t('common:meetingCoach.sections.nextTimeTry')}
+                        </h3>
+                        <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-300">
+                            {improvements.map((item, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                    <span className="text-amber-600 dark:text-amber-400 mt-0.5 select-none">•</span>
+                                    <span className="flex-1">{renderWithBold(item)}</span>
+                                </li>
+                            ))}
                         </ul>
                     </Card>
                 )}
                 {facilitation_tips && facilitation_tips.length > 0 && (
-                     <Card className="p-4 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800/50">
-                        <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">{t('common:meetingCoach.sections.facilitationTips')}</h3>
-                        <ul className="list-disc pl-5 space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
-                            {facilitation_tips.map((item, i) => <li key={i} className="pl-1">{renderWithBold(item)}</li>)}
+                     <Card className="p-5 bg-blue-50/50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/30">
+                        <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-3" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}>
+                            {t('common:meetingCoach.sections.facilitationTips')}
+                        </h3>
+                        <ul className="space-y-2.5 text-sm text-slate-700 dark:text-slate-300">
+                            {facilitation_tips.map((item, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                    <span className="text-blue-600 dark:text-blue-400 mt-0.5 select-none">•</span>
+                                    <span className="flex-1">{renderWithBold(item)}</span>
+                                </li>
+                            ))}
                         </ul>
                     </Card>
                 )}
             </div>
 
             <div>
-                <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-3">{t('common:meetingCoach.healthSnapshot.title')}</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}>
+                    {t('common:meetingCoach.healthSnapshot.title')}
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center">
                     <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
                         <div className="text-2xl font-bold text-primary">{metrics.agenda_coverage_pct}%</div>
@@ -573,6 +815,74 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
 export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig, participants }) => {
   const { t } = useTranslation(['common']);
   const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
+
+  // Emphasis Toggle state with sessionStorage persistence
+  // By default, emphasis is shown (true)
+  const [showEmphasis, setShowEmphasis] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('showEmphasis');
+      return stored === null ? true : stored === 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  // Save emphasis toggle state to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('showEmphasis', showEmphasis.toString());
+  }, [showEmphasis]);
+
+  // Grouping Mode state with localStorage persistence (user preference)
+  const [groupingMode, setGroupingMode] = useState<'by-topic' | 'by-type'>(() => {
+    try {
+      const stored = localStorage.getItem('groupingMode');
+      return (stored === 'by-type' ? 'by-type' : 'by-topic') as 'by-topic' | 'by-type';
+    } catch {
+      return 'by-topic';
+    }
+  });
+
+  // Save grouping mode state to localStorage
+  useEffect(() => {
+    localStorage.setItem('groupingMode', groupingMode);
+  }, [groupingMode]);
+
+  // Keyboard shortcut for Emphasis Toggle (F key)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Check if F key is pressed (not in an input/textarea)
+      if (e.key === 'f' || e.key === 'F') {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+          e.preventDefault();
+          setShowEmphasis(prev => !prev);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  // Auto-scroll to top and reset emphasis toggle when new notes are generated
+  useEffect(() => {
+    if (output && output.markdown) {
+      // Reset emphasis (show emphasis by default when new notes arrive)
+      setShowEmphasis(true);
+
+      // Scroll to the top of the generated notes
+      setTimeout(() => {
+        const notesContent = document.getElementById('generated-notes-content');
+        if (notesContent) {
+          notesContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [output?.markdown]); // Run when output changes
+
+  const toggleEmphasis = () => {
+    setShowEmphasis(prev => !prev);
+  };
 
   const handleInterrogateOpen = () => {
     // Telemetry: Track transcript interrogation
@@ -624,22 +934,66 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                 addToast={addToast}
                 onInterrogate={handleInterrogateOpen}
                 participants={participants}
+                showEmphasis={showEmphasis}
+                toggleEmphasis={toggleEmphasis}
+                groupingMode={groupingMode}
+                setGroupingMode={setGroupingMode}
               />
           </div>
         </div>
          <div id="generated-notes-content">
           <div className="flex justify-end gap-2 mb-4">
-              <Chip selected>{controls.view === 'full' ? 'Full Minutes' : 'Actions Only'}</Chip>
+              {/* Focus Department (if selected) */}
               {controls.focus_department.length > 0 && (
-                  <Chip selected>{controls.focus_department.join(', ') || 'Department-specific'}</Chip>
+                  <Chip className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800">
+                    {controls.focus_department.join(', ')}
+                  </Chip>
               )}
+
+              {/* Tone */}
+              <Chip className="bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-200 border-teal-200 dark:border-teal-800">
+                {t(`constants:tone.${controls.tone === 'client-ready' ? 'clientReady' : controls.tone}`)}
+              </Chip>
+
+              {/* Audience */}
+              <Chip className="bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-200 border-sky-200 dark:border-sky-800">
+                {t(`constants:audienceShort.${controls.audience === 'department-specific' ? 'departmentSpecific' : controls.audience === 'cross-functional' ? 'crossFunctional' : controls.audience}`)}
+              </Chip>
+
+              {/* Meeting Preset */}
+              <Chip className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-800">
+                {controls.meetingPreset === 'custom'
+                  ? 'Custom'
+                  : t(`constants:presets.${controls.meetingPreset === 'client-update' ? 'clientUpdate' : controls.meetingPreset === 'internal-sync' ? 'internalSync' : controls.meetingPreset === 'executive-briefing' ? 'executiveBriefing' : controls.meetingPreset}.name`)}
+              </Chip>
           </div>
-          <MarkdownRenderer 
-            content={output.markdown} 
-            nextStepsReplacement={
-              <NextStepsTable nextSteps={output.next_steps} useIcons={controls.use_icons} />
-            }
-          />
+          {output.structured_data ? (
+            <>
+              <StructuredNotesView
+                key={output.markdown?.substring(0, 50)} // Force remount on new output
+                data={output.structured_data}
+                executiveSummary={output.executive_summary}
+                criticalReview={output.critical_review}
+                showEmphasis={showEmphasis}
+                groupingMode={groupingMode}
+              />
+              {output.next_steps && output.next_steps.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-2xl font-semibold mb-4 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-3 text-slate-800 dark:text-slate-200">
+                    NEXT STEPS
+                  </h2>
+                  <NextStepsTable nextSteps={output.next_steps} />
+                </div>
+              )}
+            </>
+          ) : (
+            <MarkdownRenderer
+              content={output.markdown}
+              nextStepsReplacement={
+                <NextStepsTable nextSteps={output.next_steps} />
+              }
+            />
+          )}
           {output.coach_insights && (
               <div id="meeting-coach-panel" className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
                 <p className="text-center text-xs italic text-slate-500 dark:text-slate-400 mb-4 px-4">
@@ -657,6 +1011,8 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
         apiConfig={apiConfig}
         addToast={addToast}
         suggestedQuestions={output.suggested_questions}
+        participants={participants}
+        controls={controls}
       />
     </>
   );

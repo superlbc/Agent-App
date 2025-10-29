@@ -9,8 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from '../ui/Icon';
 import { Button } from '../ui/Button';
 import { TranscriptViewer } from './TranscriptViewer';
-import { Participant } from '../../types';
+import { Participant, ApiConfig, FormState } from '../../types';
 import { telemetryService } from '../../utils/telemetryService';
+import { InterrogateTranscriptModal } from '../InterrogateTranscriptModal';
 
 export interface TranscriptIteration {
   id: string;
@@ -28,6 +29,8 @@ interface TranscriptViewerModalProps {
   iterations?: TranscriptIteration[]; // Multiple transcript iterations (for recurring meetings)
   onlineMeetingId?: string; // For lazy loading
   joinWebUrl?: string; // For lazy loading
+  apiConfig: ApiConfig; // For interrogation modal
+  addToast?: (message: string, type?: 'success' | 'error') => void; // For interrogation modal
 }
 
 export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
@@ -39,15 +42,27 @@ export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
   meetingDate,
   iterations,
   onlineMeetingId,
-  joinWebUrl
+  joinWebUrl,
+  apiConfig,
+  addToast
 }) => {
   const { t } = useTranslation(['common', 'forms']);
   const [selectedIterationIndex, setSelectedIterationIndex] = useState(0);
   const [loadedTranscripts, setLoadedTranscripts] = useState<Map<number, string>>(new Map());
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
+  const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Dummy toast function if not provided
+  const handleToast = (message: string, type?: 'success' | 'error') => {
+    if (addToast) {
+      addToast(message, type);
+    } else {
+      console.log(`[Toast] ${type || 'info'}: ${message}`);
+    }
+  };
 
   // Find the iteration that matches the selected meeting date and load initial transcripts
   useEffect(() => {
@@ -465,18 +480,42 @@ export const TranscriptViewerModal: React.FC<TranscriptViewerModalProps> = ({
             <p className="text-sm text-slate-600 dark:text-slate-400">
               {t('common:transcript.readonlyExplanation', 'This transcript was imported from your calendar meeting and cannot be edited directly.')}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownloadTranscript}
-              className="ml-4 flex-shrink-0"
-            >
-              <Icon name="download" className="w-4 h-4 mr-2" />
-              {t('common:actions.downloadTranscript', 'Download Transcript')}
-            </Button>
+            <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsInterrogateModalOpen(true)}
+              >
+                <Icon name="interrogate" className="w-4 h-4 mr-2" />
+                {t('common:actions.interrogateTranscript', 'Interrogate Transcript')}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadTranscript}
+              >
+                <Icon name="download" className="w-4 h-4 mr-2" />
+                {t('common:actions.downloadTranscript', 'Download Transcript')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Interrogate Transcript Modal */}
+      <InterrogateTranscriptModal
+        isOpen={isInterrogateModalOpen}
+        onClose={() => setIsInterrogateModalOpen(false)}
+        formState={{
+          title: meetingName || 'Meeting Transcript',
+          agenda: '', // No agenda from transcript viewer
+          transcript: currentTranscript,
+          userNotes: ''
+        }}
+        apiConfig={apiConfig}
+        addToast={handleToast}
+        suggestedQuestions={undefined} // Don't show suggestions since notes haven't been generated
+      />
     </div>
   );
 };

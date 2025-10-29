@@ -5,10 +5,12 @@ import { Card } from './ui/Card';
 import { Icon } from './ui/Icon';
 import { Textarea } from './ui/Textarea';
 import { Button } from './ui/Button';
-import { FormState, ApiConfig, ChatMessage } from '../types';
+import { FormState, ApiConfig, ChatMessage, Participant, Controls } from '../types';
 import { interrogateTranscript } from '../services/apiService';
 import { Tooltip } from './ui/Tooltip';
 import { telemetryService } from '../utils/telemetryService';
+import { EmphasisText } from './EmphasisText';
+import { useAuth } from '../contexts/AuthContext';
 
 interface InterrogateTranscriptModalProps {
   isOpen: boolean;
@@ -17,6 +19,8 @@ interface InterrogateTranscriptModalProps {
   apiConfig: ApiConfig;
   addToast: (message: string, type?: 'success' | 'error') => void;
   suggestedQuestions?: string[];
+  participants?: Participant[];  // NEW: For context-aware interrogation
+  controls?: Controls;  // NEW: To pass user's actual control settings
 }
 
 const renderWithBold = (text: string): React.ReactNode => {
@@ -88,12 +92,23 @@ const ChatMarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 };
 
 
-export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProps> = ({ isOpen, onClose, formState, apiConfig, addToast, suggestedQuestions }) => {
+export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProps> = ({ isOpen, onClose, formState, apiConfig, addToast, suggestedQuestions, participants, controls }) => {
   const { t } = useTranslation(['common']);
+  const { graphData } = useAuth();
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
   const conversationEndRef = useRef<HTMLDivElement>(null);
+
+  // User initials for avatar
+  const getUserInitials = (): string => {
+    if (!graphData?.displayName) return 'U';
+    const names = graphData.displayName.split(' ');
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    }
+    return graphData.displayName.substring(0, 2).toUpperCase();
+  };
 
   const fallbackQuestions = [
     t('common:interrogate.defaultQuestions.decisions'),
@@ -101,9 +116,11 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
     t('common:interrogate.defaultQuestions.risks')
   ];
 
-  const questionsToDisplay = (suggestedQuestions && suggestedQuestions.length > 0)
-    ? suggestedQuestions
-    : fallbackQuestions;
+  // Only show questions if suggestedQuestions is explicitly provided (not undefined)
+  // When undefined, we don't show any suggested questions (e.g., from View Transcript modal)
+  const questionsToDisplay = suggestedQuestions !== undefined
+    ? (suggestedQuestions.length > 0 ? suggestedQuestions : fallbackQuestions)
+    : [];
     
   const lastTurn = conversation.length > 0 ? conversation[conversation.length - 1] : null;
 
@@ -136,12 +153,13 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
     setConversation(prev => [...prev, userMessage]);
 
     try {
-      const response = await interrogateTranscript(formState, trimmedQuestion, apiConfig);
+      const response = await interrogateTranscript(formState, trimmedQuestion, apiConfig, participants, controls);
       // Update the last message (the user's question) with the agent's response
       setConversation(prev => {
         const newConversation = [...prev];
         const lastMessage = newConversation[newConversation.length - 1];
         lastMessage.answer = response.answer;
+        lastMessage.emphasis = response.emphasis; // Store emphasis markers
         lastMessage.not_in_transcript = response.not_in_transcript;
         lastMessage.follow_up_suggestions = response.follow_up_suggestions;
         return newConversation;
@@ -196,7 +214,7 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
         </header>
         
         <div className="flex-grow p-6 overflow-y-auto space-y-6">
-          {conversation.length === 0 && (
+          {conversation.length === 0 && questionsToDisplay.length > 0 && (
             <div className="text-center text-slate-500 dark:text-slate-400 pt-8">
               <h3 className="text-lg font-semibold">{t('common:interrogate.subtitle')}</h3>
               <p className="mt-2 text-sm">
@@ -213,22 +231,56 @@ export const InterrogateTranscriptModal: React.FC<InterrogateTranscriptModalProp
               </div>
             </div>
           )}
+          {conversation.length === 0 && questionsToDisplay.length === 0 && (
+            <div className="text-center text-slate-500 dark:text-slate-400 pt-8">
+              <h3 className="text-lg font-semibold">{t('common:interrogate.subtitle')}</h3>
+              <p className="mt-2 text-sm">
+                Ask any question about this transcript.
+              </p>
+            </div>
+          )}
           {conversation.map((turn, index) => (
             <div key={index} className="space-y-4">
-              <div className="flex justify-end">
+              {/* User Question with Avatar */}
+              <div className="flex justify-end gap-3 items-start">
                 <div className="bg-primary text-white p-3 rounded-lg max-w-[80%]">
                   {turn.question}
                 </div>
+                {/* User Avatar */}
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-semibold shadow-md">
+                  {graphData?.photoUrl ? (
+                    <img src={graphData.photoUrl} alt="User" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    getUserInitials()
+                  )}
+                </div>
               </div>
-              
+
+              {/* Agent Answer with Icon */}
               {turn.answer ? (
-                 <div className="flex justify-start">
+                 <div className="flex justify-start gap-3 items-start">
+                    {/* Agent Icon */}
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shadow-md">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
                     <div className={`${turn.isError ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'} p-3 rounded-lg max-w-[80%]`}>
-                      <ChatMarkdownRenderer content={turn.answer} />
+                      {turn.emphasis && turn.emphasis.length > 0 ? (
+                        <EmphasisText text={turn.answer} emphasis={turn.emphasis} />
+                      ) : (
+                        <ChatMarkdownRenderer content={turn.answer} />
+                      )}
                     </div>
                   </div>
               ) : (
-                <div className="flex justify-start">
+                <div className="flex justify-start gap-3 items-start">
+                  {/* Agent Icon (loading state) */}
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shadow-md">
+                    <svg className="w-5 h-5 text-primary animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
                   <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-lg inline-flex items-center">
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-pulse [animation-delay:-0.15s] mx-1"></div>

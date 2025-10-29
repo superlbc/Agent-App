@@ -1,17 +1,5 @@
-import { Department, ContextTag, Audience, Tone, ViewMode, FormState, Controls, MeetingPreset, CoachingStyle } from './types.ts';
+import { Audience, Tone, ViewMode, FormState, Controls, MeetingPreset, CoachingStyle } from './types.ts';
 
-export const DEPARTMENT_OPTIONS: Department[] = ["BL", "STR", "PM", "CR", "XD", "XP", "TECH", "IPCT", "CON", "STU", "General"];
-
-// Context tags with translation keys
-export const CONTEXT_TAG_OPTIONS: { value: ContextTag; labelKey: string }[] = [
-  { value: "Client facing", labelKey: "constants:contextTags.clientFacing" },
-  { value: "Internal only", labelKey: "constants:contextTags.internalOnly" },
-  { value: "Sensitive", labelKey: "constants:contextTags.sensitive" },
-  { value: "Executive review", labelKey: "constants:contextTags.executiveReview" },
-];
-
-// Legacy array for backwards compatibility
-export const CONTEXT_TAG_VALUES: ContextTag[] = ["Client facing", "Internal only", "Sensitive", "Executive review"];
 export const AUDIENCE_OPTIONS: { value: Audience; labelKey: string }[] = [
   { value: 'executive', labelKey: 'constants:audience.executive' },
   { value: 'cross-functional', labelKey: 'constants:audience.crossFunctional' },
@@ -38,26 +26,11 @@ export const COACHING_STYLE_OPTIONS: { value: CoachingStyle; labelKey: string }[
   { value: 'direct', labelKey: 'constants:coachingStyle.direct' },
 ];
 
-export const DEPARTMENT_LEGEND: Record<Department, string> = {
-  BL: "Business Leadership",
-  STR: "Strategy",
-  PM: "Project Management",
-  CR: "Creative",
-  XD: "Experience Design",
-  XP: "Experience Production",
-  TECH: "Global Technology",
-  IPCT: "Creative Technology",
-  CON: "Content",
-  STU: "Studio",
-  General: "General / Cross-functional",
-};
-
 export const SAMPLE_DATA: FormState = {
   title: "ACL Weekly Team Status – 8/26",
   agenda: "ACL Nights Show\nMain Footprint\nSide Stage",
   transcript: "Alright team, let's kick off. Main footprint status? John reports we are green on talent booking. Let's talk about the side stage. We need to finalize the audio vendor by EOD Friday. Casey to mock up blanket and hat designs, due date is 2025-09-02. This is for the ACL Nights show. Sarah, can you please coordinate with the city on permits? Make sure to check with legal@example.com before signing anything. Their number is (555) 123-4567. We need a decision on the catering options for the VIP area. That's a key risk if we don't lock it down. Bob will own the decision on catering.",
   transcriptSource: 'manual',
-  tags: ["Internal only"],
 };
 
 export const MEETING_PRESET_OPTIONS: { value: Exclude<MeetingPreset, 'custom'>; labelKey: string }[] = [
@@ -67,7 +40,7 @@ export const MEETING_PRESET_OPTIONS: { value: Exclude<MeetingPreset, 'custom'>; 
     { value: 'executive-briefing', labelKey: 'constants:presets.executiveBriefing.name' },
 ];
 
-export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Controls> & { tags: ContextTag[]; description: string }> = {
+export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Controls> & { description: string }> = {
     'client-update': {
         audience: 'cross-functional',
         tone: 'client-ready',
@@ -77,7 +50,6 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         bold_important_words: true,
         meeting_coach: true,
         coaching_style: 'gentle',
-        tags: ["Client facing"],
         description: "For client-facing meetings • Polished and professional output • Sensitive data redacted • Cross-functional view • Meeting coach active",
     },
     'internal-sync': {
@@ -89,7 +61,6 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         bold_important_words: true,
         meeting_coach: true,
         coaching_style: 'gentle',
-        tags: ["Internal only"],
         description: "For internal team meetings • Granular details for your department • Professional tone • Includes critical review • Key points highlighted • Meeting coach provides facilitation tips",
     },
     brainstorm: {
@@ -101,7 +72,6 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         bold_important_words: true,
         meeting_coach: true,
         coaching_style: 'gentle',
-        tags: ["Internal only"],
         description: "For creative sessions • Concise format focusing on ideas • Critical review enabled • Cross-team perspective • Key points highlighted • Meeting coach active",
     },
     'executive-briefing': {
@@ -113,7 +83,6 @@ export const PRESET_CONFIGS: Record<Exclude<MeetingPreset, 'custom'>, Partial<Co
         bold_important_words: true,
         meeting_coach: true,
         coaching_style: 'gentle',
-        tags: ["Executive review", "Sensitive"],
         description: "For leadership updates • Executive summary format • Sensitive data redacted • Critical review included • Key decisions highlighted • Meeting coach active",
     }
 };

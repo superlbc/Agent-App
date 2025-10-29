@@ -40,6 +40,7 @@ const DEFAULT_CONTROLS: Controls = {
   meetingPreset: 'internal-sync',
   meeting_coach: true,
   coaching_style: 'gentle',
+  groupingMode: 'by-topic',
 };
 
 const AppContent: React.FC = () => {
@@ -521,6 +522,7 @@ const AppContent: React.FC = () => {
               onMarkAsExternal={markAsExternal}
               onUpdateParticipant={updateParticipant}
               generateTrigger={generateTrigger}
+              apiConfig={apiConfig}
             />
           </div>
           <div id="output-panel-wrapper" className="flex-1 min-w-0 w-full">

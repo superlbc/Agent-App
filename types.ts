@@ -10,13 +10,14 @@ export interface GraphData {
   photoUrl?: string;
 }
 
-export type Department = "BL" | "STR" | "PM" | "CR" | "XD" | "XP" | "TECH" | "IPCT" | "CON" | "STU" | "General";
-export type ContextTag = "Client facing" | "Internal only" | "Sensitive" | "Executive review";
+// Department is now a flexible string to support any department from Graph API
+// (e.g., "Experience Design", "Global Technology", "Business Leadership", "Human Resources", "Finance", etc.)
 export type Audience = 'executive' | 'cross-functional' | 'department-specific';
 export type Tone = 'professional' | 'concise' | 'client-ready';
 export type ViewMode = 'full' | 'actions-only';
 export type MeetingPreset = 'client-update' | 'internal-sync' | 'brainstorm' | 'executive-briefing' | 'custom';
 export type CoachingStyle = 'gentle' | 'direct';
+export type GroupingMode = 'by-topic' | 'by-type';
 
 export interface NextStep {
   department: string;
@@ -54,7 +55,7 @@ export interface ParticipationMetrics {
   };
   internal_count: number;
   external_count: number;
-  department_representation: Department[];
+  department_representation: string[];  // Array of department names from Graph API
 }
 
 export interface CoachFlags {
@@ -78,15 +79,58 @@ export interface CoachInsights {
 }
 
 
+// Structured data types for modern UI rendering
+export interface EmphasisMarker {
+  type: 'person' | 'date' | 'status' | 'task' | 'department' | 'monetary' | 'deadline' | 'risk' | 'general';
+  value: string;  // The exact text to emphasize (client will find position)
+}
+
+export interface EmphasisedText {
+  text: string;
+  emphasis?: EmphasisMarker[];
+}
+
+export interface WorkstreamNote {
+  workstream_name: string;
+  key_discussion_points?: EmphasisedText[];
+  decisions_made?: EmphasisedText[];
+  risks_or_open_questions?: (EmphasisedText & { risk_level?: 'LOW' | 'MEDIUM' | 'HIGH' })[];
+}
+
+export interface StructuredNoteData {
+  meeting_title: string;
+  meeting_purpose: string;
+  workstream_notes: WorkstreamNote[];
+}
+
+export interface RiskAssessment {
+  level: 'LOW' | 'MEDIUM' | 'HIGH';
+  description: string;
+}
+
+export interface UnassignedTask {
+  task: string;
+  suggested_department?: string;
+}
+
+export interface CriticalReview {
+  gaps_missing_topics: EmphasisedText[];
+  risk_assessment: RiskAssessment[];
+  unassigned_ambiguous_tasks: UnassignedTask[];
+}
+
 export interface AgentResponse {
   markdown: string;
   next_steps: NextStep[];
   coach_insights?: CoachInsights;
   suggested_questions?: string[];
+  structured_data?: StructuredNoteData;  // Raw structured JSON for modern UI rendering
+  executive_summary?: string[];  // 3-5 concise bullet points for at-a-glance overview
+  critical_review?: CriticalReview;  // Critical lens analysis (when critical_lens=true)
 }
 
 export interface Controls {
-  focus_department: Department[];
+  focus_department: string[];  // Array of department names from Graph API (e.g., ["Experience Design", "Global Technology"])
   view: ViewMode;
   critical_lens: boolean;
   audience: Audience;
@@ -100,6 +144,7 @@ export interface Controls {
   meetingPreset: MeetingPreset;
   meeting_coach: boolean;
   coaching_style: CoachingStyle;
+  groupingMode: GroupingMode;  // How to organize workstream notes: by topic/workstream (default) or by content type
   interrogation_mode?: boolean;
   user_question?: string;
 }
@@ -112,7 +157,6 @@ export interface FormState {
   importedMeetingName?: string;              // Meeting name for context display
   importedMeetingDate?: Date;                // Meeting date for context display
   userNotes?: string;  // User-provided additional notes/context
-  tags: ContextTag[];
 }
 
 export interface ToastState {
@@ -146,6 +190,7 @@ export interface Payload {
 export interface InterrogationResponse {
   question: string;
   answer: string;
+  emphasis?: EmphasisMarker[];  // Emphasis markers for the answer text
   not_in_transcript: boolean;
   follow_up_suggestions: string[];
 }
@@ -153,6 +198,7 @@ export interface InterrogationResponse {
 export interface ChatMessage {
   question: string;
   answer?: string;
+  emphasis?: EmphasisMarker[];  // Emphasis markers for the answer text
   not_in_transcript?: boolean;
   follow_up_suggestions?: string[];
   isError?: boolean;

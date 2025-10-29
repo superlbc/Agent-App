@@ -101,7 +101,7 @@ export function inferDepartmentFromRole(jobTitle?: string): string {
  * This function transforms the app's participant array into a structured text format
  * that the AI agent can parse and use for:
  * - Matching transcript speakers to real names/departments
- * - Assigning action items to correct owners
+ * - Assigning action items to correct owners with accurate department assignment
  * - Calculating participation metrics (if attendance data present)
  * - Identifying silent stakeholders
  *
@@ -110,10 +110,10 @@ export function inferDepartmentFromRole(jobTitle?: string): string {
  * Participants:
  *
  * INTERNAL PARTICIPANTS (Momentum Worldwide):
- * [BL] John Smith (john.smith@momentumww.com) - Account Director
+ * John Smith (john.smith@momentumww.com) - Account Director [Department: Business Leadership]
  *   Status: accepted (required)
  *   Source: csv
- * [STR] Sarah Jones (sarah.jones@momentumww.com) - Strategy Lead
+ * Sarah Jones (sarah.jones@momentumww.com) - Strategy Lead [Department: Strategy]
  *   Status: declined (optional)
  *   Source: manual
  *
@@ -164,12 +164,12 @@ export function buildParticipantContext(participants: Participant[]): string {
       // Log participant for debugging
       console.log(`👤 ${name} | ${title || 'No title'} | ${dept ? 'Dept: ' + dept : 'No dept from Graph'}`);
 
-      // Format: Name (email) - Job Title
-      // NO department prefix - let the AI agent infer department from job title
+      // Format: Name (email) - Job Title [Department: ...]
+      // The agent will use the [Department: ...] field directly for action item assignment
       context += `${name}`;
       if (email) context += ` (${email})`;
       if (title) context += ` - ${title}`;
-      // Include Graph API department field if available (for additional context)
+      // IMPORTANT: Include Graph API department field - agent uses this EXACT value for department assignment
       if (dept) context += ` [Department: ${dept}]`;
       context += '\n';
 

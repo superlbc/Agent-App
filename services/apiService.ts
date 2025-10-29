@@ -329,6 +329,14 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                         next_steps: Array.isArray(parsedJson.next_steps) ? parsedJson.next_steps : [],
                         coach_insights: processedCoachInsights,
                         suggested_questions: validSuggestedQuestions,
+                        structured_data: {
+                            meeting_title: parsedJson.meeting_title || '',
+                            meeting_purpose: parsedJson.meeting_purpose || '',
+                            workstream_notes: parsedJson.workstream_notes || [],
+                        },
+                        executive_summary: Array.isArray(parsedJson.executive_summary)
+                            ? parsedJson.executive_summary.filter((s: any) => typeof s === 'string')
+                            : undefined,
                     };
 
                     console.log('✅ Successfully converted structured JSON to markdown for rendering!');
@@ -469,7 +477,9 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
 export const interrogateTranscript = async (
     formState: FormState,
     question: string,
-    apiConfig: ApiConfig
+    apiConfig: ApiConfig,
+    participants?: Participant[],  // NEW: Include participants for context
+    controls?: Controls  // NEW: Include user's actual controls
 ): Promise<InterrogationResponse> => {
     if (!apiConfig.interrogationAgentId) {
         throw new Error('Interrogation Agent ID is missing from config.');
@@ -486,8 +496,15 @@ export const interrogateTranscript = async (
             meeting_title: formState.title,
             agenda: formState.agenda.split('\n').filter(line => line.trim() !== ''),
             transcript: formState.transcript,
-            controls: {
-                // Default controls to ensure agent compatibility
+            user_notes: formState.userNotes,  // NEW: Include user notes
+            participants: participants && participants.length > 0 ? participants : undefined,  // NEW: Include participants
+            controls: controls ? {
+                ...controls,
+                // Override with interrogation-specific settings
+                interrogation_mode: true,
+                user_question: question,
+            } : {
+                // Fallback defaults if controls not provided
                 focus_department: [],
                 view: 'full',
                 critical_lens: false,
