@@ -19,6 +19,8 @@ import { TourProvider, useTourContext } from './contexts/TourContext';
 import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
+import { useDepartmentContext } from './contexts/DepartmentContext';
+import { enrichAttendeeData } from './utils/departmentLookup';
 import { telemetryService } from './utils/telemetryService';
 import { getBrowserContext } from './utils/browserContext';
 import { FeedbackButton } from './components/FeedbackButton';
@@ -95,6 +97,7 @@ const AppContent: React.FC = () => {
 
   const { startTour, isTourActive } = useTourContext();
   const { isAuthenticated, user } = useAuth();
+  const { departmentMap } = useDepartmentContext();
 
   // Version checking for update notifications
   const { updateAvailable, currentVersion, serverVersion, dismissUpdate } = useVersionCheck();
@@ -232,12 +235,33 @@ const AppContent: React.FC = () => {
     const correlationId = crypto.randomUUID();
 
     try {
+      // Enrich participants with Momentum department data
+      // This provides accurate department info with fallback to Graph API
+      const enrichedParticipants = participants.map(p => {
+        // Only enrich if participant has an email
+        if (!p.email) {
+          return p;
+        }
+
+        const enrichedData = enrichAttendeeData(
+          p.email,
+          p.displayName || 'Unknown', // Provide fallback name
+          p.department, // Graph API department as fallback
+          departmentMap
+        );
+
+        return {
+          ...p,
+          department: enrichedData.department, // Prefers Momentum DepartmentGroup > Department > Graph API
+        };
+      });
+
       const payload: Payload = {
         meeting_title: currentFormState.title,
         agenda: currentFormState.agenda.split('\n').filter(line => line.trim() !== ''),
         transcript: currentFormState.transcript,
         user_notes: currentFormState.userNotes,  // Include user-provided notes
-        participants: participants.length > 0 ? participants : undefined,  // NEW: Include participants for AI context
+        participants: enrichedParticipants.length > 0 ? enrichedParticipants : undefined,  // NEW: Include participants with Momentum data
         controls: currentControls,
       };
 

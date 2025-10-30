@@ -89,7 +89,6 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
 
       // Store all meetings for calendar counts
       setAllMeetings(allCalendarMeetings);
-      console.log(`[MeetingSelection] Preloaded ${allCalendarMeetings.length} meetings for calendar display`);
     } catch (error) {
       console.error('Failed to preload calendar meetings:', error);
       // Don't show error to user - this is a background operation
@@ -114,13 +113,9 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     const onlineMeetings = meetingsToCheck.filter(m => m.hasOnlineMeeting && (m.onlineMeetingId || m.joinUrl));
 
     if (onlineMeetings.length === 0) {
-      console.log('[TranscriptCheck] No online meetings to check');
       return;
     }
 
-    console.log('[TranscriptCheck] ============================================');
-    console.log(`[TranscriptCheck] Checking transcript availability for ${onlineMeetings.length} meetings`);
-    console.log('[TranscriptCheck] ============================================');
 
     setIsCheckingTranscripts(true);
 
@@ -133,7 +128,6 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     // Check each meeting in parallel
     const checkPromises = onlineMeetings.map(async (meeting) => {
       try {
-        console.log(`[TranscriptCheck]   Checking: ${meeting.subject} (${meeting.start.toISOString()})`);
 
         // Call listTranscripts API (lightweight - only returns metadata, not content)
         const transcripts = await graphService.listTranscripts(
@@ -142,7 +136,6 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
         );
 
         if (!transcripts || transcripts.length === 0) {
-          console.log(`[TranscriptCheck]   ❌ ${meeting.subject}: No transcripts found`);
           return {
             meetingId: meeting.id,
             transcriptStatus: 'unavailable' as const,
@@ -150,14 +143,11 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
           };
         }
 
-        console.log(`[TranscriptCheck]   📋 ${meeting.subject}: Found ${transcripts.length} total transcript(s)`);
 
         // For recurring meetings, show "available" if ANY transcript exists in the series
         // Users can browse all iterations via tabs - no need to filter by date here
         if (transcripts.length > 1) {
-          console.log(`[TranscriptCheck]   🔄 Recurring meeting detected - ${transcripts.length} iterations available`);
           transcripts.forEach((t, i) => {
-            console.log(`[TranscriptCheck]      Iteration ${i + 1}: ${new Date(t.createdDateTime).toLocaleDateString()}`);
           });
         }
 
@@ -175,7 +165,6 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
           return transcriptDate >= searchWindowStart && transcriptDate <= searchWindowEnd;
         });
 
-        console.log(`[TranscriptCheck]   ${hasTranscriptForThisInstance ? '✅' : '❌'} ${meeting.subject}: ${hasTranscriptForThisInstance ? 'HAS' : 'NO'} transcript for ${meetingStart.toLocaleDateString()}`);
 
         return {
           meetingId: meeting.id,
@@ -197,13 +186,8 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     // Wait for all checks to complete
     const results = await Promise.all(checkPromises);
 
-    console.log('[TranscriptCheck] ============================================');
-    console.log(`[TranscriptCheck] ✅ Transcript check complete`);
     const available = results.filter(r => r.transcriptStatus === 'available').length;
     const unavailable = results.filter(r => r.transcriptStatus === 'unavailable').length;
-    console.log(`[TranscriptCheck]   Available: ${available}/${onlineMeetings.length}`);
-    console.log(`[TranscriptCheck]   Unavailable: ${unavailable}/${onlineMeetings.length}`);
-    console.log('[TranscriptCheck] ============================================');
 
     // Update meetings with transcript status and metadata
     setMeetings(prev => prev.map(meeting => {
@@ -242,10 +226,7 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
       // Store all meetings for calendar counts
       setAllMeetings(allCalendarMeetings);
 
-      console.log(`[MeetingSelection] Loaded ${allCalendarMeetings.length} meetings for date range`);
       if (allCalendarMeetings.length > 0) {
-        console.log(`[MeetingSelection] First meeting: ${allCalendarMeetings[0].subject} at ${allCalendarMeetings[0].start}`);
-        console.log(`[MeetingSelection] Last meeting: ${allCalendarMeetings[allCalendarMeetings.length - 1].subject} at ${allCalendarMeetings[allCalendarMeetings.length - 1].start}`);
       }
 
       // Filter to only meetings for the selected day
@@ -255,27 +236,23 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
 
-      console.log(`[MeetingSelection] Filtering for selected day: ${startOfDay.toISOString()} to ${endOfDay.toISOString()}`);
 
       const dayMeetings = allCalendarMeetings.filter(meeting => {
         const meetingTime = new Date(meeting.start);
         return meetingTime >= startOfDay && meetingTime <= endOfDay;
       });
 
-      console.log(`[MeetingSelection] Found ${dayMeetings.length} meetings for selected day`);
       setMeetings(dayMeetings);
 
       // Check transcript availability for meetings on this day
       // Use debouncing to avoid spamming API during rapid navigation
       if (transcriptCheckTimeoutRef.current) {
         clearTimeout(transcriptCheckTimeoutRef.current);
-        console.log('[MeetingSelection] Cancelled previous transcript check (debouncing)');
       }
 
       // Debounce: wait 500ms before checking transcripts
       // If user navigates to another day within 500ms, this will be cancelled
       transcriptCheckTimeoutRef.current = setTimeout(() => {
-        console.log('[MeetingSelection] Debounce delay complete, starting transcript check...');
         checkTranscriptAvailability(dayMeetings);
       }, 500);
     } catch (error) {
@@ -289,7 +266,6 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
 
   // Handle expand/collapse of meeting card
   const handleToggleExpand = (meeting: Meeting) => {
-    console.log('[MeetingSelection] Toggle expand for meeting:', { id: meeting.id, subject: meeting.subject });
 
     // Toggle: if already expanded, collapse it; otherwise expand it
     if (expandedMeetingId === meeting.id) {
@@ -301,7 +277,6 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
 
   // Handle processing the meeting (fetch transcript)
   const handleProcessMeeting = async (meeting: Meeting) => {
-    console.log('[MeetingSelection] Processing meeting:', { id: meeting.id, subject: meeting.subject });
 
     if (!meeting.id) {
       console.error('[MeetingSelection] Meeting ID is undefined!', meeting);

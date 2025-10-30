@@ -7,6 +7,9 @@ export type EventType =
   | 'userLogin'
   | 'userLogout'
   | 'accessDenied'
+  // Department data
+  | 'departmentDataFetched'
+  | 'departmentDataFetchFailed'
   // Feedback
   | 'feedback'
   // Core functionality

@@ -74,7 +74,6 @@ export class MeetingService {
         endDate
       );
 
-      console.log(`Pre-loaded ${meetings.length} meetings`);
     } catch (error) {
       console.error('Failed to pre-load calendar:', error);
       // Don't throw - this is a background operation
@@ -92,12 +91,10 @@ export class MeetingService {
     // Try cache first
     const cached = this.getCachedMeetings();
     if (cached) {
-      console.log('Returning cached meetings');
       return this.filterMeetingsByDateRange(cached, startDate, endDate);
     }
 
     // Fetch from API
-    console.log('Fetching meetings from Graph API...');
     const meetings = await this.graphService.getCalendarView(startDate, endDate);
 
     // Cache the results
@@ -113,13 +110,9 @@ export class MeetingService {
   async getMeetingWithTranscript(meetingId: string): Promise<MeetingWithTranscript> {
     try {
       // Fetch meeting details
-      console.log('Fetching meeting details...');
       const meetingDetails = await this.graphService.getMeetingDetails(meetingId);
 
       // Try to fetch transcript
-      console.log('Searching for transcript...');
-      console.log('Meeting has onlineMeetingId:', meetingDetails.onlineMeetingId);
-      console.log('Meeting has joinUrl:', meetingDetails.joinUrl);
 
       // Pass the meeting's start date for filtering recurring meeting transcripts
       // The transcript service will use this to match the correct instance
@@ -162,7 +155,6 @@ export class MeetingService {
    */
   invalidateCache(): void {
     sessionStorage.removeItem(MeetingService.CACHE_KEY);
-    console.log('Cache invalidated');
   }
 
   // ========== PRIVATE HELPER METHODS ==========
@@ -179,7 +171,6 @@ export class MeetingService {
 
       // Check cache version - invalidate if outdated
       if (!cacheEntry.version || cacheEntry.version !== MeetingService.CACHE_VERSION) {
-        console.log(`Cache version mismatch (cached: ${cacheEntry.version}, current: ${MeetingService.CACHE_VERSION}). Invalidating cache.`);
         this.invalidateCache();
         return null;
       }
@@ -187,7 +178,6 @@ export class MeetingService {
       // Check if cache is still valid
       const age = Date.now() - cacheEntry.timestamp;
       if (age > MeetingService.CACHE_TTL) {
-        console.log('Cache expired');
         this.invalidateCache();
         return null;
       }
@@ -221,7 +211,6 @@ export class MeetingService {
         JSON.stringify(cacheEntry)
       );
 
-      console.log('Meetings cached');
     } catch (error) {
       console.error('Failed to cache meetings:', error);
       // Don't throw - caching failure shouldn't break the app
