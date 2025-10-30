@@ -406,11 +406,30 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
     const nextSteps = filteredNextSteps || output.next_steps || [];
 
     const handleCopy = async () => {
-        const htmlBody = markdownToHtml(markdownContent);
+        // Build Next Steps table in tab-separated format (works universally)
+        let nextStepsTable = '';
+        if (nextSteps && nextSteps.length > 0) {
+            nextStepsTable = '\n\n## Next Steps\n\n';
+            // Header row (tab-separated)
+            nextStepsTable += 'Department\tOwner\tTask\tDue Date\tStatus\tNotes\n';
+            // Data rows (tab-separated) - uses filtered/sorted data
+            nextSteps.forEach(step => {
+                const dept = step.department || 'General';
+                const owner = step.owner || 'Unassigned';
+                const task = (step.task || '').replace(/[\t\n\r]/g, ' '); // Replace tabs/newlines with spaces
+                const dueDate = step.due_date || 'Not specified';
+                const status = step.status || 'NA';
+                const notes = (step.status_notes || '').replace(/[\t\n\r]/g, ' '); // Replace tabs/newlines with spaces
+                nextStepsTable += `${dept}\t${owner}\t${task}\t${dueDate}\t${status}\t${notes}\n`;
+            });
+        }
+
+        const fullContent = markdownContent + nextStepsTable;
+        const htmlBody = markdownToHtml(fullContent);
 
         try {
             const blobHtml = new Blob([htmlBody], { type: 'text/html' });
-            const blobText = new Blob([markdownContent], { type: 'text/plain' });
+            const blobText = new Blob([fullContent], { type: 'text/plain' });
             const clipboardItem = new ClipboardItem({
                 'text/html': blobHtml,
                 'text/plain': blobText,
@@ -419,18 +438,18 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
 
             // Telemetry: Track clipboard copy
             telemetryService.trackEvent('copiedToClipboard', {
-                contentLength: markdownContent.length,
+                contentLength: fullContent.length,
                 format: 'richText'
             });
 
             addToast(t('common:toasts.notesCopied'), 'success');
         } catch (err) {
             console.error('Failed to copy rich text, falling back to plain text:', err);
-            await navigator.clipboard.writeText(markdownContent);
+            await navigator.clipboard.writeText(fullContent);
 
             // Telemetry: Track fallback copy
             telemetryService.trackEvent('copiedToClipboard', {
-                contentLength: markdownContent.length,
+                contentLength: fullContent.length,
                 format: 'plainText'
             });
 
@@ -445,13 +464,33 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
             return;
         }
 
+        // Build Next Steps table in tab-separated format (works universally)
+        let nextStepsTable = '';
+        if (nextSteps && nextSteps.length > 0) {
+            nextStepsTable = '\n\n## Next Steps\n\n';
+            // Header row (tab-separated)
+            nextStepsTable += 'Department\tOwner\tTask\tDue Date\tStatus\tNotes\n';
+            // Data rows (tab-separated) - uses filtered/sorted data
+            nextSteps.forEach(step => {
+                const dept = step.department || 'General';
+                const owner = step.owner || 'Unassigned';
+                const task = (step.task || '').replace(/[\t\n\r]/g, ' '); // Replace tabs/newlines with spaces
+                const dueDate = step.due_date || 'Not specified';
+                const status = step.status || 'NA';
+                const notes = (step.status_notes || '').replace(/[\t\n\r]/g, ' '); // Replace tabs/newlines with spaces
+                nextStepsTable += `${dept}\t${owner}\t${task}\t${dueDate}\t${status}\t${notes}\n`;
+            });
+        }
+
+        const fullContent = markdownContent + nextStepsTable;
+
         // Telemetry: Track PDF export
         telemetryService.trackEvent('exportedToPDF', {
-            contentLength: markdownContent.length,
+            contentLength: fullContent.length,
             title: title
         });
 
-        const htmlContent = markdownToHtml(markdownContent);
+        const htmlContent = markdownToHtml(fullContent);
         
         printWindow.document.write(`
             <html>
@@ -513,20 +552,21 @@ const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: Outp
             }
         }
 
-        // Build Next Steps table in markdown
+        // Build Next Steps table in tab-separated format (works universally in all email clients)
         let nextStepsTable = '';
         if (nextSteps && nextSteps.length > 0) {
             nextStepsTable = '\n\n## Next Steps\n\n';
-            nextStepsTable += '| Department | Owner | Task | Due Date | Status | Notes |\n';
-            nextStepsTable += '|------------|-------|------|----------|--------|-------|\n';
+            // Header row (tab-separated)
+            nextStepsTable += 'Department\tOwner\tTask\tDue Date\tStatus\tNotes\n';
+            // Data rows (tab-separated)
             nextSteps.forEach(step => {
                 const dept = step.department || 'General';
                 const owner = step.owner || 'Unassigned';
-                const task = (step.task || '').replace(/\|/g, '\\|'); // Escape pipes
+                const task = (step.task || '').replace(/[\t\n\r]/g, ' '); // Replace tabs/newlines with spaces
                 const dueDate = step.due_date || 'Not specified';
                 const status = step.status || 'NA';
-                const notes = (step.status_notes || '').replace(/\|/g, '\\|'); // Escape pipes
-                nextStepsTable += `| ${dept} | ${owner} | ${task} | ${dueDate} | ${status} | ${notes} |\n`;
+                const notes = (step.status_notes || '').replace(/[\t\n\r]/g, ' '); // Replace tabs/newlines with spaces
+                nextStepsTable += `${dept}\t${owner}\t${task}\t${dueDate}\t${status}\t${notes}\n`;
             });
         }
 

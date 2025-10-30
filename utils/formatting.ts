@@ -57,7 +57,30 @@ export const markdownToHtml = (markdown: string): string => {
     lines.forEach((line, index) => {
         const trimmedLine = line.trim();
 
-        if (trimmedLine.startsWith('|')) {
+        // Handle tab-separated tables (TSV format)
+        // Tab-separated tables work universally in all email clients
+        if (trimmedLine.includes('\t')) {
+            flushList();
+            const cells = trimmedLine.split('\t');
+
+            // First row with tabs is the header
+            if (!inTable) {
+                html += `<table style="${styles.table}"><thead><tr>`;
+                cells.forEach(header => {
+                    html += `<th style="${styles.th}">${processInlineMarkdown(header.trim())}</th>`;
+                });
+                html += `</tr></thead><tbody>`;
+                inTable = true;
+            } else {
+                // Data rows
+                const isEven = (html.match(/<tr/g) || []).length % 2 === 1;
+                html += `<tr style="${isEven ? styles.evenRow : ''}">`;
+                cells.forEach(cell => {
+                    html += `<td style="${styles.td}">${processInlineMarkdown(cell.trim())}</td>`;
+                });
+                html += `</tr>`;
+            }
+        } else if (trimmedLine.startsWith('|')) {
             flushList();
             const cells = trimmedLine.split('|').slice(1, -1).map(c => c.trim());
             if (lines[index + 1]?.trim().startsWith('|-')) {

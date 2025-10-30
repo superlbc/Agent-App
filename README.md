@@ -90,7 +90,7 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 - **Client-Ready**: Polished, external-facing language
 
 ✅ **Advanced Formatting**
-- **Department Focus**: Multi-select from 10+ departments (BL, STR, PM, CR, XD, XP, IPCT, etc.)
+- **Smart Department Assignment**: Automatically assigns action items to departments using Momentum database (DepartmentGroup) with Graph API fallback
 - **Critical Lens**: Enable analysis of gaps, risks, and unassigned actions
 - **PII Redaction**: Auto-mask emails and phone numbers for client-facing notes
 - **Visual Indicators**: Status icons (🟢🟡🔴) for quick scanning
@@ -171,11 +171,23 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 
 ### 📤 Export Capabilities
 
-✅ **Multiple Export Formats**
+✅ **Multiple Export Formats** (All Respect Filters & Sorting)
 - **CSV**: Action items table for Excel/project management tools
-- **Email Draft**: Pre-formatted HTML email with meeting summary
-- **PDF**: Print or save as PDF via browser print dialog
-- **Clipboard**: Copy markdown text for Slack, Teams, or other tools
+- **Email Draft**: Pre-formatted email with meeting summary and Next Steps table
+- **PDF**: Print or save as PDF via browser print dialog with Next Steps table included
+- **Clipboard**: Copy formatted content with Next Steps table for any application
+
+✅ **Universal Compatibility**
+- **Tab-Separated Tables**: Next Steps tables use tab-separated format for universal compatibility
+- **Cross-Platform**: Works on Windows Outlook, Mac Outlook, Gmail, Apple Mail, Word, Excel
+- **Smart Fallback**: If HTML paste fails, plain text with tabs is automatically recognized as a table
+- **No More HTML Tags**: Fixes issue where some users saw raw `<table>` tags instead of formatted tables
+
+✅ **Filtered Data Export**
+- **Respects Table State**: All exports reflect exactly what you see on screen
+- **Filter Support**: Apply department, owner, or status filters - exports include only filtered items
+- **Sort Support**: Sort by any column - exports maintain the same order
+- **Consistent Experience**: CSV, PDF, Email, and Clipboard all use the same filtered/sorted data
 
 ### 🎨 User Experience Features
 

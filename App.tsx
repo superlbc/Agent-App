@@ -16,10 +16,11 @@ import { SAMPLE_DATA } from './constants';
 import { Button } from './components/ui/Button';
 import { Icon } from './components/ui/Icon';
 import { TourProvider, useTourContext } from './contexts/TourContext';
+import { DepartmentProvider, useDepartmentContext } from './contexts/DepartmentContext';
+import { fetchMomentumDepartments } from './services/departmentService';
 import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
-import { useDepartmentContext } from './contexts/DepartmentContext';
 import { enrichAttendeeData } from './utils/departmentLookup';
 import { telemetryService } from './utils/telemetryService';
 import { getBrowserContext } from './utils/browserContext';
@@ -94,10 +95,20 @@ const AppContent: React.FC = () => {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [generateTrigger, setGenerateTrigger] = useState(0); // Trigger for collapsing Advanced Settings
+  const [showButtonEmphasis, setShowButtonEmphasis] = useState(false); // Track when to show emphasis animation
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  );
+  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false); // Track when transcript is being fetched
 
-  const { startTour, isTourActive } = useTourContext();
+  const { startTour, isTourActive} = useTourContext();
   const { isAuthenticated, user } = useAuth();
-  const { departmentMap } = useDepartmentContext();
+  const {
+    departmentMap,
+    setDepartmentData,
+    setIsLoading: setDepartmentLoading,
+    setError: setDepartmentError
+  } = useDepartmentContext();
 
   // Version checking for update notifications
   const { updateAvailable, currentVersion, serverVersion, dismissUpdate } = useVersionCheck();
@@ -106,6 +117,7 @@ const AppContent: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const lastGenerateTimeRef = useRef<number>(0);
+  const previousTranscriptRef = useRef<string>(''); // Track previous transcript to detect changes
 
   // Check if using custom agent IDs (test agents)
   const isUsingTestAgent =
@@ -134,6 +146,33 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
+  // Fetch Momentum department data on app load
+  useEffect(() => {
+    const loadDepartmentData = async () => {
+      console.log('[App] Fetching Momentum department data...');
+      setDepartmentLoading(true);
+
+      try {
+        const data = await fetchMomentumDepartments();
+
+        if (data) {
+          setDepartmentData(data);
+          console.log(`[App] ✅ Loaded ${data.size} Momentum users with department data`);
+        } else {
+          console.warn('[App] ⚠️ No department data returned from Power Automate');
+          setDepartmentError('Failed to load department data');
+        }
+      } catch (error) {
+        console.error('[App] ❌ Error loading department data:', error);
+        setDepartmentError(error instanceof Error ? error.message : 'Unknown error');
+      } finally {
+        setDepartmentLoading(false);
+      }
+    };
+
+    loadDepartmentData();
+  }, [setDepartmentData, setDepartmentLoading, setDepartmentError]);
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -141,6 +180,17 @@ const AppContent: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // Listen for changes to prefers-reduced-motion setting
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   // Clear transcript on page refresh/load
   useEffect(() => {
@@ -159,6 +209,40 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     telemetryService.setUser(user);
   }, [user]);
+
+  // Emphasis animation: Track when transcript becomes ready or changes
+  useEffect(() => {
+    const currentTranscript = formState.transcript || '';
+    const hasTranscriptChanged = currentTranscript !== previousTranscriptRef.current;
+    const isTranscriptLoaded = currentTranscript.length > 0;
+
+    // Trigger animation when:
+    // 1. Transcript has changed to a new non-empty value
+    // 2. Not currently loading or generating notes
+    // 3. Not fetching a new transcript
+    if (hasTranscriptChanged && isTranscriptLoaded && !isLoading && !isLoadingTranscript) {
+      // Transcript just became available or changed, show emphasis animation
+      setShowButtonEmphasis(true);
+
+      // Remove emphasis after 2 seconds (2 pulse cycles @ 1s each)
+      const timer = setTimeout(() => {
+        setShowButtonEmphasis(false);
+      }, 2000);
+
+      // Update ref to current transcript
+      previousTranscriptRef.current = currentTranscript;
+
+      return () => clearTimeout(timer);
+    } else if (isLoading || isLoadingTranscript || !isTranscriptLoaded) {
+      // Disable emphasis during loading or when transcript is empty
+      setShowButtonEmphasis(false);
+
+      // Update ref when transcript becomes empty
+      if (!isTranscriptLoaded) {
+        previousTranscriptRef.current = '';
+      }
+    }
+  }, [formState.transcript, isLoading, isLoadingTranscript]);
 
   // Telemetry: Track user login (once per session)
   useEffect(() => {
@@ -184,6 +268,10 @@ const AppContent: React.FC = () => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
     }, 4000);
   };
+
+  const handleTranscriptLoadingChange = useCallback((isLoading: boolean) => {
+    setIsLoadingTranscript(isLoading);
+  }, []);
 
   const handleCancelGeneration = useCallback(() => {
     if (abortControllerRef.current) {
@@ -523,7 +611,19 @@ const AppContent: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="w-full lg:w-[500px] flex-shrink-0">
             <div id="generate-button-wrapper" className="sticky top-24 z-30 mb-6">
-                <Button id="generate-button" onClick={handleGenerateClick} disabled={isLoading || !formState.transcript} size="lg" className="w-full text-base shadow-lg dark:shadow-primary/20">
+                <Button
+                  id="generate-button"
+                  onClick={handleGenerateClick}
+                  disabled={isLoading || !formState.transcript || isLoadingTranscript}
+                  size="lg"
+                  className={`w-full text-base transition-all duration-500 ${
+                    showButtonEmphasis && !prefersReducedMotion
+                      ? 'animate-pulse-glow'
+                      : showButtonEmphasis && prefersReducedMotion
+                      ? 'shadow-xl shadow-primary/40 dark:shadow-primary/40 scale-[1.02]'
+                      : 'shadow-lg dark:shadow-primary/20'
+                  }`}
+                >
                 {isLoading ? (
                     <>
                         <Icon name="loader" className="h-5 w-5 mr-2 animate-spin"/>
@@ -559,6 +659,7 @@ const AppContent: React.FC = () => {
               onUpdateParticipant={updateParticipant}
               generateTrigger={generateTrigger}
               apiConfig={apiConfig}
+              onTranscriptLoadingChange={handleTranscriptLoadingChange}
             />
           </div>
           <div id="output-panel-wrapper" className="flex-1 min-w-0 w-full">
@@ -620,9 +721,11 @@ const AppContent: React.FC = () => {
 
 
 const App: React.FC = () => (
-  <TourProvider>
-    <AppContent />
-  </TourProvider>
+  <DepartmentProvider>
+    <TourProvider>
+      <AppContent />
+    </TourProvider>
+  </DepartmentProvider>
 );
 
 export default App;

@@ -23,7 +23,8 @@
       "Bash(node test-agent-runner.js:*)",
       "Bash(echo:*)",
       "Bash(node scripts/generate-version.js:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(start http://localhost:5174)"
     ],
     "deny": [],
     "ask": []

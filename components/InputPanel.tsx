@@ -66,6 +66,7 @@ interface InputPanelProps {
   onMarkAsExternal: (participantId: string, email: string) => void;
   onUpdateParticipant: (participantId: string, updates: Partial<Participant>) => void;
   generateTrigger?: number; // Trigger to collapse Advanced Settings when Generate Notes is clicked
+  onTranscriptLoadingChange?: (isLoading: boolean) => void; // Notify parent when transcript is being fetched
 }
 
 type InputMode = 'selectMeeting' | 'pasteTranscript';
@@ -92,6 +93,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
   onMarkAsExternal,
   onUpdateParticipant,
   generateTrigger,
+  onTranscriptLoadingChange,
 }) => {
   const { t } = useTranslation(['forms', 'common', 'constants']);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -669,7 +671,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     <Card className="p-4 sm:p-6" id="input-panel">
       <div className="space-y-6">
         {/* Tab Navigation */}
-        <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+        <div className="relative flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
           <button
             onClick={() => setInputMode('selectMeeting')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
@@ -681,6 +683,14 @@ export const InputPanel: React.FC<InputPanelProps> = ({
             <Icon name="calendar" className="w-4 h-4 inline-block mr-2" />
             {t('forms:tabs.selectMeeting')}
           </button>
+
+          {/* Subtle OR badge */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold text-slate-500 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 uppercase tracking-wider shadow-sm dark:shadow-none">
+              {t('common:common.or')}
+            </span>
+          </div>
+
           <button
             onClick={handleSwitchToPasteTranscript}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
@@ -704,6 +714,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
               selectedMeetingParticipants={participants}
               onViewTranscript={() => setShowTranscriptModal(true)}
               onViewParticipants={() => setShowParticipantsModal(true)}
+              onLoadingStateChange={onTranscriptLoadingChange}
             />
 
             {/* User Notes Button - Only show when a meeting is selected */}

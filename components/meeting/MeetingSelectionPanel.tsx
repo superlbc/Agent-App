@@ -27,6 +27,7 @@ interface MeetingSelectionPanelProps {
   selectedMeetingParticipants?: Array<{ name: string; email: string; role?: string }>;
   onViewTranscript?: () => void;
   onViewParticipants?: () => void;
+  onLoadingStateChange?: (isLoading: boolean) => void;
 }
 
 export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
@@ -35,7 +36,8 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   selectedMeetingTranscript,
   selectedMeetingParticipants,
   onViewTranscript,
-  onViewParticipants
+  onViewParticipants,
+  onLoadingStateChange
 }) => {
   const { t } = useTranslation('common');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -66,6 +68,13 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   useEffect(() => {
     loadMeetingsForCalendar();
   }, []);
+
+  // Notify parent of transcript loading state changes
+  useEffect(() => {
+    if (onLoadingStateChange) {
+      onLoadingStateChange(isLoadingTranscript);
+    }
+  }, [isLoadingTranscript, onLoadingStateChange]);
 
   /**
    * Load meetings for calendar display (counts on dates)

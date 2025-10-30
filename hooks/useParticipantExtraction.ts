@@ -5,6 +5,8 @@ import { searchUsersByDisplayName, searchUserByEmail } from '../utils/graphSearc
 import { fetchBatchPresence } from '../utils/presenceService';
 import { ParsedContact, isExternalEmail } from '../utils/emailListParser';
 import { telemetryService } from '../utils/telemetryService';
+import { useDepartmentContext } from '../contexts/DepartmentContext';
+import { getPreferredDepartment } from '../utils/departmentLookup';
 
 export interface BatchAddResult {
     added: number;
@@ -45,6 +47,7 @@ export interface UseParticipantExtractionReturn {
 export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
     const [participants, setParticipants] = useState<Participant[]>([]);
     const [isExtracting, setIsExtracting] = useState(false);
+    const { departmentMap } = useDepartmentContext();
 
     /**
      * Fetches presence for all matched participants with graphId
@@ -170,11 +173,19 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
                         }
 
                         if (graphData) {
+                            // Use preferred department (Momentum DB first, Graph API fallback)
+                            const preferredDepartment = getPreferredDepartment(
+                                graphData.mail || '',
+                                graphData.department,
+                                departmentMap
+                            );
+
                             console.log(`[ParticipantExtraction] Creating participant from graphData:`, {
                                 id: graphData.id,
                                 displayName: graphData.displayName,
                                 jobTitle: graphData.jobTitle,
-                                department: graphData.department,
+                                graphDepartment: graphData.department,
+                                preferredDepartment: preferredDepartment,
                                 companyName: graphData.companyName,
                                 officeLocation: graphData.officeLocation,
                                 email: graphData.mail,
@@ -187,7 +198,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
                                 graphId: graphData.id,
                                 displayName: graphData.displayName,
                                 jobTitle: graphData.jobTitle,
-                                department: graphData.department,
+                                department: preferredDepartment,
                                 companyName: graphData.companyName,
                                 officeLocation: graphData.officeLocation,
                                 email: graphData.mail,
@@ -249,7 +260,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
         } finally {
             setIsExtracting(false);
         }
-    }, [fetchPresenceForParticipants]);
+    }, [fetchPresenceForParticipants, departmentMap]);
 
     /**
      * Manually adds a participant from Graph API data
@@ -257,6 +268,13 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
      */
     const addParticipant = useCallback(async (graphData: GraphData) => {
         console.log(`[useParticipantExtraction] Adding participant: ${graphData.mail}`);
+
+        // Use preferred department (Momentum DB first, Graph API fallback)
+        const preferredDepartment = getPreferredDepartment(
+            graphData.mail || '',
+            graphData.department,
+            departmentMap
+        );
 
         const newParticipant: Participant = {
             id: `participant-manual-${Date.now()}-${Math.random()}`, // Ensure unique IDs
@@ -266,7 +284,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
             graphId: graphData.id,
             displayName: graphData.displayName,
             jobTitle: graphData.jobTitle,
-            department: graphData.department,
+            department: preferredDepartment,
             companyName: graphData.companyName,
             officeLocation: graphData.officeLocation,
             email: graphData.mail,
@@ -320,7 +338,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
 
             return newList;
         });
-    }, [fetchPresenceForParticipants]);
+    }, [fetchPresenceForParticipants, departmentMap]);
 
     /**
      * Removes a participant from the list
@@ -379,6 +397,13 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
      * Confirms a match between an unmatched participant and Graph API data
      */
     const confirmMatch = useCallback(async (participantId: string, graphData: GraphData) => {
+        // Use preferred department (Momentum DB first, Graph API fallback)
+        const preferredDepartment = getPreferredDepartment(
+            graphData.mail || '',
+            graphData.department,
+            departmentMap
+        );
+
         const updatedList = participants.map(p =>
             p.id === participantId
                 ? {
@@ -388,7 +413,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
                     graphId: graphData.id,
                     displayName: graphData.displayName,
                     jobTitle: graphData.jobTitle,
-                    department: graphData.department,
+                    department: preferredDepartment,
                     companyName: graphData.companyName,
                     officeLocation: graphData.officeLocation,
                     email: graphData.mail,
@@ -404,7 +429,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
         // Fetch presence
         const withPresence = await fetchPresenceForParticipants(updatedList);
         setParticipants(withPresence);
-    }, [participants, fetchPresenceForParticipants]);
+    }, [participants, fetchPresenceForParticipants, departmentMap]);
 
     /**
      * Marks an unmatched participant as external with their email
@@ -517,12 +542,20 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
                     const graphData = await searchUserByEmail(email);
 
                     if (graphData) {
+                        // Use preferred department (Momentum DB first, Graph API fallback)
+                        const preferredDepartment = getPreferredDepartment(
+                            graphData.mail || email,
+                            graphData.department,
+                            departmentMap
+                        );
+
                         // Successfully matched - log full profile data
                         console.log(`[BatchAdd] Graph API returned for ${email}:`, {
                             id: graphData.id,
                             displayName: graphData.displayName,
                             jobTitle: graphData.jobTitle,
-                            department: graphData.department,
+                            graphDepartment: graphData.department,
+                            preferredDepartment: preferredDepartment,
                             companyName: graphData.companyName,
                             officeLocation: graphData.officeLocation,
                             mail: graphData.mail,
@@ -537,7 +570,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
                             graphId: graphData.id,
                             displayName: graphData.displayName,
                             jobTitle: graphData.jobTitle,
-                            department: graphData.department,
+                            department: preferredDepartment,
                             companyName: graphData.companyName,
                             officeLocation: graphData.officeLocation,
                             email: graphData.mail,
@@ -624,7 +657,7 @@ export const useParticipantExtraction = (): UseParticipantExtractionReturn => {
         });
 
         return result;
-    }, [participants, fetchPresenceForParticipants]);
+    }, [participants, fetchPresenceForParticipants, departmentMap]);
 
     /**
      * Updates specific fields of a participant

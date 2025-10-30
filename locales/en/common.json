@@ -282,7 +282,7 @@
       "processing": "Processing",
       "none": "None"
     },
-    "note": "Note: Transcripts are usually available 5-10 minutes after a meeting ends. You can only access transcripts for meetings you organized (due to tenant security settings). For other meetings, use the manual paste option.",
+    "note": "Note: Transcripts are usually available 5-10 minutes after a meeting ends. Transcripts are only available where transcription was enabled. For other meetings, use the manual paste option.",
     "processMeeting": "Process This Meeting",
     "collapse": "Collapse",
     "changeMeeting": "Change Meeting",
