@@ -17,10 +17,12 @@ class ErrorLogger {
 
   private originalConsoleError: typeof console.error;
   private originalConsoleWarn: typeof console.warn;
+  private originalConsoleLog: typeof console.log;
 
   constructor() {
     this.originalConsoleError = console.error;
     this.originalConsoleWarn = console.warn;
+    this.originalConsoleLog = console.log;
   }
 
   /**
@@ -31,16 +33,21 @@ class ErrorLogger {
 
     this.isListening = true;
 
-    // Intercept console.error
-    console.error = (...args: any[]) => {
-      this.logError('error', args);
-      this.originalConsoleError.apply(console, args);
+    // Intercept console.log (silently capture without output)
+    console.log = (...args: any[]) => {
+      // Silently ignore - no output to console for users
     };
 
-    // Intercept console.warn
+    // Intercept console.error (capture but don't output)
+    console.error = (...args: any[]) => {
+      this.logError('error', args);
+      // Silently capture errors for telemetry without console output
+    };
+
+    // Intercept console.warn (capture but don't output)
     console.warn = (...args: any[]) => {
       this.logError('warning', args);
-      this.originalConsoleWarn.apply(console, args);
+      // Silently capture warnings for telemetry without console output
     };
 
     // Capture unhandled promise rejections
@@ -59,6 +66,7 @@ class ErrorLogger {
     this.isListening = false;
 
     // Restore original console methods
+    console.log = this.originalConsoleLog;
     console.error = this.originalConsoleError;
     console.warn = this.originalConsoleWarn;
 

@@ -70,7 +70,7 @@ const renderStatus = (status: string): React.ReactNode => {
     );
 };
 
-const NextStepsTable: React.FC<{ nextSteps: NextStep[] }> = ({ nextSteps }) => {
+const NextStepsTable: React.FC<{ nextSteps: NextStep[], onFilteredDataChange?: (filteredData: NextStep[]) => void }> = ({ nextSteps, onFilteredDataChange }) => {
     const { t } = useTranslation(['common']);
     const { currentLanguage } = useLanguage();
     const [showFilters, setShowFilters] = useState(false);
@@ -97,6 +97,13 @@ const NextStepsTable: React.FC<{ nextSteps: NextStep[] }> = ({ nextSteps }) => {
         ['department', 'owner', 'task', 'due_date', 'status', 'status_notes'],
         'nextStepsTable'
     );
+
+    // Notify parent component whenever filtered data changes
+    useEffect(() => {
+        if (onFilteredDataChange) {
+            onFilteredDataChange(filteredSteps);
+        }
+    }, [filteredSteps, onFilteredDataChange]);
 
     const columns: { key: keyof NextStep; label: string; sortable: boolean }[] = [
         { key: 'department', label: t('common:nextSteps.headers.department'), sortable: true },
@@ -391,11 +398,12 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 };
 
 
-const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[], showEmphasis: boolean, toggleEmphasis: () => void }> = ({ output, title, addToast, onInterrogate, participants, showEmphasis, toggleEmphasis }) => {
+const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[], showEmphasis: boolean, toggleEmphasis: () => void, groupingMode: 'by-topic' | 'by-type', setGroupingMode: (mode: 'by-topic' | 'by-type') => void, filteredNextSteps?: NextStep[] }> = ({ output, title, addToast, onInterrogate, participants, showEmphasis, toggleEmphasis, groupingMode, setGroupingMode, filteredNextSteps }) => {
     const { t } = useTranslation(['common']);
     const { graphData } = useAuth();
     const markdownContent = output.markdown || '';
-    const nextSteps = output.next_steps || [];
+    // Use filtered next steps if available, otherwise fall back to raw data
+    const nextSteps = filteredNextSteps || output.next_steps || [];
 
     const handleCopy = async () => {
         const htmlBody = markdownToHtml(markdownContent);
@@ -804,6 +812,10 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
     localStorage.setItem('groupingMode', groupingMode);
   }, [groupingMode]);
 
+  // Track filtered/sorted next steps from the table
+  // This ensures all exports (CSV, PDF, Copy, Email) use the same filtered/sorted data the user sees on screen
+  const [filteredNextSteps, setFilteredNextSteps] = useState<NextStep[] | undefined>(undefined);
+
   // Keyboard shortcut for Emphasis Toggle (F key)
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -893,6 +905,9 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                 participants={participants}
                 showEmphasis={showEmphasis}
                 toggleEmphasis={toggleEmphasis}
+                groupingMode={groupingMode}
+                setGroupingMode={setGroupingMode}
+                filteredNextSteps={filteredNextSteps}
               />
           </div>
         </div>
@@ -982,7 +997,10 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                   <h2 className="text-2xl font-semibold mb-4 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-3 text-slate-800 dark:text-slate-200">
                     NEXT STEPS
                   </h2>
-                  <NextStepsTable nextSteps={output.next_steps} />
+                  <NextStepsTable
+                    nextSteps={output.next_steps}
+                    onFilteredDataChange={setFilteredNextSteps}
+                  />
                 </div>
               )}
             </>
@@ -990,7 +1008,10 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
             <MarkdownRenderer
               content={output.markdown}
               nextStepsReplacement={
-                <NextStepsTable nextSteps={output.next_steps} />
+                <NextStepsTable
+                  nextSteps={output.next_steps}
+                  onFilteredDataChange={setFilteredNextSteps}
+                />
               }
             />
           )}
