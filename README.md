@@ -2515,6 +2515,56 @@ system: {
 
 ---
 
+### 📅 Update - 2025-10-30 - Enhanced UX Features (v1.5.0)
+
+**Summary**: Implemented three key UX improvements to enhance user workflow: automatic table filter reset on new note generation, smart scrolling when expanding meetings, and automatic scroll to top when transcripts are loaded.
+
+#### Enhanced UX Features
+
+**What's New**:
+- ✅ **Automatic Table Filter Reset**: When generating new notes, all table filters are automatically cleared to show the full dataset
+- ✅ **Smart Meeting Card Scrolling**: When expanding a meeting card, the page smoothly scrolls to ensure the "Process This Meeting" button is fully visible
+- ✅ **Scroll to Top on Transcript Load**: After a transcript is loaded, the page automatically scrolls to the top to highlight the "Generate Notes" button with its pulse animation
+
+**Key Features**:
+1. **Filter Reset on Generate** - Ensures users always see complete results for newly generated notes without needing to manually clear filters
+2. **Improved Meeting Selection Flow** - Smooth scrolling behavior guides users through the meeting selection process
+3. **Better Focus Management** - Automatic scroll to top after transcript loading directs attention to the next action
+
+**Files Modified**:
+- 📄 [components/OutputPanel.tsx](components/OutputPanel.tsx) - Added `onFiltersReset` callback prop and exposed reset function to parent via `useRef`/`useCallback`
+  - Lines 1, 31, 867-875: Added imports, interface prop, and reset function handling
+  - Lines 1056, 1068: Passed `onResetFilters` prop to both NextStepsTable instances
+- 📄 [App.tsx](App.tsx) - Integrated filter reset functionality with note generation
+  - Line 120: Added `resetFiltersRef` to store table filter reset function
+  - Lines 277-279: Created `handleFiltersReset` callback to receive reset function from OutputPanel
+  - Line 313: Called `resetFiltersRef.current?.()` at start of `handleGenerate` to clear filters before generating new notes
+  - Line 683: Passed `onFiltersReset={handleFiltersReset}` prop to OutputPanel
+- 📄 [components/meeting/MeetingCard.tsx](components/meeting/MeetingCard.tsx) - Added data attribute for scroll targeting
+  - Line 130: Added `data-meeting-id={meeting.id}` attribute for DOM targeting
+- 📄 [components/meeting/MeetingSelectionPanel.tsx](components/meeting/MeetingSelectionPanel.tsx) - Implemented scroll behaviors
+  - Lines 285-291: Added smooth scroll to meeting card when expanded using `scrollIntoView({ behavior: 'smooth', block: 'nearest' })`
+  - Lines 320-323: Added scroll to top after transcript loads using `window.scrollTo({ top: 0, behavior: 'smooth' })`
+
+**Technical Implementation**:
+- Uses callback ref pattern to expose child component's reset function to parent
+- `scrollIntoView` with `block: 'nearest'` ensures minimal scrolling while keeping button in view
+- 100ms delay on meeting expansion scroll allows DOM to update before scrolling
+- 300ms delay on transcript load scroll provides smooth transition after data update
+
+**Benefits**:
+- Reduces user confusion when viewing filtered data after generating new notes
+- Improves discoverability of the "Process This Meeting" button for collapsed meetings
+- Creates a more cohesive workflow by automatically focusing attention on the next action
+- Enhances the existing pulse animation feature by ensuring the button is always visible when triggered
+
+**Testing Scenarios**:
+1. ✅ Generate notes with active filters → Filters automatically clear and full dataset displays
+2. ✅ Expand a meeting card → Page smoothly scrolls to show the "Process This Meeting" button
+3. ✅ Process a meeting with transcript → Page scrolls to top and Generate Notes button shows pulse animation
+
+---
+
 ### 📅 Previous Update - 2025-10-29 - Automatic Version Update Detection (v1.4.0)
 
 **Summary**: Implemented automatic version detection to notify users when new deployments are available, ensuring they always use the latest version with all features and bug fixes.
@@ -2971,15 +3021,16 @@ location = /version.json {
 
 ## Version Information
 
-**Version**: 1.4.0
-**Release Date**: October 29, 2025
-**Last Updated**: October 29, 2025
+**Version**: 1.5.0
+**Release Date**: October 30, 2025
+**Last Updated**: October 30, 2025
 **Status**: Production Ready ✅
 **License**: Proprietary
 **Maintained By**: Interpublic Group / IPCT Team / Momentum Worldwide
 
 ### Version History
 
+- **v1.5.0** (2025-10-30): Enhanced UX Features - Table filter reset, improved scrolling behavior, and transcript loading improvements
 - **v1.4.0** (2025-10-29): Automatic Version Update Detection - Notify users when new deployments are available
 - **v1.3.0** (2025-10-24): Azure AD Group Security - Restricted access to Momentum users only
 - **v1.2.0** (2025-10-23): User Feedback System with multi-language support

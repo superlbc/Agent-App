@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep, Participant } from '../types';
 import { Card } from './ui/Card';
@@ -28,6 +28,7 @@ interface OutputPanelProps {
   formState: FormState;
   apiConfig: ApiConfig;
   participants: Participant[];
+  onFiltersReset?: (resetFn: () => void) => void;
 }
 
 const renderWithBold = (text: string): React.ReactNode => {
@@ -70,7 +71,7 @@ const renderStatus = (status: string): React.ReactNode => {
     );
 };
 
-const NextStepsTable: React.FC<{ nextSteps: NextStep[], onFilteredDataChange?: (filteredData: NextStep[]) => void }> = ({ nextSteps, onFilteredDataChange }) => {
+const NextStepsTable: React.FC<{ nextSteps: NextStep[], onFilteredDataChange?: (filteredData: NextStep[]) => void, onResetFilters?: (resetFn: () => void) => void }> = ({ nextSteps, onFilteredDataChange, onResetFilters }) => {
     const { t } = useTranslation(['common']);
     const { currentLanguage } = useLanguage();
     const [showFilters, setShowFilters] = useState(false);
@@ -97,6 +98,13 @@ const NextStepsTable: React.FC<{ nextSteps: NextStep[], onFilteredDataChange?: (
         ['department', 'owner', 'task', 'due_date', 'status', 'status_notes'],
         'nextStepsTable'
     );
+
+    // Expose reset function to parent
+    useEffect(() => {
+        if (onResetFilters) {
+            onResetFilters(clearAllFilters);
+        }
+    }, [onResetFilters, clearAllFilters]);
 
     // Notify parent component whenever filtered data changes
     useEffect(() => {
@@ -817,7 +825,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
     );
 };
 
-export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig, participants }) => {
+export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig, participants, onFiltersReset }) => {
   const { t } = useTranslation(['common']);
   const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
 
@@ -855,6 +863,16 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
   // Track filtered/sorted next steps from the table
   // This ensures all exports (CSV, PDF, Copy, Email) use the same filtered/sorted data the user sees on screen
   const [filteredNextSteps, setFilteredNextSteps] = useState<NextStep[] | undefined>(undefined);
+
+  // Store reset filters function from NextStepsTable
+  const resetFiltersRef = useRef<(() => void) | null>(null);
+  const handleResetFilters = useCallback((resetFn: () => void) => {
+    resetFiltersRef.current = resetFn;
+    // Expose reset function to parent
+    if (onFiltersReset) {
+      onFiltersReset(resetFn);
+    }
+  }, [onFiltersReset]);
 
   // Keyboard shortcut for Emphasis Toggle (F key)
   useEffect(() => {
@@ -1040,6 +1058,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                   <NextStepsTable
                     nextSteps={output.next_steps}
                     onFilteredDataChange={setFilteredNextSteps}
+                    onResetFilters={handleResetFilters}
                   />
                 </div>
               )}
@@ -1051,6 +1070,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                 <NextStepsTable
                   nextSteps={output.next_steps}
                   onFilteredDataChange={setFilteredNextSteps}
+                  onResetFilters={handleResetFilters}
                 />
               }
             />

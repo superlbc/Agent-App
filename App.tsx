@@ -117,6 +117,7 @@ const AppContent: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const lastGenerateTimeRef = useRef<number>(0);
+  const resetFiltersRef = useRef<(() => void) | null>(null); // Ref to store table filter reset function
   const previousTranscriptRef = useRef<string>(''); // Track previous transcript to detect changes
 
   // Check if using custom agent IDs (test agents)
@@ -273,6 +274,10 @@ const AppContent: React.FC = () => {
     setIsLoadingTranscript(isLoading);
   }, []);
 
+  const handleFiltersReset = useCallback((resetFn: () => void) => {
+    resetFiltersRef.current = resetFn;
+  }, []);
+
   const handleCancelGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -303,6 +308,9 @@ const AppContent: React.FC = () => {
       return;
     }
     lastGenerateTimeRef.current = now;
+
+    // Reset table filters when generating new notes
+    resetFiltersRef.current?.();
 
     setIsLoading(true);
     setError(null);
@@ -672,6 +680,7 @@ const AppContent: React.FC = () => {
               formState={formState}
               apiConfig={apiConfig}
               participants={participants}
+              onFiltersReset={handleFiltersReset}
             />
           </div>
         </div>

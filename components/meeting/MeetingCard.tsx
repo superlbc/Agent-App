@@ -127,6 +127,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
 
   return (
     <Card
+      data-meeting-id={meeting.id}
       className={`p-4 transition-all duration-200 relative ${
         isLoadingTranscript
           ? 'cursor-wait opacity-75 animate-pulse border-primary'

@@ -281,6 +281,14 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
       setExpandedMeetingId(undefined);
     } else {
       setExpandedMeetingId(meeting.id);
+
+      // Scroll to show the "Process This Meeting" button after expansion
+      setTimeout(() => {
+        const meetingCard = document.querySelector(`[data-meeting-id="${meeting.id}"]`);
+        if (meetingCard) {
+          meetingCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 100);
     }
   };
 
@@ -308,6 +316,11 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
 
       // Notify parent component
       onMeetingSelected(meetingWithTranscript);
+
+      // Scroll to top after transcript is loaded
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 300);
 
       // Show success feedback
       if (meetingWithTranscript.transcript?.content) {
