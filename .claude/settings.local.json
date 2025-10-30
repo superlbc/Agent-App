@@ -24,7 +24,8 @@
       "Bash(echo:*)",
       "Bash(node scripts/generate-version.js:*)",
       "Bash(curl:*)",
-      "Bash(start http://localhost:5174)"
+      "Bash(start http://localhost:5174)",
+      "Bash(powershell -ExecutionPolicy Bypass -File ./build-and-push.ps1)"
     ],
     "deny": [],
     "ask": []

@@ -145,11 +145,24 @@ export const getPreferredDepartment = (
   graphDepartment?: string,
   departmentMap?: Map<string, MomentumUserData> | null
 ): string => {
+  console.log(`🔍 [getPreferredDepartment] Called for email: ${email}`);
+  console.log(`   📊 Graph API department: "${graphDepartment}"`);
+  console.log(`   🗺️  departmentMap available: ${!!departmentMap}, size: ${departmentMap?.size || 0}`);
+
   if (departmentMap && email) {
     const normalizedEmail = email.toLowerCase().trim();
     const momentumData = departmentMap.get(normalizedEmail);
 
+    console.log(`   🔎 Momentum DB lookup result: ${momentumData ? 'FOUND' : 'NOT FOUND'}`);
+
     if (momentumData) {
+      console.log(`   📋 Momentum data:`, {
+        name: momentumData.name,
+        departmentGroup: momentumData.departmentGroup,
+        department: momentumData.department,
+        role: momentumData.roleWithoutNumbers
+      });
+
       // Prioritize DepartmentGroup, then Department, then Graph API, then Unknown
       const result = (
         momentumData.departmentGroup ||
@@ -158,11 +171,21 @@ export const getPreferredDepartment = (
         'Unknown'
       );
 
+      const source = momentumData.departmentGroup
+        ? 'DepartmentGroup (Momentum)'
+        : momentumData.department
+          ? 'Department (Momentum)'
+          : graphDepartment
+            ? 'Graph API'
+            : 'Unknown';
+
+      console.log(`   ✅ RETURNING: "${result}" (source: ${source})`);
       return result;
     }
   }
 
   const fallback = graphDepartment || 'Unknown';
+  console.log(`   ⚠️  RETURNING FALLBACK: "${fallback}" (no Momentum data found)`);
   return fallback;
 };
 

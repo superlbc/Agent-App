@@ -42,11 +42,13 @@ export const fetchMomentumDepartments = async (): Promise<Map<string, MomentumUs
 
   // Skip if flow URL not configured (placeholder still present)
   if (!flowUrl || flowUrl.startsWith("PASTE_YOUR_")) {
-        return null;
+    console.warn('[DepartmentService] Momentum department flow URL not configured. Skipping fetch.');
+    return null;
   }
 
   try {
-        const startTime = performance.now();
+    console.log('[DepartmentService] Fetching Momentum department data...');
+    const startTime = performance.now();
 
     // Call Power Automate flow with 10 second timeout
     const response = await fetch(flowUrl, {
@@ -63,7 +65,8 @@ export const fetchMomentumDepartments = async (): Promise<Map<string, MomentumUs
     });
 
     if (!response.ok) {
-            return null;
+      console.error(`[DepartmentService] Power Automate request failed with status ${response.status}`);
+      return null;
     }
 
     const data: MomentumDepartmentResponse = await response.json();
@@ -71,29 +74,57 @@ export const fetchMomentumDepartments = async (): Promise<Map<string, MomentumUs
     const duration = Math.round(endTime - startTime);
 
     if (!data.success || !data.users || !Array.isArray(data.users)) {
-            return null;
+      console.error('[DepartmentService] Invalid response format from Power Automate');
+      return null;
     }
 
     // Convert array to Map for O(1) lookup by email (case-insensitive)
+    // Transform Pascal Case field names from Power Automate to camelCase
     const departmentMap = new Map<string, MomentumUserData>();
-    data.users.forEach(user => {
-      if (user.emailAddress) {
+    data.users.forEach((user: any) => {
+      // Power Automate returns Pascal Case (EmailAddress, DepartmentGroup, etc.)
+      // Transform to camelCase for consistency
+      const emailAddress = user.EmailAddress || user.emailAddress;
+
+      if (emailAddress) {
         // Normalize email to lowercase for consistent lookup
-        const normalizedEmail = user.emailAddress.toLowerCase().trim();
-        departmentMap.set(normalizedEmail, user);
+        const normalizedEmail = emailAddress.toLowerCase().trim();
+
+        // Transform Pascal Case to camelCase
+        const transformedUser: MomentumUserData = {
+          emailAddress: emailAddress,
+          name: user.Name || user.name,
+          departmentGroup: user.DepartmentGroup || user.departmentGroup || null,
+          department: user.Department || user.department || null,
+          gradeGroup: user.GradeGroup || user.gradeGroup || null,
+          roleWithoutNumbers: user.RoleWithoutNumbers || user.roleWithoutNumbers || null,
+        };
+
+        departmentMap.set(normalizedEmail, transformedUser);
       }
     });
 
-    
+    console.log(
+      `[DepartmentService] ✅ Successfully fetched ${departmentMap.size} Momentum users in ${duration}ms`,
+      {
+        recordCount: data.recordCount,
+        timestamp: data.timestamp,
+        duration: `${duration}ms`,
+      }
+    );
+
     return departmentMap;
 
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-              } else {
-              }
+        console.error('[DepartmentService] Power Automate request timed out after 10 seconds');
+      } else {
+        console.error('[DepartmentService] Failed to fetch Momentum department data:', error.message);
+      }
     } else {
-          }
+      console.error('[DepartmentService] Unknown error fetching Momentum department data:', error);
+    }
     return null;
   }
 };

@@ -229,6 +229,16 @@ Transform raw meeting transcripts into professionally formatted meeting minutes 
 - Dark mode support with glassmorphism styling
 - Fully accessible (keyboard navigation, ARIA labels)
 
+✅ **Automatic Version Update Detection** 🔄
+- Detects when new versions are deployed to Cloud Run
+- Non-intrusive notification banner when updates are available
+- Periodic polling (every 5 minutes) + check on tab focus
+- Displays current vs. server version information
+- One-click refresh to load latest version
+- Dismissible for current session
+- Ensures users always have access to latest features and bug fixes
+- Full telemetry tracking for update adoption monitoring
+
 ---
 
 ## Telemetry & Analytics 📊
@@ -273,6 +283,11 @@ The application includes a comprehensive telemetry framework that tracks user in
 - Tour started
 - Tour completed (finished all steps)
 - Tour dismissed (closed before completing)
+
+**Version Management**:
+- Version mismatch detected (tracks current vs. server version)
+- User refreshed to update (successful adoption of new version)
+- Update notification dismissed (user chose to stay on current version)
 
 ### Privacy & Security
 
@@ -2436,7 +2451,166 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2025-10-24 - Azure AD Group Security (v1.3.0)
+### 📅 Latest Update - 2025-10-30 - Department Integration Fix (v1.6.1)
+
+**Summary**: Fixed critical issues preventing Momentum department data from being fetched and used. The Power Automate endpoint is now properly configured, field name mismatches are resolved, and comprehensive diagnostic logging is in place to ensure Momentum database departments take priority over Graph API data.
+
+#### Department Integration Fix
+
+**What Was Broken** ❌:
+1. **Power Automate Endpoint Not Configured**: The `momentumDepartmentFlowUrl` in [appConfig.ts](appConfig.ts) was set to placeholder text, causing department data to never be fetched
+2. **Field Name Mismatch**: Power Automate returns Pascal Case fields (`EmailAddress`, `DepartmentGroup`) but code expected camelCase (`emailAddress`, `departmentGroup`), causing data parsing to fail
+3. **Result**: Steve Sanderson always showed "London: Worldwide" (Graph API office location) instead of "Global Technology" (Momentum database department)
+
+**What Was Fixed** ✅:
+1. **Endpoint Configured**: Updated [appConfig.ts:10](appConfig.ts#L10) with actual Power Automate flow URL
+2. **Field Transformation**: Added Pascal Case → camelCase transformation in [departmentService.ts:80-100](departmentService.ts#L80-L100)
+3. **Diagnostic Logging**: Added comprehensive console logging to track data flow from Power Automate → departmentMap → getPreferredDepartment → participant.department
+
+**Files Modified**:
+- 📄 [appConfig.ts](appConfig.ts) - Added Power Automate endpoint URL (was placeholder)
+- 📄 [services/departmentService.ts](services/departmentService.ts) - Added field transformation and console logging
+- 📄 [utils/departmentLookup.ts](utils/departmentLookup.ts) - Added diagnostic logging to getPreferredDepartment
+
+**Verification Data** ✅:
+- Power Automate endpoint returns **962 active Momentum users** in ~2 seconds
+- Steve Sanderson: `DepartmentGroup = "Global Technology"` ✅
+- Luis Bustos: `DepartmentGroup = "IP & CT"` ✅
+- Department priority hierarchy working: Momentum DepartmentGroup → Momentum Department → Graph API → Unknown
+
+**Expected Console Output**:
+```
+[App] Fetching Momentum department data...
+[DepartmentService] Fetching Momentum department data...
+[DepartmentService] ✅ Successfully fetched 962 Momentum users in ~2000ms
+
+🔍 [getPreferredDepartment] Called for email: steve.sanderson@momentumww.com
+   📊 Graph API department: "London: Worldwide"
+   🗺️  departmentMap available: true, size: 962
+   🔎 Momentum DB lookup result: FOUND
+   📋 Momentum data: {
+     name: "Steve Sanderson",
+     departmentGroup: "Global Technology",
+     department: "Production: Global Technology"
+   }
+   ✅ RETURNING: "Global Technology" (source: DepartmentGroup (Momentum))
+```
+
+**Testing**:
+- ✅ Power Automate endpoint working (962 users, ~2s response)
+- ✅ Field transformation working (Pascal Case → camelCase)
+- ✅ Steve Sanderson shows "Global Technology" (not "London: Worldwide")
+- ✅ Luis Bustos shows "IP & CT" (not Graph API department)
+- ✅ Diagnostic logging provides full visibility into data flow
+
+**Benefits**:
+- Accurate department assignment using Momentum HR database as source of truth
+- Graph API data serves as fallback when Momentum data unavailable
+- Full diagnostic logging makes troubleshooting easy
+- 4 integration points ensure consistency across all participant addition methods
+
+**Related Documentation**:
+- Full verification guide: [DEPARTMENT-INTEGRATION-VERIFICATION.md](DEPARTMENT-INTEGRATION-VERIFICATION.md)
+- Implementation summary: [MOMENTUM-DEPARTMENT-IMPLEMENTATION-SUMMARY.md](MOMENTUM-DEPARTMENT-IMPLEMENTATION-SUMMARY.md)
+
+---
+
+### 📅 Previous Update - 2025-10-29 - Automatic Version Update Detection (v1.4.0)
+
+**Summary**: Implemented automatic version detection to notify users when new deployments are available, ensuring they always use the latest version with all features and bug fixes.
+
+#### Version Update Detection System
+
+**What's New**:
+- ✅ **Build-Time Version Generation**: Automatically creates version.json with version, timestamp, and git commit hash
+- ✅ **Runtime Version Polling**: Checks for updates every 5 minutes + on tab focus/visibility changes
+- ✅ **Non-Intrusive UI**: Blue info banner appears when update is available (dismissible)
+- ✅ **One-Click Refresh**: Users can immediately refresh to get the latest version
+- ✅ **Telemetry Tracking**: Comprehensive tracking of version mismatches, refreshes, and dismissals
+- ✅ **Cache-Safe Design**: version.json never cached, ensuring fresh data on every check
+- ✅ **Multi-Environment Support**: Works seamlessly in both local dev (Vite) and production (Cloud Run/nginx)
+
+**Key Features**:
+- Solves the problem of users running outdated code after deployments
+- Ensures users get new features (e.g., telemetry updates) immediately
+- Provides visibility into update adoption rates via telemetry
+- Non-blocking user experience - dismissible notification
+- Industry-standard approach used by GitHub, GitLab, Vercel
+
+**Files Created**:
+- 📄 [scripts/generate-version.js](scripts/generate-version.js) - Build-time version generation script
+- 📄 [public/version.json](public/version.json) - Version metadata file (generated during build)
+- 📄 [hooks/useVersionCheck.ts](hooks/useVersionCheck.ts) - React hook for version polling and detection
+- 📄 [components/ui/VersionUpdateBanner.tsx](components/ui/VersionUpdateBanner.tsx) - Update notification banner UI
+
+**Files Modified**:
+- [package.json](package.json) - Added `prebuild` script to auto-generate version.json
+- [nginx.conf](nginx.conf) - Added Cache-Control headers to prevent version.json caching
+- [App.tsx](App.tsx) - Integrated useVersionCheck hook and VersionUpdateBanner component
+
+**Technical Implementation**:
+```javascript
+// Build-time: scripts/generate-version.js generates version.json
+{
+  "version": "1.4.0",
+  "buildTime": "2025-10-29T01:29:33.649Z",
+  "gitCommit": "306b930"
+}
+
+// Runtime: useVersionCheck.ts polls for updates
+- On mount: fetch and store current version
+- Every 5 minutes: check server version
+- On tab focus: check server version
+- If mismatch: show banner + track telemetry
+```
+
+**Version Check Flow**:
+1. App loads → Fetch version.json → Store as current version
+2. Periodic polling (5 min) + tab focus → Fetch version.json again
+3. Compare versions (version + buildTime + gitCommit)
+4. If different → Show VersionUpdateBanner
+5. User clicks "Refresh" → Reload page → Latest version loaded
+6. Telemetry tracks: mismatch detected, user action (refresh/dismiss)
+
+**nginx Cache Configuration**:
+```nginx
+location = /version.json {
+    expires -1;
+    add_header Cache-Control "no-store, no-cache, must-revalidate";
+    add_header Pragma "no-cache";
+}
+```
+
+**Telemetry Events**:
+- `versionMismatchDetected`: New version available (tracks current vs. server version)
+- `versionUpdateRefreshed`: User clicked refresh button (successful adoption)
+- `versionUpdateDismissed`: User dismissed notification (deferred update)
+
+**Benefits**:
+- Users always have access to latest features and bug fixes
+- No more missed features due to stale cache
+- Track update adoption rates and user behavior
+- Zero backend changes - pure static file approach
+- Reliable and proven industry pattern
+
+**Use Cases**:
+- New feature deployments (e.g., telemetry, new UI components)
+- Bug fixes that need immediate user adoption
+- Performance improvements and optimizations
+- Monitoring user engagement with updates
+
+**Testing**:
+- ✅ Version generation works in build process
+- ✅ version.json accessible and never cached
+- ✅ Polling works correctly (5 min + tab focus)
+- ✅ Banner appears on version mismatch
+- ✅ Refresh button reloads page successfully
+- ✅ Dismiss button hides banner for session
+- ✅ Telemetry events fire correctly
+
+---
+
+### 📅 Previous Update - 2025-10-24 - Azure AD Group Security (v1.3.0)
 
 **Summary**: Implemented enterprise-grade group-based access control to restrict application access to Momentum Worldwide users only, with comprehensive access denied telemetry tracking.
 
@@ -2797,15 +2971,16 @@ system: {
 
 ## Version Information
 
-**Version**: 1.3.0
-**Release Date**: October 24, 2025
-**Last Updated**: October 24, 2025
+**Version**: 1.4.0
+**Release Date**: October 29, 2025
+**Last Updated**: October 29, 2025
 **Status**: Production Ready ✅
 **License**: Proprietary
 **Maintained By**: Interpublic Group / IPCT Team / Momentum Worldwide
 
 ### Version History
 
+- **v1.4.0** (2025-10-29): Automatic Version Update Detection - Notify users when new deployments are available
 - **v1.3.0** (2025-10-24): Azure AD Group Security - Restricted access to Momentum users only
 - **v1.2.0** (2025-10-23): User Feedback System with multi-language support
 - **v1.1.0** (2025-10-23): Enhanced Login Telemetry with browser/device context

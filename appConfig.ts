@@ -7,7 +7,7 @@ export const appConfig = {
 
   // Momentum Department Data API endpoint
   // Fetches employee department, role, and organizational info from SQL database
-  momentumDepartmentFlowUrl: "PASTE_YOUR_MOMENTUM_DEPARTMENT_FLOW_URL_HERE",
+  momentumDepartmentFlowUrl: "https://2e7cf80af71de950a36d4962c11a22.06.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/11a82bd0a6eb4da799b636025b1d7f9e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iGVxmlna0RFZSlWah_j40wb8uHiGpwEElw7MhCImNps",
 };
 
 /*
