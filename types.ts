@@ -119,6 +119,31 @@ export interface CriticalReview {
   unassigned_ambiguous_tasks: UnassignedTask[];
 }
 
+// Critical thinking for individual note lines
+export interface CriticalThinkingAnalysis {
+  strategic_context?: string;       // Why is this significant? What's the broader implication?
+  alternative_perspectives?: string[];  // What other viewpoints should be considered?
+  probing_questions?: string[];     // What questions should stakeholders ask about this?
+  risk_analysis?: string;           // What could go wrong? What's not being said?
+  connections?: string;             // How does this relate to other points in the transcript?
+  actionable_insights?: string[];   // What specific considerations should inform next steps?
+}
+
+export interface CriticalThinkingRequest {
+  line_text: string;                // The specific line to analyze
+  line_context: string;             // Section type (e.g., "key_discussion_points", "decisions_made", "risks")
+  workstream_name: string;          // Which workstream this belongs to
+  full_transcript: string;          // Complete meeting transcript for context
+  meeting_title: string;            // Meeting context
+  meeting_purpose: string;          // Meeting context
+}
+
+export interface CriticalThinkingResponse {
+  line_text: string;                // Echo back the line being analyzed
+  analysis: CriticalThinkingAnalysis;
+  emphasis?: EmphasisMarker[];      // Optional emphasis markers for the analysis text
+}
+
 export interface AgentResponse {
   markdown: string;
   next_steps: NextStep[];
@@ -165,13 +190,14 @@ export interface ToastState {
   type: 'success' | 'error';
 }
 
-// API Configuration for dual agent architecture
+// API Configuration for triple agent architecture
 export interface ApiConfig {
   hostname: string;
   clientId: string;
   clientSecret: string;
-  notesAgentId: string;          // Meeting Notes Generation Agent
-  interrogationAgentId: string;  // Interrogation Q&A Agent
+  notesAgentId: string;                 // Meeting Notes Generation Agent
+  interrogationAgentId: string;         // Interrogation Q&A Agent
+  criticalThinkingAgentId?: string;     // Critical Thinking Analysis Agent (optional, defaults to interrogationAgentId)
 }
 
 export interface AuthToken {

@@ -24,6 +24,8 @@ export type EventType =
   // Transcript interaction
   | 'transcriptInterrogated'
   | 'questionAsked'
+  | 'criticalThinkingRequested'
+  | 'criticalThinkingFailed'
   // Settings
   | 'botIdChanged'
   | 'settingsOpened'

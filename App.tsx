@@ -10,8 +10,8 @@ import { Toast } from './components/ui/Toast';
 import { ScrollToTop } from './components/ui/ScrollToTop';
 import { TestAgentBanner } from './components/ui/TestAgentBanner';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { generateNotes } from './services/apiService';
-import { Controls, Payload, AgentResponse, FormState, ToastState, ApiConfig } from './types';
+import { generateNotes, getCriticalThinking } from './services/apiService';
+import { Controls, Payload, AgentResponse, FormState, ToastState, ApiConfig, CriticalThinkingRequest, CriticalThinkingAnalysis } from './types';
 import { SAMPLE_DATA } from './constants';
 import { Button } from './components/ui/Button';
 import { Icon } from './components/ui/Icon';
@@ -424,6 +424,42 @@ const AppContent: React.FC = () => {
     handleGenerate(formState, controls);
   };
 
+  const handleCriticalThinkingRequest = useCallback(async (
+    request: CriticalThinkingRequest
+  ): Promise<CriticalThinkingAnalysis> => {
+    if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.interrogationAgentId) {
+      throw new Error('API configuration is incomplete for critical thinking');
+    }
+
+    try {
+      console.log('🧠 Requesting critical thinking analysis...');
+
+      const response = await getCriticalThinking(request, apiConfig);
+
+      console.log('✅ Critical thinking analysis received');
+
+      // Telemetry: Track critical thinking usage
+      telemetryService.trackEvent('criticalThinkingRequested', {
+        lineContext: request.line_context,
+        workstream: request.workstream_name,
+        lineLength: request.line_text.length,
+      });
+
+      return response.analysis;
+
+    } catch (error) {
+      console.error('❌ Critical thinking request failed:', error);
+
+      // Telemetry: Track critical thinking errors
+      telemetryService.trackEvent('criticalThinkingFailed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        lineContext: request.line_context,
+      });
+
+      throw error;
+    }
+  }, [apiConfig]);
+
   const handleClearForm = useCallback(() => {
     setFormState({ title: '', agenda: '', transcript: '', transcriptSource: 'manual', userNotes: undefined, tags: [] });
     setOutput(null);
@@ -681,6 +717,7 @@ const AppContent: React.FC = () => {
               apiConfig={apiConfig}
               participants={participants}
               onFiltersReset={handleFiltersReset}
+              onRequestCriticalThinking={handleCriticalThinkingRequest}
             />
           </div>
         </div>

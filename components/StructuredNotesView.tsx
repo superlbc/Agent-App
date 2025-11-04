@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { EmphasisText } from './EmphasisText';
 import { Icon } from './ui/Icon';
 import { SummaryCard } from './SummaryCard';
-import { CriticalReview, RiskAssessment, UnassignedTask } from '../types';
+import { CriticalReview, RiskAssessment, UnassignedTask, CriticalThinkingAnalysis, CriticalThinkingRequest } from '../types';
 
 interface EmphasisMarker {
   type: 'person' | 'date' | 'status' | 'task' | 'department' | 'monetary' | 'deadline' | 'risk' | 'general';
@@ -34,6 +34,11 @@ interface StructuredNotesViewProps {
   className?: string;
   showEmphasis: boolean; // Whether to show emphasis styling (true by default)
   groupingMode: 'by-topic' | 'by-type';  // How to organize workstream notes
+  // Critical thinking props
+  onRequestCriticalThinking?: (request: CriticalThinkingRequest) => Promise<CriticalThinkingAnalysis>;
+  transcript?: string;  // Full transcript for critical thinking context
+  meetingTitle?: string;
+  meetingPurpose?: string;
 }
 
 /**
@@ -41,8 +46,23 @@ interface StructuredNotesViewProps {
  * Inspired by Notion and Linear's design principles: centered titles, generous
  * spacing, clean typography, and subtle visual hierarchy.
  */
-export const StructuredNotesView: React.FC<StructuredNotesViewProps> = ({ data, executiveSummary, criticalReview, className = '', showEmphasis, groupingMode }) => {
+export const StructuredNotesView: React.FC<StructuredNotesViewProps> = ({
+  data,
+  executiveSummary,
+  criticalReview,
+  className = '',
+  showEmphasis,
+  groupingMode,
+  onRequestCriticalThinking,
+  transcript,
+  meetingTitle,
+  meetingPurpose
+}) => {
   const { meeting_title, meeting_purpose, workstream_notes } = data;
+
+  // Use props or fallback to data fields
+  const finalMeetingTitle = meetingTitle || meeting_title;
+  const finalMeetingPurpose = meetingPurpose || meeting_purpose;
 
   // Load collapsed state from sessionStorage
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
@@ -98,6 +118,10 @@ export const StructuredNotesView: React.FC<StructuredNotesViewProps> = ({ data, 
                   isExpanded={isExpanded}
                   onToggle={() => toggleSection(workstream.workstream_name)}
                   showEmphasis={showEmphasis}
+                  onRequestCriticalThinking={onRequestCriticalThinking}
+                  transcript={transcript}
+                  meetingTitle={finalMeetingTitle}
+                  meetingPurpose={finalMeetingPurpose}
                 />
               );
             })
@@ -108,6 +132,10 @@ export const StructuredNotesView: React.FC<StructuredNotesViewProps> = ({ data, 
               expandedSections={expandedSections}
               toggleSection={toggleSection}
               showEmphasis={showEmphasis}
+              onRequestCriticalThinking={onRequestCriticalThinking}
+              transcript={transcript}
+              meetingTitle={finalMeetingTitle}
+              meetingPurpose={finalMeetingPurpose}
             />
           )
         ) : (
@@ -134,7 +162,11 @@ const WorkstreamSection: React.FC<{
   isExpanded: boolean;
   onToggle: () => void;
   showEmphasis: boolean;
-}> = ({ workstream, isExpanded, onToggle, showEmphasis }) => {
+  onRequestCriticalThinking?: (request: CriticalThinkingRequest) => Promise<CriticalThinkingAnalysis>;
+  transcript?: string;
+  meetingTitle?: string;
+  meetingPurpose?: string;
+}> = ({ workstream, isExpanded, onToggle, showEmphasis, onRequestCriticalThinking, transcript, meetingTitle, meetingPurpose }) => {
   const { workstream_name, key_discussion_points, decisions_made, risks_or_open_questions } = workstream;
 
   const hasContent = (key_discussion_points && key_discussion_points.length > 0) ||
@@ -173,6 +205,12 @@ const WorkstreamSection: React.FC<{
                   items={key_discussion_points}
                   color="blue"
                   showEmphasis={showEmphasis}
+                  workstreamName={workstream_name}
+                  sectionContext="key_discussion_points"
+                  onRequestCriticalThinking={onRequestCriticalThinking}
+                  transcript={transcript}
+                  meetingTitle={meetingTitle}
+                  meetingPurpose={meetingPurpose}
                 />
               )}
 
@@ -184,6 +222,12 @@ const WorkstreamSection: React.FC<{
                   items={decisions_made}
                   color="green"
                   showEmphasis={showEmphasis}
+                  workstreamName={workstream_name}
+                  sectionContext="decisions_made"
+                  onRequestCriticalThinking={onRequestCriticalThinking}
+                  transcript={transcript}
+                  meetingTitle={meetingTitle}
+                  meetingPurpose={meetingPurpose}
                 />
               )}
 
@@ -196,6 +240,12 @@ const WorkstreamSection: React.FC<{
                   color="amber"
                   showRiskLevel
                   showEmphasis={showEmphasis}
+                  workstreamName={workstream_name}
+                  sectionContext="risks_or_open_questions"
+                  onRequestCriticalThinking={onRequestCriticalThinking}
+                  transcript={transcript}
+                  meetingTitle={meetingTitle}
+                  meetingPurpose={meetingPurpose}
                 />
               )}
             </div>
@@ -220,7 +270,80 @@ const Subsection: React.FC<{
   color: 'blue' | 'green' | 'amber';
   showRiskLevel?: boolean;
   showEmphasis: boolean;
-}> = ({ icon, title, items, color, showRiskLevel = false, showEmphasis }) => {
+  workstreamName?: string;
+  sectionContext?: string;
+  onRequestCriticalThinking?: (request: CriticalThinkingRequest) => Promise<CriticalThinkingAnalysis>;
+  transcript?: string;
+  meetingTitle?: string;
+  meetingPurpose?: string;
+}> = ({ icon, title, items, color, showRiskLevel = false, showEmphasis, workstreamName, sectionContext, onRequestCriticalThinking, transcript, meetingTitle, meetingPurpose }) => {
+
+  // State to track which items have expanded critical thinking
+  const [expandedCriticalThinking, setExpandedCriticalThinking] = useState<Record<number, CriticalThinkingAnalysis | null>>({});
+  const [loadingCriticalThinking, setLoadingCriticalThinking] = useState<Record<number, boolean>>({});
+  const [errorCriticalThinking, setErrorCriticalThinking] = useState<Record<number, string>>({});
+  const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+
+  const handleCriticalThinkingClick = async (itemIndex: number, itemText: string) => {
+    // If already expanded, collapse it
+    if (expandedCriticalThinking[itemIndex]) {
+      setExpandedCriticalThinking(prev => {
+        const newState = { ...prev };
+        delete newState[itemIndex];
+        return newState;
+      });
+      return;
+    }
+
+    // Check if we have the required data
+    if (!onRequestCriticalThinking || !transcript || !meetingTitle || !meetingPurpose || !workstreamName || !sectionContext) {
+      console.error('Missing required data for critical thinking request');
+      setErrorCriticalThinking(prev => ({
+        ...prev,
+        [itemIndex]: 'Critical thinking is not available for this item.'
+      }));
+      return;
+    }
+
+    // Set loading state
+    setLoadingCriticalThinking(prev => ({ ...prev, [itemIndex]: true }));
+    setErrorCriticalThinking(prev => {
+      const newState = { ...prev };
+      delete newState[itemIndex];
+      return newState;
+    });
+
+    try {
+      const request: CriticalThinkingRequest = {
+        line_text: itemText,
+        line_context: sectionContext,
+        workstream_name: workstreamName,
+        full_transcript: transcript,
+        meeting_title: meetingTitle,
+        meeting_purpose: meetingPurpose,
+      };
+
+      const analysis = await onRequestCriticalThinking(request);
+
+      setExpandedCriticalThinking(prev => ({
+        ...prev,
+        [itemIndex]: analysis
+      }));
+    } catch (error) {
+      console.error('Error fetching critical thinking analysis:', error);
+      setErrorCriticalThinking(prev => ({
+        ...prev,
+        [itemIndex]: error instanceof Error ? error.message : 'Failed to load critical thinking analysis.'
+      }));
+    } finally {
+      setLoadingCriticalThinking(prev => {
+        const newState = { ...prev };
+        delete newState[itemIndex];
+        return newState;
+      });
+    }
+  };
+
   const borderColorClasses = {
     blue: 'border-blue-200 dark:border-blue-800',
     green: 'border-green-200 dark:border-green-800',
@@ -233,6 +356,8 @@ const Subsection: React.FC<{
     amber: 'bg-amber-50/30 dark:bg-amber-900/10',
   };
 
+  const showCriticalThinkingButton = onRequestCriticalThinking && transcript && meetingTitle && meetingPurpose;
+
   return (
     <div className={`${bgColorClasses[color]} rounded-lg p-5 border-l-2 ${borderColorClasses[color]}`}>
       <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}>
@@ -241,24 +366,184 @@ const Subsection: React.FC<{
       </h3>
       <ul className="space-y-3">
         {items.map((item, idx) => (
-          <li key={idx} className="flex items-start gap-3">
+          <li
+            key={idx}
+            className="flex items-start gap-3 group"
+            onMouseEnter={() => setHoveredItem(idx)}
+            onMouseLeave={() => setHoveredItem(null)}
+          >
             <span className="text-slate-400 dark:text-slate-600 mt-0.5 select-none" style={{ fontSize: '0.75rem' }}>
               •
             </span>
             <div className="flex-1 min-w-0">
-              <EmphasisText
-                text={item.text}
-                emphasis={item.emphasis}
-                className="text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed"
-                showEmphasis={showEmphasis}
-              />
-              {showRiskLevel && item.risk_level && (
-                <RiskLevelBadge level={item.risk_level} />
+              <div className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <EmphasisText
+                    text={item.text}
+                    emphasis={item.emphasis}
+                    className="text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed"
+                    showEmphasis={showEmphasis}
+                  />
+                  {showRiskLevel && item.risk_level && (
+                    <RiskLevelBadge level={item.risk_level} />
+                  )}
+                </div>
+                {/* Critical Thinking Button - Shows on hover */}
+                {showCriticalThinkingButton && (
+                  <button
+                    onClick={() => handleCriticalThinkingClick(idx, item.text)}
+                    className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
+                      hoveredItem === idx || expandedCriticalThinking[idx]
+                        ? 'opacity-100 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50'
+                        : 'opacity-0 group-hover:opacity-100'
+                    }`}
+                    title="Critical Thinking (C)"
+                    aria-label="Get critical thinking analysis"
+                  >
+                    {loadingCriticalThinking[idx] ? (
+                      <Icon name="loader" className="h-4 w-4 text-purple-600 dark:text-purple-400 animate-spin" />
+                    ) : (
+                      <span className="text-base leading-none">💭</span>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Critical Thinking Panel */}
+              {expandedCriticalThinking[idx] && (
+                <CriticalThinkingPanel
+                  analysis={expandedCriticalThinking[idx]!}
+                  onClose={() => handleCriticalThinkingClick(idx, item.text)}
+                />
+              )}
+
+              {/* Error Message */}
+              {errorCriticalThinking[idx] && (
+                <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                  <p className="text-sm text-red-700 dark:text-red-300">{errorCriticalThinking[idx]}</p>
+                </div>
               )}
             </div>
           </li>
         ))}
       </ul>
+    </div>
+  );
+};
+
+/**
+ * Critical Thinking Panel - Displays AI-generated critical analysis
+ */
+const CriticalThinkingPanel: React.FC<{
+  analysis: CriticalThinkingAnalysis;
+  onClose: () => void;
+}> = ({ analysis, onClose }) => {
+  return (
+    <div className="mt-3 p-4 bg-purple-50/50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-base">💭</span>
+          <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-200">Critical Thinking</h4>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 hover:bg-purple-100 dark:hover:bg-purple-900/40 rounded transition-colors"
+          aria-label="Close critical thinking"
+        >
+          <Icon name="x" className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-3 text-sm">
+        {/* Strategic Context */}
+        {analysis.strategic_context && (
+          <div>
+            <h5 className="font-semibold text-purple-800 dark:text-purple-300 mb-1 flex items-center gap-1">
+              <span>🎯</span>
+              <span>Strategic Context</span>
+            </h5>
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed pl-5">{analysis.strategic_context}</p>
+          </div>
+        )}
+
+        {/* Alternative Perspectives */}
+        {analysis.alternative_perspectives && analysis.alternative_perspectives.length > 0 && (
+          <div>
+            <h5 className="font-semibold text-purple-800 dark:text-purple-300 mb-1 flex items-center gap-1">
+              <span>🔄</span>
+              <span>Alternative Perspectives</span>
+            </h5>
+            <ul className="space-y-1 pl-5">
+              {analysis.alternative_perspectives.map((perspective, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-purple-400 dark:text-purple-600 mt-0.5">•</span>
+                  <span className="text-slate-700 dark:text-slate-300 leading-relaxed">{perspective}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Probing Questions */}
+        {analysis.probing_questions && analysis.probing_questions.length > 0 && (
+          <div>
+            <h5 className="font-semibold text-purple-800 dark:text-purple-300 mb-1 flex items-center gap-1">
+              <span>❓</span>
+              <span>Probing Questions</span>
+            </h5>
+            <ul className="space-y-1 pl-5">
+              {analysis.probing_questions.map((question, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-purple-400 dark:text-purple-600 mt-0.5">•</span>
+                  <span className="text-slate-700 dark:text-slate-300 leading-relaxed">{question}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Risk Analysis */}
+        {analysis.risk_analysis && (
+          <div>
+            <h5 className="font-semibold text-purple-800 dark:text-purple-300 mb-1 flex items-center gap-1">
+              <span>⚠️</span>
+              <span>Risk Analysis</span>
+            </h5>
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed pl-5">{analysis.risk_analysis}</p>
+          </div>
+        )}
+
+        {/* Connections */}
+        {analysis.connections && (
+          <div>
+            <h5 className="font-semibold text-purple-800 dark:text-purple-300 mb-1 flex items-center gap-1">
+              <span>🔗</span>
+              <span>Connections</span>
+            </h5>
+            <p className="text-slate-700 dark:text-slate-300 leading-relaxed pl-5">{analysis.connections}</p>
+          </div>
+        )}
+
+        {/* Actionable Insights */}
+        {analysis.actionable_insights && analysis.actionable_insights.length > 0 && (
+          <div>
+            <h5 className="font-semibold text-purple-800 dark:text-purple-300 mb-1 flex items-center gap-1">
+              <span>💡</span>
+              <span>Actionable Insights</span>
+            </h5>
+            <ul className="space-y-1 pl-5">
+              {analysis.actionable_insights.map((insight, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-purple-400 dark:text-purple-600 mt-0.5">•</span>
+                  <span className="text-slate-700 dark:text-slate-300 leading-relaxed">{insight}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -407,7 +692,11 @@ const ContentTypeView: React.FC<{
   expandedSections: Record<string, boolean>;
   toggleSection: (name: string) => void;
   showEmphasis: boolean;
-}> = ({ workstreams, expandedSections, toggleSection, showEmphasis }) => {
+  onRequestCriticalThinking?: (request: CriticalThinkingRequest) => Promise<CriticalThinkingAnalysis>;
+  transcript?: string;
+  meetingTitle?: string;
+  meetingPurpose?: string;
+}> = ({ workstreams, expandedSections, toggleSection, showEmphasis, onRequestCriticalThinking, transcript, meetingTitle, meetingPurpose }) => {
   // Reorganize data by content type
   interface ContentByType {
     workstream_name: string;
@@ -467,6 +756,11 @@ const ContentTypeView: React.FC<{
           expandedSections={expandedSections}
           toggleSection={toggleSection}
           showEmphasis={showEmphasis}
+          sectionContext="key_discussion_points"
+          onRequestCriticalThinking={onRequestCriticalThinking}
+          transcript={transcript}
+          meetingTitle={meetingTitle}
+          meetingPurpose={meetingPurpose}
         />
       )}
 
@@ -480,6 +774,11 @@ const ContentTypeView: React.FC<{
           expandedSections={expandedSections}
           toggleSection={toggleSection}
           showEmphasis={showEmphasis}
+          sectionContext="decisions_made"
+          onRequestCriticalThinking={onRequestCriticalThinking}
+          transcript={transcript}
+          meetingTitle={meetingTitle}
+          meetingPurpose={meetingPurpose}
         />
       )}
 
@@ -494,6 +793,11 @@ const ContentTypeView: React.FC<{
           toggleSection={toggleSection}
           showRiskLevel
           showEmphasis={showEmphasis}
+          sectionContext="risks_or_open_questions"
+          onRequestCriticalThinking={onRequestCriticalThinking}
+          transcript={transcript}
+          meetingTitle={meetingTitle}
+          meetingPurpose={meetingPurpose}
         />
       )}
     </>
@@ -512,7 +816,81 @@ const ContentTypeSection: React.FC<{
   toggleSection: (name: string) => void;
   showRiskLevel?: boolean;
   showEmphasis: boolean;
-}> = ({ title, icon, color, contentByWorkstream, expandedSections, toggleSection, showRiskLevel = false, showEmphasis }) => {
+  sectionContext?: string;
+  onRequestCriticalThinking?: (request: CriticalThinkingRequest) => Promise<CriticalThinkingAnalysis>;
+  transcript?: string;
+  meetingTitle?: string;
+  meetingPurpose?: string;
+}> = ({ title, icon, color, contentByWorkstream, expandedSections, toggleSection, showRiskLevel = false, showEmphasis, sectionContext, onRequestCriticalThinking, transcript, meetingTitle, meetingPurpose }) => {
+
+  // State to track which items have expanded critical thinking (using "workstream-itemIdx" as key)
+  const [expandedCriticalThinking, setExpandedCriticalThinking] = useState<Record<string, CriticalThinkingAnalysis | null>>({});
+  const [loadingCriticalThinking, setLoadingCriticalThinking] = useState<Record<string, boolean>>({});
+  const [errorCriticalThinking, setErrorCriticalThinking] = useState<Record<string, string>>({});
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  const handleCriticalThinkingClick = async (workstreamName: string, itemIndex: number, itemText: string) => {
+    const key = `${workstreamName}-${itemIndex}`;
+
+    // If already expanded, collapse it
+    if (expandedCriticalThinking[key]) {
+      setExpandedCriticalThinking(prev => {
+        const newState = { ...prev };
+        delete newState[key];
+        return newState;
+      });
+      return;
+    }
+
+    // Check if we have the required data
+    if (!onRequestCriticalThinking || !transcript || !meetingTitle || !meetingPurpose || !sectionContext) {
+      console.error('Missing required data for critical thinking request');
+      setErrorCriticalThinking(prev => ({
+        ...prev,
+        [key]: 'Critical thinking is not available for this item.'
+      }));
+      return;
+    }
+
+    // Set loading state
+    setLoadingCriticalThinking(prev => ({ ...prev, [key]: true }));
+    setErrorCriticalThinking(prev => {
+      const newState = { ...prev };
+      delete newState[key];
+      return newState;
+    });
+
+    try {
+      const request: CriticalThinkingRequest = {
+        line_text: itemText,
+        line_context: sectionContext,
+        workstream_name: workstreamName,
+        full_transcript: transcript,
+        meeting_title: meetingTitle,
+        meeting_purpose: meetingPurpose,
+      };
+
+      const analysis = await onRequestCriticalThinking(request);
+
+      setExpandedCriticalThinking(prev => ({
+        ...prev,
+        [key]: analysis
+      }));
+    } catch (error) {
+      console.error('Error fetching critical thinking analysis:', error);
+      setErrorCriticalThinking(prev => ({
+        ...prev,
+        [key]: error instanceof Error ? error.message : 'Failed to load critical thinking analysis.'
+      }));
+    } finally {
+      setLoadingCriticalThinking(prev => {
+        const newState = { ...prev };
+        delete newState[key];
+        return newState;
+      });
+    }
+  };
+
   const sectionKey = title; // Use title as the key for expansion state
   const isExpanded = expandedSections[sectionKey] !== false; // Default to expanded
 
@@ -527,6 +905,8 @@ const ContentTypeSection: React.FC<{
     green: 'bg-green-50/30 dark:bg-green-900/10',
     amber: 'bg-amber-50/30 dark:bg-amber-900/10',
   };
+
+  const showCriticalThinkingButton = onRequestCriticalThinking && transcript && meetingTitle && meetingPurpose;
 
   return (
     <section className="scroll-mt-24">
@@ -560,24 +940,70 @@ const ContentTypeSection: React.FC<{
                 </h3>
                 {/* Items */}
                 <ul className="space-y-3">
-                  {ws.items.map((item: any, itemIdx: number) => (
-                    <li key={itemIdx} className="flex items-start gap-3">
-                      <span className="text-slate-400 dark:text-slate-600 mt-0.5 select-none" style={{ fontSize: '0.75rem' }}>
-                        •
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <EmphasisText
-                          text={item.text}
-                          emphasis={item.emphasis}
-                          className="text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed"
-                          showEmphasis={showEmphasis}
-                        />
-                        {showRiskLevel && item.risk_level && (
-                          <RiskLevelBadge level={item.risk_level} />
-                        )}
-                      </div>
-                    </li>
-                  ))}
+                  {ws.items.map((item: any, itemIdx: number) => {
+                    const itemKey = `${ws.workstream_name}-${itemIdx}`;
+                    return (
+                      <li
+                        key={itemIdx}
+                        className="flex items-start gap-3 group"
+                        onMouseEnter={() => setHoveredItem(itemKey)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                      >
+                        <span className="text-slate-400 dark:text-slate-600 mt-0.5 select-none" style={{ fontSize: '0.75rem' }}>
+                          •
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start gap-2">
+                            <div className="flex-1 min-w-0">
+                              <EmphasisText
+                                text={item.text}
+                                emphasis={item.emphasis}
+                                className="text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed"
+                                showEmphasis={showEmphasis}
+                              />
+                              {showRiskLevel && item.risk_level && (
+                                <RiskLevelBadge level={item.risk_level} />
+                              )}
+                            </div>
+                            {/* Critical Thinking Button - Shows on hover */}
+                            {showCriticalThinkingButton && (
+                              <button
+                                onClick={() => handleCriticalThinkingClick(ws.workstream_name, itemIdx, item.text)}
+                                className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
+                                  hoveredItem === itemKey || expandedCriticalThinking[itemKey]
+                                    ? 'opacity-100 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50'
+                                    : 'opacity-0 group-hover:opacity-100'
+                                }`}
+                                title="Critical Thinking (C)"
+                                aria-label="Get critical thinking analysis"
+                              >
+                                {loadingCriticalThinking[itemKey] ? (
+                                  <Icon name="loader" className="h-4 w-4 text-purple-600 dark:text-purple-400 animate-spin" />
+                                ) : (
+                                  <span className="text-base leading-none">💭</span>
+                                )}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Critical Thinking Panel */}
+                          {expandedCriticalThinking[itemKey] && (
+                            <CriticalThinkingPanel
+                              analysis={expandedCriticalThinking[itemKey]!}
+                              onClose={() => handleCriticalThinkingClick(ws.workstream_name, itemIdx, item.text)}
+                            />
+                          )}
+
+                          {/* Error Message */}
+                          {errorCriticalThinking[itemKey] && (
+                            <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                              <p className="text-sm text-red-700 dark:text-red-300">{errorCriticalThinking[itemKey]}</p>
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}

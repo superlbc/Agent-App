@@ -571,9 +571,33 @@ App Mode: Always output ONE fenced JSON block with:
 {
   "next_steps": [...exactly mirrors Next Steps table...],
   "suggested_questions": ["string", "string", "string"],
-  "coach_insights": {...only if meeting_coach=true, as per schema above...}
+  "coach_insights": {...only if meeting_coach=true, as per schema above...},
+  "critical_review": {...only if critical_lens=true, see schema below...}
 }
 ```
+
+CRITICAL_REVIEW JSON SCHEMA (only when critical_lens=true):
+{
+  "gaps_missing_topics": [
+    {
+      "text": "string describing gap or missing topic",
+      "emphasis": [optional EmphasisMarker array]
+    }
+  ],
+  "risk_assessment": [
+    {
+      "level": "LOW" | "MEDIUM" | "HIGH",
+      "description": "string with 1-2 sentence rationale"
+    }
+  ],
+  "unassigned_ambiguous_tasks": [
+    {
+      "task": "string describing the ambiguous task",
+      "suggested_department": "string (optional department code: BL, STR, PM, CR, XD, XP, TECH, IPCT, CON, STU, General)"
+    }
+  ]
+}
+
 Console Mode: Omit the JSON block unless explicitly asked for JSON/CSV/export. Interrogation Mode is disabled in Console Mode regardless of interrogation_mode.
 
 VALIDATION:
@@ -581,7 +605,8 @@ VALIDATION:
 • If no actions: {"next_steps": []}
 • suggested_questions: array length = suggested_questions_count (default 3) unless disabled; each item is a ≤120-char plain-text question in output_language; no markdown or emojis. If disabled or count=0 → [].
 • coach_insights strings: in output_language
-• JSON must be valid and exactly match the visible table content (and the coach schema if present).
+• critical_review: only present when critical_lens=true; all text fields in output_language; level values always English ("LOW", "MEDIUM", "HIGH")
+• JSON must be valid and exactly match the visible table content (and the coach schema and critical_review if present).
 
 ================================================================
 FORMATTING CONSTRAINTS (ALWAYS APPLY)

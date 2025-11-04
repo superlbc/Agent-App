@@ -1,5 +1,5 @@
 // NOTE: This service handles communication with the custom Interact API ("AI Console").
-import { Payload, AgentResponse, ApiConfig, AuthToken, FormState, InterrogationResponse } from '../types.ts';
+import { Payload, AgentResponse, ApiConfig, AuthToken, FormState, InterrogationResponse, CriticalThinkingRequest, CriticalThinkingResponse, Participant, Controls } from '../types.ts';
 import i18n from '../utils/i18n';
 import { buildParticipantContext } from '../utils/participantContext';
 
@@ -582,6 +582,174 @@ export const interrogateTranscript = async (
 
     } catch (error) {
         console.error('Error in interrogateTranscript:', error);
+
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            throw new Error("Network request failed due to a browser security policy (CORS). This is not an application bug. Please ask the API administrator to add your origin to the server's CORS allowlist.");
+        }
+
+        if (error instanceof Error && error.message.includes('authenticate')) {
+            localStorage.removeItem('authToken');
+        }
+        throw error;
+    }
+};
+
+/**
+ * Constructs a specialized prompt for critical thinking analysis
+ */
+const constructCriticalThinkingPrompt = (request: CriticalThinkingRequest): string => {
+    const { line_text, line_context, workstream_name, full_transcript, meeting_title, meeting_purpose } = request;
+
+    // Get current language from i18n (en, es, or ja)
+    const currentLanguage = i18n.language || 'en';
+
+    const contextTypeDisplay: Record<string, string> = {
+        'key_discussion_points': 'Key Discussion Point',
+        'decisions_made': 'Decision Made',
+        'risks_or_open_questions': 'Risk or Open Question',
+    };
+
+    const displayContext = contextTypeDisplay[line_context] || line_context;
+
+    const promptParts = [
+        `<<<CRITICAL_THINKING_MODE>>>`,
+        ``,
+        `Meeting Title: ${meeting_title}`,
+        `Meeting Purpose: ${meeting_purpose}`,
+        `Workstream: ${workstream_name}`,
+        ``,
+        `Note Context: ${displayContext}`,
+        `Note Text: "${line_text}"`,
+        ``,
+        `Full Meeting Transcript:`,
+        full_transcript,
+        ``,
+        `TASK: Provide critical analysis of the note text above by examining:`,
+        ``,
+        `1. Strategic Context - Why is this significant? What's the broader implication?`,
+        `2. Alternative Perspectives - What other viewpoints should be considered?`,
+        `3. Probing Questions - What questions should stakeholders ask about this?`,
+        `4. Risk Analysis - What could go wrong? What's not being said?`,
+        `5. Connections - How does this relate to other points in the transcript?`,
+        `6. Actionable Insights - What specific considerations should inform next steps?`,
+        ``,
+        `INSTRUCTIONS:`,
+        `- Be concise but substantive (3-5 key points total across all categories)`,
+        `- Reference specific transcript moments when relevant (include timestamps if available)`,
+        `- Balance critique with constructive insights`,
+        `- Focus on practical, actionable thinking`,
+        `- Output language: ${currentLanguage}`,
+        ``,
+        `Return your response as a JSON object with this exact structure:`,
+        `\`\`\`json`,
+        `{`,
+        `  "line_text": "The original note text",`,
+        `  "analysis": {`,
+        `    "strategic_context": "1-2 sentences about why this matters strategically",`,
+        `    "alternative_perspectives": ["Alternative view 1", "Alternative view 2"],`,
+        `    "probing_questions": ["Question 1?", "Question 2?", "Question 3?"],`,
+        `    "risk_analysis": "1-2 sentences about risks or what's not being addressed",`,
+        `    "connections": "1-2 sentences connecting to other transcript content",`,
+        `    "actionable_insights": ["Specific consideration 1", "Specific consideration 2"]`,
+        `  }`,
+        `}`,
+        `\`\`\``,
+    ];
+
+    return promptParts.join('\n');
+};
+
+/**
+ * Requests critical thinking analysis for a specific note line
+ */
+export const getCriticalThinking = async (
+    request: CriticalThinkingRequest,
+    apiConfig: ApiConfig,
+    signal?: AbortSignal
+): Promise<CriticalThinkingResponse> => {
+    // Use criticalThinkingAgentId if available, otherwise fall back to interrogationAgentId
+    const agentId = apiConfig.criticalThinkingAgentId || apiConfig.interrogationAgentId;
+
+    if (!agentId) {
+        throw new Error('Critical Thinking Agent ID is missing from config.');
+    }
+
+    try {
+        const accessToken = await getAuthToken(apiConfig, signal);
+
+        // Always use relative path to leverage proxy (Vite in dev, nginx in production).
+        const baseUrl = '';
+        const agentUrl = `${baseUrl}/api/chat-ai/v1/bots/${agentId}/messages`;
+        const prompt = constructCriticalThinkingPrompt(request);
+
+        const headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('Authorization', `Bearer ${accessToken}`);
+
+        console.log('🧠 ========== CRITICAL THINKING REQUEST ==========');
+        console.log('🎯 Agent URL:', agentUrl);
+        console.log('📝 Line:', request.line_text);
+        console.log('📊 Context:', request.line_context);
+        console.log('🔷 Workstream:', request.workstream_name);
+
+        const response = await fetch(agentUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ message: prompt }),
+            signal,
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Critical Thinking API request failed: ${response.status} ${response.statusText}. Details: ${errorBody}`);
+        }
+
+        const responseData = await response.json();
+
+        if (typeof responseData.message !== 'string') {
+            throw new Error(`Expected agent response 'message' to be a string, but got ${typeof responseData.message}.`);
+        }
+
+        const rawResponse = responseData.message;
+        console.log('💭 ========== RAW CRITICAL THINKING RESPONSE ==========');
+        console.log('📦 Response length:', rawResponse.length);
+
+        // Try to extract JSON from fenced code block
+        const fencedJsonRegex = /```json\s*({[\s\S]+?})\s*```/;
+        const match = rawResponse.match(fencedJsonRegex);
+
+        if (!match || !match[1]) {
+            console.warn("Critical thinking response was not a fenced JSON block. Content:", rawResponse);
+            // Return a user-friendly error response
+            throw new Error("The agent returned an invalid response format for critical thinking analysis.");
+        }
+
+        try {
+            const parsedJson = JSON.parse(match[1]);
+
+            // Validate response structure
+            if (
+                typeof parsedJson.line_text === 'string' &&
+                parsedJson.analysis &&
+                typeof parsedJson.analysis === 'object'
+            ) {
+                console.log('✅ Critical thinking analysis received');
+                return parsedJson as CriticalThinkingResponse;
+            } else {
+                throw new Error("Parsed JSON from agent is missing required fields for critical thinking.");
+            }
+        } catch (error) {
+            console.error("Failed to parse JSON from critical thinking response:", error);
+            throw new Error("The agent returned a malformed JSON response for critical thinking.");
+        }
+
+    } catch (error) {
+        console.error('Error in getCriticalThinking:', error);
+
+        // Handle AbortError specifically
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new Error('CRITICAL_THINKING_CANCELLED');
+        }
 
         if (error instanceof TypeError && error.message === 'Failed to fetch') {
             throw new Error("Network request failed due to a browser security policy (CORS). This is not an application bug. Please ask the API administrator to add your origin to the server's CORS allowlist.");

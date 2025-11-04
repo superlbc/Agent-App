@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep, Participant } from '../types';
+import { AgentResponse, Controls, CoachInsights, CoachFlags, FormState, ApiConfig, NextStep, Participant, CriticalThinkingRequest, CriticalThinkingAnalysis } from '../types';
 import { Card } from './ui/Card';
 import { SkeletonLoader } from './ui/SkeletonLoader';
 import { Icon } from './ui/Icon';
@@ -29,6 +29,7 @@ interface OutputPanelProps {
   apiConfig: ApiConfig;
   participants: Participant[];
   onFiltersReset?: (resetFn: () => void) => void;
+  onRequestCriticalThinking?: (request: CriticalThinkingRequest) => Promise<CriticalThinkingAnalysis>;
 }
 
 const renderWithBold = (text: string): React.ReactNode => {
@@ -825,7 +826,7 @@ const MeetingCoachPanel: React.FC<{ insights: CoachInsights }> = ({ insights }) 
     );
 };
 
-export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig, participants, onFiltersReset }) => {
+export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, error, controls, addToast, formState, apiConfig, participants, onFiltersReset, onRequestCriticalThinking }) => {
   const { t } = useTranslation(['common']);
   const [isInterrogateModalOpen, setIsInterrogateModalOpen] = useState(false);
 
@@ -1049,6 +1050,10 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({ output, isLoading, err
                 criticalReview={output.critical_review}
                 showEmphasis={showEmphasis}
                 groupingMode={groupingMode}
+                onRequestCriticalThinking={onRequestCriticalThinking}
+                transcript={formState.transcript}
+                meetingTitle={formState.title}
+                meetingPurpose={output.structured_data?.meeting_purpose}
               />
               {output.next_steps && output.next_steps.length > 0 && (
                 <div className="mt-8">
