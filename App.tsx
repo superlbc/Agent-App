@@ -17,7 +17,6 @@ import { Button } from './components/ui/Button';
 import { Icon } from './components/ui/Icon';
 import { TourProvider, useTourContext } from './contexts/TourContext';
 import { DepartmentProvider, useDepartmentContext } from './contexts/DepartmentContext';
-import { fetchMomentumDepartments } from './services/departmentService';
 import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
@@ -146,33 +145,6 @@ const AppContent: React.FC = () => {
       setTimeout(() => setShowWelcomeModal(true), 500);
     }
   }, []);
-
-  // Fetch Momentum department data on app load
-  useEffect(() => {
-    const loadDepartmentData = async () => {
-      console.log('[App] Fetching Momentum department data...');
-      setDepartmentLoading(true);
-
-      try {
-        const data = await fetchMomentumDepartments();
-
-        if (data) {
-          setDepartmentData(data);
-          console.log(`[App] ✅ Loaded ${data.size} Momentum users with department data`);
-        } else {
-          console.warn('[App] ⚠️ No department data returned from Power Automate');
-          setDepartmentError('Failed to load department data');
-        }
-      } catch (error) {
-        console.error('[App] ❌ Error loading department data:', error);
-        setDepartmentError(error instanceof Error ? error.message : 'Unknown error');
-      } finally {
-        setDepartmentLoading(false);
-      }
-    };
-
-    loadDepartmentData();
-  }, [setDepartmentData, setDepartmentLoading, setDepartmentError]);
 
   useEffect(() => {
     if (isDarkMode) {

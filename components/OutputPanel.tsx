@@ -407,10 +407,145 @@ const MarkdownRenderer: React.FC<{ content: string, nextStepsReplacement?: React
 };
 
 
+/**
+ * Helper function to generate markdown from structured data based on grouping mode
+ */
+const generateMarkdownFromStructuredData = (
+    output: AgentResponse,
+    groupingMode: 'by-topic' | 'by-type'
+): string => {
+    // If no structured data, return the original markdown
+    if (!output.structured_data) {
+        return output.markdown || '';
+    }
+
+    const { meeting_title, meeting_purpose, workstream_notes } = output.structured_data;
+    let markdown = `# ${meeting_title}\n\n`;
+
+    if (meeting_purpose) {
+        markdown += `**Meeting Purpose:** ${meeting_purpose}\n\n`;
+    }
+
+    // Add executive summary if available
+    if (output.executive_summary && output.executive_summary.length > 0) {
+        markdown += `## Executive Summary\n\n`;
+        output.executive_summary.forEach(bullet => {
+            markdown += `- ${bullet}\n`;
+        });
+        markdown += `\n`;
+    }
+
+    markdown += `---\n\n`;
+
+    if (groupingMode === 'by-topic') {
+        // BY TOPIC: Group by workstream
+        workstream_notes.forEach(workstream => {
+            markdown += `## ${workstream.workstream_name}\n\n`;
+
+            if (workstream.key_discussion_points && workstream.key_discussion_points.length > 0) {
+                markdown += `### 💬 Key Discussion Points\n\n`;
+                workstream.key_discussion_points.forEach(item => {
+                    markdown += `- ${item.text}\n`;
+                });
+                markdown += `\n`;
+            }
+
+            if (workstream.decisions_made && workstream.decisions_made.length > 0) {
+                markdown += `### ✅ Decisions Made\n\n`;
+                workstream.decisions_made.forEach(item => {
+                    markdown += `- ${item.text}\n`;
+                });
+                markdown += `\n`;
+            }
+
+            if (workstream.risks_or_open_questions && workstream.risks_or_open_questions.length > 0) {
+                markdown += `### ❓ Risks or Open Questions\n\n`;
+                workstream.risks_or_open_questions.forEach(item => {
+                    markdown += `- ${item.text}\n`;
+                });
+                markdown += `\n`;
+            }
+        });
+    } else {
+        // BY TYPE: Group by content type
+        // Collect all discussions
+        const allDiscussions: { workstream: string; text: string }[] = [];
+        const allDecisions: { workstream: string; text: string }[] = [];
+        const allRisks: { workstream: string; text: string }[] = [];
+
+        workstream_notes.forEach(ws => {
+            if (ws.key_discussion_points && ws.key_discussion_points.length > 0) {
+                ws.key_discussion_points.forEach(item => {
+                    allDiscussions.push({ workstream: ws.workstream_name, text: item.text });
+                });
+            }
+            if (ws.decisions_made && ws.decisions_made.length > 0) {
+                ws.decisions_made.forEach(item => {
+                    allDecisions.push({ workstream: ws.workstream_name, text: item.text });
+                });
+            }
+            if (ws.risks_or_open_questions && ws.risks_or_open_questions.length > 0) {
+                ws.risks_or_open_questions.forEach(item => {
+                    allRisks.push({ workstream: ws.workstream_name, text: item.text });
+                });
+            }
+        });
+
+        // Key Discussion Points
+        if (allDiscussions.length > 0) {
+            markdown += `## 💬 Key Discussion Points\n\n`;
+            let currentWorkstream = '';
+            allDiscussions.forEach(item => {
+                if (item.workstream !== currentWorkstream) {
+                    markdown += `### ${item.workstream}\n\n`;
+                    currentWorkstream = item.workstream;
+                }
+                markdown += `- ${item.text}\n`;
+            });
+            markdown += `\n`;
+        }
+
+        // Decisions Made
+        if (allDecisions.length > 0) {
+            markdown += `## ✅ Decisions Made\n\n`;
+            let currentWorkstream = '';
+            allDecisions.forEach(item => {
+                if (item.workstream !== currentWorkstream) {
+                    markdown += `### ${item.workstream}\n\n`;
+                    currentWorkstream = item.workstream;
+                }
+                markdown += `- ${item.text}\n`;
+            });
+            markdown += `\n`;
+        }
+
+        // Risks or Open Questions
+        if (allRisks.length > 0) {
+            markdown += `## ❓ Risks or Open Questions\n\n`;
+            let currentWorkstream = '';
+            allRisks.forEach(item => {
+                if (item.workstream !== currentWorkstream) {
+                    markdown += `### ${item.workstream}\n\n`;
+                    currentWorkstream = item.workstream;
+                }
+                markdown += `- ${item.text}\n`;
+            });
+            markdown += `\n`;
+        }
+    }
+
+    return markdown;
+};
+
 const ExportBar: React.FC<{ output: AgentResponse, title: string, addToast: OutputPanelProps['addToast'], onInterrogate: () => void, participants: Participant[], showEmphasis: boolean, toggleEmphasis: () => void, groupingMode: 'by-topic' | 'by-type', setGroupingMode: (mode: 'by-topic' | 'by-type') => void, filteredNextSteps?: NextStep[] }> = ({ output, title, addToast, onInterrogate, participants, showEmphasis, toggleEmphasis, groupingMode, setGroupingMode, filteredNextSteps }) => {
     const { t } = useTranslation(['common']);
     const { graphData } = useAuth();
-    const markdownContent = output.markdown || '';
+
+    // Generate markdown based on grouping mode if structured data exists
+    const markdownContent = output.structured_data
+        ? generateMarkdownFromStructuredData(output, groupingMode)
+        : (output.markdown || '');
+
     // Use filtered next steps if available, otherwise fall back to raw data
     const nextSteps = filteredNextSteps || output.next_steps || [];
 

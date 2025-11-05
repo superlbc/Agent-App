@@ -278,20 +278,21 @@ const Subsection: React.FC<{
   meetingPurpose?: string;
 }> = ({ icon, title, items, color, showRiskLevel = false, showEmphasis, workstreamName, sectionContext, onRequestCriticalThinking, transcript, meetingTitle, meetingPurpose }) => {
 
-  // State to track which items have expanded critical thinking
-  const [expandedCriticalThinking, setExpandedCriticalThinking] = useState<Record<number, CriticalThinkingAnalysis | null>>({});
+  // State to track fetched critical thinking analyses (persistent)
+  const [fetchedAnalyses, setFetchedAnalyses] = useState<Record<number, CriticalThinkingAnalysis>>({});
+  // State to track which items are currently expanded (toggle)
+  const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
   const [loadingCriticalThinking, setLoadingCriticalThinking] = useState<Record<number, boolean>>({});
   const [errorCriticalThinking, setErrorCriticalThinking] = useState<Record<number, string>>({});
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
 
   const handleCriticalThinkingClick = async (itemIndex: number, itemText: string) => {
-    // If already expanded, collapse it
-    if (expandedCriticalThinking[itemIndex]) {
-      setExpandedCriticalThinking(prev => {
-        const newState = { ...prev };
-        delete newState[itemIndex];
-        return newState;
-      });
+    // If already fetched, just toggle expansion
+    if (fetchedAnalyses[itemIndex]) {
+      setExpandedItems(prev => ({
+        ...prev,
+        [itemIndex]: !prev[itemIndex]
+      }));
       return;
     }
 
@@ -325,9 +326,16 @@ const Subsection: React.FC<{
 
       const analysis = await onRequestCriticalThinking(request);
 
-      setExpandedCriticalThinking(prev => ({
+      // Store in persistent cache
+      setFetchedAnalyses(prev => ({
         ...prev,
         [itemIndex]: analysis
+      }));
+
+      // Expand by default
+      setExpandedItems(prev => ({
+        ...prev,
+        [itemIndex]: true
       }));
     } catch (error) {
       console.error('Error fetching critical thinking analysis:', error);
@@ -388,12 +396,12 @@ const Subsection: React.FC<{
                     <RiskLevelBadge level={item.risk_level} />
                   )}
                 </div>
-                {/* Critical Thinking Button - Shows on hover */}
+                {/* Critical Thinking Button - Shows on hover or when analysis is fetched */}
                 {showCriticalThinkingButton && (
                   <button
                     onClick={() => handleCriticalThinkingClick(idx, item.text)}
                     className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
-                      hoveredItem === idx || expandedCriticalThinking[idx]
+                      hoveredItem === idx || fetchedAnalyses[idx]
                         ? 'opacity-100 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50'
                         : 'opacity-0 group-hover:opacity-100'
                     }`}
@@ -409,10 +417,10 @@ const Subsection: React.FC<{
                 )}
               </div>
 
-              {/* Critical Thinking Panel */}
-              {expandedCriticalThinking[idx] && (
+              {/* Critical Thinking Panel - Only show if expanded AND fetched */}
+              {expandedItems[idx] && fetchedAnalyses[idx] && (
                 <CriticalThinkingPanel
-                  analysis={expandedCriticalThinking[idx]!}
+                  analysis={fetchedAnalyses[idx]}
                   onClose={() => handleCriticalThinkingClick(idx, item.text)}
                 />
               )}
@@ -823,8 +831,10 @@ const ContentTypeSection: React.FC<{
   meetingPurpose?: string;
 }> = ({ title, icon, color, contentByWorkstream, expandedSections, toggleSection, showRiskLevel = false, showEmphasis, sectionContext, onRequestCriticalThinking, transcript, meetingTitle, meetingPurpose }) => {
 
-  // State to track which items have expanded critical thinking (using "workstream-itemIdx" as key)
-  const [expandedCriticalThinking, setExpandedCriticalThinking] = useState<Record<string, CriticalThinkingAnalysis | null>>({});
+  // State to track fetched critical thinking analyses (persistent, using "workstream-itemIdx" as key)
+  const [fetchedAnalyses, setFetchedAnalyses] = useState<Record<string, CriticalThinkingAnalysis>>({});
+  // State to track which items are currently expanded (toggle)
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const [loadingCriticalThinking, setLoadingCriticalThinking] = useState<Record<string, boolean>>({});
   const [errorCriticalThinking, setErrorCriticalThinking] = useState<Record<string, string>>({});
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -832,13 +842,12 @@ const ContentTypeSection: React.FC<{
   const handleCriticalThinkingClick = async (workstreamName: string, itemIndex: number, itemText: string) => {
     const key = `${workstreamName}-${itemIndex}`;
 
-    // If already expanded, collapse it
-    if (expandedCriticalThinking[key]) {
-      setExpandedCriticalThinking(prev => {
-        const newState = { ...prev };
-        delete newState[key];
-        return newState;
-      });
+    // If already fetched, just toggle expansion
+    if (fetchedAnalyses[key]) {
+      setExpandedItems(prev => ({
+        ...prev,
+        [key]: !prev[key]
+      }));
       return;
     }
 
@@ -872,9 +881,16 @@ const ContentTypeSection: React.FC<{
 
       const analysis = await onRequestCriticalThinking(request);
 
-      setExpandedCriticalThinking(prev => ({
+      // Store in persistent cache
+      setFetchedAnalyses(prev => ({
         ...prev,
         [key]: analysis
+      }));
+
+      // Expand by default
+      setExpandedItems(prev => ({
+        ...prev,
+        [key]: true
       }));
     } catch (error) {
       console.error('Error fetching critical thinking analysis:', error);
@@ -965,12 +981,12 @@ const ContentTypeSection: React.FC<{
                                 <RiskLevelBadge level={item.risk_level} />
                               )}
                             </div>
-                            {/* Critical Thinking Button - Shows on hover */}
+                            {/* Critical Thinking Button - Shows on hover or when analysis is fetched */}
                             {showCriticalThinkingButton && (
                               <button
                                 onClick={() => handleCriticalThinkingClick(ws.workstream_name, itemIdx, item.text)}
                                 className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
-                                  hoveredItem === itemKey || expandedCriticalThinking[itemKey]
+                                  hoveredItem === itemKey || fetchedAnalyses[itemKey]
                                     ? 'opacity-100 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50'
                                     : 'opacity-0 group-hover:opacity-100'
                                 }`}
@@ -986,10 +1002,10 @@ const ContentTypeSection: React.FC<{
                             )}
                           </div>
 
-                          {/* Critical Thinking Panel */}
-                          {expandedCriticalThinking[itemKey] && (
+                          {/* Critical Thinking Panel - Only show if expanded AND fetched */}
+                          {expandedItems[itemKey] && fetchedAnalyses[itemKey] && (
                             <CriticalThinkingPanel
-                              analysis={expandedCriticalThinking[itemKey]!}
+                              analysis={fetchedAnalyses[itemKey]}
                               onClose={() => handleCriticalThinkingClick(ws.workstream_name, itemIdx, item.text)}
                             />
                           )}

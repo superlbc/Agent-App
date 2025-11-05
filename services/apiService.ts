@@ -289,7 +289,6 @@ export const generateNotes = async (payload: Payload, apiConfig: ApiConfig, sign
                     // Add NEXT STEPS header so the NextStepsTable renders
                     if (parsedJson.next_steps && parsedJson.next_steps.length > 0) {
                         markdown += `\n---\n\n## 🔷 NEXT STEPS\n\n`;
-                        markdown += `_(Action items table will appear below)_\n\n`;
                     }
 
                     // Ensure markdown is a valid string
