@@ -38,6 +38,7 @@ import { telemetryService } from '../utils/telemetryService';
 import { searchUserByEmail } from '../utils/graphSearchService';
 import { extractSpeakerStatsFromVTT, hasSpeakerInfo } from '../utils/vttSpeakerExtraction';
 import { matchSpeakersToParticipants } from '../utils/speakerMatching';
+import { isTourDemoMeeting } from '../utils/tourMeetingData';
 
 interface InputPanelProps {
   formState: FormState;
@@ -258,13 +259,17 @@ export const InputPanel: React.FC<InputPanelProps> = ({
     let attendanceSource = 'invited'; // Track where attendees came from
     const attendanceDataMap = new Map<string, { attended: boolean; durationMinutes: number }>(); // Map email -> attendance data
 
-    try {
-      console.log('[InputPanel] Attempting to fetch attendance report...');
-      const graphService = GraphService.getInstance();
-      const attendanceReport = await graphService.getAttendanceReport(
-        meetingData.onlineMeetingId || '',
-        meetingData.joinUrl
-      );
+    // Skip attendance report for tour demo meetings
+    const isDemoMeeting = isTourDemoMeeting(meetingData.id);
+
+    if (!isDemoMeeting) {
+      try {
+        console.log('[InputPanel] Attempting to fetch attendance report...');
+        const graphService = GraphService.getInstance();
+        const attendanceReport = await graphService.getAttendanceReport(
+          meetingData.onlineMeetingId || '',
+          meetingData.joinUrl
+        );
 
       if (attendanceReport && attendanceReport.attendees.length > 0) {
         console.log('[InputPanel] ✅ Attendance report found! Using actual attendees.');
@@ -306,9 +311,12 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         console.log('[InputPanel]   - Attendance tracking wasn\'t enabled');
         console.log('[InputPanel]   - You\'re not the meeting organizer');
       }
-    } catch (error) {
-      console.error('[InputPanel] Error fetching attendance report:', error);
-      console.log('[InputPanel] Falling back to invited attendees');
+      } catch (error) {
+        console.error('[InputPanel] Error fetching attendance report:', error);
+        console.log('[InputPanel] Falling back to invited attendees');
+      }
+    } else {
+      console.log('[InputPanel] Skipping attendance report for tour demo meeting');
     }
 
     // Auto-populate participants from attendees - use proper Graph API lookup
@@ -342,36 +350,79 @@ export const InputPanel: React.FC<InputPanelProps> = ({
 
           console.log(`[InputPanel] Attendee ${attendee.email} - Type: ${attendanceType}, Response: ${acceptanceStatus}, Attended: ${attendanceData?.attended}`);
 
-          try {
-            // Look up the user by exact email to get complete profile
-            console.log(`[InputPanel] Looking up attendee: ${attendee.email}`);
-            const graphData = await searchUserByEmail(attendee.email);
+          // Skip Graph API lookup for tour demo participants (demo.local emails)
+          if (attendee.email.endsWith('@demo.local')) {
+            console.log(`[InputPanel] Skipping Graph lookup for demo participant: ${attendee.email}`);
+            onAddParticipant({
+              id: attendee.email,
+              displayName: attendee.name,
+              mail: attendee.email,
+              userPrincipalName: attendee.email,
+              jobTitle: '',
+              department: '',
+              companyName: '',
+              officeLocation: '',
+              presence: { availability: 'Unknown', activity: 'Unknown' },
+              photoUrl: null,
+              source: 'meeting',
+              attendanceType: attendanceType,
+              acceptanceStatus: acceptanceStatus,
+              attended: attendanceData?.attended,
+              attendanceDurationMinutes: attendanceData?.durationMinutes
+            } as any);
+          } else {
+            try {
+              // Look up the user by exact email to get complete profile
+              console.log(`[InputPanel] Looking up attendee: ${attendee.email}`);
+              const graphData = await searchUserByEmail(attendee.email);
 
-            if (graphData) {
-              // Add participant with full Graph data, meeting source, and attendance data
-              console.log(`[InputPanel] Found Graph data for ${attendee.email}:`, graphData.displayName);
+              if (graphData) {
+                // Add participant with full Graph data, meeting source, and attendance data
+                console.log(`[InputPanel] Found Graph data for ${attendee.email}:`, graphData.displayName);
 
-              const participantData = {
-                ...graphData,
-                source: 'meeting',
-                attendanceType: attendanceType,
-                acceptanceStatus: acceptanceStatus,
-                attended: attendanceData?.attended,
-                attendanceDurationMinutes: attendanceData?.durationMinutes
-              };
+                const participantData = {
+                  ...graphData,
+                  source: 'meeting',
+                  attendanceType: attendanceType,
+                  acceptanceStatus: acceptanceStatus,
+                  attended: attendanceData?.attended,
+                  attendanceDurationMinutes: attendanceData?.durationMinutes
+                };
 
-              console.log(`[InputPanel] Adding participant with data:`, {
-                email: attendee.email,
-                attendanceType,
-                acceptanceStatus,
-                attended: attendanceData?.attended,
-                duration: attendanceData?.durationMinutes
-              });
+                console.log(`[InputPanel] Adding participant with data:`, {
+                  email: attendee.email,
+                  attendanceType,
+                  acceptanceStatus,
+                  attended: attendanceData?.attended,
+                  duration: attendanceData?.durationMinutes
+                });
 
-              onAddParticipant(participantData as any);
-            } else {
-              // User not found in directory - add as basic data with attendance
-              console.warn(`[InputPanel] User not found in directory: ${attendee.email}`);
+                onAddParticipant(participantData as any);
+              } else {
+                // User not found in directory - add as basic data with attendance
+                console.warn(`[InputPanel] User not found in directory: ${attendee.email}`);
+                onAddParticipant({
+                  id: attendee.email,
+                  displayName: attendee.name,
+                  mail: attendee.email,
+                  userPrincipalName: attendee.email,
+                  jobTitle: '',
+                  department: '',
+                  companyName: '',
+                  officeLocation: '',
+                  presence: { availability: 'Unknown', activity: 'Unknown' },
+                  photoUrl: null,
+                  source: 'meeting',
+                  attendanceType: attendanceType,
+                  acceptanceStatus: acceptanceStatus,
+                  attended: attendanceData?.attended,
+                  attendanceDurationMinutes: attendanceData?.durationMinutes
+                } as any);
+              }
+            } catch (error) {
+              console.error(`[InputPanel] Error looking up ${attendee.email}:`, error);
+              // Fallback to basic data on error with attendance
+              const attendanceData = attendanceDataMap.get(attendee.email.toLowerCase());
               onAddParticipant({
                 id: attendee.email,
                 displayName: attendee.name,
@@ -390,27 +441,6 @@ export const InputPanel: React.FC<InputPanelProps> = ({
                 attendanceDurationMinutes: attendanceData?.durationMinutes
               } as any);
             }
-          } catch (error) {
-            console.error(`[InputPanel] Error looking up ${attendee.email}:`, error);
-            // Fallback to basic data on error with attendance
-            const attendanceData = attendanceDataMap.get(attendee.email.toLowerCase());
-            onAddParticipant({
-              id: attendee.email,
-              displayName: attendee.name,
-              mail: attendee.email,
-              userPrincipalName: attendee.email,
-              jobTitle: '',
-              department: '',
-              companyName: '',
-              officeLocation: '',
-              presence: { availability: 'Unknown', activity: 'Unknown' },
-              photoUrl: null,
-              source: 'meeting',
-              attendanceType: attendanceType,
-              acceptanceStatus: acceptanceStatus,
-              attended: attendanceData?.attended,
-              attendanceDurationMinutes: attendanceData?.durationMinutes
-            } as any);
           }
         })
       );
@@ -673,6 +703,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
         {/* Tab Navigation */}
         <div className="relative flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
           <button
+            id="tab-select-meeting"
             onClick={() => setInputMode('selectMeeting')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
               inputMode === 'selectMeeting'
@@ -692,6 +723,7 @@ export const InputPanel: React.FC<InputPanelProps> = ({
           </div>
 
           <button
+            id="tab-paste-transcript"
             onClick={handleSwitchToPasteTranscript}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
               inputMode === 'pasteTranscript'

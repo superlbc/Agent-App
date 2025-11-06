@@ -123,7 +123,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
-    <div className="space-y-4">
+    <div id="calendar-picker" className="space-y-4">
       {/* Header with navigation */}
       <div className="flex items-center justify-between mb-1">
         <div className="flex flex-col">
@@ -137,6 +137,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
         <div className="flex items-center gap-2">
           <Button
+            id="calendar-today-button"
             variant="outline"
             size="sm"
             onClick={goToToday}
@@ -147,6 +148,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
           <div className="flex items-center gap-1">
             <Button
+              id="calendar-prev-week"
               variant="outline"
               size="sm"
               onClick={() => navigateWeek('prev')}
@@ -155,6 +157,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
               <Icon name="chevron-left" className="w-4 h-4" />
             </Button>
             <Button
+              id="calendar-next-week"
               variant="outline"
               size="sm"
               onClick={() => navigateWeek('next')}
@@ -175,6 +178,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({
 
           return (
             <button
+              id={`calendar-day-${index}`}
               key={date.toISOString()}
               onClick={() => handleDateSelect(date, 'click')}
               className={`

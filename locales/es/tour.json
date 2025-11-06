@@ -75,118 +75,158 @@
       "content": "Este tour te mostrará las funciones clave. Comencemos."
     },
     "step2": {
-      "title": "1. Proporciona tu Contenido",
-      "content": "Solo la transcripción es obligatoria. Si proporcionas una agenda, las notas generadas seguirán esa estructura."
+      "title": "Dos Formas de Entrada",
+      "content": "Puedes seleccionar una reunión de tu calendario o pegar manualmente una transcripción. La pestaña 'Seleccionar Reunión' es el enfoque recomendado."
     },
     "step3": {
+      "title": "Selector de Calendario",
+      "content": "Explora reuniones por semana. Puedes ver cuántas reuniones tienes cada día de un vistazo."
+    },
+    "step4": {
+      "title": "Botón de Hoy",
+      "content": "Haz clic en este botón para saltar rápidamente a las reuniones de hoy."
+    },
+    "step5": {
+      "title": "Navegación de Semana",
+      "content": "Usa estas flechas para explorar semanas anteriores o futuras para encontrar la reunión que deseas procesar."
+    },
+    "step6": {
+      "title": "Lista de Reuniones",
+      "content": "Todas las reuniones del día seleccionado aparecen aquí. Puedes ver detalles como la hora, asistentes y disponibilidad de transcripción."
+    },
+    "step7": {
+      "title": "Estado de Transcripción",
+      "content": "Cada reunión muestra una insignia indicando si una transcripción está disponible (verde), aún procesando (amarillo) o no disponible (gris)."
+    },
+    "step8": {
+      "title": "Expandir para Vista Previa",
+      "content": "Haz clic en cualquier tarjeta de reunión para expandirla y ver la lista de asistentes antes de procesarla."
+    },
+    "step9": {
+      "title": "Procesar Esta Reunión",
+      "content": "Una vez que hayas seleccionado la reunión correcta, haz clic en este botón para cargar automáticamente la transcripción, agenda e información de participantes."
+    },
+    "step10": {
+      "title": "Ver Participantes",
+      "content": "Después del procesamiento, puedes ver todos los participantes aquí. Haz clic para ver opciones de contacto como correo electrónico o mensajería de Teams."
+    },
+    "step11": {
+      "title": "Ver Transcripción",
+      "content": "Accede a la transcripción completa de la reunión aquí. Puedes descargarla o usar la función 'Interrogar' para hacer preguntas sobre contenido específico."
+    },
+    "step12": {
+      "title": "Opción de Entrada Manual",
+      "content": "Si lo prefieres, también puedes pegar manualmente una transcripción usando esta pestaña. Esto es útil para reuniones fuera de tu calendario o para propósitos de demostración."
+    },
+    "step13": {
       "title": "Usar Datos de Muestra",
       "content": "Para este tour, cargaremos algunos datos de muestra para ver cómo funciona."
     },
-    "step4": {
+    "step14": {
       "title": "2. Selecciona una Configuración",
       "content": "Las configuraciones son la forma más rápida de configurar tus notas. Veamos algunos tipos de reunión comunes."
     },
-    "step5": {
+    "step15": {
       "title": "Configuración: Actualización de Cliente",
       "content": "Esta configuración está optimizada para reuniones externas. Usa un tono listo para el cliente y oculta información personal."
     },
-    "step6": {
+    "step16": {
       "title": "Configuración: Sincronización Interna",
       "content": "Ideal para reuniones de equipo. Esta configuración usa un tono más detallado y profesional y habilita la revisión crítica."
     },
-    "step7": {
+    "step17": {
       "title": "Configuración: Lluvia de Ideas",
       "content": "Usa esto para sesiones creativas. Genera notas concisas y ayuda a identificar temas emergentes y acciones."
     },
-    "step8": {
+    "step18": {
       "title": "Configuración: Resumen Ejecutivo",
       "content": "Crea un resumen de alto nivel con un tono conciso, perfecto para actualizaciones de liderazgo."
     },
-    "step9": {
+    "step19": {
       "title": "3. Generar Notas",
       "content": "Cuando estés listo, haz clic aquí. Para el tour, mostraremos instantáneamente un resultado de muestra."
     },
-    "step10": {
+    "step20": {
       "title": "4. Revisa tu Resultado",
       "content": "Aquí están tus notas estructuradas y profesionales. Veamos las secciones clave."
     },
-    "step11": {
+    "step21": {
       "title": "Notas de Flujo de Trabajo",
       "content": "El agente organiza la transcripción en secciones basadas en tu agenda, extrayendo puntos clave, decisiones y riesgos."
     },
-    "step12": {
+    "step22": {
       "title": "Próximos Pasos",
       "content": "Todos los próximos pasos se extraen automáticamente en una tabla clara y organizada con responsables, fechas de vencimiento y un estado RAG."
     },
-    "step13": {
+    "step23": {
       "title": "Revisión Crítica",
       "content": "Esta sección (habilitada por algunas configuraciones) analiza brechas, riesgos y tareas sin asignar."
     },
-    "step14": {
+    "step24": {
       "title": "Coach de Reuniones",
       "content": "Obtén retroalimentación impulsada por IA sobre la eficacia de tu reunión. Esto es solo para ti y no se exportará."
     },
-    "step15": {
+    "step25": {
       "title": "5. Exporta tus Notas",
       "content": "Copia fácilmente, descarga como PDF o redacta un correo electrónico con tus notas generadas."
     },
-    "step16": {
+    "step26": {
       "title": "6. Interroga la Transcripción",
       "content": "¿Tienes una pregunta específica? Usa esta función para chatear con un agente de IA que conoce el contenido de tu transcripción."
     },
-    "step17": {
+    "step27": {
       "title": "Pregunta lo que Quieras",
       "content": "Puedes pedir resúmenes, decisiones clave o quién fue responsable de ciertas tareas. El agente responderá basándose solo en la transcripción proporcionada."
     },
-    "step18": {
+    "step28": {
       "title": "Ajuste Fino del Resultado",
       "content": "A continuación, exploraremos la configuración avanzada para personalizar tu resultado. El formulario se ha limpiado y estamos de vuelta arriba para continuar."
     },
-    "step19": {
+    "step29": {
       "title": "Mostrar Configuración Avanzada",
       "content": "Cada configuración es solo una combinación de esta configuración avanzada. Abramos el panel para verlas."
     },
-    "step20": {
+    "step30": {
       "title": "Panel de Configuración Avanzada",
       "content": "Aquí puedes controlar manualmente cada aspecto del resultado."
     },
-    "step21": {
+    "step31": {
       "title": "Configuración Dinámica",
       "content": "Observa cómo cambia la configuración en este panel cuando seleccionamos la configuración 'Actualización de Cliente'. Nota el 'Ocultar PII' y el tono 'Listo para el Cliente'."
     },
-    "step22": {
+    "step32": {
       "title": "Configuración Dinámica",
       "content": "Ahora probemos 'Sincronización Interna'. Habilita el 'Lente Crítico' y usa iconos para una mejor legibilidad."
     },
-    "step23": {
+    "step33": {
       "title": "Etiquetas de Contexto",
       "content": "Aplica etiquetas como \"Sensible\" o \"De cara al cliente\" para dar a la IA un contexto importante sobre el contenido de la reunión."
     },
-    "step24": {
+    "step34": {
       "title": "Enfoque de Departamento",
       "content": "Selecciona uno o más departamentos para que la IA priorice sus discusiones relacionadas y elementos de acción en el resumen."
     },
-    "step25": {
+    "step35": {
       "title": "Audiencia",
       "content": "Adapta el nivel de detalle del resumen. 'Ejecutivo' es de alto nivel, mientras que 'Departamento' es más granular."
     },
-    "step26": {
+    "step36": {
       "title": "Tono",
       "content": "Ajusta el estilo de escritura de las notas, desde profesional hasta conciso o pulido para clientes."
     },
-    "step27": {
+    "step37": {
       "title": "Modo de Vista",
       "content": "Elige entre las actas completas y detalladas o una versión que muestre solo los elementos de acción."
     },
-    "step28": {
+    "step38": {
       "title": "Opciones de Formato",
       "content": "Usa estos interruptores para habilitar el Lente Crítico, ocultar información personal (PII), agregar iconos o resaltar palabras clave importantes."
     },
-    "step29": {
+    "step39": {
       "title": "Configuración de Coach de Reuniones",
       "content": "Puedes desactivar el Coach de Reuniones o cambiar su estilo de retroalimentación de solidario (\"Amable\") a más directo."
     },
-    "step30": {
+    "step40": {
       "title": "¡Ya Está Todo Listo!",
       "content": "Eso cubre todas las funciones. Puedes repetir este tour en cualquier momento desde este menú haciendo clic en \"Repetir Tutorial\"."
     }

@@ -396,12 +396,12 @@ const Subsection: React.FC<{
                     <RiskLevelBadge level={item.risk_level} />
                   )}
                 </div>
-                {/* Critical Thinking Button - Shows on hover or when analysis is fetched */}
+                {/* Critical Thinking Button - Shows on hover, when loading, or when analysis is fetched */}
                 {showCriticalThinkingButton && (
                   <button
                     onClick={() => handleCriticalThinkingClick(idx, item.text)}
                     className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
-                      hoveredItem === idx || fetchedAnalyses[idx]
+                      hoveredItem === idx || fetchedAnalyses[idx] || loadingCriticalThinking[idx]
                         ? 'opacity-100 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50'
                         : 'opacity-0 group-hover:opacity-100'
                     }`}
@@ -981,12 +981,12 @@ const ContentTypeSection: React.FC<{
                                 <RiskLevelBadge level={item.risk_level} />
                               )}
                             </div>
-                            {/* Critical Thinking Button - Shows on hover or when analysis is fetched */}
+                            {/* Critical Thinking Button - Shows on hover, when loading, or when analysis is fetched */}
                             {showCriticalThinkingButton && (
                               <button
                                 onClick={() => handleCriticalThinkingClick(ws.workstream_name, itemIdx, item.text)}
                                 className={`flex-shrink-0 p-1.5 rounded-md transition-all duration-200 ${
-                                  hoveredItem === itemKey || fetchedAnalyses[itemKey]
+                                  hoveredItem === itemKey || fetchedAnalyses[itemKey] || loadingCriticalThinking[itemKey]
                                     ? 'opacity-100 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50'
                                     : 'opacity-0 group-hover:opacity-100'
                                 }`}

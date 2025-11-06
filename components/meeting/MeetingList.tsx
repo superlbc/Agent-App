@@ -81,7 +81,7 @@ export const MeetingList: React.FC<MeetingListProps> = ({
     : meetings;
 
   return (
-    <div className="space-y-3">
+    <div id="meeting-list" className="space-y-3">
       {/* Only show header and legend if no meeting is selected */}
       {!selectedMeetingId && (
         <div className="flex items-center justify-between mb-2">

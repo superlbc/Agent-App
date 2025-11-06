@@ -127,6 +127,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
 
   return (
     <Card
+      id="meeting-card-0"
       data-meeting-id={meeting.id}
       className={`p-4 transition-all duration-200 relative ${
         isLoadingTranscript
@@ -202,6 +203,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
               {/* Change Meeting Button - Aligned right, vertically with attendees */}
               {isSelected && onChangeSelection && (
                 <button
+                  id="change-meeting-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onChangeSelection();
@@ -225,6 +227,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
           <div className="flex flex-wrap gap-2">
             {hasTranscript && onViewTranscript && (
               <Button
+                id="view-transcript-button"
                 variant="outline"
                 size="sm"
                 onClick={(e) => {
@@ -239,6 +242,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
             )}
             {hasParticipants && onViewParticipants && (
               <Button
+                id="view-participants-button"
                 variant="outline"
                 size="sm"
                 onClick={(e) => {
@@ -338,6 +342,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
               {t('meetings.collapse', 'Collapse')}
             </Button>
             <Button
+              id="process-meeting-button"
               variant="primary"
               size="md"
               onClick={(e) => {

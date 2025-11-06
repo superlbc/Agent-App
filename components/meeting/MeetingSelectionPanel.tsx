@@ -19,6 +19,8 @@ import { GraphService } from '../../services/graphService';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { useTourContext } from '../../contexts/TourContext';
+import { getTourDemoMeetings, isTourDemoMeeting, getTourDemoMeetingDetails } from '../../utils/tourMeetingData';
 
 interface MeetingSelectionPanelProps {
   onMeetingSelected: (data: MeetingWithTranscript) => void;
@@ -40,6 +42,7 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   onLoadingStateChange
 }) => {
   const { t } = useTranslation('common');
+  const { isTourActive } = useTourContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
@@ -76,12 +79,45 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
     }
   }, [isLoadingTranscript, onLoadingStateChange]);
 
+  // Handle tour mode activation/deactivation
+  useEffect(() => {
+    if (isTourActive) {
+      // Tour started - load demo meetings
+      console.log('[MeetingSelection] Tour activated - loading demo meetings');
+      const today = new Date();
+      setSelectedDate(today);
+      setHasUserClickedDate(true); // Enable meeting list display
+
+      // Load demo meetings
+      const demoMeetings = getTourDemoMeetings();
+      setMeetings(demoMeetings);
+      setAllMeetings(demoMeetings);
+    } else {
+      // Tour ended - reload real meetings
+      console.log('[MeetingSelection] Tour deactivated - reloading real meetings');
+      loadMeetingsForCalendar();
+
+      // If a date was selected, reload meetings for that date
+      if (hasUserClickedDate) {
+        loadMeetingsForDate(selectedDate);
+      }
+    }
+  }, [isTourActive]);
+
   /**
    * Load meetings for calendar display (counts on dates)
    * This runs on mount to show meeting counts immediately
    */
   const loadMeetingsForCalendar = async () => {
     try {
+      // TOUR MODE: Inject demo meetings instead of fetching from Graph API
+      if (isTourActive) {
+        const demoMeetings = getTourDemoMeetings();
+        setAllMeetings(demoMeetings);
+        return;
+      }
+
+      // NORMAL MODE: Fetch real meetings from Graph API
       const today = new Date();
       const rangeStart = new Date(today);
       rangeStart.setDate(rangeStart.getDate() - 28); // 4 weeks back
@@ -217,6 +253,30 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   const loadMeetingsForDate = async (date: Date) => {
     setIsLoadingCalendar(true);
     try {
+      // TOUR MODE: Inject demo meetings if selected date is today
+      if (isTourActive) {
+        const today = new Date();
+        const isSameDay =
+          date.getDate() === today.getDate() &&
+          date.getMonth() === today.getMonth() &&
+          date.getFullYear() === today.getFullYear();
+
+        if (isSameDay) {
+          // Show demo meetings for today
+          const demoMeetings = getTourDemoMeetings();
+          setMeetings(demoMeetings);
+          setAllMeetings(demoMeetings);
+          setIsLoadingCalendar(false);
+          return;
+        } else {
+          // No meetings on other days in tour mode
+          setMeetings([]);
+          setIsLoadingCalendar(false);
+          return;
+        }
+      }
+
+      // NORMAL MODE: Fetch real meetings from Graph API
       // Load a wide range of meetings for calendar counts (4 weeks back, 4 weeks forward)
       // This ensures meeting counts show even when navigating to future/past weeks
       const rangeStart = new Date(date);
@@ -299,6 +359,22 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
       console.error('[MeetingSelection] Meeting ID is undefined!', meeting);
       onError('Invalid meeting data. Please try refreshing the page.');
       return;
+    }
+
+    // Check if this is a tour demo meeting
+    if (isTourDemoMeeting(meeting.id)) {
+      const demoMeetingDetails = getTourDemoMeetingDetails(meeting.id);
+      if (demoMeetingDetails) {
+        setSelectedMeeting(demoMeetingDetails);
+        onMeetingSelected(demoMeetingDetails);
+
+        // Scroll to top after selection
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 300);
+
+        return; // Skip Graph API call for demo meetings
+      }
     }
 
     setIsLoadingTranscript(true);
@@ -414,7 +490,7 @@ export const MeetingSelectionPanel: React.FC<MeetingSelectionPanelProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div id="meeting-selection-panel" className="space-y-4">
       {/* Calendar Picker */}
       <Card className="p-4">
         <CalendarPicker
