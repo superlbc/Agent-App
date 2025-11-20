@@ -136,7 +136,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-lg shadow-2xl">
         {/* Form State */}
         {modalState === 'form' && (
-          <div className="p-6">
+          <div className="p-5">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h2
@@ -278,7 +278,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
 
         {/* Submitting State */}
         {modalState === 'submitting' && (
-          <div className="p-12 flex flex-col items-center justify-center">
+          <div className="p-8 flex flex-col items-center justify-center">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-lg font-medium text-gray-900 dark:text-white">
               {t('states.submitting')}
@@ -288,7 +288,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
 
         {/* Success State */}
         {modalState === 'success' && (
-          <div className="p-12 flex flex-col items-center justify-center text-center">
+          <div className="p-8 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
               <Icon name="check" className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>

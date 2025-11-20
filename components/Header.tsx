@@ -63,16 +63,16 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
   return (
     <>
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-3">
              <Icon name="logo" className="h-10 w-10 text-primary flex-shrink-0"/>
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Meeting Notes Generator</h1>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Employee Onboarding System</h1>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500 text-white">Beta</span>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 italic">Drive consistency and impact in every meeting.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 italic">Streamline employee onboarding from pre-hire to day one.</p>
             </div>
           </div>
           <div id="user-profile-menu" className="relative">

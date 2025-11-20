@@ -1,0 +1,800 @@
+// ============================================================================
+// PACKAGE BUILDER COMPONENT
+// ============================================================================
+// Create and edit equipment packages with hardware/software selection
+
+import React, { useState, useMemo } from 'react';
+import { Package, Hardware, Software } from '../types';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { Icon } from './ui/Icon';
+import { Input } from './ui/Input';
+import { Textarea } from './ui/Textarea';
+import { Select } from './ui/Select';
+import { HardwareCatalog } from './HardwareCatalog';
+import { SoftwareCatalog } from './SoftwareCatalog';
+import { DEPARTMENTS, ROLES } from '../constants';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface PackageBuilderProps {
+  package?: Package; // For editing
+  hardware: Hardware[]; // Available hardware
+  software: Software[]; // Available software
+  onSave: (pkg: Partial<Package>) => void;
+  onCancel: () => void;
+  className?: string;
+}
+
+type Tab = 'details' | 'hardware' | 'software' | 'licenses' | 'review';
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+export const PackageBuilder: React.FC<PackageBuilderProps> = ({
+  package: existingPackage,
+  hardware,
+  software,
+  onSave,
+  onCancel,
+  className = '',
+}) => {
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
+  const [activeTab, setActiveTab] = useState<Tab>('details');
+  const [name, setName] = useState(existingPackage?.name || '');
+  const [description, setDescription] = useState(existingPackage?.description || '');
+  const [isStandard, setIsStandard] = useState(existingPackage?.isStandard ?? true);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(existingPackage?.roleTarget || []);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>(
+    existingPackage?.departmentTarget || []
+  );
+  const [selectedHardware, setSelectedHardware] = useState<Hardware[]>(
+    existingPackage?.hardware || []
+  );
+  const [selectedSoftware, setSelectedSoftware] = useState<Software[]>(
+    existingPackage?.software || []
+  );
+  const [selectedLicenses, setSelectedLicenses] = useState<Software[]>(
+    existingPackage?.licenses || []
+  );
+
+  // ============================================================================
+  // VALIDATION
+  // ============================================================================
+
+  const validation = useMemo(() => {
+    const errors: string[] = [];
+
+    if (!name.trim()) errors.push('Package name is required');
+    if (name.trim().length < 3) errors.push('Package name must be at least 3 characters');
+    if (!description.trim()) errors.push('Description is required');
+    if (selectedRoles.length === 0) errors.push('At least one role must be selected');
+    if (selectedDepartments.length === 0) errors.push('At least one department must be selected');
+    if (selectedHardware.length === 0 && selectedSoftware.length === 0) {
+      errors.push('At least one hardware or software item must be selected');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }, [name, description, selectedRoles, selectedDepartments, selectedHardware, selectedSoftware]);
+
+  // ============================================================================
+  // COST CALCULATIONS
+  // ============================================================================
+
+  const costs = useMemo(() => {
+    const hardwareCost = selectedHardware.reduce((sum, item) => sum + (item.cost || 0), 0);
+    const softwareCost = selectedSoftware.reduce((sum, item) => {
+      if (item.renewalFrequency === 'monthly') {
+        return sum + (item.cost || 0);
+      } else if (item.renewalFrequency === 'annual') {
+        return sum + (item.cost || 0) / 12;
+      }
+      return sum;
+    }, 0);
+    const licensesCost = selectedLicenses.reduce((sum, item) => {
+      if (item.renewalFrequency === 'monthly') {
+        return sum + (item.cost || 0);
+      } else if (item.renewalFrequency === 'annual') {
+        return sum + (item.cost || 0) / 12;
+      }
+      return sum;
+    }, 0);
+
+    return {
+      hardware: hardwareCost,
+      software: softwareCost,
+      licenses: licensesCost,
+      monthlyTotal: softwareCost + licensesCost,
+      total: hardwareCost + softwareCost + licensesCost,
+    };
+  }, [selectedHardware, selectedSoftware, selectedLicenses]);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleRoleToggle = (role: string) => {
+    setSelectedRoles((prev) =>
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+    );
+  };
+
+  const handleDepartmentToggle = (dept: string) => {
+    setSelectedDepartments((prev) =>
+      prev.includes(dept) ? prev.filter((d) => d !== dept) : [...prev, dept]
+    );
+  };
+
+  const handleSave = () => {
+    if (!validation.isValid) return;
+
+    const packageData: Partial<Package> = {
+      id: existingPackage?.id || `pkg-${Date.now()}`,
+      name: name.trim(),
+      description: description.trim(),
+      isStandard,
+      roleTarget: selectedRoles,
+      departmentTarget: selectedDepartments,
+      hardware: selectedHardware,
+      software: selectedSoftware,
+      licenses: selectedLicenses,
+      createdBy: existingPackage?.createdBy || 'Current User',
+      createdDate: existingPackage?.createdDate || new Date(),
+      lastModified: new Date(),
+    };
+
+    onSave(packageData);
+  };
+
+  // ============================================================================
+  // TAB CONTENT RENDERERS
+  // ============================================================================
+
+  const renderDetailsTab = () => (
+    <div className="space-y-5">
+      {/* Basic Information */}
+      <Card className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Basic Information
+        </h3>
+        <div className="space-y-4">
+          <Input
+            label="Package Name *"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g., XD Designer Standard"
+            error={name && name.trim().length < 3 ? 'Name must be at least 3 characters' : undefined}
+          />
+
+          <Textarea
+            label="Description *"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe this equipment package and who it's designed for..."
+            rows={3}
+          />
+
+          {/* Package Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Package Type *
+            </label>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setIsStandard(true)}
+                className={`
+                  flex-1 p-4 rounded-lg border-2 transition-all
+                  ${
+                    isStandard
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                      : 'border-gray-200 dark:border-gray-700'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon
+                    name="check"
+                    className={`w-5 h-5 ${
+                      isStandard
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-gray-400 dark:text-gray-600'
+                    }`}
+                  />
+                  <span className="font-medium text-gray-900 dark:text-white">Standard</span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                  Auto-approved, standard equipment configuration
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsStandard(false)}
+                className={`
+                  flex-1 p-4 rounded-lg border-2 transition-all
+                  ${
+                    !isStandard
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                      : 'border-gray-200 dark:border-gray-700'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Icon
+                    name="alert-circle"
+                    className={`w-5 h-5 ${
+                      !isStandard
+                        ? 'text-orange-600 dark:text-orange-400'
+                        : 'text-gray-400 dark:text-gray-600'
+                    }`}
+                  />
+                  <span className="font-medium text-gray-900 dark:text-white">Exception</span>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                  Requires SVP approval, non-standard configuration
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Target Roles */}
+      <Card className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Target Roles * ({selectedRoles.length} selected)
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {ROLES.map((role) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => handleRoleToggle(role)}
+              className={`
+                px-3 py-1.5 rounded-full text-sm font-medium transition-all
+                ${
+                  selectedRoles.includes(role)
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }
+              `}
+            >
+              {role}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Target Departments */}
+      <Card className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Target Departments * ({selectedDepartments.length} selected)
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {DEPARTMENTS.map((dept) => (
+            <button
+              key={dept}
+              type="button"
+              onClick={() => handleDepartmentToggle(dept)}
+              className={`
+                px-3 py-1.5 rounded-full text-sm font-medium transition-all
+                ${
+                  selectedDepartments.includes(dept)
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }
+              `}
+            >
+              {dept}
+            </button>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+
+  const renderHardwareTab = () => (
+    <div className="space-y-6">
+      {/* Selected Hardware */}
+      {selectedHardware.length > 0 && (
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Selected Hardware ({selectedHardware.length})
+          </h3>
+          <div className="space-y-2">
+            {selectedHardware.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">
+                    {item.model}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    {item.manufacturer}
+                  </p>
+                </div>
+                {item.cost !== undefined && (
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white mx-4">
+                    ${item.cost.toFixed(2)}
+                  </span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setSelectedHardware((prev) => prev.filter((h) => h.id !== item.id))
+                  }
+                  className="text-red-600 dark:text-red-400"
+                >
+                  <Icon name="trash" className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Hardware Catalog */}
+      <HardwareCatalog
+        hardware={hardware}
+        selectedItems={selectedHardware}
+        onSelect={(item) => setSelectedHardware((prev) => [...prev, item])}
+        onDeselect={(item) =>
+          setSelectedHardware((prev) => prev.filter((h) => h.id !== item.id))
+        }
+        multiSelect={true}
+        showCost={true}
+      />
+    </div>
+  );
+
+  const renderSoftwareTab = () => (
+    <div className="space-y-6">
+      {/* Selected Software */}
+      {selectedSoftware.length > 0 && (
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Selected Software ({selectedSoftware.length})
+          </h3>
+          <div className="space-y-2">
+            {selectedSoftware.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                      {item.name}
+                    </p>
+                    {item.requiresApproval && (
+                      <Icon
+                        name="alert-circle"
+                        className="w-4 h-4 text-orange-600 dark:text-orange-400"
+                      />
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{item.vendor}</p>
+                </div>
+                {item.cost !== undefined && (
+                  <div className="text-right mx-4">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      ${item.cost.toFixed(2)}
+                    </span>
+                    {item.renewalFrequency && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        /{item.renewalFrequency === 'monthly' ? 'mo' : 'yr'}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setSelectedSoftware((prev) => prev.filter((s) => s.id !== item.id))
+                  }
+                  className="text-red-600 dark:text-red-400"
+                >
+                  <Icon name="trash" className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Software Catalog */}
+      <SoftwareCatalog
+        software={software}
+        selectedItems={selectedSoftware}
+        onSelect={(item) => setSelectedSoftware((prev) => [...prev, item])}
+        onDeselect={(item) =>
+          setSelectedSoftware((prev) => prev.filter((s) => s.id !== item.id))
+        }
+        multiSelect={true}
+        showCost={true}
+      />
+    </div>
+  );
+
+  const renderLicensesTab = () => (
+    <div className="space-y-6">
+      {/* Selected Licenses */}
+      {selectedLicenses.length > 0 && (
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Selected Additional Licenses ({selectedLicenses.length})
+          </h3>
+          <div className="space-y-2">
+            {selectedLicenses.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{item.vendor}</p>
+                </div>
+                {item.cost !== undefined && (
+                  <div className="text-right mx-4">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      ${item.cost.toFixed(2)}
+                    </span>
+                    {item.renewalFrequency && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        /{item.renewalFrequency === 'monthly' ? 'mo' : 'yr'}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setSelectedLicenses((prev) => prev.filter((l) => l.id !== item.id))
+                  }
+                  className="text-red-600 dark:text-red-400"
+                >
+                  <Icon name="trash" className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Licenses Catalog (using SoftwareCatalog) */}
+      <SoftwareCatalog
+        software={software.filter((s) => s.licenseType !== 'perpetual')}
+        selectedItems={selectedLicenses}
+        onSelect={(item) => setSelectedLicenses((prev) => [...prev, item])}
+        onDeselect={(item) =>
+          setSelectedLicenses((prev) => prev.filter((l) => l.id !== item.id))
+        }
+        multiSelect={true}
+        showCost={true}
+      />
+    </div>
+  );
+
+  const renderReviewTab = () => (
+    <div className="space-y-5">
+      {/* Package Summary */}
+      <Card className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Package Summary
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-gray-600 dark:text-gray-400">Name</label>
+            <p className="text-base font-medium text-gray-900 dark:text-white">{name}</p>
+          </div>
+          <div>
+            <label className="text-sm text-gray-600 dark:text-gray-400">Description</label>
+            <p className="text-base text-gray-900 dark:text-white">{description}</p>
+          </div>
+          <div>
+            <label className="text-sm text-gray-600 dark:text-gray-400">Type</label>
+            <p className="text-base text-gray-900 dark:text-white">
+              {isStandard ? 'Standard (Auto-approve)' : 'Exception (SVP Approval)'}
+            </p>
+          </div>
+          <div>
+            <label className="text-sm text-gray-600 dark:text-gray-400">Target Roles</label>
+            <p className="text-base text-gray-900 dark:text-white">
+              {selectedRoles.join(', ')}
+            </p>
+          </div>
+          <div>
+            <label className="text-sm text-gray-600 dark:text-gray-400">
+              Target Departments
+            </label>
+            <p className="text-base text-gray-900 dark:text-white">
+              {selectedDepartments.join(', ')}
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Contents Summary */}
+      <Card className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Package Contents
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon name="monitor" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">Hardware</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {selectedHardware.length}
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon name="package" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">Software</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {selectedSoftware.length}
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Icon name="key" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">Licenses</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {selectedLicenses.length}
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Cost Summary */}
+      <Card className="p-5">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Cost Summary
+        </h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Hardware (one-time)</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              ${costs.hardware.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Software (monthly)</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              ${costs.software.toFixed(2)}/mo
+            </span>
+          </div>
+          {selectedLicenses.length > 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Licenses (monthly)</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                ${costs.licenses.toFixed(2)}/mo
+              </span>
+            </div>
+          )}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+            <div className="flex items-center justify-between">
+              <span className="text-base font-semibold text-gray-900 dark:text-white">
+                Total Monthly Cost
+              </span>
+              <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
+                ${costs.total.toFixed(2)}/mo
+              </span>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Validation Errors */}
+      {!validation.isValid && (
+        <Card className="p-6 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+          <div className="flex items-start gap-3">
+            <Icon name="alert-circle" className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">
+                Please fix the following errors:
+              </h4>
+              <ul className="list-disc list-inside space-y-1 text-sm text-red-700 dark:text-red-400">
+                {validation.errors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+
+  // ============================================================================
+  // TAB CONFIGURATION
+  // ============================================================================
+
+  const tabs: Array<{ id: Tab; label: string; icon: string; count?: number }> = [
+    { id: 'details', label: 'Details', icon: 'info' },
+    {
+      id: 'hardware',
+      label: 'Hardware',
+      icon: 'monitor',
+      count: selectedHardware.length,
+    },
+    {
+      id: 'software',
+      label: 'Software',
+      icon: 'package',
+      count: selectedSoftware.length,
+    },
+    {
+      id: 'licenses',
+      label: 'Licenses',
+      icon: 'key',
+      count: selectedLicenses.length,
+    },
+    { id: 'review', label: 'Review', icon: 'eye' },
+  ];
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  return (
+    <div className={`max-w-7xl mx-auto ${className}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {existingPackage ? 'Edit Package' : 'Create Package'}
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Build a custom equipment package for pre-hire assignment
+          </p>
+        </div>
+
+        {/* Cost Display */}
+        <div className="text-right">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Monthly Cost</p>
+          <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+            ${costs.total.toFixed(2)}/mo
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all
+              ${
+                activeTab === tab.id
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }
+            `}
+          >
+            <Icon name={tab.icon as any} className="w-4 h-4" />
+            {tab.label}
+            {tab.count !== undefined && tab.count > 0 && (
+              <span
+                className={`
+                  px-2 py-0.5 rounded-full text-xs font-semibold
+                  ${
+                    activeTab === tab.id
+                      ? 'bg-white/20 text-white'
+                      : 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                  }
+                `}
+              >
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="mb-6">
+        {activeTab === 'details' && renderDetailsTab()}
+        {activeTab === 'hardware' && renderHardwareTab()}
+        {activeTab === 'software' && renderSoftwareTab()}
+        {activeTab === 'licenses' && renderLicensesTab()}
+        {activeTab === 'review' && renderReviewTab()}
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-between gap-4 sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 -mx-4">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+
+        <div className="flex items-center gap-3">
+          {activeTab !== 'details' && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                const currentIndex = tabs.findIndex((t) => t.id === activeTab);
+                if (currentIndex > 0) {
+                  setActiveTab(tabs[currentIndex - 1].id);
+                }
+              }}
+            >
+              <Icon name="chevron-left" className="w-4 h-4 mr-1" />
+              Previous
+            </Button>
+          )}
+
+          {activeTab !== 'review' ? (
+            <Button
+              variant="primary"
+              onClick={() => {
+                const currentIndex = tabs.findIndex((t) => t.id === activeTab);
+                if (currentIndex < tabs.length - 1) {
+                  setActiveTab(tabs[currentIndex + 1].id);
+                }
+              }}
+            >
+              Next
+              <Icon name="chevron-right" className="w-4 h-4 ml-1" />
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!validation.isValid}
+            >
+              <Icon name="save" className="w-4 h-4 mr-2" />
+              {existingPackage ? 'Update Package' : 'Create Package'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// USAGE EXAMPLES
+// ============================================================================
+
+/**
+ * Create mode:
+ * <PackageBuilder
+ *   hardware={mockHardware}
+ *   software={mockSoftware}
+ *   onSave={(pkg) => handleCreatePackage(pkg)}
+ *   onCancel={() => setCreating(false)}
+ * />
+ *
+ * Edit mode:
+ * <PackageBuilder
+ *   package={existingPackage}
+ *   hardware={mockHardware}
+ *   software={mockSoftware}
+ *   onSave={(pkg) => handleUpdatePackage(existingPackage.id, pkg)}
+ *   onCancel={() => setEditingPackage(null)}
+ * />
+ */

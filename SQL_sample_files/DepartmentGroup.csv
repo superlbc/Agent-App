@@ -1,0 +1,186 @@
+﻿DepartmentGroup,Department,GradeGroup,Grade,Role,RoleWithoutNumbers,EmployeeGradeDesc,HRLinkDeptCode,PreassignedPackageID,CreatedOn,ModifiedOn,ModifiedBy,Active
+Business Leadership,Business Leadership: Account Management,Account Directors,100000,0111 Account Director,Account Director,Account Director,NA,5,09:53.4,22:17.0,luis.bustos@momentumww.com,1
+Business Leadership,Business Leadership: Account Management,Account Executives,100001,0116 Account Executive,Account Executive,Account Executive,NA,NULL,09:53.4,NULL,NULL,1
+Finance: General Accounting,Finance: General Accounting,Finance: General Accounting,100008,z40 zRole Not Required ,z40 zRole Not Required,Accounting Associate,FA,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Analytics,Analytics,100016,0740 Analyst,Analyst,Analyst,SC,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Art Direction,Art Directors,100023,4211 Art Director,Art Director,Art Director,BA,2,09:53.4,58:42.9,luis.bustos@momentumww.com,1
+"Strategy, Research & Analytics",Analytics,Analytics,100024,"0712 Analytics, Associate Director","Analytics, Associate Director",Assoc Dir Anltc Srv,SC,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Creative Directors,100030,"4112 Creative Director, Associate Director","Creative Director, Associate Director",Assoc Creative Dir,BA,2,09:53.4,58:43.1,luis.bustos@momentumww.com,1
+Business Leadership,Business Leadership: Account Management,Account Executives,100036,"0116 Account Executive, Assistant","Account Executive, Assistant",Asst Account Exec,NA,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,Business Affairs,100041,8740 Broadcast Business Manger,Broadcast Business Manger,Brdcst Business Mgr ,DE,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Leadership,100059,4000 Chief Creative Officer,Chief Creative Officer,Chief Creative Off,BA,NULL,09:53.4,NULL,NULL,1
+Leadership,Leadership,Leadership,100060,0000 Chief Executive Officer,Chief Executive Officer,Chief Exec Officer,NE,2,09:53.4,31:30.5,luis.bustos@momentumww.com,1
+Leadership,Leadership,Leadership,100062,0000 Chief Marketing Officer,Chief Marketing Officer,Chief Marketing Off,DG,2,09:53.4,31:30.6,luis.bustos@momentumww.com,1
+Creative,Creative: Copywriting,Copywriters,100072,4340 Copywriter,Copywriter,Copywriter,BC,3,09:53.4,13:32.7,luis.bustos@momentumww.com,1
+Creative,Creative: Creative Directors,Creative Directors,100077,4111 Creative Director,Creative Director,Creative Director,BA,3,09:53.4,13:33.2,luis.bustos@momentumww.com,1
+zNon-bill - Admin/Office Svcs,zNon-bill - Admin/Office Svcs,Executive Assistants,100116,0119 Exec Assistant,Exec Assistant,Exec Assistant,AO,NULL,09:53.4,NULL,NULL,1
+Finance: General Accounting,Finance: General Accounting,Finance: General Accounting,100121,z40 zRole Not Required ,z40 zRole Not Required,Financial Analyst,FA,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Group Account Directors,100132,0105 Group Account Director,Group Account Director,Group Director,NA,NULL,09:53.4,NULL,NULL,1
+People Team,People Team,People Team,100140,z40 zRole Not Required ,z40 zRole Not Required,Human Resources,AH,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Executive Assistants,100143,z40 zRole Not Required ,z40 zRole Not Required,Intern,AO,NULL,09:53.4,NULL,NULL,1
+Leadership,Leadership,Leadership,100197,0000 President,President,President ,NE,2,09:53.4,31:30.8,luis.bustos@momentumww.com,1
+Experience Production (XP),Production: XP,XP - Producers,100205,6040 Producer,Producer,Producer,PR,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Directors,100208,6011 Production Director,Production Director,Production Director,PR,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Managers,100215,0315 Project Manager,Project Manager,Project Manager,PA,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Account Executives,100231,"0114 Account Executive, Senior","Account Executive, Senior",Sr Account Executive,NA,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Artworking,Art Buyers,100232,"8814 Art Buyer, Senior","Art Buyer, Senior",Senior Art Buyer ,PC,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Art Direction,Art Directors,100234,"4210 Art Director, Senior","Art Director, Senior",Sr Art Director,BA,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Copywriting,Copywriters,100236,"4314 Copywriter, Senior","Copywriter, Senior",Sr Copywriter,BC,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Producers,100241,"6014 Producer, Senior","Producer, Senior",Sr Producer,PR,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Managers,100247,"0313 Project Manager, Senior","Project Manager, Senior",Sr Project Manager,PA,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Artworking,Artworkers,100252,9015 Studio Manager,Studio Manager,Studio Manager,PC,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Artworking,Artworkers,100256,9140 Studio Specialist,Studio Specialist,Studio Specialist,PC,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Account Directors,100260,"0108 Account Director, SVP","Account Director, SVP",SVP Account Director ,NE,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Creative Directors,100261,"4103 Group Creative Director, SVP","Group Creative Director, SVP",SVP Group Creative Director,BA,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Account Directors,100276,"0109 Account Director, VP","Account Director, VP",VP Account Director,NA,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Creative Directors,100279,"4109 Creative Director, VP","Creative Director, VP",VP Creative Director,BA,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Directors,100288,"6009 Production Director, VP","Production Director, VP",VP Production Dir,PR,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Account Managers,100291,0115 Account Manager,Account Manager,Account Manager,NA,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Managing Partners,100300,0101 Managing Partner,Managing Partner,ECD Managing Partner ,BA,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Account Managers,100303,"0113 Account Manager, Senior","Account Manager, Senior",Sr Account Manager,NA,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Account Directors,100304,"0110 Account Director, Senior","Account Director, Senior",Sr Account Director,NA,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Analytics,Analytics,100333,"0714 Analyst, Senior","Analyst, Senior",Senior Analyst,SC,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Producers,100367,"6017 Producer, Associate","Producer, Associate",Associate Producer,PR,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,Business Affairs,100385,"8711 Business Affairs, Director","Business Affairs, Director",Dir. Business Affairs,DE,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Managing Directors,100389,0101 Managing Director,Managing Director,Managing Director,NA,2,09:53.4,05:06.8,luis.bustos@momentumww.com,1
+"Strategy, Research & Analytics",Strategy,Strategists,100409,"0514 Strategist, Senior","Strategist, Senior",Senior Strategist,SP,NULL,09:53.4,NULL,NULL,1
+zNon-bill - Admin/Office Svcs,zNon-bill - Admin/Office Svcs,Executive Assistants,100418,z40 zRole Not Required ,z40 zRole Not Required,Admin,AO,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,Compliance Officers,100426,"7215 Compliance, Manager","Compliance, Manager",Compliance Manager ,PI,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Analytics,Analytics,100481,0711 Analytics Director,Analytics Director,"Analytics, Director",SC,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,Integrated Producers,100490,"7117 Integrated Producer, Associate","Integrated Producer, Associate",Associate Integrated Producer ,PI,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Tour Managers,100494,"6215 Tour Manager, Assistant","Tour Manager, Assistant",Asst Tour Manager,PR,NULL,09:53.4,NULL,NULL,1
+NULL,NULL,NULL,100495,6120 Brand Ambassador,Brand Ambassador,Brand Ambassador,AC,2,09:53.4,05:06.5,luis.bustos@momentumww.com,1
+"Strategy, Research & Analytics",Strategy,Leadership,100502,0500 Chief Strategy Officer,Chief Strategy Officer,Chief Strategy Officer,SP,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,Compliance Officers,100506,"7211 Compliance, Director","Compliance, Director",Compliance Director,PI,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: CT,Creative Technologists,100513,7540 Creative Technologist,Creative Technologist,Creative Technologist,CT,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Edit,Editors,100530,9440 Video Editor,Video Editor,Editor,PC,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,Integrated Producers,100546,7140 Integrated Producer,Integrated Producer,Integrated Producer,PI,NULL,09:53.4,NULL,NULL,1
+zNon-bill - Admin/Office Svcs,zNon-bill - Admin/Office Svcs,NULL,100548,z40 zRole Not Required ,z40 zRole Not Required,IT Support Analyst ,AO,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Print Buying,Print Buyer,100571,9515 Print Manager,Print Manager,NULL,NULL,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategy Directors,100600,"0508 Strategy Director, SVP","Strategy Director, SVP","Strategy Director, SVP",SP,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Group Account Directors,100606,"0103 Group Account Director, SVP","Group Account Director, SVP",SVP Group Account Director,NE,4,09:53.4,32:31.7,luis.bustos@momentumww.com,1
+Global Technology,Production: Global Technology,Technologists,100619,"8008 Technology Director, SVP","Technology Director, SVP","Technology Director, SVP ",EZ,2,09:53.4,16:00.0,luis.bustos@momentumww.com,1
+Experience Production (XP),Production: XP,XP - Tour Managers,100625,6215 Tour Manager,Tour Manager,Tour Manager,PR,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Transportation Managers,100627,6215 Transportation Manager,Transportation Manager,Transportation Mgr,PR,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Group Account Directors,100642,"0104 Group Account Director, VP","Group Account Director, VP",VP Group Account Director,NA,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Creative Directors,100644,"4104 Group Creative Director, VP","Group Creative Director, VP","VP Group Creative Dir, Art",BA,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Warehouse Managers,100649,6215 Warehouse Manager,Warehouse Manager,Warehouse Manager,PR,NULL,09:53.4,NULL,NULL,1
+zNon-bill - Admin/Office Svcs,zNon-bill - Admin/Office Svcs,NULL,100656,z40 zRole Not Required ,z40 zRole Not Required,Pass-Though Staff,AO,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Print Buying,Print Buyer,100663,9540 Premium Buyer,Premium Buyer,Premium Buyer ,PC,NULL,09:53.4,NULL,NULL,1
+Creative,Creative: Creative Directors,Creative Directors,100681,4011 Executive Creative Director,Executive Creative Director,Executive Creative Director,BA,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Directors,100683,"0311 Project Manager, Director","Project Manager, Director",Director of Project Mgt,PA,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategists,100721,0540 Strategist,Strategist,Strategist,SP,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategy Directors,100833,0511 Strategy Director,Strategy Director,Director Strategy,SP,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Directors,100876,"0312 Project Manager, Associate Director","Project Manager, Associate Director","Assoc Dir, Proj Mgmt",PA,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Research,Research Analysts,100884,0615 Research Manager,Research Manager,Research Manager ,SR,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,100925,"5111 XD, Design, Director","XD, Design, Director","Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Managers,101046,"0315 Project Manager, Associate","Project Manager, Associate",Assoc Project Manager ,PA,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,"Integrated Producers, Directors",101078,"7008 Integrated Production, Director, SVP","Integrated Production, Director, SVP","Dir, Integrated Prod SVP",PI,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,Content Producers,101086,"8614 Content Producer, Senior","Content Producer, Senior",Senior Content Producer,DE,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,Content Producers,101088,8640 Content Producer,Content Producer,Content producer,DE,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: CT,Creative Technologists,101340,"7511 Creative Technologist, Director","Creative Technologist, Director",Creative Tech Dir,CT,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategists,101525,"0517 Strategist, Associate","Strategist, Associate",Strategy Assoc,SP,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Analytics,Analytics,101634,"0708 Analytics Director, SVP","Analytics Director, SVP",SVP Director of Analytics ,SC,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,Project Managers,101646,"6008 Production Director, SVP","Production Director, SVP",SVP Director of Production ,DE,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Resource Managers,101673,0440 Resourcing Manger,Resourcing Manger,Resource Manager,PA,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Directors,101748,"0308 Operations Director, SVP","Operations Director, SVP","Dir, Operations - SVP",PA,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,"Integrated Producers, Directors",101772,"7511 Integrated Production, Director","Integrated Production, Director","Dir, Integrated Production",PI,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategy Directors,101796,"0512 Strategy, Associate Director","Strategy, Associate Director",Assoc Director of Strategy,SP,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Research,Research Analysts,101844,0640 Research Analyst,Research Analyst,Research Analyst,SR,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategy Directors,101890,"0509 Strategy Director, VP","Strategy Director, VP","Director Of Strategy, VP",SP,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Analytics,Analytics,101910,"0709 Analytics Director, VP","Analytics Director, VP",VP Director Analytics,SC,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Copy Edit,Copy Editors,102002,"9214 Copy Editor, Senior","Copy Editor, Senior",Senior Copy Editor,PC,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Account Management,Group Account Directors,102128,"0102 Group Account Director, EVP","Group Account Director, EVP","EVP, Group Account Director",NE,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Managers,102239,"6115 Business Lounge, Manager","Business Lounge, Manager",Business Lounge Manager,PR,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Print Buying,Print Buyer,102240,9515 Group Print Manager,Group Print Manager,Group Print Manager,PC,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Retouching,Retouchers,102241,"9340 Digital Artist, Lead","Digital Artist, Lead",Lead Digital Artist,PC,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Retouching,Retouchers,102242,"9314 Digital Artist, Senior","Digital Artist, Senior",Senior Digital Artist ,PC,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,Integrated Producers,102248,"7114 Integrated Producer, Senior","Integrated Producer, Senior",Senior Integrated Producer,PI,NULL,09:53.4,NULL,NULL,1
+Global Technology,Production: Global Technology,Technologists,102249,"8009 Creative Technology Director, VP","Creative Technology Director, VP",VP Director Creative Technology,CT,5,09:53.4,08:35.2,luis.bustos@momentumww.com,1
+Growth & Marketing,Growth & Marketing,Marketing,102250,"9909 Marketing Comms Director, VP","Marketing Comms Director, VP",VP Dir Marketing Communications,AC,NULL,09:53.4,NULL,NULL,1
+Growth & Marketing,Growth & Marketing,Marketing,102251,"9915 Marketing Comms, Manager","Marketing Comms, Manager",Communications Manager,AC,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategy Directors,102253,"0504 Group Strategy Director, VP","Group Strategy Director, VP",VP Group Director Strategy,SP,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Analytics,Analytics,102254,0717 Analyst Associate,Analyst Associate,Associate Analyst ,SC,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Research,Research Analysts,102255,"0609 Research Director, VP","Research Director, VP",VP Research Director ,SR,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,102256,"5008 XD, Design Director, SVP","XD, Design Director, SVP",SVP Executive Experience Director,CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102258,"5314 XD, 3D Designer, Senior","XD, 3D Designer, Senior","3D Senior Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Field Management,Field Managers,102260,6215 Field Manager,Field Manager,Field Manager,NA,NULL,09:53.4,NULL,NULL,1
+Leadership,Leadership,Leadership,102261,0000 Chief Technology Officer,Chief Technology Officer,Chief Technology Officer,EZ,2,09:53.4,31:30.4,luis.bustos@momentumww.com,1
+Studio,Production: Artworking,Artworkers,102327,"9114 Studio Specialist, Senior","Studio Specialist, Senior",Sr Studio Specialist,PC,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102328,"5311 XD, 3D Design, Director","XD, 3D Design, Director","3D Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+People Team,People Team,People Team,102329,"4411 Creative Resource, Director","Creative Resource, Director",Creative Resource Director,AH,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,Content Producers,102522,"8617 Content Production, Associate","Content Production, Associate",Associate Content Producer,DE,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Technical Designers,102642,"5840 XD, Technical Designer","XD, Technical Designer","Technical Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Artworking,Studio Leadership,102643,z40 zRole Not Required ,z40 zRole Not Required,Studio Production Manager ,PC,NULL,09:53.4,NULL,NULL,1
+Studio,Production: Print Buying,Print Buyer,102644,9540 Print & Premiums Specialist,Print & Premiums Specialist,Print & Premiums Specialist,PC,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: IP,Integrated Producers,102645,"7140 Integrated Producer, Coordinator","Integrated Producer, Coordinator",Integrated Production Coordinator,PI,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Creative Technologists,102646,"5917 XD, Creative Technologist, Associate","XD, Creative Technologist, Associate","Assoc Creative Technologist, XD",CW,NULL,09:53.4,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,102661,"9809 Sponsorship Consulting, Director, VP","Sponsorship Consulting, Director, VP",Spon Con VP Director,DF,NULL,09:53.4,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,102662,"9811 Sponsorship Consulting, Director","Sponsorship Consulting, Director",Sponsorship Consulting Director,DF,NULL,09:53.4,NULL,NULL,1
+Partnerships,Partnerships,Partnerships,102663,"9840 Sponsorship Consulting, Analyst","Sponsorship Consulting, Analyst",Spon Con Analyst,DF,NULL,09:53.4,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,102664,"9808 Sponsorship Consulting, Director, SVP","Sponsorship Consulting, Director, SVP",Spon Con SVP Dir,DF,NULL,09:53.4,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,102665,"9810 Sponsorship Consulting, Group Director","Sponsorship Consulting, Group Director",Spon Con VP Grp Dir,DF,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,102691,"5011 XD, Group Design, Director","XD, Group Design, Director","Group Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,102692,"5112 XD, Design, Associate Director","XD, Design, Associate Director","Associate Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,102693,"5114 XD, Designer, Senior","XD, Designer, Senior","Senior Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,102694,"5140 XD, Designer","XD, Designer","Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,102695,"5311 XD, 3D Group Design, Director","XD, 3D Group Design, Director","3D Group Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102696,"5317 XD, 3D Designer, Associate","XD, 3D Designer, Associate","3D Associate Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102697,"5340 XD, 3D Designer","XD, 3D Designer","3D Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102698,"5711 XD, 3D Production, Director","XD, 3D Production, Director","3D Production Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102699,"5714 XD, 3D Production Artist, Senior","XD, 3D Production Artist, Senior","3D Senior Production Artist, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102700,"5740 XD, 3D Production Artist","XD, 3D Production Artist","3D Production Artist, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102701,"5717 XD, 3D Production Artist, Associate","XD, 3D Production Artist, Associate","3D Associate Production Artist, XD ",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Technical Designers,102702,"5811 XD, Technical Designer, Director","XD, Technical Designer, Director","Technical Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Technical Designers,102703,"5812 XD, Technical Designer, Associate Director","XD, Technical Designer, Associate Director","Associate Technical Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Technical Designers,102704,"5814 XD, Technical Designer, Senior","XD, Technical Designer, Senior","Senior Technical Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Graphic Designers,102705,"5211 XD, Graphic Design, Director","XD, Graphic Design, Director","Graphic Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Graphic Designers,102706,"5214 XD, Graphic Designer, Senior","XD, Graphic Designer, Senior","Senior Graphic Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Graphic Designers,102707,"5240 XD, Graphic Designer","XD, Graphic Designer","Graphic Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Graphic Designers,102708,"5217 XD, Graphic Designer, Associate","XD, Graphic Designer, Associate","Associate Graphic Designer, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Creative Technologists,102709,"5911 XD, Creative Technology, Group Director","XD, Creative Technology, Group Director","Group Creative Technology Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Creative Technologists,102710,"5911 XD, Creative Technology Director","XD, Creative Technology Director","Creative Technology Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Creative Technologists,102711,"5911 XD, Creative Tech, Director","XD, Creative Tech, Director","Associate Creative Technology Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Creative Technologists,102712,"5940 XD, Creative Technologist","XD, Creative Technologist","Creative Technologist, XD",CW,NULL,09:53.4,NULL,NULL,1
+IP & CT,Production: CT,Creative Technologists,102716,"7514 Creative Technologist, Senior","Creative Technologist, Senior",Sr. Creative Technologist,CT,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - 3D Designers,102717,"5711 XD, 3D Group Production Director","XD, 3D Group Production Director","3D Group Production Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Graphic Designers,102718,"5211 XD, Group Graphic Design, Director","XD, Group Graphic Design, Director","Group Graphic Design Director, XD",CW,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Directors,102736,"6008 Experiential Director, SVP","Experiential Director, SVP",SVP Director of Experiential,PR,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Research,Research Analysts,102737,"0608 Research Director, SVP","Research Director, SVP",SVP Research Director,SR,NULL,09:53.4,NULL,NULL,1
+Project Management,Project Management,Project Managers,102948,"0409 Resourcing, Director, VP","Resourcing, Director, VP",VP Dir Resource Mgt,PA,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,"Content Producers, Directors",102986,"8611 Content Production, Director","Content Production, Director",Dir of Cont Prod,DE,NULL,09:53.4,NULL,NULL,1
+Partnerships,Partnerships,Partnerships,102987,"9814 Sponsorship Consulting, Analyst, Senior","Sponsorship Consulting, Analyst, Senior",Spon Con Sr Analyst,DF,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,103005,"5009 XD, Design Director, VP","XD, Design Director, VP",VP Design Dir XD,CW,NULL,09:53.4,NULL,NULL,1
+Content,Production: Content Producers,"Content Producers, Directors",103136,"8609 Content Production, Director, VP","Content Production, Director, VP",VP Dir Cont Prod,DE,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),Leadership,103176,"5000 XD, Chief of Experience Design","XD, Chief of Experience Design",Chf of Exp Design,CW,NULL,09:53.4,NULL,NULL,1
+"Strategy, Research & Analytics",Research,Research Analysts,103378,"0613 Research Manager, Senior","Research Manager, Senior",Sr Research Mgr,SR,NULL,09:53.4,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,103379,"5004 XD, Group Design Director, VP","XD, Group Design Director, VP",VP Gr Dsgn Dir XD,CW,NULL,09:53.4,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Directors,103380,"6004 Group Experience Production, Director, VP","Group Experience Production, Director, VP",VP Grp Director XP,PR,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Field Management,Field Managers,103697,"6211 Field Marketing, Director","Field Marketing, Director",Dir of Field Mrkting,NA,NULL,09:53.4,NULL,NULL,1
+Business Leadership,Business Leadership: Field Management,Field Managers,103698,"6213 Field Marketing Manager, Senior","Field Marketing Manager, Senior",Sr Field Mrkting Mgr,NA,NULL,09:53.4,NULL,NULL,1
+Leadership,Leadership,Leadership,102760,Global CFO,Global CFO,NULL,NULL,NULL,59:44.7,NULL,NULL,1
+Creative,Creative: Copywriting,Copywriters,100029,"4341 Copywriter, Associate","Copywriter, Associate",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Global Technology,Production: Global Technology,Technologists,100432,8140 Data Architect,Data Architect,NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Creative,Creative: Art Direction,Art Directors,101281,"4212 Art Director, Associate","Art Director, Associate",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Studio,Production: Studio,Studio Leadership,101692,9014 Studio QC Manager,Studio QC Manager,NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Project Management,Project Management,Project Directors,102042,"0310 Project Manager, Director VP","Project Manager, Director VP",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+"Strategy, Research & Analytics",Strategy,Strategy Directors,102446,"0513 Strategy, Associate Director, Senior","Strategy, Associate Director, Senior",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,103816,"9840 Partnerships, Director, EVP","Partnerships, Director, EVP",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships,103817,"9840 Partnerships, Manager","Partnerships, Manager",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+IP & CT,Production: IP,"Integrated Producers, Directors",103818,"7510 Integrated Production, Senior Director","Integrated Production, Senior Director",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+IP & CT,Production: IP,"Integrated Producers, Directors",103819,"7512 Integrated Production, Associate Director","Integrated Production, Associate Director",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Designers,103820,"5110 XD, Design, Director, Senior","XD, Design, Director, Senior",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Experience Design (XD),Experience Design (XD),XD - Graphic Designers,103821,"5211 XD, Group Graphic Design, Associate Director","XD, Group Graphic Design, Associate Director",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Studio,Production: Print Buying,Print Buyer,103822,"9541 Print & Premiums Specialist, Senior","Print & Premiums Specialist, Senior",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Directors,103823,"6010 Production, Director, Senior","Production, Director, Senior",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Warehouse Managers,103824,6213 Warehouse Associate,Warehouse Associate,NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Experience Production (XP),Production: XP,XP - Warehouse Managers,103825,"6214 Warehouse Associate, Senior","Warehouse Associate, Senior",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+IP & CT,Production: CT,Creative Technologists,103829,"7512 Creative Technologist, Associate","Creative Technologist, Associate",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,103833,"9840 Partnerships, Director, SVP","Partnerships, Director, SVP",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,103834,"9840 Partnerships, Director, Group VP","Partnerships, Director, Group VP",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,103835,"9840 Partnerships, Director, VP","Partnerships, Director, VP",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships Directors,103836,"9840 Partnerships, Director","Partnerships, Director",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships,103837,"9840 Partnerships, Senior Associate","Partnerships, Senior Associate",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Partnerships,Partnerships,Partnerships,103838,"9840 Partnerships, Associate","Partnerships, Associate",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Studio,Production: Edit,Editors,103177,"9439 Video Editor, Senior","Video Editor, Senior",NULL,NULL,NULL,12:22.0,NULL,NULL,1
+Studio,Production: Studio,Studio Leadership,103023,9010 Studio Director,Studio Director,NULL,NULL,NULL,12:22.0,NULL,NULL,1

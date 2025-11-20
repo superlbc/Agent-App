@@ -24,11 +24,20 @@
       "Bash(echo:*)",
       "Bash(node scripts/generate-version.js:*)",
       "Bash(curl:*)",
-      "Bash(start http://localhost:5174)",
+      "Bash(start http://localhost:5173)",
       "Bash(powershell -ExecutionPolicy Bypass -File ./build-and-push.ps1)",
       "Bash(node test-department-flow.js:*)",
       "Bash(powershell.exe -ExecutionPolicy Bypass -File build-and-push.ps1)",
-      "Bash(powershell.exe:*)"
+      "Bash(powershell.exe:*)",
+      "Bash(rm:*)",
+      "Bash(timeout 30 npx tsc:*)",
+      "Bash(npx @microsoft/playwright-mcp --help)",
+      "Bash(echo:*)",
+      "Bash(npx -y playwright install chromium)",
+      "Bash(tree:*)",
+      "Bash(powershell -Command \"(Get-Content ''c:\\Users\\luis.bustos\\Downloads\\UXP\\utils\\mockData.ts'' | Measure-Object -Line).Lines\")",
+      "Bash(powershell -Command \"(Get-Content ''c:\\Users\\luis.bustos\\Downloads\\UXP\\CLAUDE.md'' | Select-String -Pattern ''### 🖥️ Hardware Inventory'' -Context 0,200 | Select-Object -ExpandProperty Context | Select-Object -ExpandProperty PostContext | Select-String -Pattern ''^###'' -List | Select-Object -First 1).LineNumber\")",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []

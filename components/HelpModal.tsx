@@ -25,7 +25,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50" onClick={onClose}>
       <div className="flex min-h-full items-center justify-center p-4">
         <Card className="w-full max-w-4xl" onClick={e => e.stopPropagation()}>
-          <div className="p-6">
+          <div className="p-5">
             {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <div className="space-y-1">

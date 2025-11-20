@@ -68,7 +68,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50" onClick={onClose}>
       <div className="flex min-h-full items-center justify-center p-4">
         <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="p-6">
+        <div className="p-5">
           <div className="relative mb-6">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-white text-center">{t('common:about.title')}</h2>
             <button

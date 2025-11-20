@@ -1,0 +1,54 @@
+{
+  "description": "Claude Code settings for this project - controls permissions, allowed commands, and behavior",
+
+  "allowedCommands": [
+    "npm run dev",
+    "npm run build",
+    "npm install",
+    "npm test",
+    "git status",
+    "git add",
+    "git commit",
+    "git push",
+    "git pull",
+    "git log",
+    "git diff",
+    "gcloud run deploy",
+    "gcloud config",
+    "gcloud run services",
+    "ls",
+    "pwd",
+    "cat",
+    "grep"
+  ],
+
+  "blockedCommands": [
+    "rm -rf",
+    "sudo",
+    "chmod 777"
+  ],
+
+  "autoApprove": {
+    "description": "Commands that don't require user approval",
+    "enabled": true,
+    "commands": [
+      "git status",
+      "git diff",
+      "git log",
+      "npm run dev",
+      "ls",
+      "pwd",
+      "cat package.json"
+    ]
+  },
+
+  "hints": {
+    "description": "Helpful reminders for Claude Code",
+    "alwaysVisualValidate": "Always use Playwright to validate frontend changes visually",
+    "usePlanMode": "Use plan mode (Shift+Tab) for non-trivial features",
+    "checkDesignPrinciples": "Reference /context/design-principles.md for all UI work",
+    "followStyleGuide": "Follow /context/style-guide.md for React + Tailwind patterns",
+    "responsiveFirst": "Test desktop (1440px), tablet (768px), and mobile (375px)",
+    "darkModeAlways": "Always implement and test dark mode support"
+  }
+}

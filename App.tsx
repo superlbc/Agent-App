@@ -1,151 +1,161 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { InputPanel } from './components/InputPanel';
 import { OutputPanel } from './components/OutputPanel';
 import { SettingsDrawer } from './components/SettingsDrawer';
 import { HelpModal } from './components/HelpModal';
-import { LoadingModal } from './components/ui/LoadingModal';
 import { Toast } from './components/ui/Toast';
 import { ScrollToTop } from './components/ui/ScrollToTop';
-import { TestAgentBanner } from './components/ui/TestAgentBanner';
-import { useLocalStorage } from './hooks/useLocalStorage';
-import { generateNotes, getCriticalThinking } from './services/apiService';
-import { Controls, Payload, AgentResponse, FormState, ToastState, ApiConfig, CriticalThinkingRequest, CriticalThinkingAnalysis } from './types';
-import { SAMPLE_DATA } from './constants';
 import { Button } from './components/ui/Button';
 import { Icon } from './components/ui/Icon';
-import { TourProvider, useTourContext } from './contexts/TourContext';
-import { DepartmentProvider, useDepartmentContext } from './contexts/DepartmentContext';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import { ToastState, ApiConfig, PreHire } from './types';
+import { TourProvider } from './contexts/TourContext';
+import { DepartmentProvider } from './contexts/DepartmentContext';
+import { PreHireProvider, usePreHires } from './contexts/PreHireContext';
 import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
-import { enrichAttendeeData } from './utils/departmentLookup';
 import { telemetryService } from './utils/telemetryService';
 import { getBrowserContext } from './utils/browserContext';
 import { FeedbackButton } from './components/FeedbackButton';
-import { useParticipantExtraction } from './hooks/useParticipantExtraction';
-import { resetAllUserData } from './utils/resetUserData';
 import { useVersionCheck } from './hooks/useVersionCheck';
 import { VersionUpdateBanner } from './components/ui/VersionUpdateBanner';
-
-const DEFAULT_CONTROLS: Controls = {
-  focus_department: [],
-  view: 'full',
-  critical_lens: true,
-  audience: 'department-specific',
-  tone: 'professional',
-  redact: false,
-  status_view: 'embedded',
-  meeting_date: new Date().toISOString().split('T')[0],
-  rag_mode: 'rag',
-  use_icons: true,
-  bold_important_words: false,
-  meetingPreset: 'internal-sync',
-  meeting_coach: true,
-  coaching_style: 'gentle',
-  groupingMode: 'by-topic',
-};
+import { PackageProvider, usePackages } from './contexts/PackageContext';
+import { ApprovalProvider, useApprovals } from './contexts/ApprovalContext';
+import { PackageAssignmentModal } from './components/PackageAssignmentModal';
+import { PackageBuilder } from './components/PackageBuilder';
+import { PackageDetailView } from './components/PackageDetailView';
+import { PackageLibrary } from './components/PackageLibrary';
+import { ApprovalQueue } from './components/ApprovalQueue';
+import { HelixTicketList } from './components/HelixTicketList';
+import { ApprovalDetailModal } from './components/ApprovalDetailModal';
+import { HelixTicketDetailModal } from './components/HelixTicketDetailModal';
+import { ApproveConfirmModal } from './components/ApproveConfirmModal';
+import { RejectConfirmModal } from './components/RejectConfirmModal';
+import { PreHireDetailModal } from './components/PreHireDetailModal';
+import { DEFAULT_API_CONFIG } from './constants';
+import { Package, ApprovalRequest, HelixTicket } from './types';
+import { Navigation, NavigationSection } from './components/Navigation';
+import HardwareInventory from './components/HardwareInventory';
+import { LicensePoolDashboard } from './components/LicensePoolDashboard';
+import { FreezePeriodAdmin } from './components/FreezePeriodAdmin';
+import { FreezePeriodDashboard } from './components/FreezePeriodDashboard';
+import {
+  mockHardware,
+  mockSoftware,
+  mockFreezePeriods,
+  mockEmployees,
+  mockFreezePeriodNotifications,
+  mockPreHires,
+} from './utils/mockData';
 
 const AppContent: React.FC = () => {
-  const { t } = useTranslation(['common', 'forms']);
+  const { t } = useTranslation(['common']);
   const [isDarkMode, setIsDarkMode] = useLocalStorage('darkMode',
     window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
   );
+  const [currentSection, setCurrentSection] = useLocalStorage<NavigationSection>(
+    'currentSection',
+    'pre-hires'
+  );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [toasts, setToasts] = useState<ToastState[]>([]);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
-  const [formState, setFormState] = useLocalStorage<FormState>('formState', {
-    title: '',
-    agenda: '',
-    transcript: '',
-    transcriptSource: 'manual',
-    tags: ["Internal only"],
-  });
+  const { user } = useAuth();
+  const {
+    preHires,
+    editingPreHire,
+    createPreHire,
+    updatePreHire,
+    deletePreHire,
+    startEdit,
+    cancelEdit,
+  } = usePreHires();
 
-  // Dual Agent Architecture: Separate IDs for meeting notes and interrogation
-  // Hard-coded defaults with env override capability
-  const DEFAULT_NOTES_AGENT_ID = (import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
-  const DEFAULT_INTERROGATION_AGENT_ID = (import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
+  // Package Management
+  const {
+    packages,
+    hardware,
+    software,
+    editingPackage,
+    viewingPackage,
+    createPackage,
+    updatePackage,
+    deletePackage,
+    duplicatePackage,
+    startEdit: startEditPackage,
+    cancelEdit: cancelEditPackage,
+    startView: startViewPackage,
+    cancelView: cancelViewPackage,
+  } = usePackages();
 
+  // Pre-hire Modal States
+  const [viewingPreHire, setViewingPreHire] = useState<PreHire | null>(null);
+  const [triggerFormOpen, setTriggerFormOpen] = useState<number>(0);
+
+  // Package Modal States
+  const [showPackageAssignmentModal, setShowPackageAssignmentModal] = useState(false);
+  const [assigningPreHire, setAssigningPreHire] = useState<PreHire | null>(null);
+  const [showPackageBuilder, setShowPackageBuilder] = useState(false);
+  const [showPackageLibrary, setShowPackageLibrary] = useState(false);
+
+  // Approval & Helix Management
+  const {
+    approvals,
+    tickets,
+    statistics: approvalStatistics,
+    viewingApproval,
+    viewingTicket,
+    approveRequest,
+    rejectRequest,
+    resolveTicket,
+    closeTicket,
+    startViewApproval,
+    cancelViewApproval,
+    startViewTicket,
+    cancelViewTicket,
+    getTicketById,
+    getApprovalById,
+  } = useApprovals();
+
+  // Approval Modal States
+  const [showApprovalQueue, setShowApprovalQueue] = useState(false);
+  const [showHelixTicketList, setShowHelixTicketList] = useState(false);
+  const [approvingRequest, setApprovingRequest] = useState<ApprovalRequest | null>(null);
+  const [rejectingRequest, setRejectingRequest] = useState<ApprovalRequest | null>(null);
+
+  // API Configuration (preserved for potential future AI integration)
   const [notesAgentId, setNotesAgentId] = useLocalStorage<string>(
     'notesAgentId',
-    DEFAULT_NOTES_AGENT_ID
+    DEFAULT_API_CONFIG.notesAgentId
   );
   const [interrogationAgentId, setInterrogationAgentId] = useLocalStorage<string>(
     'interrogationAgentId',
-    DEFAULT_INTERROGATION_AGENT_ID
+    DEFAULT_API_CONFIG.interrogationAgentId
   );
 
   const apiConfig: ApiConfig = {
-    hostname: 'https://interact.interpublic.com',
-    clientId: (import.meta.env)?.VITE_CLIENT_ID || '',
-    clientSecret: (import.meta.env)?.VITE_CLIENT_SECRET || '',
+    hostname: DEFAULT_API_CONFIG.hostname,
+    clientId: DEFAULT_API_CONFIG.clientId,
+    clientSecret: DEFAULT_API_CONFIG.clientSecret,
     notesAgentId: notesAgentId,
     interrogationAgentId: interrogationAgentId,
   };
 
-  const [controls, setControls] = useState<Controls>(DEFAULT_CONTROLS);
-
-  const [output, setOutput] = useState<AgentResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [toasts, setToasts] = useState<ToastState[]>([]);
-  const [hasGenerated, setHasGenerated] = useState(false);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [generateTrigger, setGenerateTrigger] = useState(0); // Trigger for collapsing Advanced Settings
-  const [showButtonEmphasis, setShowButtonEmphasis] = useState(false); // Track when to show emphasis animation
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-  );
-  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false); // Track when transcript is being fetched
-
-  const { startTour, isTourActive} = useTourContext();
-  const { isAuthenticated, user } = useAuth();
+  // Version check for automatic update detection
   const {
-    departmentMap,
-    setDepartmentData,
-    setIsLoading: setDepartmentLoading,
-    setError: setDepartmentError
-  } = useDepartmentContext();
+    hasUpdate,
+    currentVersion,
+    serverVersion,
+    dismissUpdate,
+    refreshForUpdate
+  } = useVersionCheck();
 
-  // Version checking for update notifications
-  const { updateAvailable, currentVersion, serverVersion, dismissUpdate } = useVersionCheck();
-
-  // AbortController ref for cancelling requests
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-  const lastGenerateTimeRef = useRef<number>(0);
-  const resetFiltersRef = useRef<(() => void) | null>(null); // Ref to store table filter reset function
-  const previousTranscriptRef = useRef<string>(''); // Track previous transcript to detect changes
-
-  // Check if using custom agent IDs (test agents)
-  const isUsingTestAgent =
-    (notesAgentId !== DEFAULT_NOTES_AGENT_ID && notesAgentId !== '') ||
-    (interrogationAgentId !== DEFAULT_INTERROGATION_AGENT_ID && interrogationAgentId !== '');
-
-  // Participant extraction hook
-  const {
-    participants,
-    isExtracting,
-    extractAndMatch,
-    addParticipant,
-    batchAddParticipantsFromEmails,
-    removeParticipant,
-    searchAndMatch,
-    confirmMatch,
-    markAsExternal,
-    updateParticipant,
-    clearParticipants
-  } = useParticipantExtraction();
-
-  useEffect(() => {
-    const tourCompleted = localStorage.getItem('tourCompleted');
-    if (!tourCompleted) {
-      setTimeout(() => setShowWelcomeModal(true), 500);
-    }
-  }, []);
-
+  // Apply dark mode class to document
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -154,596 +164,649 @@ const AppContent: React.FC = () => {
     }
   }, [isDarkMode]);
 
-  // Listen for changes to prefers-reduced-motion setting
+  // Track user login (once per session)
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  // Clear transcript on page refresh/load
-  useEffect(() => {
-    if (formState.transcript) {
-      setFormState(prev => ({
-        ...prev,
-        transcript: ''
-      }));
-      setOutput(null);
-      setHasGenerated(false);
-      clearParticipants();
+    if (user && !sessionStorage.getItem('loginTracked')) {
+      const browserContext = getBrowserContext();
+      telemetryService.trackEvent('userLogin', {
+        userName: user.displayName || 'Unknown',
+        userEmail: user.email || 'Unknown',
+        ...browserContext,
+      });
+      sessionStorage.setItem('loginTracked', 'true');
     }
-  }, []); // Empty dependency array - runs once on mount
-
-  // Telemetry: Set user context when authentication changes
-  useEffect(() => {
-    telemetryService.setUser(user);
   }, [user]);
 
-  // Emphasis animation: Track when transcript becomes ready or changes
+  // Check for first-time user (show welcome modal)
   useEffect(() => {
-    const currentTranscript = formState.transcript || '';
-    const hasTranscriptChanged = currentTranscript !== previousTranscriptRef.current;
-    const isTranscriptLoaded = currentTranscript.length > 0;
-
-    // Trigger animation when:
-    // 1. Transcript has changed to a new non-empty value
-    // 2. Not currently loading or generating notes
-    // 3. Not fetching a new transcript
-    if (hasTranscriptChanged && isTranscriptLoaded && !isLoading && !isLoadingTranscript) {
-      // Transcript just became available or changed, show emphasis animation
-      setShowButtonEmphasis(true);
-
-      // Remove emphasis after 2 seconds (2 pulse cycles @ 1s each)
-      const timer = setTimeout(() => {
-        setShowButtonEmphasis(false);
-      }, 2000);
-
-      // Update ref to current transcript
-      previousTranscriptRef.current = currentTranscript;
-
-      return () => clearTimeout(timer);
-    } else if (isLoading || isLoadingTranscript || !isTranscriptLoaded) {
-      // Disable emphasis during loading or when transcript is empty
-      setShowButtonEmphasis(false);
-
-      // Update ref when transcript becomes empty
-      if (!isTranscriptLoaded) {
-        previousTranscriptRef.current = '';
-      }
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    if (!hasSeenWelcome) {
+      setShowWelcomeModal(true);
+      localStorage.setItem('hasSeenWelcome', 'true');
     }
-  }, [formState.transcript, isLoading, isLoadingTranscript]);
-
-  // Telemetry: Track user login (once per session)
-  useEffect(() => {
-    // Check if login event already tracked in this session
-    const hasTrackedLogin = sessionStorage.getItem('hasTrackedLogin') === 'true';
-
-    if (isAuthenticated && user && !hasTrackedLogin) {
-      // Mark as tracked for this session (persists across page refreshes)
-      sessionStorage.setItem('hasTrackedLogin', 'true');
-
-      // Capture comprehensive browser/device context
-      const browserContext = getBrowserContext(isDarkMode);
-
-      // Track login event with context
-      telemetryService.trackEvent('userLogin', browserContext);
-    }
-  }, [isAuthenticated, user, isDarkMode]);
+  }, []);
 
   const addToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 4000);
+    }, 3000);
   };
 
-  const handleTranscriptLoadingChange = useCallback((isLoading: boolean) => {
-    setIsLoadingTranscript(isLoading);
-  }, []);
+  // ============================================================================
+  // PRE-HIRE HANDLERS
+  // ============================================================================
 
-  const handleFiltersReset = useCallback((resetFn: () => void) => {
-    resetFiltersRef.current = resetFn;
-  }, []);
-
-  const handleCancelGeneration = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
+  const handleSavePreHire = (preHireData: Partial<PreHire>) => {
+    if (editingPreHire) {
+      // Update existing pre-hire
+      updatePreHire(editingPreHire.id, preHireData);
+    } else {
+      // Create new pre-hire
+      createPreHire(preHireData);
     }
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-      timeoutIdRef.current = null;
-    }
-    setIsLoading(false);
-    addToast(t('common:toasts.generationCancelled'), 'error');
-
-    // Telemetry: Track cancellation
-    telemetryService.trackEvent('generationCancelled', {});
-  }, [t, addToast]);
-
-  const handleGenerate = useCallback(async (currentFormState: FormState, currentControls: Controls) => {
-    if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.notesAgentId || !apiConfig.interrogationAgentId) {
-        addToast(t('common:toasts.apiConfigMissing'), 'error');
-        return;
-    }
-
-    // Cooldown check: prevent rapid repeated requests (3 seconds)
-    const now = Date.now();
-    const timeSinceLastGenerate = now - lastGenerateTimeRef.current;
-    if (timeSinceLastGenerate < 3000) {
-      addToast(t('common:toasts.pleasewait'), 'error');
-      return;
-    }
-    lastGenerateTimeRef.current = now;
-
-    // Reset table filters when generating new notes
-    resetFiltersRef.current?.();
-
-    setIsLoading(true);
-    setError(null);
-
-    // Create new AbortController for this request
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-
-    // Set up 3-minute (180 seconds) timeout
-    timeoutIdRef.current = setTimeout(() => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-    }, 180000);
-
-    // Generate correlation ID for tracking related events
-    const correlationId = crypto.randomUUID();
-
-    try {
-      // Enrich participants with Momentum department data
-      // This provides accurate department info with fallback to Graph API
-      const enrichedParticipants = participants.map(p => {
-        // Only enrich if participant has an email
-        if (!p.email) {
-          return p;
-        }
-
-        const enrichedData = enrichAttendeeData(
-          p.email,
-          p.displayName || 'Unknown', // Provide fallback name
-          p.department, // Graph API department as fallback
-          departmentMap
-        );
-
-        return {
-          ...p,
-          department: enrichedData.department, // Prefers Momentum DepartmentGroup > Department > Graph API
-        };
-      });
-
-      const payload: Payload = {
-        meeting_title: currentFormState.title,
-        agenda: currentFormState.agenda.split('\n').filter(line => line.trim() !== ''),
-        transcript: currentFormState.transcript,
-        user_notes: currentFormState.userNotes,  // Include user-provided notes
-        participants: enrichedParticipants.length > 0 ? enrichedParticipants : undefined,  // NEW: Include participants with Momentum data
-        controls: currentControls,
-      };
-
-      const response = await generateNotes(payload, apiConfig, signal);
-      setOutput(response);
-
-      // Telemetry: Track notes generation with details
-      const eventType = hasGenerated ? 'notesRegenerated' : 'notesGenerated';
-      telemetryService.trackEvent(eventType, {
-        meetingTitle: currentFormState.title,
-        transcriptLength: currentFormState.transcript.length,
-        agendaItemCount: payload.agenda.length,
-        audience: currentControls.audience,
-        tone: currentControls.tone,
-        viewMode: currentControls.view,
-        meetingCoachEnabled: currentControls.meeting_coach,
-        coachingStyle: currentControls.coaching_style,
-        preset: currentControls.meetingPreset,
-        criticalLens: currentControls.critical_lens,
-        redactionEnabled: currentControls.redact,
-        useIcons: currentControls.use_icons,
-        boldKeywords: currentControls.bold_important_words,
-        actionItemCount: response.next_steps?.length || 0,
-        hasTags: currentFormState.tags.length > 0,
-        // NEW: Participant context telemetry
-        participantCount: participants.length,
-        hasParticipantContext: participants.length > 0,
-        hasParticipationMetrics: response.coach_insights?.participation_metrics !== undefined
-      }, correlationId);
-
-      setHasGenerated(true);
-      if(hasGenerated) {
-        addToast(t('common:toasts.previewUpdated'), 'success');
-      } else {
-        addToast(t('common:toasts.notesGenerated'), 'success');
-      }
-    } catch (err) {
-      // Handle cancellation separately
-      if (err instanceof Error && err.message === 'GENERATION_CANCELLED') {
-        // Cancellation already handled by handleCancelGeneration
-        // Don't show additional error toast
-        return;
-      }
-
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setError(errorMessage);
-      setOutput(null);
-      addToast(errorMessage, 'error');
-    } finally {
-      // Clean up AbortController and timeout
-      if (abortControllerRef.current) {
-        abortControllerRef.current = null;
-      }
-      if (timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
-        timeoutIdRef.current = null;
-      }
-      setIsLoading(false);
-    }
-  }, [hasGenerated, apiConfig, user, participants, t, addToast]);
-
-  const handleGenerateClick = () => {
-    setGenerateTrigger(prev => prev + 1); // Increment to trigger Advanced Settings collapse
-    handleGenerate(formState, controls);
   };
 
-  const handleCriticalThinkingRequest = useCallback(async (
-    request: CriticalThinkingRequest
-  ): Promise<CriticalThinkingAnalysis> => {
-    if (!apiConfig.clientId || !apiConfig.clientSecret || !apiConfig.interrogationAgentId) {
-      throw new Error('API configuration is incomplete for critical thinking');
+  const handleEditPreHire = (preHire: PreHire) => {
+    startEdit(preHire);
+  };
+
+  const handleDeletePreHire = (preHire: PreHire) => {
+    deletePreHire(preHire.id);
+    addToast(`Pre-hire record for ${preHire.candidateName} deleted`, 'success');
+  };
+
+  const handleViewPreHire = (preHire: PreHire) => {
+    setViewingPreHire(preHire);
+  };
+
+  const handleCreatePreHire = () => {
+    // Trigger form opening in InputPanel
+    cancelEdit(); // Make sure we're not in edit mode
+    setTriggerFormOpen(Date.now()); // Trigger form open via timestamp change
+  };
+
+  const handleCancelEdit = () => {
+    cancelEdit();
+  };
+
+  // ============================================================================
+  // PACKAGE HANDLERS
+  // ============================================================================
+
+  const handleAssignPackage = (preHire: PreHire) => {
+    setAssigningPreHire(preHire);
+    setShowPackageAssignmentModal(true);
+  };
+
+  const handlePackageAssignment = (preHire: PreHire, selectedPackage: Package) => {
+    updatePreHire(preHire.id, { assignedPackage: selectedPackage });
+    addToast(`Package "${selectedPackage.name}" assigned to ${preHire.candidateName}`, 'success');
+    setShowPackageAssignmentModal(false);
+    setAssigningPreHire(null);
+  };
+
+  const handleCreatePackage = () => {
+    cancelEditPackage(); // Ensure we're in create mode
+    setShowPackageBuilder(true);
+  };
+
+  const handleEditPackage = (pkg: Package) => {
+    startEditPackage(pkg);
+    setShowPackageLibrary(false); // Close Package Library modal first
+    setShowPackageBuilder(true);
+  };
+
+  const handleSavePackage = (packageData: Partial<Package>) => {
+    if (editingPackage) {
+      updatePackage(editingPackage.id, packageData);
+      addToast(`Package "${packageData.name}" updated successfully`, 'success');
+    } else {
+      createPackage(packageData);
+      addToast(`Package "${packageData.name}" created successfully`, 'success');
     }
+    setShowPackageBuilder(false);
+    cancelEditPackage();
+  };
 
-    try {
-      console.log('🧠 Requesting critical thinking analysis...');
+  const handleCancelPackageBuilder = () => {
+    setShowPackageBuilder(false);
+    cancelEditPackage();
+  };
 
-      const response = await getCriticalThinking(request, apiConfig);
-
-      console.log('✅ Critical thinking analysis received');
-
-      // Telemetry: Track critical thinking usage
-      telemetryService.trackEvent('criticalThinkingRequested', {
-        lineContext: request.line_context,
-        workstream: request.workstream_name,
-        lineLength: request.line_text.length,
-      });
-
-      return response.analysis;
-
-    } catch (error) {
-      console.error('❌ Critical thinking request failed:', error);
-
-      // Telemetry: Track critical thinking errors
-      telemetryService.trackEvent('criticalThinkingFailed', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        lineContext: request.line_context,
-      });
-
-      throw error;
+  const handleDeletePackage = (pkg: Package) => {
+    deletePackage(pkg.id);
+    addToast(`Package "${pkg.name}" deleted successfully`, 'success');
+    if (viewingPackage?.id === pkg.id) {
+      cancelViewPackage();
     }
-  }, [apiConfig]);
+  };
 
-  const handleClearForm = useCallback(() => {
-    setFormState({ title: '', agenda: '', transcript: '', transcriptSource: 'manual', userNotes: undefined, tags: [] });
-    setOutput(null);
-    setHasGenerated(false);
-    clearParticipants();
+  const handleDuplicatePackage = (pkg: Package) => {
+    duplicatePackage(pkg.id);
+    addToast(`Package "${pkg.name}" duplicated successfully`, 'success');
+  };
 
-    // Telemetry: DISABLED - formCleared generates too many events with low analytical value
-    // telemetryService.trackEvent('formCleared', {});
-  }, [setFormState, clearParticipants]);
+  const handleViewPackage = (pkg: Package) => {
+    startViewPackage(pkg);
+  };
 
-  const handleUseSampleData = useCallback(() => {
-    setFormState(SAMPLE_DATA);
+  const handleManagePackages = () => {
+    setShowPackageLibrary(true);
+  };
 
-    // Telemetry: DISABLED - sampleDataLoaded only useful during testing phase
-    // telemetryService.trackEvent('sampleDataLoaded', {
-    //   sampleTitle: SAMPLE_DATA.title
-    // });
-  }, [setFormState]);
-  
+  // ============================================================================
+  // APPROVAL HANDLERS
+  // ============================================================================
+
+  const handleViewApprovalQueue = () => {
+    setShowApprovalQueue(true);
+  };
+
+  const handleViewHelixTickets = () => {
+    setShowHelixTicketList(true);
+  };
+
+  const handleViewApprovalDetail = (approval: ApprovalRequest) => {
+    startViewApproval(approval);
+  };
+
+  const handleStartApprove = (approval: ApprovalRequest) => {
+    setApprovingRequest(approval);
+  };
+
+  const handleConfirmApprove = (notes?: string) => {
+    if (approvingRequest) {
+      approveRequest(approvingRequest.id, notes);
+      addToast(`Request for ${approvingRequest.employeeName} approved successfully`, 'success');
+      setApprovingRequest(null);
+    }
+  };
+
+  const handleCancelApprove = () => {
+    setApprovingRequest(null);
+  };
+
+  const handleStartReject = (approval: ApprovalRequest) => {
+    setRejectingRequest(approval);
+  };
+
+  const handleConfirmReject = (reason: string) => {
+    if (rejectingRequest) {
+      rejectRequest(rejectingRequest.id, reason);
+      addToast(`Request for ${rejectingRequest.employeeName} rejected`, 'error');
+      setRejectingRequest(null);
+    }
+  };
+
+  const handleCancelReject = () => {
+    setRejectingRequest(null);
+  };
+
+  const handleViewTicketDetail = (ticket: HelixTicket) => {
+    startViewTicket(ticket);
+  };
+
+  const handleViewTicketById = (ticketId: string) => {
+    const ticket = getTicketById(ticketId);
+    if (ticket) {
+      startViewTicket(ticket);
+    } else {
+      addToast(`Ticket ${ticketId} not found`, 'error');
+    }
+  };
+
+  const handleViewApprovalById = (approvalId: string) => {
+    const approval = getApprovalById(approvalId);
+    if (approval) {
+      startViewApproval(approval);
+    } else {
+      addToast(`Approval ${approvalId} not found`, 'error');
+    }
+  };
+
+  const handleResolveTicket = (ticket: HelixTicket) => {
+    resolveTicket(ticket.id);
+    addToast(`Ticket ${ticket.id} marked as resolved`, 'success');
+  };
+
+  const handleCloseTicket = (ticket: HelixTicket) => {
+    closeTicket(ticket.id);
+    addToast(`Ticket ${ticket.id} closed`, 'success');
+  };
+
+  // ============================================================================
+  // OTHER HANDLERS
+  // ============================================================================
+
+  const handleDarkModeToggle = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const handleLogout = () => {
+    telemetryService.trackEvent('userLogout', {
+      userName: user?.displayName || 'Unknown',
+      userEmail: user?.email || 'Unknown',
+    });
+    // Logout handled by AuthContext
+  };
+
+  const handleHelpOpen = () => {
+    setIsHelpOpen(true);
+  };
+
+  const handleResetData = () => {
+    if (window.confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
+      // Clear all pre-hires
+      preHires.forEach(ph => deletePreHire(ph.id));
+      // Clear all packages
+      packages.forEach(pkg => deletePackage(pkg.id));
+      addToast('All data has been reset', 'success');
+    }
+  };
+
   const handleReplayTour = () => {
-    setShowWelcomeModal(true);
+    // Tour replay would be handled by TourContext
+    addToast('Tour replay feature coming soon', 'success');
   };
-
-  const handleResetUserData = useCallback(() => {
-    // Confirm with user before resetting
-    if (window.confirm(t('common:resetData.confirmMessage'))) {
-      // Reset all localStorage data
-      resetAllUserData();
-
-      // Immediately clear form state and participants for visual feedback
-      setFormState({ title: '', agenda: '', transcript: '', transcriptSource: 'manual', tags: [] });
-      setOutput(null);
-      setHasGenerated(false);
-      clearParticipants();
-
-      // Telemetry: Track data reset
-      telemetryService.trackEvent('userDataReset', {});
-
-      // Show success toast
-      addToast(t('common:toasts.dataReset'), 'success');
-
-      // Reload the page to apply all defaults
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
-  }, [t, addToast, setFormState, clearParticipants]);
-
-  // Keyboard shortcuts handler
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if Alt is pressed without Ctrl or Meta (Cmd)
-      if (!e.altKey || e.ctrlKey || e.metaKey) return;
-
-      // Prevent shortcuts when typing in inputs, textareas, or contenteditable elements
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      ) {
-        return;
-      }
-
-      switch (e.key.toLowerCase()) {
-        case 'g':
-          // Alt+G: Generate Notes
-          e.preventDefault();
-          if (!isLoading && formState.transcript) {
-            handleGenerateClick();
-          }
-          break;
-
-        case 'k':
-          // Alt+K: Clear Form
-          e.preventDefault();
-          handleClearForm();
-          addToast(t('common:toasts.formCleared'), 'success');
-          break;
-
-        case 'o':
-          // Alt+O: Open File Upload
-          e.preventDefault();
-          if ((window as any).__fileUploadTrigger) {
-            (window as any).__fileUploadTrigger();
-          }
-          break;
-
-        case 'h':
-          // Alt+H: Help
-          e.preventDefault();
-          setIsHelpOpen(true);
-          break;
-
-        case 'c':
-          // Alt+C: Copy to clipboard (if output exists)
-          e.preventDefault();
-          if (output) {
-            // Trigger copy from OutputPanel
-            const copyButton = document.querySelector('[aria-label*="Copy"]') as HTMLButtonElement;
-            if (copyButton) copyButton.click();
-          }
-          break;
-
-        case 'p':
-          // Alt+P: Export to PDF (if output exists)
-          e.preventDefault();
-          if (output) {
-            const pdfButton = document.querySelector('[aria-label*="PDF"]') as HTMLButtonElement;
-            if (pdfButton) pdfButton.click();
-          }
-          break;
-
-        case 's':
-          // Alt+S: Download CSV (if output exists)
-          e.preventDefault();
-          if (output) {
-            const csvButton = document.querySelector('[aria-label*="CSV"]') as HTMLButtonElement;
-            if (csvButton) csvButton.click();
-          }
-          break;
-
-        case 'i':
-          // Alt+I: Interrogate Transcript (if output exists)
-          e.preventDefault();
-          if (output) {
-            const interrogateButton = document.querySelector('[aria-label*="Interrogate"]') as HTMLButtonElement;
-            if (interrogateButton) interrogateButton.click();
-          }
-          break;
-
-        case ',':
-          // Alt+,: Settings
-          e.preventDefault();
-          setIsSettingsOpen(true);
-          break;
-
-        case 't':
-          // Alt+T: Replay Tour
-          e.preventDefault();
-          handleReplayTour();
-          break;
-      }
-
-      // Escape key to close modals (without Alt)
-      if (e.key === 'Escape' && !e.altKey) {
-        if (isHelpOpen) {
-          e.preventDefault();
-          setIsHelpOpen(false);
-        } else if (isSettingsOpen) {
-          e.preventDefault();
-          setIsSettingsOpen(false);
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [
-    isLoading,
-    formState,
-    output,
-    isHelpOpen,
-    isSettingsOpen,
-    handleGenerateClick,
-    handleClearForm,
-    handleReplayTour,
-    addToast,
-    t,
-  ]);
 
   return (
-    <div className="min-h-screen font-sans">
+    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+      {/* Version Update Banner */}
+      {hasUpdate && (
+        <VersionUpdateBanner
+          currentVersion={currentVersion}
+          serverVersion={serverVersion}
+          onRefresh={refreshForUpdate}
+          onDismiss={dismissUpdate}
+        />
+      )}
+
+      {/* Header */}
       <Header
         isDarkMode={isDarkMode}
-        onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-        onOpenHelp={() => setIsHelpOpen(true)}
+        onToggleDarkMode={handleDarkModeToggle}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenHelp={handleHelpOpen}
         onReplayTour={handleReplayTour}
-        onReset={handleResetUserData}
+        onReset={handleResetData}
       />
-      <main className="p-4 sm:p-6 lg:p-8 max-w-screen-2xl mx-auto">
-        {updateAvailable && currentVersion && serverVersion && (
-          <VersionUpdateBanner
-            currentVersion={currentVersion.version}
-            serverVersion={serverVersion.version}
-            onDismiss={dismissUpdate}
-          />
-        )}
-        {isUsingTestAgent && (
-          <TestAgentBanner onOpenSettings={() => setIsSettingsOpen(true)} />
-        )}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <div className="w-full lg:w-[500px] flex-shrink-0">
-            <div id="generate-button-wrapper" className="sticky top-24 z-30 mb-6">
-                <Button
-                  id="generate-button"
-                  onClick={handleGenerateClick}
-                  disabled={isLoading || !formState.transcript || isLoadingTranscript}
-                  size="lg"
-                  className={`w-full text-base transition-all duration-500 ${
-                    showButtonEmphasis && !prefersReducedMotion
-                      ? 'animate-pulse-glow'
-                      : showButtonEmphasis && prefersReducedMotion
-                      ? 'shadow-xl shadow-primary/40 dark:shadow-primary/40 scale-[1.02]'
-                      : 'shadow-lg dark:shadow-primary/20'
-                  }`}
-                >
-                {isLoading ? (
-                    <>
-                        <Icon name="loader" className="h-5 w-5 mr-2 animate-spin"/>
-                        {t('common:status.generating')}
-                    </>
-                ) : (
-                    <>
-                        <Icon name="sparkles" className="h-5 w-5 mr-2"/>
-                        {t('forms:actions.generateNotes')}
-                    </>
-                )}
-                </Button>
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Navigation Sidebar */}
+        <Navigation
+          currentSection={currentSection}
+          onSectionChange={setCurrentSection}
+        />
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-hidden">
+          {/* Pre-hires & Packages Section */}
+          {currentSection === 'pre-hires' && (
+            <div className="h-full flex overflow-hidden">
+              {/* Input Panel */}
+              <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 overflow-hidden">
+                <InputPanel
+                  editingPreHire={editingPreHire}
+                  onSavePreHire={handleSavePreHire}
+                  onCancelEdit={handleCancelEdit}
+                  onCreate={handleCreatePreHire}
+                  triggerFormOpen={triggerFormOpen}
+                  onCreatePackage={handleCreatePackage}
+                  onManagePackages={handleManagePackages}
+                  onViewApprovalQueue={handleViewApprovalQueue}
+                  onViewHelixTickets={handleViewHelixTickets}
+                  addToast={addToast}
+                />
+              </div>
+
+              {/* Output Panel */}
+              <div className="w-2/3 overflow-hidden">
+                <OutputPanel
+                  preHires={preHires}
+                  onEdit={handleEditPreHire}
+                  onDelete={handleDeletePreHire}
+                  onView={handleViewPreHire}
+                  onAssignPackage={handleAssignPackage}
+                  onCreate={handleCreatePreHire}
+                />
+              </div>
             </div>
-            <InputPanel
-              formState={formState}
-              setFormState={setFormState}
-              controls={controls}
-              setControls={setControls}
-              addToast={addToast}
-              onClearForm={() => { handleClearForm(); addToast(t('common:toasts.formCleared'), 'success'); }}
-              onUseSampleData={() => { handleUseSampleData(); addToast(t('common:toasts.sampleDataLoaded'), 'success'); }}
-              isTourActive={isTourActive}
-              onTriggerFileUpload={() => {}}
-              participants={participants}
-              isExtracting={isExtracting}
-              onExtractAndMatch={extractAndMatch}
-              onAddParticipant={addParticipant}
-              onBatchAddParticipants={batchAddParticipantsFromEmails}
-              onRemoveParticipant={removeParticipant}
-              onSearchAndMatch={searchAndMatch}
-              onConfirmMatch={confirmMatch}
-              onMarkAsExternal={markAsExternal}
-              onUpdateParticipant={updateParticipant}
-              generateTrigger={generateTrigger}
-              apiConfig={apiConfig}
-              onTranscriptLoadingChange={handleTranscriptLoadingChange}
-            />
-          </div>
-          <div id="output-panel-wrapper" className="flex-1 min-w-0 w-full">
-            <OutputPanel
-              output={output}
-              isLoading={isLoading}
-              error={error}
-              controls={controls}
-              addToast={addToast}
-              formState={formState}
-              apiConfig={apiConfig}
-              participants={participants}
-              onFiltersReset={handleFiltersReset}
-              onRequestCriticalThinking={handleCriticalThinkingRequest}
-            />
-          </div>
+          )}
+
+          {/* Hardware Inventory Section */}
+          {currentSection === 'hardware-inventory' && (
+            <div className="h-full overflow-auto p-6">
+              <HardwareInventory
+                initialHardware={mockHardware}
+                onHardwareChange={(updatedHardware) => {
+                  console.log('Hardware updated:', updatedHardware);
+                  addToast('Hardware inventory updated', 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* License Pool Dashboard Section */}
+          {currentSection === 'license-pools' && (
+            <div className="h-full overflow-auto p-6">
+              <LicensePoolDashboard
+                licenses={mockSoftware}
+                onAssignLicense={(license) => {
+                  console.log('Assign license:', license);
+                  addToast(`Assigning ${license.name}...`, 'success');
+                }}
+                onViewAssignments={(license) => {
+                  console.log('View assignments for:', license);
+                  addToast(`Viewing assignments for ${license.name}`, 'success');
+                }}
+                onEditLicense={(license) => {
+                  console.log('Edit license:', license);
+                  addToast(`Editing ${license.name}...`, 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Freeze Period Admin Section */}
+          {currentSection === 'freeze-period-admin' && (
+            <div className="h-full overflow-auto p-6">
+              <FreezePeriodAdmin
+                freezePeriods={mockFreezePeriods}
+                currentUser={{
+                  name: user?.displayName || 'Unknown User',
+                  email: user?.email || 'unknown@momentumww.com',
+                }}
+                onCreateFreezePeriod={(period) => {
+                  console.log('Create freeze period:', period);
+                  addToast('Freeze period created successfully', 'success');
+                }}
+                onUpdateFreezePeriod={(period) => {
+                  console.log('Update freeze period:', period);
+                  addToast('Freeze period updated successfully', 'success');
+                }}
+                onDeleteFreezePeriod={(periodId) => {
+                  console.log('Delete freeze period:', periodId);
+                  addToast('Freeze period deleted', 'success');
+                }}
+                onClose={() => {
+                  // No-op - not needed for navigation-based UI
+                }}
+              />
+            </div>
+          )}
+
+          {/* Freeze Period Dashboard Section */}
+          {currentSection === 'freeze-period-dashboard' && (
+            <div className="h-full overflow-auto p-6">
+              <FreezePeriodDashboard
+                freezePeriods={mockFreezePeriods}
+                preHires={mockPreHires}
+                employees={mockEmployees}
+                notifications={mockFreezePeriodNotifications}
+                onGenerateEmail={(notification) => {
+                  console.log('Generate email:', notification);
+                  addToast(`Email generated for ${notification.employeeName}`, 'success');
+                }}
+                onGenerateBulkEmails={(notifications) => {
+                  console.log('Generate bulk emails:', notifications);
+                  addToast(`Generated ${notifications.length} emails`, 'success');
+                }}
+                onMarkEmailSent={(notificationId) => {
+                  console.log('Mark email sent:', notificationId);
+                  addToast('Email marked as sent', 'success');
+                }}
+                onClose={() => {
+                  // No-op - not needed for navigation-based UI
+                }}
+              />
+            </div>
+          )}
         </div>
-      </main>
+      </div>
+
+      {/* Modals and Drawers */}
       <SettingsDrawer
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        addToast={addToast}
         notesAgentId={notesAgentId}
-        setNotesAgentId={setNotesAgentId}
+        onNotesAgentIdChange={setNotesAgentId}
         interrogationAgentId={interrogationAgentId}
-        setInterrogationAgentId={setInterrogationAgentId}
+        onInterrogationAgentIdChange={setInterrogationAgentId}
       />
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
-      <LoadingModal isOpen={isLoading} onCancel={handleCancelGeneration} />
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+      />
 
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      {showWelcomeModal && (
+        <TourWelcomeModal onClose={() => setShowWelcomeModal(false)} />
+      )}
+
+      {/* Package Assignment Modal */}
+      {showPackageAssignmentModal && assigningPreHire && (
+        <PackageAssignmentModal
+          preHire={assigningPreHire}
+          packages={packages}
+          onAssign={handlePackageAssignment}
+          onClose={() => {
+            setShowPackageAssignmentModal(false);
+            setAssigningPreHire(null);
+          }}
+        />
+      )}
+
+      {/* Package Builder Modal */}
+      {showPackageBuilder && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="w-full max-w-7xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+              <PackageBuilder
+                package={editingPackage || undefined}
+                hardware={hardware}
+                software={software}
+                onSave={handleSavePackage}
+                onCancel={handleCancelPackageBuilder}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Package Detail View Modal */}
+      {viewingPackage && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="w-full max-w-5xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+              <PackageDetailView
+                package={viewingPackage}
+                onClose={cancelViewPackage}
+                onEdit={() => handleEditPackage(viewingPackage)}
+                onDuplicate={() => handleDuplicatePackage(viewingPackage)}
+                onDelete={() => handleDeletePackage(viewingPackage)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Package Library Modal */}
+      {showPackageLibrary && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-screen flex items-center justify-center py-8">
+            <div className="relative w-full max-w-7xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+              {/* Close button positioned absolutely in top-right corner */}
+              <button
+                onClick={() => setShowPackageLibrary(false)}
+                className="absolute top-4 right-4 z-10 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                aria-label="Close modal"
+              >
+                <Icon name="x" className="w-5 h-5" />
+              </button>
+              {/* PackageLibrary component already has its own header - no duplicate needed */}
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approval Queue Modal */}
+      {showApprovalQueue && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-screen flex items-center justify-center py-8">
+            <div className="w-full max-w-7xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Approval Queue
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Review and approve equipment and software requests
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => setShowApprovalQueue(false)}>
+                  <Icon name="x" className="w-5 h-5" />
+                </Button>
+              </div>
+              <ApprovalQueue
+                approvals={approvals}
+                statistics={approvalStatistics}
+                onView={handleViewApprovalDetail}
+                onApprove={handleStartApprove}
+                onReject={handleStartReject}
+                onViewTicket={handleViewTicketById}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Helix Ticket List Modal */}
+      {showHelixTicketList && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-screen flex items-center justify-center py-8">
+            <div className="w-full max-w-7xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Helix Tickets
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    IT provisioning and ticketing system
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => setShowHelixTicketList(false)}>
+                  <Icon name="x" className="w-5 h-5" />
+                </Button>
+              </div>
+              <HelixTicketList
+                tickets={tickets}
+                statistics={approvalStatistics}
+                onView={handleViewTicketDetail}
+                onResolve={handleResolveTicket}
+                onClose={handleCloseTicket}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approval Detail Modal */}
+      {viewingApproval && (
+        <ApprovalDetailModal
+          approval={viewingApproval}
+          onApprove={handleStartApprove}
+          onReject={handleStartReject}
+          onViewTicket={handleViewTicketById}
+          onClose={cancelViewApproval}
+        />
+      )}
+
+      {/* Helix Ticket Detail Modal */}
+      {viewingTicket && (
+        <HelixTicketDetailModal
+          ticket={viewingTicket}
+          onResolve={handleResolveTicket}
+          onClose={handleCloseTicket}
+          onViewApproval={handleViewApprovalById}
+          onCloseModal={cancelViewTicket}
+        />
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {approvingRequest && (
+        <ApproveConfirmModal
+          approval={approvingRequest}
+          onConfirm={handleConfirmApprove}
+          onCancel={handleCancelApprove}
+        />
+      )}
+
+      {/* Reject Confirmation Modal */}
+      {rejectingRequest && (
+        <RejectConfirmModal
+          approval={rejectingRequest}
+          onConfirm={handleConfirmReject}
+          onCancel={handleCancelReject}
+        />
+      )}
+
+      {/* Pre-hire Detail Modal */}
+      {viewingPreHire && (
+        <PreHireDetailModal
+          preHire={viewingPreHire}
+          onEdit={handleEditPreHire}
+          onDelete={handleDeletePreHire}
+          onClose={() => setViewingPreHire(null)}
+        />
+      )}
+
+      {/* Floating Components */}
+      <FeedbackButton apiConfig={apiConfig} />
+      <ScrollToTop />
+
+      {/* Tour Controller */}
+      <TourController />
+
+      {/* Toast Notifications */}
+      <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
         {toasts.map(toast => (
-          <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => setToasts(p => p.filter(t => t.id !== toast.id))} />
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+          />
         ))}
       </div>
-       <TourWelcomeModal
-        isOpen={showWelcomeModal}
-        onStart={() => {
-          setShowWelcomeModal(false);
-          startTour();
-        }}
-        onClose={() => {
-          setShowWelcomeModal(false);
-          localStorage.setItem('tourCompleted', 'true');
-        }}
-      />
-       <TourController
-          setFormState={setFormState}
-          setControls={setControls}
-          setOutput={setOutput}
-          handleClearForm={handleClearForm}
-          handleUseSampleData={handleUseSampleData}
-        />
-
-      <ScrollToTop />
-      <FeedbackButton />
     </div>
   );
 };
 
-
-const App: React.FC = () => (
-  <DepartmentProvider>
+function App() {
+  return (
     <TourProvider>
-      <AppContent />
+      <DepartmentProvider>
+        <PreHireProvider>
+          <PackageProvider>
+            <ApprovalProvider>
+              <AppContent />
+            </ApprovalProvider>
+          </PackageProvider>
+        </PreHireProvider>
+      </DepartmentProvider>
     </TourProvider>
-  </DepartmentProvider>
-);
+  );
+}
 
 export default App;

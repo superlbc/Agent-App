@@ -1,0 +1,171 @@
+// ============================================================================
+// NAVIGATION COMPONENT
+// ============================================================================
+// Sidebar navigation for switching between major application sections
+
+import React from 'react';
+import { Icon } from './ui/Icon';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+export type NavigationSection =
+  | 'pre-hires'
+  | 'hardware-inventory'
+  | 'license-pools'
+  | 'freeze-period-admin'
+  | 'freeze-period-dashboard';
+
+interface NavigationProps {
+  currentSection: NavigationSection;
+  onSectionChange: (section: NavigationSection) => void;
+  className?: string;
+}
+
+interface NavigationItem {
+  id: NavigationSection;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+// ============================================================================
+// NAVIGATION ITEMS CONFIGURATION
+// ============================================================================
+
+const NAVIGATION_ITEMS: NavigationItem[] = [
+  {
+    id: 'pre-hires',
+    label: 'Pre-hires & Packages',
+    icon: 'users',
+    description: 'Manage pre-hire candidates and equipment packages',
+  },
+  {
+    id: 'hardware-inventory',
+    label: 'Hardware Inventory',
+    icon: 'package',
+    description: 'Manage hardware items and inventory',
+  },
+  {
+    id: 'license-pools',
+    label: 'License Pool Dashboard',
+    icon: 'key',
+    description: 'Manage software license pools and assignments',
+  },
+  {
+    id: 'freeze-period-admin',
+    label: 'Freeze Period Admin',
+    icon: 'settings',
+    description: 'Configure freeze period settings',
+  },
+  {
+    id: 'freeze-period-dashboard',
+    label: 'Freeze Period Dashboard',
+    icon: 'calendar',
+    description: 'Monitor freeze period notifications',
+  },
+];
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+export const Navigation: React.FC<NavigationProps> = ({
+  currentSection,
+  onSectionChange,
+  className = '',
+}) => {
+  return (
+    <nav
+      className={`w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col ${className}`}
+    >
+      {/* Navigation Header */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          UXP System
+        </h2>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          Employee Onboarding Platform
+        </p>
+      </div>
+
+      {/* Navigation Items */}
+      <div className="flex-1 overflow-y-auto p-2">
+        <ul className="space-y-1">
+          {NAVIGATION_ITEMS.map((item) => {
+            const isActive = currentSection === item.id;
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => onSectionChange(item.id)}
+                  className={`
+                    w-full flex items-start gap-3 px-3 py-3 rounded-lg transition-all
+                    ${
+                      isActive
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }
+                  `}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {/* Icon */}
+                  <Icon
+                    name={item.icon}
+                    className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                      isActive
+                        ? 'text-primary-600 dark:text-primary-400'
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                  />
+
+                  {/* Label and Description */}
+                  <div className="flex-1 text-left">
+                    <div
+                      className={`text-sm font-medium ${
+                        isActive
+                          ? 'text-primary-700 dark:text-primary-300'
+                          : 'text-gray-900 dark:text-white'
+                      }`}
+                    >
+                      {item.label}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                      {item.description}
+                    </div>
+                  </div>
+
+                  {/* Active Indicator */}
+                  {isActive && (
+                    <div className="w-1 h-full bg-primary-600 dark:bg-primary-400 rounded-full absolute right-0" />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Navigation Footer */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
+          <p>Version 2.0.0</p>
+          <p className="mt-1">Employee Onboarding System</p>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+// ============================================================================
+// USAGE EXAMPLE
+// ============================================================================
+
+/**
+ * const [currentSection, setCurrentSection] = useState<NavigationSection>('pre-hires');
+ *
+ * <Navigation
+ *   currentSection={currentSection}
+ *   onSectionChange={setCurrentSection}
+ * />
+ */
