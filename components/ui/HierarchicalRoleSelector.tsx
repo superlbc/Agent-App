@@ -24,14 +24,15 @@ export interface DepartmentRoleData {
 
 interface HierarchicalRoleSelectorProps {
   data: DepartmentRoleData[]; // All department/role combinations from CSV
-  value: RoleSelection | null;
-  onChange: (selection: RoleSelection | null) => void;
+  value: RoleSelection | null | RoleSelection[]; // Single or multi-select
+  onChange: (selection: RoleSelection | null | RoleSelection[]) => void;
   placeholder?: string;
   error?: string;
   disabled?: boolean;
   className?: string;
   label?: string;
   required?: boolean;
+  multiSelect?: boolean; // Enable multi-select mode
 }
 
 export const HierarchicalRoleSelector: React.FC<HierarchicalRoleSelectorProps> = ({

@@ -715,7 +715,7 @@ export class GraphService {
 
       const response = await this.client
         .api('/users')
-        .search(`"displayName:${query}"`)
+        .filter(`startswith(displayName,'${query}') or startswith(givenName,'${query}') or startswith(surname,'${query}') or startswith(mail,'${query}')`)
         .select('id,displayName,mail,userPrincipalName,jobTitle,department')
         .top(10)
         .get();
