@@ -4,6 +4,9 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const { validateAzureADToken } = require('./middleware/auth');
 
+// Import routes
+const preHireRoutes = require('./routes/preHireRoutes');
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -111,6 +114,9 @@ app.post('/api/chat-ai/v1/bots/:botId/messages', validateAzureADToken, async (re
     });
   }
 });
+
+// Employee Onboarding System API Routes
+app.use('/api/pre-hires', preHireRoutes);
 
 // Catch-all for undefined routes
 app.use((req, res) => {
