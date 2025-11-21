@@ -6,6 +6,10 @@ const { validateAzureADToken } = require('./middleware/auth');
 
 // Import routes
 const preHireRoutes = require('./routes/preHireRoutes');
+const packageRoutes = require('./routes/packageRoutes');
+const hardwareRoutes = require('./routes/hardwareRoutes');
+const softwareRoutes = require('./routes/softwareRoutes');
+const approvalRoutes = require('./routes/approvalRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -117,6 +121,10 @@ app.post('/api/chat-ai/v1/bots/:botId/messages', validateAzureADToken, async (re
 
 // Employee Onboarding System API Routes
 app.use('/api/pre-hires', preHireRoutes);
+app.use('/api/packages', packageRoutes);
+app.use('/api/hardware', hardwareRoutes);
+app.use('/api/software', softwareRoutes);
+app.use('/api/approvals', approvalRoutes);
 
 // Catch-all for undefined routes
 app.use((req, res) => {

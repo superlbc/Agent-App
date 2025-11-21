@@ -16,6 +16,7 @@ const DB_FILES = {
   software: path.join(DB_DIR, 'software.json'),
   approvals: path.join(DB_DIR, 'approvals.json'),
   roleAssignments: path.join(DB_DIR, 'role-assignments.json'),
+  licenseAssignments: path.join(DB_DIR, 'license-assignments.json'),
 };
 
 // Ensure database directory exists
