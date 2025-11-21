@@ -4,6 +4,7 @@ const jwksClient = require('jwks-rsa');
 // Azure AD Configuration
 const TENANT_ID = 'd026e4c1-5892-497a-b9da-ee493c9f0364';
 const REQUIRED_GROUP_ID = '2c08b5d8-7def-4845-a48c-740b987dcffb'; // MOM WW All Users 1 SG
+const ADMIN_GROUP_ID = '1322ab5f-d86d-4c9e-b863-fba031615857'; // MOM Tech Admin Users SG
 
 // JWKS client to fetch Azure AD public keys for token verification
 const client = jwksClient({
@@ -99,4 +100,40 @@ function validateAzureADToken(req, res, next) {
   );
 }
 
-module.exports = { validateAzureADToken };
+/**
+ * Middleware to check if user has required permission
+ */
+function checkPermission(requiredPermission) {
+  return (req, res, next) => {
+    const { hasPermission, getUserRolesFromGroups } = require('../config/rbac');
+
+    if (!req.user) {
+      return res.status(401).json({
+        error: 'unauthorized',
+        error_description: 'User not authenticated'
+      });
+    }
+
+    // Get user roles from Azure AD groups or database
+    const userRoles = getUserRolesFromGroups(req.user.groups);
+
+    // Check if user has the required permission
+    const hasRequiredPermission = hasPermission(userRoles, requiredPermission);
+
+    if (!hasRequiredPermission) {
+      console.warn(`Permission denied for user ${req.user.email}: ${requiredPermission}`);
+      return res.status(403).json({
+        error: 'forbidden',
+        message: 'Insufficient permissions',
+        requiredPermission
+      });
+    }
+
+    // Attach user roles to request for potential downstream use
+    req.user.roles = userRoles;
+
+    next();
+  };
+}
+
+module.exports = { validateAzureADToken, checkPermission };
