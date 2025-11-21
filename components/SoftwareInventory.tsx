@@ -10,6 +10,7 @@ import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { Input } from './ui/Input';
 import SoftwareCreateModal from './SoftwareCreateModal';
+import { useRole } from '../contexts/RoleContext';
 
 interface SoftwareInventoryProps {
   initialSoftware?: Software[];
@@ -20,6 +21,13 @@ const SoftwareInventory: React.FC<SoftwareInventoryProps> = ({
   initialSoftware = [],
   onSoftwareChange,
 }) => {
+  const { hasPermission } = useRole();
+
+  // Permission checks
+  const canCreate = hasPermission('SOFTWARE_CREATE');
+  const canUpdate = hasPermission('SOFTWARE_UPDATE');
+  const canRead = hasPermission('SOFTWARE_READ');
+
   // State
   const [software, setSoftware] = useState<Software[]>(initialSoftware);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,11 +82,48 @@ const SoftwareInventory: React.FC<SoftwareInventoryProps> = ({
           </p>
         </div>
 
-        <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
+        <Button
+          variant="primary"
+          onClick={() => setIsCreateModalOpen(true)}
+          disabled={!canCreate}
+          title={!canCreate ? 'You do not have permission to create software' : undefined}
+        >
           <Icon name="add" className="w-4 h-4 mr-2" />
           Add Software
         </Button>
       </div>
+
+      {/* Permission Check Alert */}
+      {!canRead && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start gap-3">
+          <Icon name="alert-triangle" className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
+              Insufficient Permissions
+            </h4>
+            <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+              You do not have permission to view software inventory. Required permission: SOFTWARE_READ
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+              Contact your administrator if you need access to this feature.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {(!canCreate && canRead) && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+          <Icon name="info" className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
+              Read-Only Access
+            </h4>
+            <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+              You have view-only access to software inventory. You cannot create or edit software items.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Search & Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
