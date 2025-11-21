@@ -315,19 +315,8 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
     <nav
       className={`${navWidth} bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out overflow-x-hidden ${className}`}
     >
-      {/* Navigation Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        {!isCollapsed && (
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-              Employee Onboarding
-            </h2>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate">
-              Pre-hire to Active Employee
-            </p>
-          </div>
-        )}
-
+      {/* Navigation Toggle Button */}
+      <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex justify-end">
         {/* Hamburger Toggle Button */}
         <button
           onClick={toggleCollapse}
