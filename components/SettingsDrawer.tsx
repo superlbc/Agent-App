@@ -116,7 +116,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       >
         <div className="h-full flex flex-col">
           <header className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-lg font-semibold">Settings</h2>
+            <h2 className="text-xl font-semibold">Settings</h2>
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"

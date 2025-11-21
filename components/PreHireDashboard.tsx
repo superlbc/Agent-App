@@ -94,12 +94,12 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
   return (
     <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* Compact Statistics Row */}
-      <div className="flex items-center gap-4 px-6 py-4">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 px-6 py-4">
         {/* Stat Cards */}
         {statCards.map((card) => (
           <div
             key={card.label}
-            className="group relative flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-help flex-1"
+            className="group relative flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-help flex-1"
             title={card.description}
           >
             {/* Icon */}
