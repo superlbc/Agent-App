@@ -30,6 +30,8 @@ interface NavigationProps {
   currentSection: NavigationSection;
   onSectionChange: (section: NavigationSection) => void;
   className?: string;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 interface NavigationItem {
@@ -284,6 +286,8 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
   currentSection,
   onSectionChange,
   className = '',
+  isMobileOpen = false,
+  onMobileClose,
 }) => {
   // Collapse state (saved to localStorage)
   const [isCollapsed, setIsCollapsed] = useLocalStorage('navCollapsed', false);
@@ -308,13 +312,42 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
     }));
   };
 
+  // Handle section change and close mobile menu
+  const handleSectionChange = (section: NavigationSection) => {
+    onSectionChange(section);
+    // Close mobile menu after selecting a section
+    if (onMobileClose) {
+      onMobileClose();
+    }
+  };
+
   // Calculate width based on collapse state
   const navWidth = isCollapsed ? 'w-16' : 'w-64';
 
   return (
-    <nav
-      className={`${navWidth} bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out overflow-x-hidden ${className}`}
-    >
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Navigation Sidebar/Drawer */}
+      <nav
+        className={`
+          ${navWidth}
+          fixed lg:relative inset-y-0 left-0 z-50
+          bg-white dark:bg-gray-800
+          border-r border-gray-200 dark:border-gray-700
+          flex flex-col
+          transition-all duration-300 ease-in-out overflow-x-hidden
+          transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${className}
+        `}
+      >
       {/* Navigation Toggle Button */}
       <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex justify-end">
         {/* Hamburger Toggle Button */}
@@ -360,7 +393,7 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
                       isCollapsed={isCollapsed}
                       hasChildren={hasChildren}
                       isExpanded={isExpanded}
-                      onClick={() => onSectionChange(item.id)}
+                      onClick={() => handleSectionChange(item.id)}
                       onToggleExpand={() => toggleGroupExpansion(groupKey)}
                     />
 
@@ -374,7 +407,7 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
                               isActive={currentSection === child.id}
                               isCollapsed={false}
                               isChild={true}
-                              onClick={() => onSectionChange(child.id)}
+                              onClick={() => handleSectionChange(child.id)}
                             />
                           </li>
                         ))}
@@ -398,6 +431,7 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
         </div>
       )}
     </nav>
+    </>
   );
 };
 

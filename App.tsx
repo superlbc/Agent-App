@@ -69,6 +69,7 @@ const AppContent: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { user } = useAuth();
   const {
@@ -472,12 +473,23 @@ const AppContent: React.FC = () => {
         onReset={handleResetData}
       />
 
+      {/* Mobile Menu Button (Hamburger) - Only visible on mobile */}
+      <button
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="fixed top-4 left-4 z-30 lg:hidden p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+        aria-label="Open navigation menu"
+      >
+        <Icon name="menu" className="w-6 h-6" />
+      </button>
+
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Navigation Sidebar */}
         <CollapsibleNavigation
           currentSection={currentSection}
           onSectionChange={setCurrentSection}
+          isMobileOpen={isMobileMenuOpen}
+          onMobileClose={() => setIsMobileMenuOpen(false)}
         />
 
         {/* Content Area */}
