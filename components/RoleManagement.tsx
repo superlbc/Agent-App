@@ -47,6 +47,9 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
   // View mode state
   const [viewMode, setViewMode] = useState<ViewMode>('roles');
 
+  // Layout mode state
+  const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid');
+
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
@@ -241,10 +244,11 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
       {viewMode === 'roles' && (
         <div className="space-y-4">
           {/* Filters */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-end">
             <div className="flex-1">
               <Input
                 label="Search Roles"
+                id="search-roles"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name, display name, or description..."
@@ -254,93 +258,211 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
             <div className="w-48">
               <Select
                 label="Status"
+                id="filter-status"
                 value={filterActive}
                 onChange={(e) => setFilterActive(e.target.value as 'all' | 'active' | 'inactive')}
+                options={[
+                  { value: 'all', label: 'All Roles' },
+                  { value: 'active', label: 'Active Only' },
+                  { value: 'inactive', label: 'Inactive Only' },
+                ]}
+              />
+            </div>
+            <div className="flex gap-1 border border-gray-300 dark:border-gray-600 rounded-lg p-1">
+              <button
+                onClick={() => setLayoutMode('grid')}
+                className={`p-2 rounded transition-colors ${
+                  layoutMode === 'grid'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title="Grid view"
               >
-                <option value="all">All Roles</option>
-                <option value="active">Active Only</option>
-                <option value="inactive">Inactive Only</option>
-              </Select>
+                <Icon name="grid" className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setLayoutMode('list')}
+                className={`p-2 rounded transition-colors ${
+                  layoutMode === 'list'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title="List view"
+              >
+                <Icon name="list" className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
-          {/* Role Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRoles.map((role) => (
-              <Card key={role.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {role.displayName}
-                      </h3>
-                      {role.isSystemRole && (
-                        <StatusBadge status="info" size="sm">
-                          System
-                        </StatusBadge>
-                      )}
+          {/* Role Cards - Grid View */}
+          {layoutMode === 'grid' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredRoles.map((role) => (
+                <Card key={role.id} className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon name="shield" className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {role.displayName}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {role.name}
+                        </p>
+                        {role.isSystemRole && (
+                          <StatusBadge status="info" size="sm">
+                            System
+                          </StatusBadge>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {role.name}
+                  </div>
+
+                  {role.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                      {role.description}
                     </p>
-                  </div>
-                  <Icon name="shield" className="w-6 h-6 text-blue-500" />
-                </div>
+                  )}
 
-                {role.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                    {role.description}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Icon name="key" className="w-4 h-4" />
-                    <span>{role.permissions.length} permissions</span>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <div className="flex items-center gap-1">
+                      <Icon name="key" className="w-4 h-4" />
+                      <span>{role.permissions.length} permissions</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Icon name="users" className="w-4 h-4" />
+                      <span>0 users</span> {/* TODO: Add user count */}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Icon name="users" className="w-4 h-4" />
-                    <span>0 users</span> {/* TODO: Add user count */}
-                  </div>
-                </div>
 
-                <div className="flex gap-2">
-                  {canManageRoles && !role.isSystemRole && (
-                    <>
+                  <div className="flex gap-2">
+                    {canManageRoles && !role.isSystemRole && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleEditRole(role)}
+                          className="flex-1"
+                        >
+                          <Icon name="edit" className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteRole(role.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Icon name="trash" className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                    {role.isSystemRole && (
                       <Button
-                        variant="secondary"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleEditRole(role)}
                         className="flex-1"
                       >
-                        <Icon name="edit" className="w-4 h-4 mr-1" />
-                        Edit
+                        <Icon name="eye" className="w-4 h-4 mr-1" />
+                        View Details
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteRole(role.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Icon name="trash" className="w-4 h-4" />
-                      </Button>
-                    </>
-                  )}
-                  {role.isSystemRole && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditRole(role)}
-                      className="flex-1"
-                    >
-                      <Icon name="eye" className="w-4 h-4 mr-1" />
-                      View Details
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Role Cards - List View */}
+          {layoutMode === 'list' && (
+            <div className="space-y-3">
+              {filteredRoles.map((role) => (
+                <Card key={role.id} className="p-5 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-6">
+                    {/* Icon */}
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <Icon name="shield" className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {role.displayName}
+                        </h3>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {role.name}
+                        </span>
+                        {role.isSystemRole && (
+                          <StatusBadge status="info" size="sm">
+                            System
+                          </StatusBadge>
+                        )}
+                      </div>
+                      {role.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                          {role.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <Icon name="key" className="w-4 h-4" />
+                        <span className="font-medium">{role.permissions.length}</span>
+                        <span className="text-xs">permissions</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Icon name="users" className="w-4 h-4" />
+                        <span className="font-medium">0</span>
+                        <span className="text-xs">users</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2">
+                      {canManageRoles && !role.isSystemRole && (
+                        <>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleEditRole(role)}
+                          >
+                            <Icon name="edit" className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteRole(role.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Icon name="trash" className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                      {role.isSystemRole && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditRole(role)}
+                        >
+                          <Icon name="eye" className="w-4 h-4 mr-1" />
+                          View Details
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {filteredRoles.length === 0 && (
             <Card className="p-12 text-center">
