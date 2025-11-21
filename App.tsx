@@ -1004,7 +1004,7 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <TourProvider>
-      <RoleProvider>
+      <RoleProvider mockRoles={["ADMIN"]}>
         <DepartmentProvider>
           <PreHireProvider>
             <PackageProvider>
