@@ -25,6 +25,7 @@ interface PreHireListProps {
   onDelete: (preHire: PreHire) => void;
   onView: (preHire: PreHire) => void;
   onAssignPackage: (preHire: PreHire) => void;
+  onMerge?: (preHire: PreHire) => void;
   onCreate: () => void;
   className?: string;
   loading?: boolean;
@@ -56,6 +57,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   onDelete,
   onView,
   onAssignPackage,
+  onMerge,
   onCreate,
   className = '',
   loading = false,
@@ -942,6 +944,19 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                       >
                         <Icon name="package" className="w-4 h-4" />
                       </Button>
+                      {/* Link to Employee button - only show for accepted pre-hires */}
+                      {onMerge && preHire.status === 'accepted' && !preHire.linkedEmployeeId && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onMerge(preHire)}
+                          title="Link to employee record"
+                          aria-label={`Link ${preHire.candidateName} to employee record`}
+                          className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                        >
+                          <Icon name="link" className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
