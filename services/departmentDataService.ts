@@ -4,6 +4,7 @@
 // Loads department and role data from DepartmentGroup.csv
 
 import { ComboboxOption } from '../components/ui/Combobox';
+import { DepartmentRoleData } from '../components/ui/HierarchicalRoleSelector';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -15,6 +16,8 @@ interface DepartmentGroupRow {
   Department: string;
   Role: string;
   Grade: string;
+  GradeGroup: string;
+  Active: string;
   [key: string]: string; // Allow other CSV columns
 }
 
@@ -26,23 +29,47 @@ let departmentGroupsCache: ComboboxOption[] | null = null;
 let rolesCache: ComboboxOption[] | null = null;
 
 /**
- * Parse CSV text into rows
+ * Parse CSV text into rows (handles quoted fields with commas)
  */
 function parseCSV(csvText: string): DepartmentGroupRow[] {
   const lines = csvText.trim().split('\n');
   if (lines.length === 0) return [];
 
-  // Parse header
-  const headers = lines[0].split(',').map((h) => h.trim());
+  // Parse header (skip BOM if present)
+  const headerLine = lines[0].replace(/^\uFEFF/, '');
+  const headers = headerLine.split(',').map((h) => h.trim());
 
   // Parse rows
   const rows: DepartmentGroupRow[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map((v) => v.trim());
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    // Handle CSV parsing with quoted fields
+    const values: string[] = [];
+    let currentValue = '';
+    let insideQuotes = false;
+
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+
+      if (char === '"') {
+        insideQuotes = !insideQuotes;
+      } else if (char === ',' && !insideQuotes) {
+        values.push(currentValue.trim());
+        currentValue = '';
+      } else {
+        currentValue += char;
+      }
+    }
+    values.push(currentValue.trim());
+
+    // Create row object
     const row: any = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
     });
+
     rows.push(row as DepartmentGroupRow);
   }
 
@@ -139,6 +166,48 @@ export async function getRoles(): Promise<ComboboxOption[]> {
   } catch (error) {
     console.error('[DepartmentDataService] Error loading roles:', error);
     // Return empty array on error
+    return [];
+  }
+}
+
+/**
+ * Get hierarchical department/role data for HierarchicalRoleSelector
+ */
+export async function getHierarchicalData(): Promise<DepartmentRoleData[]> {
+  try {
+    // Fetch CSV file
+    const response = await fetch('/SQL_sample_files/DepartmentGroup.csv');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch DepartmentGroup.csv: ${response.statusText}`);
+    }
+
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
+
+    // Filter and map to hierarchical data
+    const data: DepartmentRoleData[] = rows
+      .filter((row) => {
+        // Filter out non-billable departments and placeholder roles
+        return (
+          row.Active === '1' &&
+          row.DepartmentGroup &&
+          row.DepartmentGroup !== 'zNon-bill - Admin/Office Svcs' &&
+          row.RoleWithoutNumbers &&
+          !row.RoleWithoutNumbers.startsWith('z40')
+        );
+      })
+      .map((row) => ({
+        departmentGroup: row.DepartmentGroup.trim(),
+        department: row.Department.trim(),
+        role: row.RoleWithoutNumbers.trim(),
+        gradeGroup: row.GradeGroup?.trim() || undefined,
+        grade: row.Grade?.trim() || undefined,
+      }));
+
+    console.log(`[DepartmentDataService] Loaded ${data.length} active department/role combinations`);
+    return data;
+  } catch (error) {
+    console.error('[DepartmentDataService] Error loading hierarchical data:', error);
     return [];
   }
 }
