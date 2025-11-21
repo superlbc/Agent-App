@@ -30,7 +30,7 @@ interface PackageBuilderProps {
   className?: string;
 }
 
-type Tab = 'details' | 'hardware' | 'software' | 'licenses' | 'review';
+type Tab = 'details' | 'hardware' | 'software' | 'review';
 
 // ============================================================================
 // COMPONENT
@@ -72,12 +72,12 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
   const [selectedHardware, setSelectedHardware] = useState<Hardware[]>(
     existingPackage?.hardware || []
   );
-  const [selectedSoftware, setSelectedSoftware] = useState<Software[]>(
-    existingPackage?.software || []
-  );
-  const [selectedLicenses, setSelectedLicenses] = useState<Software[]>(
-    existingPackage?.licenses || []
-  );
+  const [selectedSoftware, setSelectedSoftware] = useState<Software[]>(() => {
+    // Merge software and licenses from existing package
+    const software = existingPackage?.software || [];
+    const licenses = existingPackage?.licenses || [];
+    return [...software, ...licenses];
+  });
 
   // ============================================================================
   // EFFECTS
@@ -132,23 +132,14 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
       }
       return sum;
     }, 0);
-    const licensesCost = selectedLicenses.reduce((sum, item) => {
-      if (item.renewalFrequency === 'monthly') {
-        return sum + (item.cost || 0);
-      } else if (item.renewalFrequency === 'annual') {
-        return sum + (item.cost || 0) / 12;
-      }
-      return sum;
-    }, 0);
 
     return {
       hardware: hardwareCost,
       software: softwareCost,
-      licenses: licensesCost,
-      monthlyTotal: softwareCost + licensesCost,
-      total: hardwareCost + softwareCost + licensesCost,
+      monthlyTotal: softwareCost,
+      total: hardwareCost + softwareCost,
     };
-  }, [selectedHardware, selectedSoftware, selectedLicenses]);
+  }, [selectedHardware, selectedSoftware]);
 
   // ============================================================================
   // HANDLERS
@@ -190,7 +181,6 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
       departmentTarget,
       hardware: selectedHardware,
       software: selectedSoftware,
-      licenses: selectedLicenses,
       createdBy: existingPackage?.createdBy || 'Current User',
       createdDate: existingPackage?.createdDate || new Date(),
       lastModified: new Date(),
@@ -486,68 +476,6 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
     </div>
   );
 
-  const renderLicensesTab = () => (
-    <div className="space-y-6">
-      {/* Selected Licenses */}
-      {selectedLicenses.length > 0 && (
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Selected Additional Licenses ({selectedLicenses.length})
-          </h3>
-          <div className="space-y-2">
-            {selectedLicenses.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">{item.vendor}</p>
-                </div>
-                {item.cost !== undefined && (
-                  <div className="text-right mx-4">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      ${item.cost.toFixed(2)}
-                    </span>
-                    {item.renewalFrequency && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        /{item.renewalFrequency === 'monthly' ? 'mo' : 'yr'}
-                      </span>
-                    )}
-                  </div>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSelectedLicenses((prev) => prev.filter((l) => l.id !== item.id))
-                  }
-                  className="text-red-600 dark:text-red-400"
-                >
-                  <Icon name="trash" className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Licenses Catalog (using SoftwareCatalog) */}
-      <SoftwareCatalog
-        software={software.filter((s) => s.licenseType !== 'perpetual')}
-        selectedItems={selectedLicenses}
-        onSelect={(item) => setSelectedLicenses((prev) => [...prev, item])}
-        onDeselect={(item) =>
-          setSelectedLicenses((prev) => prev.filter((l) => l.id !== item.id))
-        }
-        multiSelect={true}
-        showCost={true}
-      />
-    </div>
-  );
-
   const renderReviewTab = () => (
     <div className="space-y-5">
       {/* Package Summary */}
@@ -607,15 +535,6 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
               {selectedSoftware.length}
             </p>
           </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon name="key" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Licenses</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {selectedLicenses.length}
-            </p>
-          </div>
         </div>
       </Card>
 
@@ -637,14 +556,6 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
               ${costs.software.toFixed(2)}/mo
             </span>
           </div>
-          {selectedLicenses.length > 0 && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Licenses (monthly)</span>
-              <span className="font-medium text-gray-900 dark:text-white">
-                ${costs.licenses.toFixed(2)}/mo
-              </span>
-            </div>
-          )}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <div className="flex items-center justify-between">
               <span className="text-base font-semibold text-gray-900 dark:text-white">
@@ -693,15 +604,9 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
     },
     {
       id: 'software',
-      label: 'Software',
+      label: 'Software & Licenses',
       icon: 'package',
       count: selectedSoftware.length,
-    },
-    {
-      id: 'licenses',
-      label: 'Licenses',
-      icon: 'key',
-      count: selectedLicenses.length,
     },
     { id: 'review', label: 'Review', icon: 'eye' },
   ];
@@ -792,7 +697,6 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
         {activeTab === 'details' && renderDetailsTab()}
         {activeTab === 'hardware' && renderHardwareTab()}
         {activeTab === 'software' && renderSoftwareTab()}
-        {activeTab === 'licenses' && renderLicensesTab()}
         {activeTab === 'review' && renderReviewTab()}
       </div>
 

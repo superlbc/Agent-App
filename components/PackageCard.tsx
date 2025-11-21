@@ -254,20 +254,9 @@ export const PackageCard: React.FC<PackageCardProps> = ({
               className="w-4 h-4 text-gray-500 dark:text-gray-400"
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>{pkg.software.length}</strong> Software
+              <strong>{pkg.software.length}</strong> Software & Licenses
             </span>
           </div>
-          {pkg.licenses.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Icon
-                name="key"
-                className="w-4 h-4 text-gray-500 dark:text-gray-400"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                <strong>{pkg.licenses.length}</strong> Licenses
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Footer: Cost Breakdown & Date */}
