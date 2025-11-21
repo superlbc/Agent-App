@@ -9,6 +9,7 @@ interface OutputPanelProps {
   onDelete: (preHire: PreHire) => void;
   onView: (preHire: PreHire) => void;
   onAssignPackage: (preHire: PreHire) => void;
+  onMerge: (preHire: PreHire) => void;
   onCreate: () => void;
   loading?: boolean;
 }
@@ -19,6 +20,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   onDelete,
   onView,
   onAssignPackage,
+  onMerge,
   onCreate,
   loading = false,
 }) => {
@@ -35,6 +37,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
           onDelete={onDelete}
           onView={onView}
           onAssignPackage={onAssignPackage}
+          onMerge={onMerge}
           onCreate={onCreate}
           loading={loading}
         />

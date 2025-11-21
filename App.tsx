@@ -36,6 +36,7 @@ import { ApproveConfirmModal } from './components/ApproveConfirmModal';
 import { RejectConfirmModal } from './components/RejectConfirmModal';
 import { PreHireDetailModal } from './components/PreHireDetailModal';
 import { PreHireForm } from './components/PreHireForm';
+import EmployeeLinkingModal from './components/EmployeeLinkingModal';
 import { DEFAULT_API_CONFIG } from './constants';
 import { Package, ApprovalRequest, HelixTicket } from './types';
 import { CollapsibleNavigation, NavigationSection } from './components/CollapsibleNavigation';
@@ -111,6 +112,9 @@ const AppContent: React.FC = () => {
   const [showPackageBuilder, setShowPackageBuilder] = useState(false);
   const [showPackageLibrary, setShowPackageLibrary] = useState(false);
   const [isCloning, setIsCloning] = useState(false); // Track if we're cloning a package
+
+  // Employee Linking Modal State
+  const [linkingPreHire, setLinkingPreHire] = useState<PreHire | null>(null);
 
   // Approval & Helix Management
   const {
@@ -246,6 +250,28 @@ const AppContent: React.FC = () => {
   const handleCreatePreHire = () => {
     setEditingPreHire(null); // Clear any editing pre-hire
     setShowPreHireForm(true); // Show the form modal
+  };
+
+  const handleMergePreHire = (preHire: PreHire) => {
+    setLinkingPreHire(preHire);
+  };
+
+  const handleLinkEmployee = (employeeId: string, linkConfidence: 'auto' | 'manual' | 'verified') => {
+    if (linkingPreHire) {
+      // Update the pre-hire record with linked employee ID and change status to 'linked'
+      updatePreHire(linkingPreHire.id, {
+        linkedEmployeeId: employeeId,
+        status: 'linked',
+      });
+
+      addToast(
+        `Pre-hire ${linkingPreHire.candidateName} linked to employee ${employeeId}`,
+        'success'
+      );
+
+      // Close the modal
+      setLinkingPreHire(null);
+    }
   };
 
   const handlePreHireFormSubmit = (preHireData: Partial<PreHire>) => {
@@ -518,6 +544,7 @@ const AppContent: React.FC = () => {
                 onDelete={handleDeletePreHire}
                 onView={handleViewPreHire}
                 onAssignPackage={handleAssignPackage}
+                onMerge={handleMergePreHire}
                 onCreate={handleCreatePreHire}
                 loading={isLoadingData}
               />
@@ -977,6 +1004,15 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Employee Linking Modal */}
+      {linkingPreHire && (
+        <EmployeeLinkingModal
+          preHire={linkingPreHire}
+          onLink={handleLinkEmployee}
+          onClose={() => setLinkingPreHire(null)}
+        />
       )}
 
       {/* Floating Components */}
