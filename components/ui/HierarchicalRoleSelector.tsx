@@ -45,11 +45,13 @@ export const HierarchicalRoleSelector: React.FC<HierarchicalRoleSelectorProps> =
   className = '',
   label,
   required = false,
+  multiSelect = false,
 }) => {
   // State
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [tempSelections, setTempSelections] = useState<RoleSelection[]>([]);
 
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
