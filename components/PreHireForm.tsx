@@ -9,6 +9,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
+import { Icon } from './ui/Icon';
 import { FreezePeriodAlert, isInFreezePeriod } from './ui/FreezePeriodBanner';
 import { HierarchicalRoleSelector, RoleSelection } from './ui/HierarchicalRoleSelector';
 import { ManagerSelector, ManagerProfile } from './ManagerSelector';
@@ -17,6 +18,7 @@ import {
 } from '../constants';
 import { mockPackages } from '../utils/mockData';
 import { getHierarchicalData } from '../services/departmentDataService';
+import { useRole } from '../contexts/RoleContext';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -58,6 +60,12 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
   className = '',
 }) => {
   const isEditMode = !!preHire;
+  const { hasPermission } = useRole();
+
+  // Permission checks
+  const canCreate = hasPermission('PREHIRE_CREATE');
+  const canUpdate = hasPermission('PREHIRE_UPDATE');
+  const hasRequiredPermission = isEditMode ? canUpdate : canCreate;
 
   // ============================================================================
   // STATE
@@ -254,6 +262,26 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
           </p>
         </div>
 
+        {/* Permission Check Alert */}
+        {!hasRequiredPermission && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start gap-3">
+            <Icon name="alert-triangle" className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
+                Insufficient Permissions
+              </h4>
+              <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                {isEditMode
+                  ? 'You do not have permission to update pre-hire records. Required permission: PREHIRE_UPDATE'
+                  : 'You do not have permission to create pre-hire records. Required permission: PREHIRE_CREATE'}
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+                Contact your administrator if you need access to this feature.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Candidate Information */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
@@ -405,7 +433,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
           <Button
             type="submit"
             variant="primary"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !hasRequiredPermission}
           >
             {isEditMode ? 'Update Pre-hire' : 'Create Pre-hire'}
           </Button>
