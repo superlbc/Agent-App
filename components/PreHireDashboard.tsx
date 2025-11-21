@@ -1,7 +1,7 @@
 // ============================================================================
-// PRE-HIRE DASHBOARD COMPONENT
+// PRE-HIRE DASHBOARD COMPONENT (COMPACT VERSION)
 // ============================================================================
-// Overview dashboard showing pre-hire statistics and key metrics
+// Compact dashboard showing pre-hire statistics in a single row
 
 import React, { useMemo } from 'react';
 import { Icon } from './ui/Icon';
@@ -13,6 +13,7 @@ import { PreHire } from '../types';
 
 interface PreHireDashboardProps {
   preHires: PreHire[];
+  onCreate?: () => void;
 }
 
 interface StatCard {
@@ -28,20 +29,15 @@ interface StatCard {
 // COMPONENT
 // ============================================================================
 
-export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({ preHires }) => {
+export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
+  preHires,
+  onCreate
+}) => {
   // Calculate statistics
   const stats = useMemo(() => {
     const total = preHires.length;
-    const byStatus = {
-      candidate: preHires.filter((p) => p.status === 'candidate').length,
-      offered: preHires.filter((p) => p.status === 'offered').length,
-      accepted: preHires.filter((p) => p.status === 'accepted').length,
-      linked: preHires.filter((p) => p.status === 'linked').length,
-      cancelled: preHires.filter((p) => p.status === 'cancelled').length,
-    };
-
+    const accepted = preHires.filter((p) => p.status === 'accepted').length;
     const withPackage = preHires.filter((p) => p.assignedPackage).length;
-    const withoutPackage = total - withPackage;
 
     // Upcoming starts (next 30 days)
     const now = new Date();
@@ -51,27 +47,18 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({ preHires }) 
       return startDate >= now && startDate <= thirtyDaysFromNow && p.status !== 'cancelled';
     }).length;
 
-    // Recent activity (last 7 days)
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const recentActivity = preHires.filter((p) => {
-      const createdDate = new Date(p.createdDate);
-      return createdDate >= sevenDaysAgo;
-    }).length;
-
     return {
       total,
-      byStatus,
+      accepted,
       withPackage,
-      withoutPackage,
       upcomingStarts,
-      recentActivity,
     };
   }, [preHires]);
 
-  // Define stat cards
+  // Define compact stat cards (4 stats + 1 action)
   const statCards: StatCard[] = [
     {
-      label: 'Total Pre-hires',
+      label: 'Total',
       value: stats.total,
       icon: 'users',
       color: 'text-blue-600 dark:text-blue-400',
@@ -80,14 +67,14 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({ preHires }) 
     },
     {
       label: 'Accepted',
-      value: stats.byStatus.accepted,
+      value: stats.accepted,
       icon: 'check-circle',
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-50 dark:bg-green-900/30',
       description: 'Offers accepted',
     },
     {
-      label: 'Upcoming Starts',
+      label: 'Starting Soon',
       value: stats.upcomingStarts,
       icon: 'calendar',
       color: 'text-orange-600 dark:text-orange-400',
@@ -95,154 +82,59 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({ preHires }) 
       description: 'Starting in next 30 days',
     },
     {
-      label: 'Packages Assigned',
+      label: 'Packages',
       value: stats.withPackage,
       icon: 'package',
       color: 'text-purple-600 dark:text-purple-400',
       bgColor: 'bg-purple-50 dark:bg-purple-900/30',
-      description: 'Equipment packages ready',
-    },
-    {
-      label: 'Linked to Employees',
-      value: stats.byStatus.linked,
-      icon: 'link',
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bgColor: 'bg-indigo-50 dark:bg-indigo-900/30',
-      description: 'Connected to employee records',
-    },
-    {
-      label: 'Recent Activity',
-      value: stats.recentActivity,
-      icon: 'clock',
-      color: 'text-teal-600 dark:text-teal-400',
-      bgColor: 'bg-teal-50 dark:bg-teal-900/30',
-      description: 'Added in last 7 days',
+      description: 'Equipment packages assigned',
     },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Pre-hire Management Dashboard
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Overview of pre-hire candidates and onboarding status
-        </p>
-      </div>
-
-      {/* Statistics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      {/* Compact Statistics Row */}
+      <div className="flex items-center gap-4 px-6 py-4">
+        {/* Stat Cards */}
         {statCards.map((card) => (
           <div
             key={card.label}
-            className={`${card.bgColor} rounded-lg p-6 border border-gray-200 dark:border-gray-700`}
+            className="group relative flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-help flex-1"
+            title={card.description}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {card.label}
-                </p>
-                <p className={`text-3xl font-bold mt-2 ${card.color}`}>
-                  {card.value}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  {card.description}
-                </p>
-              </div>
-              <div className={`${card.bgColor} p-3 rounded-full`}>
-                <Icon name={card.icon} className={`w-6 h-6 ${card.color}`} />
-              </div>
+            {/* Icon */}
+            <div className={`${card.bgColor} p-2 rounded-lg`}>
+              <Icon name={card.icon} className={`w-5 h-5 ${card.color}`} />
+            </div>
+
+            {/* Value & Label */}
+            <div className="flex-1 min-w-0">
+              <p className={`text-2xl font-bold ${card.color} leading-none`}>
+                {card.value}
+              </p>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mt-1 truncate">
+                {card.label}
+              </p>
+            </div>
+
+            {/* Tooltip (hidden by default, shows on hover) */}
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none">
+              {card.description}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
             </div>
           </div>
         ))}
-      </div>
 
-      {/* Status Breakdown */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Status Breakdown
-        </h3>
-        <div className="space-y-3">
-          {[
-            {
-              status: 'Candidate',
-              count: stats.byStatus.candidate,
-              color: 'bg-gray-400',
-              percentage: (stats.byStatus.candidate / stats.total) * 100 || 0,
-            },
-            {
-              status: 'Offered',
-              count: stats.byStatus.offered,
-              color: 'bg-blue-500',
-              percentage: (stats.byStatus.offered / stats.total) * 100 || 0,
-            },
-            {
-              status: 'Accepted',
-              count: stats.byStatus.accepted,
-              color: 'bg-green-500',
-              percentage: (stats.byStatus.accepted / stats.total) * 100 || 0,
-            },
-            {
-              status: 'Linked',
-              count: stats.byStatus.linked,
-              color: 'bg-indigo-500',
-              percentage: (stats.byStatus.linked / stats.total) * 100 || 0,
-            },
-            {
-              status: 'Cancelled',
-              count: stats.byStatus.cancelled,
-              color: 'bg-red-500',
-              percentage: (stats.byStatus.cancelled / stats.total) * 100 || 0,
-            },
-          ].map((item) => (
-            <div key={item.status}>
-              <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-gray-700 dark:text-gray-300">
-                  {item.status}
-                </span>
-                <span className="text-gray-600 dark:text-gray-400">
-                  {item.count} ({item.percentage.toFixed(0)}%)
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className={`${item.color} h-2 rounded-full transition-all duration-300`}
-                  style={{ width: `${item.percentage}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 rounded-lg border border-primary-200 dark:border-primary-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Quick Actions
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Common tasks for managing pre-hires
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <Icon name="plus" className="w-4 h-4" />
-            Add Pre-hire
+        {/* Create Pre-hire Button */}
+        {onCreate && (
+          <button
+            onClick={onCreate}
+            className="flex items-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0"
+          >
+            <Icon name="plus" className="w-5 h-5" />
+            <span className="text-sm">Create</span>
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <Icon name="package" className="w-4 h-4" />
-            Assign Packages
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <Icon name="link" className="w-4 h-4" />
-            Link Employees
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <Icon name="download" className="w-4 h-4" />
-            Export Report
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -256,5 +148,8 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({ preHires }) 
  * import { PreHireDashboard } from './components/PreHireDashboard';
  * import { mockPreHires } from './utils/mockData';
  *
- * <PreHireDashboard preHires={mockPreHires} />
+ * <PreHireDashboard
+ *   preHires={mockPreHires}
+ *   onCreate={() => console.log('Create pre-hire')}
+ * />
  */

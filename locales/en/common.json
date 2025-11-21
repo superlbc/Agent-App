@@ -1,12 +1,12 @@
 {
   "app": {
-    "title": "Meeting Notes Generator",
+    "title": "Employee Onboarding System",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success"
   },
   "header": {
-    "title": "Meeting Notes Generator",
+    "title": "Employee Onboarding System",
     "adminBadge": "Admin",
     "menu": {
       "toggleTheme": "Toggle Theme",
@@ -138,19 +138,19 @@
   },
   "about": {
     "title": "About",
-    "appName": "Meeting Notes Generator",
+    "appName": "Employee Onboarding System",
     "version": "Version {{version}} Beta",
     "developedBy": "Developed By",
     "organization": "Organization",
     "orgName": "Momentum Global Technology Team",
     "initiative": "AI Literacy Program Initiative",
-    "copyright": "© {{year}} Meeting Notes Generator"
+    "copyright": "© {{year}} Employee Onboarding System"
   },
   "auth": {
     "signIn": {
       "welcomeTo": "Welcome to",
-      "appName": "Meeting Notes Generator",
-      "tagline": "Drive consistency and impact in every meeting.",
+      "appName": "Employee Onboarding System",
+      "tagline": "Streamline employee onboarding from pre-hire to day one.",
       "instruction": "Please sign in with your Momentum account to continue.",
       "button": "Sign In",
       "popupBlocked": {

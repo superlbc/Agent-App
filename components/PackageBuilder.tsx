@@ -23,6 +23,7 @@ interface PackageBuilderProps {
   package?: Package; // For editing
   hardware: Hardware[]; // Available hardware
   software: Software[]; // Available software
+  isCloning?: boolean; // Flag to indicate cloning mode
   onSave: (pkg: Partial<Package>) => void;
   onCancel: () => void;
   className?: string;
@@ -38,6 +39,7 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
   package: existingPackage,
   hardware,
   software,
+  isCloning = false,
   onSave,
   onCancel,
   className = '',
@@ -252,9 +254,12 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
 
       {/* Target Roles */}
       <Card className="p-5">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Target Roles * ({selectedRoles.length} selected)
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <Icon name="briefcase" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Target Roles * ({selectedRoles.length} selected)
+          </h3>
+        </div>
         <div className="flex flex-wrap gap-2">
           {ROLES.map((role) => (
             <button
@@ -278,9 +283,12 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
 
       {/* Target Departments */}
       <Card className="p-5">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Target Departments * ({selectedDepartments.length} selected)
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <Icon name="building" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Target Departments * ({selectedDepartments.length} selected)
+          </h3>
+        </div>
         <div className="flex flex-wrap gap-2">
           {DEPARTMENTS.map((dept) => (
             <button
@@ -680,6 +688,26 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Cloning Banner */}
+      {isCloning && existingPackage && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-start gap-3">
+            <Icon name="copy" className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Cloning Package
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                You are creating a new package based on: <span className="font-semibold">{existingPackage.name.replace(' - Copy', '')}</span>
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                All settings and items have been pre-filled. You can modify them before saving.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto">

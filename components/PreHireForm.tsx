@@ -7,16 +7,16 @@ import React, { useState, useEffect } from 'react';
 import { PreHire, Package } from '../types';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
+import { Combobox, ComboboxOption } from './ui/Combobox';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { FreezePeriodAlert, isInFreezePeriod } from './ui/FreezePeriodBanner';
 import {
-  ROLES,
-  DEPARTMENTS,
   PRE_HIRE_STATUSES,
   COMMON_HIRING_MANAGERS,
 } from '../constants';
 import { mockPackages } from '../utils/mockData';
+import { getDepartmentGroups, getRoles } from '../services/departmentDataService';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -82,9 +82,31 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedPackages, setSuggestedPackages] = useState<Package[]>([]);
 
+  // Department and role options from CSV
+  const [departmentOptions, setDepartmentOptions] = useState<ComboboxOption[]>([]);
+  const [roleOptions, setRoleOptions] = useState<ComboboxOption[]>([]);
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
+
+  // Load department and role options from CSV on mount
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [departments, roles] = await Promise.all([
+          getDepartmentGroups(),
+          getRoles(),
+        ]);
+        setDepartmentOptions(departments);
+        setRoleOptions(roles);
+      } catch (error) {
+        console.error('Error loading department/role options:', error);
+      }
+    };
+
+    loadOptions();
+  }, []);
 
   // Auto-suggest packages based on role
   useEffect(() => {
@@ -264,24 +286,24 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
+            <Combobox
               label="Role"
               name="role"
               value={formData.role}
-              onChange={(e) => handleChange('role', e.target.value)}
-              options={ROLES.map((role) => ({ value: role, label: role }))}
-              placeholder="Select role"
+              onChange={(value) => handleChange('role', value)}
+              options={roleOptions}
+              placeholder="Search roles..."
               required
               error={errors.role}
             />
 
-            <Select
+            <Combobox
               label="Department"
               name="department"
               value={formData.department}
-              onChange={(e) => handleChange('department', e.target.value)}
-              options={DEPARTMENTS.map((dept) => ({ value: dept, label: dept }))}
-              placeholder="Select department"
+              onChange={(value) => handleChange('department', value)}
+              options={departmentOptions}
+              placeholder="Search departments..."
               required
               error={errors.department}
             />

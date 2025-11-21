@@ -1,0 +1,11 @@
+Candidate Name,Email,Role,Department,Start Date,Hiring Manager,Status,Package Assigned,In Freeze Period
+"Emily Rodriguez","emily.rodriguez@momentumww.com","Project Manager","STR","Nov 20, 2025","John Davis","offered","Project Manager Standard","Yes"
+"Amanda Brown","amanda.brown@momentumww.com","Senior Project Manager","PM","Nov 22, 2025","Mark Johnson","candidate","Project Manager Standard","Yes"
+"David Kim","david.kim@momentumww.com","Full Stack Developer","IPCT","Nov 25, 2025","Steve Sanderson","linked","Developer Standard","Yes"
+"Christopher Lee","christopher.lee@momentumww.com","Software Engineer","Global Technology","Nov 28, 2025","Steve Sanderson","accepted","Developer Standard","Yes"
+"Jane Smith","jane.smith@momentumww.com","XD Designer","Creative","Dec 1, 2025","Sarah Johnson","linked","XD Designer Standard","Yes"
+"Robert Taylor","robert.taylor@momentumww.com","Motion Designer","IPTC","Dec 10, 2025","Lisa Anderson","accepted","XD Designer Standard","Yes"
+"Michael Chen","michael.chen@momentumww.com","Senior XD Designer","Creative","Dec 15, 2025","Sarah Johnson","accepted","XD Designer Premium","Yes"
+"Maria Garcia","maria.garcia@momentumww.com","XD Designer","Creative","Jan 8, 2026","Sarah Johnson","offered","XD Designer Standard","No"
+"Sarah Williams","sarah.williams@momentumww.com","Business Analyst","STR","Jan 15, 2026","Patricia Martinez","accepted","Business Analyst Standard","No"
+"James Wilson","james.wilson@momentumww.com","Data Analyst","Operations","Jan 20, 2026","Patricia Martinez","accepted","Business Analyst Standard","No"

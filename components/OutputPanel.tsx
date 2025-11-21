@@ -22,15 +22,11 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
 }) => {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Dashboard Overview */}
-        <PreHireDashboard preHires={preHires} />
+      {/* Compact Dashboard - Sticky Header */}
+      <PreHireDashboard preHires={preHires} onCreate={onCreate} />
 
-        {/* Divider */}
-        <div className="border-t border-gray-200 dark:border-gray-700 my-6" />
-
-        {/* Pre-hire List */}
+      {/* Pre-hire List - Main Content */}
+      <div className="flex-1 overflow-y-auto p-6">
         <PreHireList
           preHires={preHires}
           onEdit={onEdit}

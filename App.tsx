@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
-import { InputPanel } from './components/InputPanel';
 import { OutputPanel } from './components/OutputPanel';
 import { SettingsDrawer } from './components/SettingsDrawer';
 import { HelpModal } from './components/HelpModal';
@@ -35,10 +34,12 @@ import { HelixTicketDetailModal } from './components/HelixTicketDetailModal';
 import { ApproveConfirmModal } from './components/ApproveConfirmModal';
 import { RejectConfirmModal } from './components/RejectConfirmModal';
 import { PreHireDetailModal } from './components/PreHireDetailModal';
+import { PreHireForm } from './components/PreHireForm';
 import { DEFAULT_API_CONFIG } from './constants';
 import { Package, ApprovalRequest, HelixTicket } from './types';
-import { Navigation, NavigationSection } from './components/Navigation';
+import { CollapsibleNavigation, NavigationSection } from './components/CollapsibleNavigation';
 import HardwareInventory from './components/HardwareInventory';
+import SoftwareInventory from './components/SoftwareInventory';
 import { LicensePoolDashboard } from './components/LicensePoolDashboard';
 import { RefreshCalendar } from './components/RefreshCalendar';
 import { RefreshFinanceView } from './components/RefreshFinanceView';
@@ -52,6 +53,7 @@ import {
   mockEmployees,
   mockFreezePeriodNotifications,
   mockPreHires,
+  mockHelixTickets,
 } from './utils/mockData';
 
 const AppContent: React.FC = () => {
@@ -71,7 +73,7 @@ const AppContent: React.FC = () => {
   const { user } = useAuth();
   const {
     preHires,
-    editingPreHire,
+    editingPreHire: contextEditingPreHire,
     createPreHire,
     updatePreHire,
     deletePreHire,
@@ -89,7 +91,6 @@ const AppContent: React.FC = () => {
     createPackage,
     updatePackage,
     deletePackage,
-    duplicatePackage,
     startEdit: startEditPackage,
     cancelEdit: cancelEditPackage,
     startView: startViewPackage,
@@ -98,13 +99,15 @@ const AppContent: React.FC = () => {
 
   // Pre-hire Modal States
   const [viewingPreHire, setViewingPreHire] = useState<PreHire | null>(null);
-  const [triggerFormOpen, setTriggerFormOpen] = useState<number>(0);
+  const [showPreHireForm, setShowPreHireForm] = useState(false);
+  const [editingPreHire, setEditingPreHire] = useState<PreHire | null>(null);
 
   // Package Modal States
   const [showPackageAssignmentModal, setShowPackageAssignmentModal] = useState(false);
   const [assigningPreHire, setAssigningPreHire] = useState<PreHire | null>(null);
   const [showPackageBuilder, setShowPackageBuilder] = useState(false);
   const [showPackageLibrary, setShowPackageLibrary] = useState(false);
+  const [isCloning, setIsCloning] = useState(false); // Track if we're cloning a package
 
   // Approval & Helix Management
   const {
@@ -151,11 +154,10 @@ const AppContent: React.FC = () => {
 
   // Version check for automatic update detection
   const {
-    hasUpdate,
+    updateAvailable,
     currentVersion,
     serverVersion,
     dismissUpdate,
-    refreshForUpdate
   } = useVersionCheck();
 
   // Apply dark mode class to document
@@ -170,15 +172,15 @@ const AppContent: React.FC = () => {
   // Track user login (once per session)
   useEffect(() => {
     if (user && !sessionStorage.getItem('loginTracked')) {
-      const browserContext = getBrowserContext();
+      const browserContext = getBrowserContext(isDarkMode);
       telemetryService.trackEvent('userLogin', {
-        userName: user.displayName || 'Unknown',
-        userEmail: user.email || 'Unknown',
+        userName: user.name || 'Unknown',
+        userEmail: user.username || 'Unknown',
         ...browserContext,
       });
       sessionStorage.setItem('loginTracked', 'true');
     }
-  }, [user]);
+  }, [user, isDarkMode]);
 
   // Check for first-time user (show welcome modal)
   useEffect(() => {
@@ -212,7 +214,8 @@ const AppContent: React.FC = () => {
   };
 
   const handleEditPreHire = (preHire: PreHire) => {
-    startEdit(preHire);
+    setEditingPreHire(preHire);
+    setShowPreHireForm(true);
   };
 
   const handleDeletePreHire = (preHire: PreHire) => {
@@ -225,9 +228,27 @@ const AppContent: React.FC = () => {
   };
 
   const handleCreatePreHire = () => {
-    // Trigger form opening in InputPanel
-    cancelEdit(); // Make sure we're not in edit mode
-    setTriggerFormOpen(Date.now()); // Trigger form open via timestamp change
+    setEditingPreHire(null); // Clear any editing pre-hire
+    setShowPreHireForm(true); // Show the form modal
+  };
+
+  const handlePreHireFormSubmit = (preHireData: Partial<PreHire>) => {
+    if (editingPreHire) {
+      // Update existing pre-hire
+      updatePreHire(editingPreHire.id, preHireData);
+      addToast(`Pre-hire record for ${preHireData.candidateName} updated`, 'success');
+    } else {
+      // Create new pre-hire
+      createPreHire(preHireData);
+      addToast(`Pre-hire record for ${preHireData.candidateName} created`, 'success');
+    }
+    setShowPreHireForm(false);
+    setEditingPreHire(null);
+  };
+
+  const handlePreHireFormCancel = () => {
+    setShowPreHireForm(false);
+    setEditingPreHire(null);
   };
 
   const handleCancelEdit = () => {
@@ -262,19 +283,23 @@ const AppContent: React.FC = () => {
   };
 
   const handleSavePackage = (packageData: Partial<Package>) => {
-    if (editingPackage) {
-      updatePackage(editingPackage.id, packageData);
-      addToast(`Package "${packageData.name}" updated successfully`, 'success');
-    } else {
+    if (isCloning || !editingPackage) {
+      // Cloning or creating new package
       createPackage(packageData);
       addToast(`Package "${packageData.name}" created successfully`, 'success');
+    } else {
+      // Updating existing package
+      updatePackage(editingPackage.id, packageData);
+      addToast(`Package "${packageData.name}" updated successfully`, 'success');
     }
     setShowPackageBuilder(false);
+    setIsCloning(false);
     cancelEditPackage();
   };
 
   const handleCancelPackageBuilder = () => {
     setShowPackageBuilder(false);
+    setIsCloning(false);
     cancelEditPackage();
   };
 
@@ -287,8 +312,19 @@ const AppContent: React.FC = () => {
   };
 
   const handleDuplicatePackage = (pkg: Package) => {
-    duplicatePackage(pkg.id);
-    addToast(`Package "${pkg.name}" duplicated successfully`, 'success');
+    // Prepare package for cloning with modified name
+    const packageForCloning: Package = {
+      ...pkg,
+      name: `${pkg.name} - Copy`,
+    };
+
+    // Set up cloning mode
+    setIsCloning(true);
+    startEditPackage(packageForCloning);
+    setShowPackageLibrary(false); // Close Package Library if open
+    setShowPackageBuilder(true); // Open PackageBuilder with pre-filled data
+
+    // Don't show toast yet - will show when user saves the cloned package
   };
 
   const handleViewPackage = (pkg: Package) => {
@@ -389,8 +425,8 @@ const AppContent: React.FC = () => {
 
   const handleLogout = () => {
     telemetryService.trackEvent('userLogout', {
-      userName: user?.displayName || 'Unknown',
-      userEmail: user?.email || 'Unknown',
+      userName: user?.name || 'Unknown',
+      userEmail: user?.username || 'Unknown',
     });
     // Logout handled by AuthContext
   };
@@ -417,11 +453,11 @@ const AppContent: React.FC = () => {
   return (
     <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
       {/* Version Update Banner */}
-      {hasUpdate && (
+      {updateAvailable && currentVersion && serverVersion && (
         <VersionUpdateBanner
-          currentVersion={currentVersion}
-          serverVersion={serverVersion}
-          onRefresh={refreshForUpdate}
+          currentVersion={currentVersion.version}
+          serverVersion={serverVersion.version}
+          onRefresh={() => window.location.reload()}
           onDismiss={dismissUpdate}
         />
       )}
@@ -439,7 +475,7 @@ const AppContent: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Navigation Sidebar */}
-        <Navigation
+        <CollapsibleNavigation
           currentSection={currentSection}
           onSectionChange={setCurrentSection}
         />
@@ -448,34 +484,15 @@ const AppContent: React.FC = () => {
         <div className="flex-1 overflow-hidden">
           {/* Pre-hires & Packages Section */}
           {currentSection === 'pre-hires' && (
-            <div className="h-full flex overflow-hidden">
-              {/* Input Panel */}
-              <div className="w-1/3 border-r border-gray-200 dark:border-gray-700 overflow-hidden">
-                <InputPanel
-                  editingPreHire={editingPreHire}
-                  onSavePreHire={handleSavePreHire}
-                  onCancelEdit={handleCancelEdit}
-                  onCreate={handleCreatePreHire}
-                  triggerFormOpen={triggerFormOpen}
-                  onCreatePackage={handleCreatePackage}
-                  onManagePackages={handleManagePackages}
-                  onViewApprovalQueue={handleViewApprovalQueue}
-                  onViewHelixTickets={handleViewHelixTickets}
-                  addToast={addToast}
-                />
-              </div>
-
-              {/* Output Panel */}
-              <div className="w-2/3 overflow-hidden">
-                <OutputPanel
-                  preHires={preHires}
-                  onEdit={handleEditPreHire}
-                  onDelete={handleDeletePreHire}
-                  onView={handleViewPreHire}
-                  onAssignPackage={handleAssignPackage}
-                  onCreate={handleCreatePreHire}
-                />
-              </div>
+            <div className="h-full overflow-hidden relative">
+              <OutputPanel
+                preHires={preHires}
+                onEdit={handleEditPreHire}
+                onDelete={handleDeletePreHire}
+                onView={handleViewPreHire}
+                onAssignPackage={handleAssignPackage}
+                onCreate={handleCreatePreHire}
+              />
             </div>
           )}
 
@@ -492,8 +509,83 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
+          {/* Software Inventory Section */}
+          {currentSection === 'software-inventory' && (
+            <div className="h-full overflow-auto p-6">
+              <SoftwareInventory
+                initialSoftware={mockSoftware}
+                onSoftwareChange={(updatedSoftware) => {
+                  console.log('Software updated:', updatedSoftware);
+                  addToast('Software inventory updated', 'success');
+                }}
+              />
+            </div>
+          )}
+
           {/* License Pool Dashboard Section */}
           {currentSection === 'license-pools' && (
+            <div className="h-full overflow-auto p-6">
+              <LicensePoolDashboard
+                licenses={mockSoftware}
+                onAssignLicense={(license) => {
+                  console.log('Assign license:', license);
+                  addToast(`Assigning ${license.name}...`, 'success');
+                }}
+                onViewAssignments={(license) => {
+                  console.log('View assignments for:', license);
+                  addToast(`Viewing assignments for ${license.name}`, 'success');
+                }}
+                onEditLicense={(license) => {
+                  console.log('Edit license:', license);
+                  addToast(`Editing ${license.name}...`, 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Manage Packages Section */}
+          {currentSection === 'manage-packages' && (
+            <div className="h-full overflow-auto p-6">
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          )}
+
+          {/* Packages > Hardware Section */}
+          {currentSection === 'packages-hardware' && (
+            <div className="h-full overflow-auto p-6">
+              <HardwareInventory
+                initialHardware={mockHardware}
+                onHardwareChange={(updatedHardware) => {
+                  console.log('Hardware updated:', updatedHardware);
+                  addToast('Hardware inventory updated', 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Packages > Software Section */}
+          {currentSection === 'packages-software' && (
+            <div className="h-full overflow-auto p-6">
+              <SoftwareInventory
+                initialSoftware={mockSoftware}
+                onSoftwareChange={(updatedSoftware) => {
+                  console.log('Software updated:', updatedSoftware);
+                  addToast('Software inventory updated', 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Packages > Licenses Section */}
+          {currentSection === 'packages-licenses' && (
             <div className="h-full overflow-auto p-6">
               <LicensePoolDashboard
                 licenses={mockSoftware}
@@ -568,8 +660,8 @@ const AppContent: React.FC = () => {
               <FreezePeriodAdmin
                 freezePeriods={mockFreezePeriods}
                 currentUser={{
-                  name: user?.displayName || 'Unknown User',
-                  email: user?.email || 'unknown@momentumww.com',
+                  name: user?.name || 'Unknown User',
+                  email: user?.username || 'unknown@momentumww.com',
                 }}
                 onCreateFreezePeriod={(period) => {
                   console.log('Create freeze period:', period);
@@ -623,10 +715,11 @@ const AppContent: React.FC = () => {
       <SettingsDrawer
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        addToast={addToast}
         notesAgentId={notesAgentId}
-        onNotesAgentIdChange={setNotesAgentId}
+        setNotesAgentId={setNotesAgentId}
         interrogationAgentId={interrogationAgentId}
-        onInterrogationAgentIdChange={setInterrogationAgentId}
+        setInterrogationAgentId={setInterrogationAgentId}
       />
 
       <HelpModal
@@ -635,7 +728,11 @@ const AppContent: React.FC = () => {
       />
 
       {showWelcomeModal && (
-        <TourWelcomeModal onClose={() => setShowWelcomeModal(false)} />
+        <TourWelcomeModal
+          isOpen={showWelcomeModal}
+          onStart={() => setShowWelcomeModal(false)}
+          onClose={() => setShowWelcomeModal(false)}
+        />
       )}
 
       {/* Package Assignment Modal */}
@@ -660,6 +757,7 @@ const AppContent: React.FC = () => {
                 package={editingPackage || undefined}
                 hardware={hardware}
                 software={software}
+                isCloning={isCloning}
                 onSave={handleSavePackage}
                 onCancel={handleCancelPackageBuilder}
               />
@@ -824,12 +922,30 @@ const AppContent: React.FC = () => {
         />
       )}
 
+      {/* Pre-hire Create/Edit Form Modal */}
+      {showPreHireForm && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
+          <div className="min-h-screen flex items-center justify-center py-8">
+            <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                {editingPreHire ? 'Edit Pre-hire' : 'Create Pre-hire'}
+              </h2>
+              <PreHireForm
+                preHire={editingPreHire || undefined}
+                onSubmit={handlePreHireFormSubmit}
+                onCancel={handlePreHireFormCancel}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Components */}
-      <FeedbackButton apiConfig={apiConfig} />
+      <FeedbackButton />
       <ScrollToTop />
 
-      {/* Tour Controller */}
-      <TourController />
+      {/* Tour Controller - commented out for now, needs proper props */}
+      {/* <TourController /> */}
 
       {/* Toast Notifications */}
       <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2">
@@ -838,6 +954,7 @@ const AppContent: React.FC = () => {
             key={toast.id}
             message={toast.message}
             type={toast.type}
+            onClose={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
           />
         ))}
       </div>
