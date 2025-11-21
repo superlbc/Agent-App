@@ -11,6 +11,7 @@ import { Icon } from './components/ui/Icon';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { ToastState, ApiConfig, PreHire } from './types';
 import { TourProvider } from './contexts/TourContext';
+import { RoleProvider } from './contexts/RoleContext';
 import { DepartmentProvider } from './contexts/DepartmentContext';
 import { PreHireProvider, usePreHires } from './contexts/PreHireContext';
 import { TourController } from './components/tour/TourController';
@@ -754,6 +755,10 @@ const AppContent: React.FC = () => {
         setNotesAgentId={setNotesAgentId}
         interrogationAgentId={interrogationAgentId}
         setInterrogationAgentId={setInterrogationAgentId}
+        onOpenRoleManagement={() => {
+          setCurrentSection('role-management');
+          addToast('Opening Role Management Dashboard', 'success');
+        }}
       />
 
       <HelpModal
@@ -999,15 +1004,17 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <TourProvider>
-      <DepartmentProvider>
-        <PreHireProvider>
-          <PackageProvider>
-            <ApprovalProvider>
-              <AppContent />
-            </ApprovalProvider>
-          </PackageProvider>
-        </PreHireProvider>
-      </DepartmentProvider>
+      <RoleProvider>
+        <DepartmentProvider>
+          <PreHireProvider>
+            <PackageProvider>
+              <ApprovalProvider>
+                <AppContent />
+              </ApprovalProvider>
+            </PackageProvider>
+          </PreHireProvider>
+        </DepartmentProvider>
+      </RoleProvider>
     </TourProvider>
   );
 }
