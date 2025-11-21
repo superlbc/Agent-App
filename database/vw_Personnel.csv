@@ -1,0 +1,16 @@
+Employee ID,First Name,Last Name,Full Name,Email,Department Group,Department,Grade Group,Grade,Start Date,Status,Manager Name,Manager Email
+EMP001,John,Smith,John Smith,john.smith@momentumww.com,Global Technology,Production: Global Technology,Professional,Senior Developer,2020-03-15,Active,Sarah Johnson,sarah.johnson@momentumww.com
+EMP002,Sarah,Johnson,Sarah Johnson,sarah.johnson@momentumww.com,Global Technology,Production: Global Technology,Leadership,Engineering Manager,2018-06-01,Active,Steve Sanderson,steve.sanderson@momentumww.com
+EMP003,Michael,Chen,Michael Chen,michael.chen@momentumww.com,Creative,IPTC: Creative Production,Professional,XD Designer,2021-09-20,Active,Patricia Williams,patricia.williams@momentumww.com
+EMP004,Emily,Rodriguez,Emily Rodriguez,emily.rodriguez@momentumww.com,Strategy,STR: Strategy & Planning,Professional,Senior Strategist,2019-11-10,Active,Luis Bustos,luis.bustos@momentumww.com
+EMP005,David,Kim,David Kim,david.kim@momentumww.com,IP & CT,IP & CT: Innovation,Professional,Software Engineer,2022-01-15,Active,Luis Bustos,luis.bustos@momentumww.com
+EMP006,Jennifer,Martinez,Jennifer Martinez,jennifer.martinez@momentumww.com,Client Services,CS: Account Management,Professional,Account Manager,2020-07-22,Active,Tom Wilson,tom.wilson@momentumww.com
+EMP007,Robert,Taylor,Robert Taylor,robert.taylor@momentumww.com,Finance,FIN: Financial Operations,Professional,Financial Analyst,2021-03-01,Active,Amanda Lee,amanda.lee@momentumww.com
+EMP008,Lisa,Anderson,Lisa Anderson,lisa.anderson@momentumww.com,HR,HR: Talent Acquisition,Professional,HR Specialist,2019-05-15,Active,Camille Harper,camille.harper@momentumww.com
+EMP009,Steve,Sanderson,Steve Sanderson,steve.sanderson@momentumww.com,Global Technology,Production: Global Technology,Leadership,VP Engineering,2015-01-10,Active,CEO Office,ceo@momentumww.com
+EMP010,Luis,Bustos,Luis Bustos,luis.bustos@momentumww.com,IP & CT,IP & CT: Innovation,Leadership,Director Innovation,2017-08-20,Active,Patricia Williams,patricia.williams@momentumww.com
+EMP011,Patricia,Williams,Patricia Williams,patricia.williams@momentumww.com,Creative,IPTC: Creative Leadership,Executive,SVP Creative,2016-02-15,Active,CEO Office,ceo@momentumww.com
+EMP012,Tom,Wilson,Tom Wilson,tom.wilson@momentumww.com,Client Services,CS: Client Services Leadership,Leadership,Director Client Services,2018-09-01,Active,CEO Office,ceo@momentumww.com
+EMP013,Amanda,Lee,Amanda Lee,amanda.lee@momentumww.com,Finance,FIN: Finance Leadership,Leadership,CFO,2014-04-10,Active,CEO Office,ceo@momentumww.com
+EMP014,Camille,Harper,Camille Harper,camille.harper@momentumww.com,HR,HR: HR Leadership,Leadership,CHRO,2016-11-05,Active,CEO Office,ceo@momentumww.com
+EMP015,James,Brown,James Brown,james.brown@momentumww.com,Global Technology,Production: Global Technology,Professional,DevOps Engineer,2021-06-15,Active,Sarah Johnson,sarah.johnson@momentumww.com

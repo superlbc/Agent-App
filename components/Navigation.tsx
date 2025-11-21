@@ -15,7 +15,10 @@ export type NavigationSection =
   | 'hardware-inventory'
   | 'license-pools'
   | 'freeze-period-admin'
-  | 'freeze-period-dashboard';
+  | 'freeze-period-dashboard'
+  | 'refresh-calendar'
+  | 'refresh-finance'
+  | 'refresh-notifications';
 
 interface NavigationProps {
   currentSection: NavigationSection;
@@ -37,9 +40,9 @@ interface NavigationItem {
 const NAVIGATION_ITEMS: NavigationItem[] = [
   {
     id: 'pre-hires',
-    label: 'Pre-hires & Packages',
+    label: 'Pre-hire Management',
     icon: 'users',
-    description: 'Manage pre-hire candidates and equipment packages',
+    description: 'Primary dashboard for candidate onboarding',
   },
   {
     id: 'hardware-inventory',
@@ -54,6 +57,24 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
     description: 'Manage software license pools and assignments',
   },
   {
+    id: 'refresh-calendar',
+    label: 'Refresh Calendar',
+    icon: 'calendar',
+    description: 'View hardware refresh schedule and timeline',
+  },
+  {
+    id: 'refresh-finance',
+    label: 'Refresh Budget Forecast',
+    icon: 'trending-up',
+    description: 'Financial planning and cost projections',
+  },
+  {
+    id: 'refresh-notifications',
+    label: 'Refresh Notifications',
+    icon: 'bell',
+    description: 'Manage upcoming refresh notifications',
+  },
+  {
     id: 'freeze-period-admin',
     label: 'Freeze Period Admin',
     icon: 'settings',
@@ -62,7 +83,7 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
   {
     id: 'freeze-period-dashboard',
     label: 'Freeze Period Dashboard',
-    icon: 'calendar',
+    icon: 'inbox',
     description: 'Monitor freeze period notifications',
   },
 ];
@@ -83,10 +104,10 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Navigation Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          UXP System
+          Employee Onboarding
         </h2>
         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-          Employee Onboarding Platform
+          Pre-hire to Active Employee
         </p>
       </div>
 

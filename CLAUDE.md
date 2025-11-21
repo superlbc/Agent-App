@@ -2317,10 +2317,6 @@ export const graphConfig = {
 - Token cache: Consider `localStorage` for persistence across tabs
 - Ensure HTTPS is configured
 
-**AI Studio Deployment** (`https://aistudio.google.com`):
-- Add redirect URI: `https://aistudio.google.com`
-- The app will auto-detect AI Studio environment and use mock authentication
-
 ### Step 6: Test Authentication
 
 1. Start the development server: `npm run dev`
@@ -3453,19 +3449,6 @@ vercel
    - Add `CLIENT_ID`, `CLIENT_SECRET`, `DEFAULT_BOT_ID`
 
 5. Push to GitHub to trigger automatic deployment
-
-#### Option 3: Google AI Studio
-
-1. Ensure your app is ready for AI Studio:
-   - Set redirect URI to `https://aistudio.google.com`
-   - Mock authentication will activate automatically
-
-2. Deploy via AI Studio interface:
-   - Upload your built `dist/` folder
-   - Configure app settings
-   - Publish to AI Studio app gallery
-
-3. Access your app at: `https://ai.studio/apps/drive/{your-app-id}`
 
 ### SSL/TLS Configuration
 

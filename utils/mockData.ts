@@ -8,6 +8,9 @@ import {
   Hardware,
   Software,
   Package,
+  PackageVersion,
+  PackageAssignment,
+  PackageCostBreakdown,
   PreHire,
   Employee,
   ApprovalRequest,
@@ -23,7 +26,7 @@ import {
 // ============================================================================
 
 export const mockHardware: Hardware[] = [
-  // Computers
+  // Computers - Superseding Chain Example: M3 → M4
   {
     id: 'hw-comp-001',
     type: 'computer',
@@ -34,8 +37,10 @@ export const mockHardware: Hardware[] = [
       ram: '64GB',
       storage: '2TB SSD',
     },
-    status: 'available',
+    supersededById: 'hw-comp-005', // Superseded by M4 Max
+    purchaseDate: new Date('2024-01-15'),
     cost: 4299.00,
+    costFrequency: 'one-time',
   },
   {
     id: 'hw-comp-002',
@@ -47,8 +52,10 @@ export const mockHardware: Hardware[] = [
       ram: '32GB',
       storage: '1TB SSD',
     },
-    status: 'available',
+    // No supersededById - still current for this form factor
+    purchaseDate: new Date('2024-02-01'),
     cost: 2899.00,
+    costFrequency: 'one-time',
   },
   {
     id: 'hw-comp-003',
@@ -60,8 +67,10 @@ export const mockHardware: Hardware[] = [
       ram: '32GB',
       storage: '1TB SSD',
     },
-    status: 'available',
+    // No supersededById - still current
+    purchaseDate: new Date('2024-03-10'),
     cost: 2499.00,
+    costFrequency: 'one-time',
   },
   {
     id: 'hw-comp-004',
@@ -73,8 +82,23 @@ export const mockHardware: Hardware[] = [
       ram: '32GB',
       storage: '1TB SSD',
     },
-    status: 'available',
+    // No supersededById - still current
+    purchaseDate: new Date('2024-04-05'),
     cost: 2799.00,
+  },
+  {
+    id: 'hw-comp-005',
+    type: 'computer',
+    model: 'MacBook Pro 16" M4 Max',
+    manufacturer: 'Apple',
+    specifications: {
+      processor: 'M4 Max',
+      ram: '64GB',
+      storage: '2TB SSD',
+    },
+    // Latest - no supersededById
+    purchaseDate: new Date('2025-11-01'),
+    cost: 4499.00,
   },
 
   // Monitors
@@ -87,7 +111,6 @@ export const mockHardware: Hardware[] = [
       screenSize: '27"',
       connectivity: 'USB-C, HDMI, DisplayPort',
     },
-    status: 'available',
     cost: 649.00,
   },
   {
@@ -99,7 +122,6 @@ export const mockHardware: Hardware[] = [
       screenSize: '32"',
       connectivity: 'USB-C, Thunderbolt 3',
     },
-    status: 'available',
     cost: 899.00,
   },
   {
@@ -111,7 +133,6 @@ export const mockHardware: Hardware[] = [
       screenSize: '32"',
       connectivity: 'USB-C, HDMI, DisplayPort',
     },
-    status: 'available',
     cost: 1099.00,
   },
 
@@ -124,7 +145,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth, USB-C',
     },
-    status: 'available',
     cost: 149.00,
   },
   {
@@ -135,7 +155,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth, USB Receiver',
     },
-    status: 'available',
     cost: 99.99,
   },
   {
@@ -146,7 +165,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth, USB Receiver',
     },
-    status: 'available',
     cost: 99.99,
   },
   {
@@ -157,7 +175,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth',
     },
-    status: 'available',
     cost: 79.00,
   },
 
@@ -170,7 +187,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Thunderbolt 4, 18 ports',
     },
-    status: 'available',
     cost: 399.99,
   },
   {
@@ -181,7 +197,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Thunderbolt 3, USB-C',
     },
-    status: 'available',
     cost: 299.00,
   },
 
@@ -194,7 +209,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth',
     },
-    status: 'available',
     cost: 249.00,
   },
   {
@@ -205,7 +219,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth, USB-C',
     },
-    status: 'available',
     cost: 449.00,
   },
   {
@@ -216,7 +229,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'Bluetooth, 3.5mm',
     },
-    status: 'available',
     cost: 399.99,
   },
 
@@ -227,7 +239,6 @@ export const mockHardware: Hardware[] = [
     model: 'Laptop Stand',
     manufacturer: 'Rain Design',
     specifications: {},
-    status: 'available',
     cost: 59.99,
   },
   {
@@ -238,7 +249,6 @@ export const mockHardware: Hardware[] = [
     specifications: {
       connectivity: 'USB-C, HDMI, USB 3.0',
     },
-    status: 'available',
     cost: 49.99,
   },
   {
@@ -247,7 +257,6 @@ export const mockHardware: Hardware[] = [
     model: 'Ergonomic Mouse Pad',
     manufacturer: '3M',
     specifications: {},
-    status: 'available',
     cost: 24.99,
   },
 ];
@@ -265,6 +274,7 @@ export const mockSoftware: Software[] = [
     requiresApproval: false,
     approver: 'Auto',
     cost: 59.99,
+    costFrequency: 'monthly',
     renewalFrequency: 'monthly',
     description: 'Full suite of Adobe creative applications',
   },
@@ -276,6 +286,7 @@ export const mockSoftware: Software[] = [
     requiresApproval: false,
     approver: 'Auto',
     cost: 15.00,
+    costFrequency: 'monthly',
     renewalFrequency: 'monthly',
     description: 'Collaborative design tool',
   },
@@ -287,6 +298,7 @@ export const mockSoftware: Software[] = [
     requiresApproval: true,
     approver: 'Steve Sanderson',
     cost: 94.99,
+    costFrequency: 'monthly',
     renewalFrequency: 'monthly',
     description: '3D modeling and animation software',
   },
@@ -379,10 +391,18 @@ export const mockPackages: Package[] = [
     id: 'pkg-xd-std-001',
     name: 'XD Designer Standard',
     description: 'Standard equipment package for Experience Designers and Motion Designers',
+    // Phase 6: Role-based targeting
+    roleTargets: [
+      { departmentGroup: 'Creative Services', role: 'XD Designer' },
+      { departmentGroup: 'Creative Services', role: 'Senior XD Designer', grade: 'Senior' },
+      { departmentGroup: 'Creative Services', role: 'Motion Designer' },
+    ],
+    osPreference: 'Mac',
+    // Legacy fields (backward compatibility)
     roleTarget: ['XD Designer', 'Senior XD Designer', 'Motion Designer'],
     departmentTarget: ['Creative', 'IPTC'],
     hardware: [
-      mockHardware[0], // MacBook Pro 16" M3 Max
+      mockHardware[0], // MacBook Pro 16" M3 Max (superseded by M4, but still used in v1)
       mockHardware[4], // Dell UltraSharp 27" 4K
       mockHardware[7], // Magic Keyboard
       mockHardware[9], // MX Master 3S
@@ -410,6 +430,14 @@ export const mockPackages: Package[] = [
     id: 'pkg-xd-prem-001',
     name: 'XD Designer Premium',
     description: 'Premium package for Senior XD Designers requiring 3D capabilities',
+    // Phase 6: Role-based targeting
+    roleTargets: [
+      { departmentGroup: 'Creative Services', role: 'Senior XD Designer', grade: 'Senior' },
+      { departmentGroup: 'Creative Services', role: 'Lead XD Designer', grade: 'Lead' },
+      { departmentGroup: 'Creative Services', role: 'Motion Designer', grade: 'Lead' },
+    ],
+    osPreference: 'Mac',
+    // Legacy fields (backward compatibility)
     roleTarget: ['Senior XD Designer', 'Lead XD Designer', 'Motion Designer'],
     departmentTarget: ['Creative', 'IPTC'],
     hardware: [
@@ -442,6 +470,15 @@ export const mockPackages: Package[] = [
     id: 'pkg-pm-std-001',
     name: 'Project Manager Standard',
     description: 'Standard equipment for Project Managers and Program Managers',
+    // Phase 6: Role-based targeting
+    roleTargets: [
+      { departmentGroup: 'IP & CT', role: 'Project Manager' },
+      { departmentGroup: 'IP & CT', role: 'Senior Project Manager', grade: 'Senior' },
+      { departmentGroup: 'IP & CT', role: 'Program Manager', gradeGroup: 'Management' },
+      { departmentGroup: 'STR', role: 'Project Manager' },
+    ],
+    osPreference: 'Either',
+    // Legacy fields (backward compatibility)
     roleTarget: ['Project Manager', 'Senior Project Manager', 'Program Manager'],
     departmentTarget: ['STR', 'PM', 'Operations'],
     hardware: [
@@ -471,6 +508,16 @@ export const mockPackages: Package[] = [
     id: 'pkg-dev-std-001',
     name: 'Developer Standard',
     description: 'Standard package for Software Developers and Engineers',
+    // Phase 6: Role-based targeting
+    roleTargets: [
+      { departmentGroup: 'Global Technology', role: 'Developer' },
+      { departmentGroup: 'Global Technology', role: 'Senior Developer', grade: 'Senior' },
+      { departmentGroup: 'Global Technology', role: 'Software Engineer' },
+      { departmentGroup: 'Global Technology', role: 'Full Stack Developer' },
+      { departmentGroup: 'IP & CT', role: 'Developer' },
+    ],
+    osPreference: 'Windows',
+    // Legacy fields (backward compatibility)
     roleTarget: ['Developer', 'Senior Developer', 'Software Engineer', 'Full Stack Developer'],
     departmentTarget: ['IPCT', 'Global Technology'],
     hardware: [
@@ -499,6 +546,14 @@ export const mockPackages: Package[] = [
     id: 'pkg-ba-std-001',
     name: 'Business Analyst Standard',
     description: 'Standard package for Business Analysts and Data Analysts',
+    // Phase 6: Role-based targeting
+    roleTargets: [
+      { departmentGroup: 'STR', role: 'Business Analyst' },
+      { departmentGroup: 'STR', role: 'Data Analyst' },
+      { departmentGroup: 'STR', role: 'Senior Business Analyst', grade: 'Senior' },
+    ],
+    osPreference: 'Windows',
+    // Legacy fields (backward compatibility)
     roleTarget: ['Business Analyst', 'Data Analyst', 'Senior Business Analyst'],
     departmentTarget: ['STR', 'Operations', 'Finance'],
     hardware: [
@@ -524,6 +579,190 @@ export const mockPackages: Package[] = [
 ];
 
 // ============================================================================
+// PACKAGE VERSIONS (Phase 3: Versioning System)
+// ============================================================================
+// Immutable snapshots of package configurations
+// Each package gets v1 on creation, v2+ when modified
+
+export const mockPackageVersions: PackageVersion[] = [
+  // XD Designer Standard - Version 1 (Initial)
+  {
+    id: 'pkgver-xd-std-001-v1',
+    packageId: 'pkg-xd-std-001',
+    versionNumber: 1,
+    snapshotDate: new Date('2025-01-15'),
+    hardware: [
+      mockHardware[0], // MacBook Pro 16" M3 Max
+      mockHardware[4], // Dell UltraSharp 27" 4K
+      mockHardware[7], // Magic Keyboard
+      mockHardware[9], // MX Master 3S
+      mockHardware[11], // CalDigit TS4 Dock
+      mockHardware[13], // AirPods Pro
+      mockHardware[16], // Laptop Stand
+    ],
+    software: [
+      mockSoftware[0], // Adobe CC
+      mockSoftware[1], // Figma
+      mockSoftware[4], // Microsoft 365
+      mockSoftware[5], // Slack
+      mockSoftware[6], // Zoom
+      mockSoftware[7], // Miro
+    ],
+    isStandard: true,
+    createdBy: 'IT Admin',
+    createdDate: new Date('2025-01-15'),
+    notes: 'Initial version',
+  },
+
+  // XD Designer Premium - Version 1 (Initial)
+  {
+    id: 'pkgver-xd-prem-001-v1',
+    packageId: 'pkg-xd-prem-001',
+    versionNumber: 1,
+    snapshotDate: new Date('2025-01-15'),
+    hardware: [
+      mockHardware[0], // MacBook Pro 16" M3 Max
+      mockHardware[5], // LG UltraFine 32" 4K
+      mockHardware[7], // Magic Keyboard
+      mockHardware[9], // MX Master 3S
+      mockHardware[11], // CalDigit TS4 Dock
+      mockHardware[14], // Jabra Evolve2 85
+      mockHardware[16], // Laptop Stand
+    ],
+    software: [
+      mockSoftware[0], // Adobe CC
+      mockSoftware[1], // Figma
+      mockSoftware[2], // Cinema 4D
+      mockSoftware[4], // Microsoft 365
+      mockSoftware[5], // Slack
+      mockSoftware[6], // Zoom
+      mockSoftware[7], // Miro
+    ],
+    isStandard: false,
+    createdBy: 'IT Admin',
+    createdDate: new Date('2025-01-15'),
+    notes: 'Initial version with Cinema 4D (requires approval)',
+  },
+
+  // Project Manager Standard - Version 1 (Initial)
+  {
+    id: 'pkgver-pm-std-001-v1',
+    packageId: 'pkg-pm-std-001',
+    versionNumber: 1,
+    snapshotDate: new Date('2025-01-15'),
+    hardware: [
+      mockHardware[1], // MacBook Pro 14" M3 Pro
+      mockHardware[4], // Dell UltraSharp 27" 4K
+      mockHardware[8], // MX Keys Keyboard
+      mockHardware[9], // MX Master 3S
+      mockHardware[12], // Dell Thunderbolt Dock
+      mockHardware[13], // AirPods Pro
+    ],
+    software: [
+      mockSoftware[4], // Microsoft 365
+      mockSoftware[5], // Slack
+      mockSoftware[6], // Zoom
+      mockSoftware[8], // Notion
+      mockSoftware[9], // Airtable
+    ],
+    isStandard: true,
+    createdBy: 'IT Admin',
+    createdDate: new Date('2025-01-15'),
+    notes: 'Initial version',
+  },
+
+  // Developer Standard - Version 1 (Initial)
+  {
+    id: 'pkgver-dev-std-001-v1',
+    packageId: 'pkg-dev-std-001',
+    versionNumber: 1,
+    snapshotDate: new Date('2025-01-15'),
+    hardware: [
+      mockHardware[2], // Dell XPS 15
+      mockHardware[4], // Dell UltraSharp 27" 4K
+      mockHardware[8], // MX Keys Keyboard
+      mockHardware[9], // MX Master 3S
+      mockHardware[12], // Dell Thunderbolt Dock
+      mockHardware[15], // Sony WH-1000XM5
+    ],
+    software: [
+      mockSoftware[4], // Microsoft 365
+      mockSoftware[5], // Slack
+      mockSoftware[6], // Zoom
+      mockSoftware[1], // Figma
+    ],
+    isStandard: true,
+    createdBy: 'IT Admin',
+    createdDate: new Date('2025-01-15'),
+    notes: 'Initial version',
+  },
+
+  // Business Analyst Standard - Version 1 (Initial)
+  {
+    id: 'pkgver-ba-std-001-v1',
+    packageId: 'pkg-ba-std-001',
+    versionNumber: 1,
+    snapshotDate: new Date('2025-01-15'),
+    hardware: [
+      mockHardware[3], // Surface Laptop Studio 2
+      mockHardware[4], // Dell UltraSharp 27" 4K
+      mockHardware[8], // MX Keys Keyboard
+      mockHardware[9], // MX Master 3S
+      mockHardware[13], // AirPods Pro
+      mockHardware[17], // USB-C Hub
+    ],
+    software: [
+      mockSoftware[4], // Microsoft 365
+      mockSoftware[5], // Slack
+      mockSoftware[6], // Zoom
+      mockSoftware[9], // Airtable
+    ],
+    isStandard: true,
+    createdBy: 'IT Admin',
+    createdDate: new Date('2025-01-15'),
+    notes: 'Initial version',
+  },
+];
+
+// ============================================================================
+// PACKAGE ASSIGNMENTS (Phase 3: Versioning System)
+// ============================================================================
+// Links pre-hires and employees to specific package versions
+// Assignments are immutable - changing the package doesn't affect existing assignments
+
+export const mockPackageAssignments: PackageAssignment[] = [
+  // Jane Smith - Assigned XD Designer Standard v1
+  {
+    id: 'pkgasgn-001',
+    preHireId: 'pre-2025-001',
+    packageVersionId: 'pkgver-xd-std-001-v1',
+    assignedDate: new Date('2025-11-01'),
+    assignedBy: 'Camille (HR)',
+    notes: 'Standard package for XD Designer role',
+  },
+
+  // Michael Chen - Assigned XD Designer Premium v1 (requires approval)
+  {
+    id: 'pkgasgn-002',
+    preHireId: 'pre-2025-002',
+    packageVersionId: 'pkgver-xd-prem-001-v1',
+    assignedDate: new Date('2025-11-05'),
+    assignedBy: 'Camille (HR)',
+    notes: 'Premium package approved by hiring manager - includes Cinema 4D',
+  },
+
+  // Emily Rodriguez - Assigned Project Manager Standard v1
+  {
+    id: 'pkgasgn-003',
+    preHireId: 'pre-2025-003',
+    packageVersionId: 'pkgver-pm-std-001-v1',
+    assignedDate: new Date('2025-11-10'),
+    assignedBy: 'Payton (HR)',
+    notes: 'Standard PM package',
+  },
+];
+
+// ============================================================================
 // PRE-HIRE RECORDS
 // ============================================================================
 
@@ -536,11 +775,15 @@ export const mockPreHires: PreHire[] = [
     department: 'Creative',
     startDate: new Date('2025-12-01'), // During freeze period!
     hiringManager: 'Sarah Johnson',
-    status: 'accepted',
+    status: 'linked', // Updated to linked status
     assignedPackage: mockPackages[0], // XD Designer Standard
+    // Phase 8: Employee linking example (100% exact match - auto-linked)
+    employeeId: 'EMP003', // Linked to Michael Chen from vw_Personnel.csv
+    linkedDate: new Date('2025-11-18'),
+    linkConfidence: 'auto', // Auto-matched with 100% confidence
     createdBy: 'Camille (HR)',
     createdDate: new Date('2025-11-01'),
-    lastModified: new Date('2025-11-05'),
+    lastModified: new Date('2025-11-18'),
   },
   {
     id: 'pre-2025-002',
@@ -582,16 +825,20 @@ export const mockPreHires: PreHire[] = [
     department: 'IPCT',
     startDate: new Date('2025-11-25'),
     hiringManager: 'Steve Sanderson',
-    status: 'accepted',
+    status: 'linked', // Updated to linked status
     assignedPackage: mockPackages[3], // Developer Standard
     customizations: {
       addedHardware: [mockHardware[5]], // Upgraded to LG UltraFine 32"
       removedHardware: [mockHardware[4]], // Removed Dell 27"
       reason: 'Candidate requested larger screen for multi-window development work',
     },
+    // Phase 8: Employee linking example (manually verified by HR)
+    employeeId: 'EMP005', // Linked to David Kim from vw_Personnel.csv
+    linkedDate: new Date('2025-11-15'),
+    linkConfidence: 'verified', // HR verified this is the correct match
     createdBy: 'Camille (HR)',
     createdDate: new Date('2025-10-28'),
-    lastModified: new Date('2025-11-08'),
+    lastModified: new Date('2025-11-15'),
   },
   {
     id: 'pre-2025-005',
@@ -753,13 +1000,52 @@ export function getSoftwareRequiringApproval(): Software[] {
 }
 
 /**
- * Calculate total package cost
+ * Calculate total package cost with breakdown
+ * Phase 2: Differentiates one-time vs recurring costs
  */
-export function calculatePackageCost(pkg: Package): number {
-  const hardwareCost = pkg.hardware.reduce((sum, hw) => sum + (hw.cost || 0), 0);
-  const softwareCost = pkg.software.reduce((sum, sw) => sum + sw.cost, 0);
-  const licensesCost = pkg.licenses.reduce((sum, lic) => sum + lic.cost, 0);
-  return hardwareCost + softwareCost + licensesCost;
+export function calculatePackageCost(pkg: Package): PackageCostBreakdown {
+  // Hardware costs (always one-time)
+  const oneTimeHardware = pkg.hardware.reduce((sum, hw) => {
+    if (!hw.cost) return sum;
+    // Hardware is one-time unless explicitly marked as subscription (e.g., leasing)
+    return hw.costFrequency === 'subscription' ? sum : sum + hw.cost;
+  }, 0);
+
+  // Software costs (can be one-time, monthly, or annual)
+  let oneTimeSoftware = 0;
+  let monthlySoftware = 0;
+  let annualSoftware = 0;
+
+  [...pkg.software, ...pkg.licenses].forEach(sw => {
+    if (!sw.cost) return;
+
+    // Determine cost frequency
+    const frequency = sw.costFrequency || sw.renewalFrequency || 'one-time';
+
+    if (frequency === 'monthly') {
+      monthlySoftware += sw.cost;
+    } else if (frequency === 'annual') {
+      annualSoftware += sw.cost;
+    } else {
+      // 'one-time' or perpetual licenses
+      oneTimeSoftware += sw.cost;
+    }
+  });
+
+  // Calculate totals
+  const oneTimeTotal = oneTimeHardware + oneTimeSoftware;
+  const monthlyTotal = monthlySoftware;
+  const annualTotal = annualSoftware;
+  const firstYearTotal = oneTimeTotal + (monthlyTotal * 12) + annualTotal;
+  const ongoingAnnualTotal = (monthlyTotal * 12) + annualTotal;
+
+  return {
+    oneTimeTotal,
+    monthlyTotal,
+    annualTotal,
+    firstYearTotal,
+    ongoingAnnualTotal
+  };
 }
 
 // ============================================================================

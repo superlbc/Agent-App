@@ -41,7 +41,7 @@ export const PackageCard: React.FC<PackageCardProps> = ({
   compact = false,
   className = '',
 }) => {
-  const totalCost = calculatePackageCost(pkg);
+  const costBreakdown = calculatePackageCost(pkg);
 
   const handleClick = () => {
     if (onSelect) {
@@ -213,21 +213,51 @@ export const PackageCard: React.FC<PackageCardProps> = ({
           )}
         </div>
 
-        {/* Footer: Cost & Date */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Created{' '}
-            {new Date(pkg.createdDate).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            ${totalCost.toFixed(2)}
-            <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
-              /month
+        {/* Footer: Cost Breakdown & Date */}
+        <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Created</span>
+            <span className="text-gray-900 dark:text-white">
+              {new Date(pkg.createdDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </span>
+          </div>
+
+          {/* Cost Breakdown */}
+          <div className="space-y-1 text-sm">
+            {costBreakdown.oneTimeTotal > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-400">One-time hardware</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  ${costBreakdown.oneTimeTotal.toFixed(2)}
+                </span>
+              </div>
+            )}
+            {costBreakdown.monthlyTotal > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Monthly software</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  ${costBreakdown.monthlyTotal.toFixed(2)}/mo
+                </span>
+              </div>
+            )}
+            {costBreakdown.annualTotal > 0 && (
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Annual software</span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  ${costBreakdown.annualTotal.toFixed(2)}/yr
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-800">
+              <span className="text-gray-900 dark:text-white font-medium">First year total</span>
+              <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
+                ${costBreakdown.firstYearTotal.toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
 

@@ -40,6 +40,9 @@ import { Package, ApprovalRequest, HelixTicket } from './types';
 import { Navigation, NavigationSection } from './components/Navigation';
 import HardwareInventory from './components/HardwareInventory';
 import { LicensePoolDashboard } from './components/LicensePoolDashboard';
+import { RefreshCalendar } from './components/RefreshCalendar';
+import { RefreshFinanceView } from './components/RefreshFinanceView';
+import { RefreshNotifications } from './components/RefreshNotifications';
 import { FreezePeriodAdmin } from './components/FreezePeriodAdmin';
 import { FreezePeriodDashboard } from './components/FreezePeriodDashboard';
 import {
@@ -505,6 +508,55 @@ const AppContent: React.FC = () => {
                 onEditLicense={(license) => {
                   console.log('Edit license:', license);
                   addToast(`Editing ${license.name}...`, 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Refresh Calendar Section */}
+          {currentSection === 'refresh-calendar' && (
+            <div className="h-full overflow-hidden">
+              <RefreshCalendar
+                schedules={[]} // TODO: Add mock refresh schedules
+                onScheduleClick={(schedule) => {
+                  console.log('Schedule clicked:', schedule);
+                  addToast(`Viewing refresh schedule for ${schedule.hardwareModel}`, 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Refresh Finance View Section */}
+          {currentSection === 'refresh-finance' && (
+            <div className="h-full overflow-hidden">
+              <RefreshFinanceView
+                schedules={[]} // TODO: Add mock refresh schedules
+                onExportCSV={() => {
+                  addToast('Exported refresh forecast to CSV', 'success');
+                }}
+                onExportPDF={() => {
+                  addToast('Exported refresh forecast to PDF', 'success');
+                }}
+              />
+            </div>
+          )}
+
+          {/* Refresh Notifications Section */}
+          {currentSection === 'refresh-notifications' && (
+            <div className="h-full overflow-hidden">
+              <RefreshNotifications
+                schedules={[]} // TODO: Add mock refresh schedules
+                onSendNotification={(schedule) => {
+                  console.log('Send notification:', schedule);
+                  addToast(`Notification sent to ${schedule.employeeName}`, 'success');
+                }}
+                onMarkAsNotified={(scheduleId) => {
+                  console.log('Mark as notified:', scheduleId);
+                  addToast('Schedule marked as notified', 'success');
+                }}
+                onScheduleClick={(schedule) => {
+                  console.log('Schedule clicked:', schedule);
+                  addToast(`Viewing refresh schedule for ${schedule.hardwareModel}`, 'success');
                 }}
               />
             </div>

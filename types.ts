@@ -77,6 +77,20 @@ export interface Participant {
 /**
  * Hardware inventory item
  * Represents physical equipment (computers, monitors, accessories)
+ *
+ * **Phase 4: Hardware Superseding**
+ * Hardware items form a superseding chain (e.g., MacBook M3 → M4 → M5)
+ * When new hardware supersedes old hardware:
+ * - Old hardware gets `supersededById` set to new hardware's ID
+ * - Packages automatically update to use new hardware
+ * - Existing assignments remain unchanged (versioning prevents retroactive changes)
+ *
+ * **Example**:
+ * - MacBook Pro M3 (id: hw-mbp-m3) created → Used in packages
+ * - MacBook Pro M4 (id: hw-mbp-m4) created → Supersedes M3
+ * - MacBook M3.supersededById = "hw-mbp-m4"
+ * - Packages auto-update to use M4 (creates new version)
+ * - Pre-hires assigned to old version still get M3 (as promised)
  */
 export interface Hardware {
   id: string;
@@ -90,10 +104,12 @@ export interface Hardware {
     screenSize?: string;
     connectivity?: string;
   };
-  status: "available" | "assigned" | "maintenance" | "retired";
-  serialNumber?: string;
+  // Phase 4: Hardware Superseding
+  supersededById?: string; // ID of hardware that replaces this item
   purchaseDate?: Date;
   cost?: number;
+  // Phase 2: Cost Calculation Fix
+  costFrequency?: "one-time" | "subscription"; // Differentiates hardware (one-time) from software subscriptions (monthly/annual)
 }
 
 /**
@@ -126,6 +142,8 @@ export interface Software {
   requiresApproval: boolean;
   approver?: string; // e.g., "Steve Sanderson", "Patricia", "Auto"
   cost: number;
+  // Phase 2: Cost Calculation Fix
+  costFrequency?: "one-time" | "monthly" | "annual"; // For accurate cost calculation
   renewalFrequency?: "monthly" | "annual";
   seatCount?: number; // Total number of seats available (for concurrent/subscription licenses)
   description?: string;
@@ -144,29 +162,162 @@ export interface Software {
 }
 
 /**
+ * Package cost breakdown
+ * Phase 2: Differentiates one-time hardware costs from recurring software costs
+ */
+export interface PackageCostBreakdown {
+  oneTimeTotal: number;      // Total one-time hardware costs
+  monthlyTotal: number;      // Total monthly software subscription costs
+  annualTotal: number;       // Total annual software subscription costs
+  firstYearTotal: number;    // oneTimeTotal + (monthlyTotal * 12) + annualTotal
+  ongoingAnnualTotal: number; // (monthlyTotal * 12) + annualTotal (for year 2+)
+}
+
+/**
+ * Role target specification for package matching
+ * Phase 6: Multi-dimensional role targeting
+ */
+export interface RoleTarget {
+  departmentGroup: string; // e.g., "Global Technology", "Creative Services"
+  role: string; // e.g., "XD Designer", "Developer", "Project Manager"
+  gradeGroup?: string; // Optional: e.g., "Management", "Individual Contributor"
+  grade?: string; // Optional: e.g., "Senior", "Lead", "Principal"
+}
+
+/**
  * Equipment package definition
  * Pre-configured bundles of hardware + software for specific roles
  * Example: "XD Designer Standard Package"
+ *
+ * **Phase 6: Role-Based Package Assignment**
+ * Packages now support multi-dimensional role targeting based on:
+ * - Department Group (from DepartmentGroup.csv)
+ * - Role (job title)
+ * - Grade Group (optional - management vs IC)
+ * - Grade (optional - senior, lead, principal)
+ *
+ * **Matching Logic**:
+ * 1. User enters: Department Group + Role (required)
+ * 2. System finds all packages matching both criteria
+ * 3. If multiple matches → User selects from list
+ * 4. If one match → Auto-assign
+ * 5. If no match → Show all packages for manual selection
+ *
+ * **Example**:
+ * - Role Target: { departmentGroup: "Creative Services", role: "XD Designer" }
+ * - Matches: "XD Designer Standard", "XD Designer Premium"
+ * - User chooses "Premium" → Assignment created
  */
+/**
+ * Approval email template
+ * Phase 7: Customizable email templates for approval requests
+ */
+export interface ApprovalEmailTemplate {
+  subject: string; // Email subject with placeholders: {packageName}, {candidateName}, {role}
+  body: string; // Email body with placeholders
+  cc?: string[]; // Optional CC recipients
+}
+
 export interface Package {
   id: string;
   name: string; // e.g., "XD Designer Standard"
   description: string;
-  roleTarget: string[]; // e.g., ["XD Designer", "Motion Designer"]
-  departmentTarget: string[]; // e.g., ["Creative", "IPTC"]
+
+  // Phase 6: Role-based targeting (replaces simple roleTarget/departmentTarget arrays)
+  roleTargets: RoleTarget[]; // Multiple role combinations that can use this package
+  osPreference?: "Windows" | "Mac" | "Either"; // Hardware OS preference
+
+  // Legacy fields (deprecated - keep for backward compatibility)
+  roleTarget?: string[]; // DEPRECATED: Use roleTargets instead
+  departmentTarget?: string[]; // DEPRECATED: Use roleTargets instead
+
   hardware: Hardware[];
   software: Software[];
   licenses: Software[];
-  isStandard: boolean; // true = auto-approve, false = SVP approval
+
+  // Phase 7: Configurable approval workflow
+  approverIds: string[]; // Empty array = auto-approve, populated = requires approval from these users (emails or IDs)
+  approvalEmailTemplate?: ApprovalEmailTemplate; // Custom email template for approval requests
+
+  // Legacy approval field (deprecated)
+  isStandard: boolean; // DEPRECATED: Use approverIds instead (true = [], false = [approvers])
+
   createdBy: string;
   createdDate: Date;
   lastModified: Date;
 }
 
 /**
+ * Package Version snapshot
+ * Immutable snapshot of a package's configuration at a specific point in time
+ *
+ * **Purpose**: Prevent retroactive changes to packages already assigned to pre-hires/employees
+ *
+ * **Workflow**:
+ * 1. When a package is created, create initial PackageVersion (v1)
+ * 2. When a package is assigned, link to specific PackageVersion (not Package)
+ * 3. When a package is modified, create new PackageVersion (v2, v3, etc.)
+ * 4. Existing assignments remain unchanged (linked to old version)
+ * 5. New assignments use latest version
+ *
+ * **Example**:
+ * - Package "XD Designer Standard" v1 assigned to pre-hire Jane (Nov 1)
+ * - Package updated on Nov 15 (MacBook Pro M3 → M4) → creates v2
+ * - Jane still gets M3 (assigned to v1)
+ * - New pre-hire John (Nov 20) gets M4 (assigned to v2)
+ */
+export interface PackageVersion {
+  id: string;
+  packageId: string; // FK to Package.id
+  versionNumber: number; // 1, 2, 3, etc. (auto-incremented)
+  snapshotDate: Date; // When this version was created
+  hardware: Hardware[]; // Snapshot of hardware at this version
+  software: Software[]; // Snapshot of software at this version
+  isStandard: boolean; // Snapshot of approval requirement
+  createdBy: string; // Who created this version
+  createdDate: Date;
+  notes?: string; // Change notes (e.g., "Updated MacBook Pro M3 → M4")
+}
+
+/**
+ * Package Assignment
+ * Links a pre-hire or employee to a specific PackageVersion (not Package!)
+ *
+ * **Key Design Decision**: References PackageVersion, NOT Package
+ * - This ensures assignments are immutable
+ * - Changing a package doesn't retroactively affect existing assignments
+ * - Each assignment gets the exact hardware/software promised at assignment time
+ *
+ * **Workflow**:
+ * 1. HR assigns package to pre-hire → Create PackageAssignment with latest PackageVersion
+ * 2. Package updated (new version created) → Existing assignments unaffected
+ * 3. Query: "What hardware does Jane get?" → Lookup her PackageAssignment → Get PackageVersion → Return hardware snapshot
+ *
+ * **Example**:
+ * - Jane assigned to "XD Designer Standard" v1 on Nov 1 (MacBook M3)
+ * - Package updated to v2 on Nov 15 (MacBook M4)
+ * - Jane's assignment still points to v1 → She gets M3 (as promised)
+ */
+export interface PackageAssignment {
+  id: string;
+  preHireId?: string; // FK to PreHire.id (if assigned to pre-hire)
+  employeeId?: string; // FK to Employee.id (if assigned to employee)
+  packageVersionId: string; // FK to PackageVersion.id (NOT Package.id!)
+  assignedDate: Date; // When the assignment was made
+  assignedBy: string; // Who made the assignment
+  notes?: string; // Assignment notes (e.g., "Approved by hiring manager")
+}
+
+/**
  * Pre-hire candidate record
  * Tracks candidates from offer acceptance through start date
  * Note: Salary data intentionally excluded (maintained in Camille's Excel)
+ *
+ * **Phase 8: Employee Linking**
+ * Pre-hire records can be linked to employee records from vw_Personnel.csv
+ * - employeeId: FK to vw_Personnel Employee ID
+ * - linkedDate: When the link was established
+ * - linkConfidence: How the link was made (auto-match, manual selection, or verified by HR)
  */
 export interface PreHire {
   id: string;
@@ -185,7 +336,15 @@ export interface PreHire {
     removedSoftware?: Software[];
     reason?: string; // Explanation for customization
   };
-  linkedEmployeeId?: string; // Manual link to Vantage/AD
+
+  // Phase 8: Employee linking fields
+  employeeId?: string; // FK to vw_Personnel Employee ID
+  linkedDate?: Date; // When pre-hire was linked to employee record
+  linkConfidence?: "auto" | "manual" | "verified"; // How link was established
+
+  // Legacy field (deprecated - use employeeId instead)
+  linkedEmployeeId?: string; // DEPRECATED: Use employeeId instead
+
   createdBy: string;
   createdDate: Date;
   lastModified: Date;
@@ -236,24 +395,63 @@ export interface Employee {
 /**
  * Approval request
  * Tracks equipment/software approval workflow
- * Standard packages auto-approve, exceptions route to SVP
+ *
+ * **Approval Flow**:
+ * - Empty approverIds → Auto-approve (standard package)
+ * - Populated approverIds → Email sent to approvers, wait for approval
+ *
+ * **Phase 7 Enhancements**:
+ * - Linked to specific PackageVersion (not just Package)
+ * - Tracks pre-hire assignment via preHireId
+ * - Email tracking (sentEmailDate, emailMessageId)
+ * - Escalation support
  */
 export interface ApprovalRequest {
   id: string;
-  employeeId: string;
+
+  // References
+  preHireId?: string; // FK to PreHire.id (if for pre-hire onboarding)
+  employeeId?: string; // FK to Employee.id (if for existing employee)
   employeeName: string;
+  packageId?: string; // FK to Package.id (legacy, use packageVersionId)
+  packageVersionId?: string; // FK to PackageVersion.id (Phase 3 integration)
+
+  // Request details
   requestType: "equipment" | "software" | "exception" | "mid-employment";
-  items: (Hardware | Software)[];
-  packageId?: string;
-  requester: string;
+  items: (Hardware | Software)[]; // Items being requested
+  requester: string; // Name of person making request
+  requesterEmail?: string; // Email of requester (for notifications)
   requestDate: Date;
-  approver: string; // "Auto", "Steve Sanderson", "Patricia"
+  notes?: string; // Justification or additional notes
+
+  // Approval workflow (Phase 7)
+  approverIds: string[]; // Array of user IDs who can approve (empty = auto-approve)
+  currentApprover?: string; // Name of current approver (for display)
+  currentApproverEmail?: string; // Email of current approver
   status: "pending" | "approved" | "rejected" | "cancelled";
-  helixTicketId?: string;
-  automatedDecision: boolean; // true for standard packages
+  automatedDecision: boolean; // true if auto-approved (empty approverIds)
   approvalDate?: Date;
+  approvedBy?: string; // Name of person who approved
   rejectionReason?: string;
-  notes?: string;
+  rejectedBy?: string; // Name of person who rejected
+
+  // Email tracking (Phase 7)
+  sentEmailDate?: Date; // When approval email was sent
+  emailMessageId?: string; // Email message ID (for tracking replies)
+  responseDeadline?: Date; // Optional deadline for approval response
+  reminderSentDate?: Date; // When reminder email was sent
+
+  // Escalation
+  escalatedTo?: string; // User ID if escalated to higher authority
+  escalationDate?: Date;
+  escalationReason?: string;
+
+  // Helix integration
+  helixTicketId?: string; // Created after approval
+
+  // Legacy field (deprecated - use approverIds instead)
+  /** @deprecated Use approverIds array instead */
+  approver?: string; // "Auto", "Steve Sanderson", "Patricia"
 }
 
 /**
@@ -366,6 +564,65 @@ export interface FreezePeriodNotification {
   status: "pending" | "sent" | "failed" | "cancelled";
   failureReason?: string;
   createdDate: Date;
+}
+
+/**
+ * Hardware Refresh Schedule
+ * Phase 9: Tracks hardware refresh eligibility and calendar
+ *
+ * **Purpose**: Manage hardware refresh lifecycle (typically 3 years for computers, 2 years for phones)
+ *
+ * **Workflow**:
+ * 1. When hardware is assigned to employee, create RefreshSchedule record
+ * 2. Calculate refreshEligibilityDate = assignedDate + refreshCycleYears
+ * 3. Monitor refresh calendar for upcoming eligible hardware
+ * 4. Generate notifications X months before eligibility
+ * 5. Create approval requests for refresh equipment
+ * 6. Track financial forecasting for upcoming refreshes
+ *
+ * **Example**:
+ * - MacBook Pro assigned to Jane on 2022-01-01 (3-year cycle)
+ * - Refresh eligibility date: 2025-01-01
+ * - Notification: Sept 2024 (4 months advance notice)
+ * - Finance forecast: Include $3,500 in Q1 2025 budget
+ */
+export interface RefreshSchedule {
+  id: string;
+  hardwareId: string; // FK to Hardware.id
+  hardwareType: HardwareType; // Computer, monitor, etc.
+  hardwareModel: string; // e.g., "MacBook Pro 16\" M3 Max"
+  employeeId?: string; // FK to Employee.id (if assigned)
+  employeeName?: string; // Employee name for display
+  employeeEmail?: string; // Employee email
+  assignedDate: Date; // When hardware was assigned
+  refreshCycleYears: number; // 3 for computers, 2 for phones, etc.
+  refreshEligibilityDate: Date; // Calculated: assignedDate + refreshCycleYears
+  estimatedRefreshCost: number; // Estimated cost for budgeting
+  status: "active" | "refresh-pending" | "refreshed" | "retired";
+  notificationSent: boolean; // Advance notification sent?
+  notificationSentDate?: Date;
+  refreshRequestId?: string; // FK to ApprovalRequest if refresh requested
+  refreshedDate?: Date; // When refresh was completed
+  newHardwareId?: string; // FK to new Hardware.id after refresh
+  notes?: string; // Additional notes
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+}
+
+/**
+ * Refresh Calendar Stats
+ * Aggregated statistics for refresh calendar dashboard
+ */
+export interface RefreshCalendarStats {
+  totalActiveAssets: number;
+  eligibleThisQuarter: number;
+  eligibleThisYear: number;
+  refreshPendingCount: number;
+  estimatedCostThisQuarter: number;
+  estimatedCostThisYear: number;
+  byHardwareType: Record<HardwareType, number>;
+  byDepartment: Record<string, number>;
 }
 
 // ============================================================================

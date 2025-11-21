@@ -1,6 +1,7 @@
 import React from 'react';
 import { PreHire } from '../types';
 import { PreHireList } from './PreHireList';
+import { PreHireDashboard } from './PreHireDashboard';
 
 interface OutputPanelProps {
   preHires: PreHire[];
@@ -22,7 +23,14 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Dashboard Overview */}
+        <PreHireDashboard preHires={preHires} />
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 dark:border-gray-700 my-6" />
+
+        {/* Pre-hire List */}
         <PreHireList
           preHires={preHires}
           onEdit={onEdit}

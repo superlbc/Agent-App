@@ -39,33 +39,8 @@ export const PackageDetailView: React.FC<PackageDetailViewProps> = ({
   // COST CALCULATIONS
   // ============================================================================
 
-  const costs = useMemo(() => {
-    const hardwareCost = pkg.hardware.reduce((sum, item) => sum + (item.cost || 0), 0);
-    const softwareCost = pkg.software.reduce((sum, item) => {
-      if (item.renewalFrequency === 'monthly') {
-        return sum + (item.cost || 0);
-      } else if (item.renewalFrequency === 'annual') {
-        return sum + (item.cost || 0) / 12;
-      }
-      return sum;
-    }, 0);
-    const licensesCost = pkg.licenses?.reduce((sum, item) => {
-      if (item.renewalFrequency === 'monthly') {
-        return sum + (item.cost || 0);
-      } else if (item.renewalFrequency === 'annual') {
-        return sum + (item.cost || 0) / 12;
-      }
-      return sum;
-    }, 0) || 0;
-
-    return {
-      hardware: hardwareCost,
-      software: softwareCost,
-      licenses: licensesCost,
-      monthlyTotal: softwareCost + licensesCost,
-      annualTotal: (softwareCost + licensesCost) * 12,
-      total: calculatePackageCost(pkg),
-    };
+  const costBreakdown = useMemo(() => {
+    return calculatePackageCost(pkg);
   }, [pkg]);
 
   // ============================================================================
@@ -180,7 +155,7 @@ export const PackageDetailView: React.FC<PackageDetailViewProps> = ({
               Hardware ({pkg.hardware.length})
             </h3>
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
-              ${costs.hardware.toFixed(2)}
+              ${costBreakdown.oneTimeTotal.toFixed(2)}
             </span>
           </div>
           <div className="space-y-3">
@@ -236,10 +211,10 @@ export const PackageDetailView: React.FC<PackageDetailViewProps> = ({
             </h3>
             <div className="text-right">
               <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                ${costs.software.toFixed(2)}/mo
+                ${(costBreakdown.monthlyTotal + costBreakdown.annualTotal / 12).toFixed(2)}/mo avg
               </span>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                ${(costs.software * 12).toFixed(2)}/yr
+                ${costBreakdown.ongoingAnnualTotal.toFixed(2)}/yr
               </p>
             </div>
           </div>
@@ -314,14 +289,7 @@ export const PackageDetailView: React.FC<PackageDetailViewProps> = ({
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Additional Licenses ({pkg.licenses.length})
             </h3>
-            <div className="text-right">
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                ${costs.licenses.toFixed(2)}/mo
-              </span>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                ${(costs.licenses * 12).toFixed(2)}/yr
-              </p>
-            </div>
+            {/* Cost already included in software total above */}
           </div>
           <div className="space-y-3">
             {pkg.licenses.map((item) => (
@@ -364,41 +332,54 @@ export const PackageDetailView: React.FC<PackageDetailViewProps> = ({
           Cost Summary
         </h3>
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Hardware (one-time)</span>
-            <span className="font-medium text-gray-900 dark:text-white">
-              ${costs.hardware.toFixed(2)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">Software (monthly)</span>
-            <span className="font-medium text-gray-900 dark:text-white">
-              ${costs.software.toFixed(2)}/mo
-            </span>
-          </div>
-          {pkg.licenses && pkg.licenses.length > 0 && (
+          {/* One-time costs */}
+          {costBreakdown.oneTimeTotal > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Licenses (monthly)</span>
+              <span className="text-gray-600 dark:text-gray-400">One-time hardware</span>
               <span className="font-medium text-gray-900 dark:text-white">
-                ${costs.licenses.toFixed(2)}/mo
+                ${costBreakdown.oneTimeTotal.toFixed(2)}
               </span>
             </div>
           )}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+
+          {/* Monthly recurring costs */}
+          {costBreakdown.monthlyTotal > 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Monthly software/licenses</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                ${costBreakdown.monthlyTotal.toFixed(2)}/mo
+              </span>
+            </div>
+          )}
+
+          {/* Annual recurring costs */}
+          {costBreakdown.annualTotal > 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Annual software/licenses</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                ${costBreakdown.annualTotal.toFixed(2)}/yr
+              </span>
+            </div>
+          )}
+
+          {/* Totals */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-base font-semibold text-gray-900 dark:text-white">
-                Total Monthly Cost
+                First Year Total
               </span>
               <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
-                ${costs.total.toFixed(2)}/mo
+                ${costBreakdown.firstYearTotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex items-center justify-between mt-1 text-sm">
-              <span className="text-gray-500 dark:text-gray-400">Annual (software only)</span>
-              <span className="text-gray-700 dark:text-gray-300">
-                ${costs.annualTotal.toFixed(2)}/yr
-              </span>
-            </div>
+            {costBreakdown.ongoingAnnualTotal > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">Ongoing annual cost (year 2+)</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  ${costBreakdown.ongoingAnnualTotal.toFixed(2)}/yr
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </Card>
