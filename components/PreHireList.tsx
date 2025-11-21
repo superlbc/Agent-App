@@ -912,6 +912,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => onView(preHire)}
                         title="View details"
+                        aria-label={`View details for ${preHire.candidateName}`}
                       >
                         <Icon name="eye" className="w-4 h-4" />
                       </Button>
@@ -920,6 +921,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => onAssignPackage(preHire)}
                         title="Assign equipment package"
+                        aria-label={`Assign equipment package to ${preHire.candidateName}`}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                       >
                         <Icon name="package" className="w-4 h-4" />
@@ -929,6 +931,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => onEdit(preHire)}
                         title="Edit pre-hire"
+                        aria-label={`Edit ${preHire.candidateName}`}
                       >
                         <Icon name="edit" className="w-4 h-4" />
                       </Button>
@@ -937,6 +940,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => handleDeleteClick(preHire)}
                         title="Delete pre-hire"
+                        aria-label={`Delete ${preHire.candidateName}`}
                         className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                       >
                         <Icon name="trash" className="w-4 h-4" />

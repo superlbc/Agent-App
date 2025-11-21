@@ -111,15 +111,15 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
       onClick={onClose}
     >
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-slate-900 shadow-2xl transform ${isOpen ? 'animate-slide-in' : 'animate-slide-out'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl transform ${isOpen ? 'animate-slide-in' : 'animate-slide-out'}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="h-full flex flex-col">
-          <header className="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+          <header className="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-lg font-semibold">Settings</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label="Close settings"
             >
               <Icon name="close" className="h-5 w-5" />
@@ -128,8 +128,8 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
           
           <div className="flex-grow p-6 overflow-y-auto">
             <section className="space-y-4">
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200">API Configuration</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
+              <h3 className="font-semibold text-gray-800 dark:text-gray-200">API Configuration</h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Override default agent IDs for testing. Leave empty to use defaults.
               </p>
 

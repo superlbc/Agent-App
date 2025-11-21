@@ -36,7 +36,7 @@ export const ScrollToTop: React.FC = () => {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-24 right-6 z-40 h-12 w-12 rounded-full bg-primary text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90"
+          className="fixed bottom-24 right-6 z-40 h-12 w-12 rounded-full bg-primary text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90"
           aria-label="Scroll to top"
           title="Scroll to top"
         >

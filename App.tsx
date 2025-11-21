@@ -451,7 +451,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Version Update Banner */}
       {updateAvailable && currentVersion && serverVersion && (
         <VersionUpdateBanner

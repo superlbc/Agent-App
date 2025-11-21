@@ -129,7 +129,7 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
         {onCreate && (
           <button
             onClick={onCreate}
-            className="flex items-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0"
+            className="flex items-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
           >
             <Icon name="plus" className="w-5 h-5" />
             <span className="text-sm">Create</span>

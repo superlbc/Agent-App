@@ -122,6 +122,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   onClick={() => onSectionChange(item.id)}
                   className={`
                     w-full flex items-start gap-3 px-3 py-3 rounded-lg transition-all
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                     ${
                       isActive
                         ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'

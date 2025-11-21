@@ -143,21 +143,21 @@ export const TourStep: React.FC<TourStepProps> = ({
                 });
                 onStop();
               }}
-              className="-mt-2 -mr-2 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+              className="-mt-2 -mr-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
               aria-label="Close tutorial"
             >
               <Icon name="close" className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 my-3" role="progressbar" aria-valuenow={currentStepIndex + 1} aria-valuemin={1} aria-valuemax={totalSteps} aria-label={`Step ${currentStepIndex + 1} of ${totalSteps}`}>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 my-3" role="progressbar" aria-valuenow={currentStepIndex + 1} aria-valuemin={1} aria-valuemax={totalSteps} aria-label={`Step ${currentStepIndex + 1} of ${totalSteps}`}>
             <div 
               className="bg-primary h-1.5 rounded-full transition-all duration-300" 
               style={{ width: `${((currentStepIndex + 1) / totalSteps) * 100}%` }}
             ></div>
           </div>
 
-          <p className="text-sm text-slate-600 dark:text-slate-300">{content}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">{content}</p>
           
           <div className="flex justify-between items-center mt-4">
             <Button variant="secondary" size="sm" onClick={() => {

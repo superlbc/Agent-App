@@ -140,6 +140,27 @@
       html[lang="ja"] textarea {
         ime-mode: active;
       }
+
+      /* Reduce motion for users who prefer it (WCAG Accessibility) */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        /* Disable specific animations */
+        #tour-highlight {
+          transition: none !important;
+        }
+
+        .tour-popover {
+          animation: none !important;
+        }
+      }
     </style>
 <script type="importmap">
 {
@@ -156,7 +177,7 @@
 }
 </script>
 </head>
-  <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased">
+  <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
