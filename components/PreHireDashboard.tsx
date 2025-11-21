@@ -104,46 +104,53 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
   }
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-      {/* Compact Statistics Row */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 px-6 py-4">
-        {/* Stat Cards */}
-        {statCards.map((card) => (
-          <div
-            key={card.label}
-            className="group relative flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-help flex-1"
-            title={card.description}
-          >
-            {/* Icon */}
-            <div className={`${card.bgColor} p-2 rounded-lg`}>
-              <Icon name={card.icon} className={`w-5 h-5 ${card.color}`} />
-            </div>
+    <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-6 py-3">
+      {/* Inline Header with Stats */}
+      <div className="flex items-center justify-between gap-4">
+        {/* Left: Title */}
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Pre-hire Records
+        </h2>
 
-            {/* Value & Label */}
-            <div className="flex-1 min-w-0">
-              <p className={`text-2xl font-bold ${card.color} leading-none`}>
-                {card.value}
-              </p>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mt-1 truncate">
-                {card.label}
-              </p>
-            </div>
+        {/* Center: Inline Stats */}
+        <div className="flex items-center gap-4 flex-1 justify-center">
+          {statCards.map((card) => (
+            <div
+              key={card.label}
+              className="group relative flex items-center gap-2 cursor-help"
+              title={card.description}
+            >
+              {/* Icon */}
+              <div className={`${card.bgColor} p-1.5 rounded`}>
+                <Icon name={card.icon} className={`w-4 h-4 ${card.color}`} />
+              </div>
 
-            {/* Tooltip (hidden by default, shows on hover) */}
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none">
-              {card.description}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
-            </div>
-          </div>
-        ))}
+              {/* Value & Label */}
+              <div>
+                <span className={`text-lg font-bold ${card.color} leading-none`}>
+                  {card.value}
+                </span>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">
+                  {card.label}
+                </span>
+              </div>
 
-        {/* Create Pre-hire Button */}
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none">
+                {card.description}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Right: Create Button */}
         {onCreate && (
           <button
             onClick={onCreate}
-            className="flex items-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
           >
-            <Icon name="plus" className="w-5 h-5" />
+            <Icon name="plus" className="w-4 h-4" />
             <span className="text-sm">Create</span>
           </button>
         )}

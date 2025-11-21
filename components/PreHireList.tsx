@@ -899,15 +899,14 @@ export const PreHireList: React.FC<PreHireListProps> = ({
 
                   {/* Start Date */}
                   <td className="px-4 py-3">
-                    <div>
-                      <div className="text-sm text-gray-900 dark:text-gray-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         {formatDate(preHire.startDate)}
-                      </div>
+                      </span>
                       {isInFreezePeriod(new Date(preHire.startDate)) && (
                         <FreezePeriodAlert
                           date={new Date(preHire.startDate)}
                           size="sm"
-                          className="mt-1"
                         />
                       )}
                     </div>
