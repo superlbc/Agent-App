@@ -172,32 +172,13 @@ export const HardwareCatalog: React.FC<HardwareCatalogProps> = ({
           {renderSpecs(item.specifications)}
 
           {/* Footer */}
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-            {/* Status */}
-            <span
-              className={`
-                text-xs px-2 py-1 rounded-full font-medium
-                ${
-                  item.status === 'available'
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                    : item.status === 'assigned'
-                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                    : item.status === 'maintenance'
-                    ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }
-              `}
-            >
-              {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-            </span>
-
-            {/* Cost */}
-            {showCost && item.cost !== undefined && (
+          {showCost && item.cost !== undefined && (
+            <div className="flex items-center justify-end mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
                 ${item.cost.toFixed(2)}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </Card>
     );
