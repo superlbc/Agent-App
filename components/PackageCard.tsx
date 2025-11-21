@@ -27,6 +27,44 @@ interface PackageCardProps {
 }
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get an icon name for a given role
+ */
+function getRoleIcon(role: string): string {
+  const roleLower = role.toLowerCase();
+
+  // Designer roles
+  if (roleLower.includes('designer') || roleLower.includes('xd') || roleLower.includes('ux')) {
+    return 'design';
+  }
+  // Developer roles
+  if (roleLower.includes('developer') || roleLower.includes('engineer') || roleLower.includes('code')) {
+    return 'code';
+  }
+  // Manager/Leadership roles
+  if (roleLower.includes('manager') || roleLower.includes('director') || roleLower.includes('lead')) {
+    return 'users';
+  }
+  // Analyst roles
+  if (roleLower.includes('analyst') || roleLower.includes('data')) {
+    return 'chart';
+  }
+  // Creative roles
+  if (roleLower.includes('creative') || roleLower.includes('art') || roleLower.includes('motion')) {
+    return 'image';
+  }
+  // Strategy roles
+  if (roleLower.includes('strategy') || roleLower.includes('consultant')) {
+    return 'lightbulb';
+  }
+  // Default
+  return 'briefcase';
+}
+
+// ============================================================================
 // COMPONENT
 // ============================================================================
 
@@ -151,30 +189,49 @@ export const PackageCard: React.FC<PackageCardProps> = ({
 
         {/* Target Roles & Departments */}
         {!compact && (
-          <div className="mb-4 space-y-2">
-            <div className="flex items-start gap-2">
-              <Icon
-                name="briefcase"
-                className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0"
-              />
-              <div className="text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Roles: </span>
-                <span className="text-gray-900 dark:text-white">
-                  {pkg.roleTarget.slice(0, 3).join(', ')}
-                  {pkg.roleTarget.length > 3 && ` +${pkg.roleTarget.length - 3} more`}
+          <div className="mb-4 space-y-3">
+            {/* Roles with Icons */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  name="briefcase"
+                  className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0"
+                />
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Target Roles
                 </span>
               </div>
+              <div className="flex flex-wrap gap-2">
+                {pkg.roleTarget.slice(0, 4).map((role, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md"
+                  >
+                    <Icon name={getRoleIcon(role) as any} className="w-3.5 h-3.5" />
+                    {role}
+                  </span>
+                ))}
+                {pkg.roleTarget.length > 4 && (
+                  <span className="inline-flex items-center px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-medium rounded-md">
+                    +{pkg.roleTarget.length - 4} more
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex items-start gap-2">
-              <Icon
-                name="building"
-                className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0"
-              />
-              <div className="text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Departments: </span>
-                <span className="text-gray-900 dark:text-white">
-                  {pkg.departmentTarget.join(', ')}
+
+            {/* Departments */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  name="building"
+                  className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0"
+                />
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Departments
                 </span>
+              </div>
+              <div className="text-sm text-gray-900 dark:text-white">
+                {pkg.departmentTarget.join(', ')}
               </div>
             </div>
           </div>
