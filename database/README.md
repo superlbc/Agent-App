@@ -10,17 +10,20 @@ This directory contains SQL migration scripts for the Employee Onboarding System
 
 | Table | Purpose | Migration |
 |-------|---------|-----------|
+| `Packages` | Package definitions (master) | 003 |
 | `PackageVersions` | Immutable snapshots of package configurations | 001 |
 | `PackageAssignments` | Links pre-hires/employees to specific package versions | 001 |
-| `Packages` | Package definitions (master) | TBD |
-| `Hardware` | Hardware inventory | TBD |
-| `Software` | Software catalog and license pools | TBD |
-| `PreHires` | Pre-hire candidate tracking | TBD |
-| `Employees` | Employee records | TBD |
-| `ApprovalRequests` | Approval workflow tracking | TBD |
-| `HelixTickets` | IT ticket integration | TBD |
-| `FreezePeriods` | Workday freeze period definitions | TBD |
-| `FreezePeriodNotifications` | Freeze period email tracking | TBD |
+| `Hardware` | Hardware inventory catalog | 003 |
+| `HardwareMaintenanceHistory` | Hardware maintenance tracking | 006 |
+| `Software` | Software catalog and license pools | 003 |
+| `LicenseAssignments` | Software license assignments to employees | 006 |
+| `PreHires` | Pre-hire candidate tracking | 003 |
+| `Employees` | Employee records with onboarding status | 003 |
+| `ApprovalRequests` | Approval workflow tracking | 004 |
+| `HelixTickets` | IT ticket integration | 004 |
+| `OnboardingTasks` | Task checklist management | 004 |
+| `FreezePeriods` | Workday freeze period definitions | 005 |
+| `FreezePeriodNotifications` | Freeze period email tracking | 005 |
 
 ## Migration Files
 
@@ -42,6 +45,127 @@ This directory contains SQL migration scripts for the Employee Onboarding System
 - JSON storage for hardware/software arrays
 - Audit trail with creation timestamps and notes
 
+### 002_hardware_superseding.sql
+
+**Purpose**: Add hardware superseding relationships for automatic package updates
+
+**Tables Modified**:
+- `Hardware` - Added `supersededById` column for upgrade chains
+
+**Views Created**:
+- `vw_LatestHardware` - Current hardware (not superseded)
+- `vw_HardwareSupersedingChain` - Full upgrade lineage
+- `vw_SupersededHardwareInPackages` - Package impact analysis
+
+**Stored Procedures**:
+- `sp_SupersedeHardware` - Mark hardware as superseded and update packages
+
+**Key Features**:
+- Superseding chains (e.g., MacBook M3 → M4 → M5)
+- Automatic package updates with new hardware
+- Existing assignments preserved via versioning
+- Impact analysis for package updates
+
+### 003_core_tables.sql
+
+**Purpose**: Create foundational tables for Employee Onboarding System
+
+**Tables Created**:
+- `Packages` - Equipment package definitions
+- `Hardware` - Hardware inventory catalog
+- `Software` - Software catalog with license pools
+- `PreHires` - Pre-hire candidate tracking
+- `Employees` - Employee records with onboarding status
+
+**Views Created**:
+- `vw_PreHiresWithPackages` - Pre-hires with assigned packages
+- `vw_EmployeesOnboardingProgress` - Employee onboarding status
+- `vw_HardwareInventorySummary` - Hardware inventory by type
+- `vw_SoftwareLicenseUtilization` - License usage and availability
+
+**Key Features**:
+- Complete employee lifecycle tracking (pre-hire → employee)
+- Hardware/software catalog with cost tracking
+- License pool management (seats, utilization, renewal)
+- Onboarding phase tracking with progress percentage
+
+### 004_approval_workflow.sql
+
+**Purpose**: Create approval routing and onboarding task tracking
+
+**Tables Created**:
+- `ApprovalRequests` - Equipment/software approval workflow
+- `HelixTickets` - IT ticketing system integration
+- `OnboardingTasks` - Task checklist management
+
+**Views Created**:
+- `vw_PendingApprovals` - Approval queue with urgency
+- `vw_OpenHelixTickets` - Active IT tickets
+- `vw_OverdueOnboardingTasks` - Tasks past due date
+- `vw_OnboardingProgressSummary` - Employee onboarding metrics
+- `vw_ApprovalRequestHistory` - Approval audit trail
+
+**Stored Procedures**:
+- `sp_AutoApproveStandardPackage` - Auto-approve and create Helix ticket
+
+**Key Features**:
+- Standard packages auto-approve, exceptions route to SVP
+- Helix ticket creation for IT provisioning
+- Freeze period password reset/termination handling
+- Task tracking with due dates and blocking
+
+### 005_freeze_periods.sql
+
+**Purpose**: Create freeze period management and notification tracking
+
+**Tables Created**:
+- `FreezePeriods` - Workday freeze period definitions
+- `FreezePeriodNotifications` - Email notification tracking
+
+**Views Created**:
+- `vw_ActiveFreezePeriods` - Current and upcoming freeze periods
+- `vw_PendingFreezePeriodNotifications` - Notifications to send
+- `vw_FreezePeriodNotificationHistory` - Sent notification audit trail
+- `vw_EmployeesAffectedByFreezePeriod` - Employees with start/end during freeze
+
+**Stored Procedures**:
+- `sp_CreateFreezePeriodNotifications` - Generate notifications for affected employees
+- `sp_MarkNotificationSent` - Track sent notifications
+
+**Key Features**:
+- Configurable freeze periods (not hardcoded Nov-Jan 5)
+- Email template system with placeholders
+- Auto-detect employees starting/ending during freeze
+- Password reset automation for pre-loaded accounts
+- Termination email automation
+
+### 006_license_management.sql
+
+**Purpose**: Create license assignment and reclaim tracking (Phase 2)
+
+**Tables Created**:
+- `LicenseAssignments` - Software license assignments to employees
+- `HardwareMaintenanceHistory` - Hardware maintenance tracking
+
+**Views Created**:
+- `vw_EmployeeLicenseAssignments` - Licenses per employee
+- `vw_LicenseOverAllocationAlerts` - Over-allocated licenses
+- `vw_ExpiringLicenseAssignments` - Licenses expiring soon
+- `vw_LicenseReclaimHistory` - Reclaimed license audit trail
+- `vw_HardwareMaintenanceCosts` - Total cost of ownership
+
+**Stored Procedures**:
+- `sp_AssignLicense` - Assign license to employee
+- `sp_ReclaimLicense` - Revoke single license
+- `sp_ReclaimAllLicensesForEmployee` - Bulk reclaim on termination
+
+**Key Features**:
+- License seat tracking and utilization
+- Over-allocation prevention and alerts
+- Automatic reclaim on employee termination
+- Temporary license assignments with expiration
+- Hardware maintenance cost tracking
+
 ## How to Apply Migrations
 
 ### Prerequisites
@@ -62,11 +186,23 @@ GO
 
 2. **Apply Migrations** (in order):
 ```bash
-# Migration 001
+# Migration 001 - Package Versioning (REQUIRED)
 sqlcmd -S <server> -d EmployeeOnboarding -i migrations/001_package_versioning.sql
 
-# Future migrations
-# sqlcmd -S <server> -d EmployeeOnboarding -i migrations/002_*.sql
+# Migration 002 - Hardware Superseding (REQUIRED)
+sqlcmd -S <server> -d EmployeeOnboarding -i migrations/002_hardware_superseding.sql
+
+# Migration 003 - Core Tables (REQUIRED)
+sqlcmd -S <server> -d EmployeeOnboarding -i migrations/003_core_tables.sql
+
+# Migration 004 - Approval Workflow (REQUIRED)
+sqlcmd -S <server> -d EmployeeOnboarding -i migrations/004_approval_workflow.sql
+
+# Migration 005 - Freeze Periods (REQUIRED)
+sqlcmd -S <server> -d EmployeeOnboarding -i migrations/005_freeze_periods.sql
+
+# Migration 006 - License Management (Phase 2 - Optional)
+sqlcmd -S <server> -d EmployeeOnboarding -i migrations/006_license_management.sql
 ```
 
 3. **Verify Migration**:
@@ -222,15 +358,25 @@ FROM PackageVersions
 CROSS APPLY OPENJSON(hardware);
 ```
 
-## Future Migrations
+## Migration Status
 
-Planned migrations:
+### Completed Migrations ✅
 
-- `002_core_tables.sql` - Packages, Hardware, Software, PreHires, Employees
-- `003_approval_workflow.sql` - ApprovalRequests, HelixTickets
-- `004_freeze_periods.sql` - FreezePeriods, FreezePeriodNotifications
-- `005_hardware_superseding.sql` - Add supersededById to Hardware table
-- `006_role_based_matching.sql` - Add roleTargets array to Packages
+- ✅ `001_package_versioning.sql` - PackageVersions, PackageAssignments
+- ✅ `002_hardware_superseding.sql` - Hardware superseding relationships
+- ✅ `003_core_tables.sql` - Packages, Hardware, Software, PreHires, Employees
+- ✅ `004_approval_workflow.sql` - ApprovalRequests, HelixTickets, OnboardingTasks
+- ✅ `005_freeze_periods.sql` - FreezePeriods, FreezePeriodNotifications
+- ✅ `006_license_management.sql` - LicenseAssignments, HardwareMaintenanceHistory
+
+### Future Enhancements (Optional)
+
+Potential future migrations for additional features:
+
+- `007_document_management.sql` - Onboarding document tracking (I-9, W-4, etc.)
+- `008_audit_logging.sql` - Comprehensive audit trail for all table changes
+- `009_reporting_views.sql` - Additional business intelligence views
+- `010_performance_optimization.sql` - Indexes and query optimization
 
 ## Maintenance
 
