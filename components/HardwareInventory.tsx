@@ -13,6 +13,7 @@ import HardwareCreateModal from './HardwareCreateModal';
 import HardwareEditModal from './HardwareEditModal';
 import HardwareBulkImportModal from './HardwareBulkImportModal';
 import { Hardware } from '../types';
+import { useRole } from '../contexts/RoleContext';
 
 interface HardwareInventoryProps {
   // Optional: pass in hardware data from parent
@@ -24,6 +25,14 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
   initialHardware = [],
   onHardwareChange,
 }) => {
+  const { hasPermission } = useRole();
+
+  // Permission checks
+  const canCreate = hasPermission('HARDWARE_CREATE');
+  const canUpdate = hasPermission('HARDWARE_UPDATE');
+  const canDelete = hasPermission('HARDWARE_DELETE');
+  const canRead = hasPermission('HARDWARE_READ');
+
   // State
   const [hardware, setHardware] = useState<Hardware[]>(initialHardware);
   const [searchQuery, setSearchQuery] = useState('');
@@ -185,16 +194,58 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => setShowBulkImportModal(true)}>
+          <Button
+            variant="ghost"
+            onClick={() => setShowBulkImportModal(true)}
+            disabled={!canCreate}
+            title={!canCreate ? 'You do not have permission to import hardware' : undefined}
+          >
             <Icon name="upload" className="w-4 h-4" />
             Bulk Import
           </Button>
-          <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+          <Button
+            variant="primary"
+            onClick={() => setShowCreateModal(true)}
+            disabled={!canCreate}
+            title={!canCreate ? 'You do not have permission to create hardware' : undefined}
+          >
             <Icon name="plus" className="w-4 h-4" />
             Add Hardware
           </Button>
         </div>
       </div>
+
+      {/* Permission Check Alert */}
+      {!canRead && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start gap-3">
+          <Icon name="alert-triangle" className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
+              Insufficient Permissions
+            </h4>
+            <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+              You do not have permission to view hardware inventory. Required permission: HARDWARE_READ
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+              Contact your administrator if you need access to this feature.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {(!canCreate && canRead) && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+          <Icon name="info" className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
+              Read-Only Access
+            </h4>
+            <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+              You have view-only access to hardware inventory. You cannot create, edit, or delete hardware items.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -468,7 +519,14 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(hw)} className="flex-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(hw)}
+                    className="flex-1"
+                    disabled={!canUpdate}
+                    title={!canUpdate ? 'You do not have permission to edit hardware' : undefined}
+                  >
                     <Icon name="edit" className="w-4 h-4" />
                     Edit
                   </Button>
@@ -477,7 +535,8 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                     size="sm"
                     onClick={() => handleDeleteHardware(hw.id)}
                     className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    title={`Delete ${hw.model}`}
+                    disabled={!canDelete}
+                    title={!canDelete ? 'You do not have permission to delete hardware' : `Delete ${hw.model}`}
                     aria-label={`Delete ${hw.model}`}
                   >
                     <Icon name="trash" className="w-4 h-4" />
@@ -504,7 +563,12 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
               </p>
             </div>
             {!searchQuery && filterType === 'all' && filterStatus === 'all' && (
-              <Button variant="primary" onClick={() => setShowCreateModal(true)}>
+              <Button
+                variant="primary"
+                onClick={() => setShowCreateModal(true)}
+                disabled={!canCreate}
+                title={!canCreate ? 'You do not have permission to create hardware' : undefined}
+              >
                 <Icon name="plus" className="w-4 h-4" />
                 Add Hardware
               </Button>

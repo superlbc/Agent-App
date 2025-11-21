@@ -15,6 +15,7 @@ import { HardwareCatalog } from './HardwareCatalog';
 import { SoftwareCatalog } from './SoftwareCatalog';
 import { HierarchicalRoleSelector, RoleSelection } from './ui/HierarchicalRoleSelector';
 import { getHierarchicalData } from '../services/departmentDataService';
+import { useRole } from '../contexts/RoleContext';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -45,6 +46,12 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
   onCancel,
   className = '',
 }) => {
+  const { hasPermission } = useRole();
+
+  // Permission checks
+  const canCreateStandard = hasPermission('PACKAGE_CREATE_STANDARD');
+  const canCreateException = hasPermission('PACKAGE_CREATE_EXCEPTION');
+
   // ============================================================================
   // STATE
   // ============================================================================
@@ -232,7 +239,9 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
             <div className="flex items-center gap-4">
               <button
                 type="button"
-                onClick={() => setIsStandard(true)}
+                onClick={() => canCreateStandard && setIsStandard(true)}
+                disabled={!canCreateStandard}
+                title={!canCreateStandard ? 'You do not have permission to create standard packages' : undefined}
                 className={`
                   flex-1 p-4 rounded-lg border-2 transition-all
                   ${
@@ -240,6 +249,7 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                       : 'border-gray-200 dark:border-gray-700'
                   }
+                  ${!canCreateStandard ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -256,11 +266,18 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
                 <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
                   Auto-approved, standard equipment configuration
                 </p>
+                {!canCreateStandard && (
+                  <p className="text-xs text-red-600 dark:text-red-400 text-left mt-1">
+                    Permission required: PACKAGE_CREATE_STANDARD
+                  </p>
+                )}
               </button>
 
               <button
                 type="button"
-                onClick={() => setIsStandard(false)}
+                onClick={() => canCreateException && setIsStandard(false)}
+                disabled={!canCreateException}
+                title={!canCreateException ? 'You do not have permission to create exception packages' : undefined}
                 className={`
                   flex-1 p-4 rounded-lg border-2 transition-all
                   ${
@@ -268,6 +285,7 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
                       ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                       : 'border-gray-200 dark:border-gray-700'
                   }
+                  ${!canCreateException ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -284,6 +302,11 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
                 <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
                   Requires SVP approval, non-standard configuration
                 </p>
+                {!canCreateException && (
+                  <p className="text-xs text-red-600 dark:text-red-400 text-left mt-1">
+                    Permission required: PACKAGE_CREATE_EXCEPTION
+                  </p>
+                )}
               </button>
             </div>
           </div>
@@ -637,6 +660,38 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
         </div>
       </div>
 
+      {/* Permission Check Alert */}
+      {!canCreateStandard && !canCreateException && (
+        <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start gap-3">
+          <Icon name="alert-triangle" className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
+              Insufficient Permissions
+            </h4>
+            <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+              You do not have permission to create equipment packages. Required permissions: PACKAGE_CREATE_STANDARD or PACKAGE_CREATE_EXCEPTION
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">
+              Contact your administrator if you need access to this feature.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!canCreateStandard && canCreateException && (
+        <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+          <Icon name="info" className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-blue-900 dark:text-blue-100 text-sm">
+              Exception Packages Only
+            </h4>
+            <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+              You can create exception packages only (requires SVP approval). You cannot create standard auto-approved packages.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Cloning Banner */}
       {isCloning && existingPackage && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -739,7 +794,16 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
             <Button
               variant="primary"
               onClick={handleSave}
-              disabled={!validation.isValid}
+              disabled={!validation.isValid || (isStandard ? !canCreateStandard : !canCreateException)}
+              title={
+                !validation.isValid
+                  ? 'Please fix validation errors before saving'
+                  : (isStandard && !canCreateStandard)
+                  ? 'You do not have permission to create standard packages'
+                  : (!isStandard && !canCreateException)
+                  ? 'You do not have permission to create exception packages'
+                  : undefined
+              }
             >
               <Icon name="save" className="w-4 h-4 mr-2" />
               {existingPackage ? 'Update Package' : 'Create Package'}

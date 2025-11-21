@@ -4,6 +4,7 @@ import { Icon } from './ui/Icon.tsx';
 import { Input } from './ui/Input.tsx';
 import { Button } from './ui/Button.tsx';
 import { telemetryService } from '../utils/telemetryService';
+import { useRole } from '../contexts/RoleContext';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface SettingsDrawerProps {
   setNotesAgentId: React.Dispatch<React.SetStateAction<string>>;
   interrogationAgentId: string;
   setInterrogationAgentId: React.Dispatch<React.SetStateAction<string>>;
+  onOpenRoleManagement?: () => void;
 }
 
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
@@ -22,12 +24,17 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   notesAgentId,
   setNotesAgentId,
   interrogationAgentId,
-  setInterrogationAgentId
+  setInterrogationAgentId,
+  onOpenRoleManagement
 }) => {
   const { t } = useTranslation(['common']);
+  const { hasPermission } = useRole();
   const [isRendered, setIsRendered] = useState(false);
   const [localNotesAgentId, setLocalNotesAgentId] = useState(notesAgentId);
   const [localInterrogationAgentId, setLocalInterrogationAgentId] = useState(interrogationAgentId);
+
+  // Check if user has permission to manage roles
+  const canManageRoles = hasPermission('ADMIN_ROLE_MANAGE');
 
   useEffect(() => {
     if (isOpen) {
@@ -154,6 +161,36 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 <Button onClick={handleReset} variant="secondary">Reset</Button>
               </div>
             </section>
+
+            {/* Role Management Section - Only visible to admins */}
+            {canManageRoles && onOpenRoleManagement && (
+              <section className="space-y-4 mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                  <Icon name="shield" className="h-5 w-5 text-blue-500" />
+                  System Administration
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Manage roles, permissions, and user access control
+                </p>
+
+                <Button
+                  onClick={() => {
+                    onOpenRoleManagement();
+                    onClose();
+                  }}
+                  variant="secondary"
+                  className="w-full justify-start"
+                >
+                  <Icon name="settings" className="h-5 w-5 mr-2" />
+                  Role Management Dashboard
+                </Button>
+
+                <div className="text-xs text-gray-500 dark:text-gray-500 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <Icon name="info" className="h-4 w-4 inline mr-1" />
+                  You have administrator permissions to manage system roles and user access.
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>
