@@ -99,7 +99,28 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
   ]);
 
   // ============================================================================
-  // ACCESS CONTROL
+  // FILTERING (MUST BE BEFORE CONDITIONAL RETURNS)
+  // ============================================================================
+
+  const filteredRoles = useMemo(() => {
+    return roles.filter(role => {
+      // Search filter
+      const matchesSearch = !searchQuery ||
+        role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        role.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        role.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Active status filter
+      const matchesStatus = filterActive === 'all' ||
+        (filterActive === 'active' && true) || // TODO: Add isActive field when backend ready
+        (filterActive === 'inactive' && false);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [roles, searchQuery, filterActive]);
+
+  // ============================================================================
+  // ACCESS CONTROL (AFTER ALL HOOKS)
   // ============================================================================
 
   if (!canManageRoles && !canManageUsers) {
@@ -121,27 +142,6 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
       </div>
     );
   }
-
-  // ============================================================================
-  // FILTERING
-  // ============================================================================
-
-  const filteredRoles = useMemo(() => {
-    return roles.filter(role => {
-      // Search filter
-      const matchesSearch = !searchQuery ||
-        role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Active status filter
-      const matchesStatus = filterActive === 'all' ||
-        (filterActive === 'active' && true) || // TODO: Add isActive field when backend ready
-        (filterActive === 'inactive' && false);
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [roles, searchQuery, filterActive]);
 
   // ============================================================================
   // EVENT HANDLERS
