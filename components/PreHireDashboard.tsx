@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { Icon } from './ui/Icon';
 import { PreHire } from '../types';
+import { StatsSkeleton } from './ui/StatsSkeleton';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -14,6 +15,7 @@ import { PreHire } from '../types';
 interface PreHireDashboardProps {
   preHires: PreHire[];
   onCreate?: () => void;
+  loading?: boolean;
 }
 
 interface StatCard {
@@ -31,7 +33,8 @@ interface StatCard {
 
 export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
   preHires,
-  onCreate
+  onCreate,
+  loading = false
 }) => {
   // Calculate statistics
   const stats = useMemo(() => {
@@ -91,15 +94,24 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
     },
   ];
 
+  // Show skeleton loader while loading
+  if (loading) {
+    return (
+      <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <StatsSkeleton count={4} />
+      </div>
+    );
+  }
+
   return (
     <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       {/* Compact Statistics Row */}
-      <div className="flex items-center gap-4 px-6 py-4">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 px-6 py-4">
         {/* Stat Cards */}
         {statCards.map((card) => (
           <div
             key={card.label}
-            className="group relative flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-help flex-1"
+            className="group relative flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-help flex-1"
             title={card.description}
           >
             {/* Icon */}
@@ -129,7 +141,7 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
         {onCreate && (
           <button
             onClick={onCreate}
-            className="flex items-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0"
+            className="flex items-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
           >
             <Icon name="plus" className="w-5 h-5" />
             <span className="text-sm">Create</span>

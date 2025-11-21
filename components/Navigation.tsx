@@ -24,6 +24,8 @@ interface NavigationProps {
   currentSection: NavigationSection;
   onSectionChange: (section: NavigationSection) => void;
   className?: string;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 interface NavigationItem {
@@ -96,14 +98,43 @@ export const Navigation: React.FC<NavigationProps> = ({
   currentSection,
   onSectionChange,
   className = '',
+  isMobileOpen = false,
+  onMobileClose,
 }) => {
+  const handleSectionChange = (section: NavigationSection) => {
+    onSectionChange(section);
+    // Close mobile menu after selecting a section
+    if (onMobileClose) {
+      onMobileClose();
+    }
+  };
+
   return (
-    <nav
-      className={`w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col ${className}`}
-    >
+    <>
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Navigation Sidebar/Drawer */}
+      <nav
+        className={`
+          fixed lg:relative inset-y-0 left-0 z-50
+          w-64 bg-white dark:bg-gray-800
+          border-r border-gray-200 dark:border-gray-700
+          flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${className}
+        `}
+      >
       {/* Navigation Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Employee Onboarding
         </h2>
         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -119,9 +150,10 @@ export const Navigation: React.FC<NavigationProps> = ({
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => onSectionChange(item.id)}
+                  onClick={() => handleSectionChange(item.id)}
                   className={`
                     w-full flex items-start gap-3 px-3 py-3 rounded-lg transition-all
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                     ${
                       isActive
                         ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
@@ -175,6 +207,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         </div>
       </div>
     </nav>
+    </>
   );
 };
 

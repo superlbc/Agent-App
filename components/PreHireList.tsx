@@ -13,6 +13,7 @@ import { Card } from './ui/Card';
 import { StatusBadge } from './ui/StatusBadge';
 import { FreezePeriodAlert, isInFreezePeriod } from './ui/FreezePeriodBanner';
 import { DEPARTMENTS, ROLES, PRE_HIRE_STATUSES } from '../constants';
+import { TableSkeleton } from './ui/TableSkeleton';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -26,6 +27,7 @@ interface PreHireListProps {
   onAssignPackage: (preHire: PreHire) => void;
   onCreate: () => void;
   className?: string;
+  loading?: boolean;
 }
 
 type SortField = 'candidateName' | 'role' | 'department' | 'startDate' | 'status';
@@ -56,6 +58,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   onAssignPackage,
   onCreate,
   className = '',
+  loading = false,
 }) => {
   // ============================================================================
   // STATE
@@ -504,6 +507,19 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   // RENDER
   // ============================================================================
 
+  // Show skeleton loader while loading
+  if (loading) {
+    return (
+      <Card className={`p-6 ${className}`}>
+        <div className="mb-6">
+          <div className="h-7 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded mt-2 animate-pulse"></div>
+        </div>
+        <TableSkeleton rows={8} columns={7} />
+      </Card>
+    );
+  }
+
   return (
     <Card className={`p-6 ${className}`}>
       {/* Header */}
@@ -748,8 +764,8 @@ export const PreHireList: React.FC<PreHireListProps> = ({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <table className="w-full min-w-[800px]">
           <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th className="px-4 py-3 text-left w-12">
@@ -912,6 +928,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => onView(preHire)}
                         title="View details"
+                        aria-label={`View details for ${preHire.candidateName}`}
                       >
                         <Icon name="eye" className="w-4 h-4" />
                       </Button>
@@ -920,6 +937,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => onAssignPackage(preHire)}
                         title="Assign equipment package"
+                        aria-label={`Assign equipment package to ${preHire.candidateName}`}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                       >
                         <Icon name="package" className="w-4 h-4" />
@@ -929,6 +947,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => onEdit(preHire)}
                         title="Edit pre-hire"
+                        aria-label={`Edit ${preHire.candidateName}`}
                       >
                         <Icon name="edit" className="w-4 h-4" />
                       </Button>
@@ -937,6 +956,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                         size="sm"
                         onClick={() => handleDeleteClick(preHire)}
                         title="Delete pre-hire"
+                        aria-label={`Delete ${preHire.candidateName}`}
                         className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
                       >
                         <Icon name="trash" className="w-4 h-4" />

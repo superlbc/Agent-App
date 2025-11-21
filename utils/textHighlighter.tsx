@@ -43,8 +43,8 @@ export function highlightText(
         key={`match-${matchIndex}`}
         className={`rounded px-0.5 ${
           isCurrent
-            ? 'bg-amber-400 dark:bg-amber-500 text-slate-900'
-            : 'bg-yellow-200 dark:bg-yellow-600/50 text-slate-900 dark:text-white'
+            ? 'bg-amber-400 dark:bg-amber-500 text-gray-900'
+            : 'bg-yellow-200 dark:bg-yellow-600/50 text-gray-900 dark:text-white'
         }`}
       >
         {text.substring(index, index + query.length)}
@@ -93,8 +93,8 @@ export function highlightMatch(
       <mark
         className={`rounded px-0.5 ${
           isCurrent
-            ? 'bg-amber-400 dark:bg-amber-500 text-slate-900'
-            : 'bg-yellow-200 dark:bg-yellow-600/50 text-slate-900 dark:text-white'
+            ? 'bg-amber-400 dark:bg-amber-500 text-gray-900'
+            : 'bg-yellow-200 dark:bg-yellow-600/50 text-gray-900 dark:text-white'
         }`}
       >
         {match}

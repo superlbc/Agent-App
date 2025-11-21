@@ -70,10 +70,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
         <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
         <div className="p-5">
           <div className="relative mb-6">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white text-center">{t('common:about.title')}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">{t('common:about.title')}</h2>
             <button
               onClick={onClose}
-              className="absolute -top-2 -right-2 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="absolute -top-2 -right-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label="Close about"
             >
               <Icon name="close" className="h-5 w-5" />
@@ -83,21 +83,21 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
           {/* App Info */}
           <div className="text-center mb-6">
             <Icon name="logo" className="h-16 w-16 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t('common:about.appName')}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{t('common:about.version', { version: '1.0.0' })}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('common:about.version', { version: '1.0.0' })}</p>
           </div>
 
           <div className="space-y-4 text-sm">
             {/* Developer Card */}
-            <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-              <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-3">{t('common:about.developedBy')}</h4>
-              <Card className="p-4 bg-slate-50 dark:bg-slate-800/50">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3">{t('common:about.developedBy')}</h4>
+              <Card className="p-4 bg-gray-50 dark:bg-gray-800/50">
                 <div className="flex items-center gap-3">
                   {/* Developer Avatar - Live from Azure AD or fallback */}
                   {isLoadingDeveloper ? (
-                    <div className="h-12 w-12 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse flex-shrink-0" />
+                    <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
                   ) : displayData.photoUrl ? (
                     <img
                       src={displayData.photoUrl}
@@ -113,15 +113,15 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
                   <div className="flex-1 min-w-0">
                     {isLoadingDeveloper ? (
                       <>
-                        <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded animate-pulse mb-1 w-32" />
-                        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse w-48" />
+                        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-1 w-32" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-48" />
                       </>
                     ) : (
                       <>
-                        <p className="text-base font-semibold text-slate-900 dark:text-white truncate">
+                        <p className="text-base font-semibold text-gray-900 dark:text-white truncate">
                           {displayData.displayName}
                         </p>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
                           {displayData.jobTitle}
                         </p>
                       </>
@@ -130,18 +130,18 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
                 </div>
 
                 {/* Contact Actions Row */}
-                <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   {/* Email - Only show if live data available */}
                   {hasLiveData && displayData.mail && (
                     <a
                       href={`mailto:${displayData.mail}`}
-                      className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
                       aria-label="Send email to Luis Bustos"
                       title="Email Luis"
                     >
-                      <Icon name="email" className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                      <Icon name="email" className="h-5 w-5 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                       {/* Tooltip */}
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                         Email Luis
                       </span>
                     </a>
@@ -153,13 +153,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
                       href={`https://teams.microsoft.com/l/chat/0/0?users=${displayData.mail}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
                       aria-label="Chat with Luis Bustos on Teams"
                       title="Chat on Teams"
                     >
-                      <Icon name="teams-filled" className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
+                      <Icon name="teams-filled" className="h-5 w-5 text-gray-600 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
                       {/* Tooltip */}
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                         Chat on Teams
                       </span>
                     </a>
@@ -170,13 +170,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
                     href="https://www.linkedin.com/in/lbustos/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 dark:border-slate-700 hover:border-blue-700 dark:hover:border-blue-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="group relative flex items-center justify-center h-10 w-10 rounded-full border border-gray-200 dark:border-gray-700 hover:border-blue-700 dark:hover:border-blue-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105 active:scale-95"
                     aria-label="View Luis Bustos LinkedIn profile"
                     title="View LinkedIn Profile"
                   >
-                    <Icon name="linkedin" className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-700 dark:group-hover:text-blue-500 transition-colors" />
+                    <Icon name="linkedin" className="h-5 w-5 text-gray-600 dark:text-gray-400 group-hover:text-blue-700 dark:group-hover:text-blue-500 transition-colors" />
                     {/* Tooltip */}
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                       View LinkedIn Profile
                     </span>
                   </a>
@@ -185,21 +185,21 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
             </div>
 
             {/* Organization Section */}
-            <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <div className="flex items-start gap-3">
-                <Icon name="building" className="h-5 w-5 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-0.5" />
+                <Icon name="building" className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-1">{t('common:about.organization')}</h4>
-                  <p className="text-slate-600 dark:text-slate-400">{t('common:about.orgName')}</p>
-                  <p className="text-slate-600 dark:text-slate-400">{t('common:about.initiative')}</p>
+                  <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-1">{t('common:about.organization')}</h4>
+                  <p className="text-gray-600 dark:text-gray-400">{t('common:about.orgName')}</p>
+                  <p className="text-gray-600 dark:text-gray-400">{t('common:about.initiative')}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {t('common:about.copyright', { year: new Date().getFullYear() })}
             </p>
           </div>

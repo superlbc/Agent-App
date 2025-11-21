@@ -13,7 +13,7 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({ userEmail, onSignOut
     const { t } = useTranslation(['common']);
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
+        <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
             <Card className="w-full max-w-md p-8 text-center">
                 {/* Momentum Logo */}
                 <Icon name="logo" className="h-20 w-20 text-primary mx-auto" />
@@ -34,30 +34,30 @@ export const AccessDenied: React.FC<AccessDeniedProps> = ({ userEmail, onSignOut
                 </div>
 
                 {/* Title */}
-                <h1 className="mt-6 text-3xl font-bold text-slate-900 dark:text-white">
+                <h1 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
                     {t('common:auth.accessDenied.title')}
                 </h1>
 
                 {/* Message */}
                 <p
-                    className="mt-4 text-slate-600 dark:text-slate-400"
+                    className="mt-4 text-gray-600 dark:text-gray-400"
                     dangerouslySetInnerHTML={{ __html: t('common:auth.accessDenied.message') }}
                 />
 
                 {/* User Info Box */}
                 {userEmail && (
-                    <div className="mt-6 p-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
-                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                             {t('common:auth.accessDenied.signedInAs')}
                         </p>
-                        <p className="mt-1 text-sm font-mono text-slate-900 dark:text-slate-100 break-all">
+                        <p className="mt-1 text-sm font-mono text-gray-900 dark:text-gray-100 break-all">
                             {userEmail}
                         </p>
                     </div>
                 )}
 
                 {/* Additional Info */}
-                <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
                     {t('common:auth.accessDenied.contactAdmin')}
                 </p>
 

@@ -51,21 +51,21 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   activeFilterCount,
 }) => {
   return (
-    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 space-y-4 border border-slate-200 dark:border-slate-700">
+    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 space-y-4 border border-gray-200 dark:border-gray-700">
       {/* Search Box */}
       <div className="relative">
-        <Icon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Icon name="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         {searchQuery && (
           <button
             onClick={() => onSearchChange('')}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             aria-label="Clear search"
           >
             <Icon name="close" className="h-4 w-4" />
@@ -108,7 +108,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-2">
-        <span className="text-xs text-slate-600 dark:text-slate-400">
+        <span className="text-xs text-gray-600 dark:text-gray-400">
           {activeFilterCount > 0 ? `${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'} active` : 'No filters applied'}
         </span>
         {activeFilterCount > 0 && (
@@ -165,7 +165,7 @@ const MultiSelect: React.FC<{
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3 py-2 text-sm text-left border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent flex items-center justify-between"
+        className="w-full px-3 py-2 text-sm text-left border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent flex items-center justify-between"
       >
         <span className="truncate">
           {selected.length === 0
@@ -178,9 +178,9 @@ const MultiSelect: React.FC<{
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto">
           {/* Select All / Clear All */}
-          <div className="flex items-center justify-between px-3 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <button
               onClick={selectAll}
               className="text-xs text-primary hover:underline focus:outline-none"
@@ -189,7 +189,7 @@ const MultiSelect: React.FC<{
             </button>
             <button
               onClick={clearAll}
-              className="text-xs text-slate-600 dark:text-slate-400 hover:underline focus:outline-none"
+              className="text-xs text-gray-600 dark:text-gray-400 hover:underline focus:outline-none"
             >
               Clear
             </button>
@@ -200,15 +200,15 @@ const MultiSelect: React.FC<{
             {options.map((option) => (
               <label
                 key={option.value}
-                className="flex items-center px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                className="flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
               >
                 <input
                   type="checkbox"
                   checked={selected.includes(option.value)}
                   onChange={() => toggleOption(option.value)}
-                  className="h-4 w-4 text-primary border-slate-300 dark:border-slate-600 rounded focus:ring-primary focus:ring-offset-0 mr-3"
+                  className="h-4 w-4 text-primary border-gray-300 dark:border-gray-600 rounded focus:ring-primary focus:ring-offset-0 mr-3"
                 />
-                <span className="text-sm text-slate-900 dark:text-slate-100 truncate">
+                <span className="text-sm text-gray-900 dark:text-gray-100 truncate">
                   {option.label}
                 </span>
               </label>

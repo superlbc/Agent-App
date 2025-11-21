@@ -278,12 +278,14 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                   onClick={() => setFilterType(type.value)}
                   className={`
                     flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                     ${
                       filterType === type.value
                         ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                     }
                   `}
+                  aria-pressed={filterType === type.value}
                 >
                   <Icon name={type.icon} className="w-4 h-4" />
                   {type.label}
@@ -309,12 +311,14 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                   onClick={() => setFilterStatus(status.value)}
                   className={`
                     px-3 py-1.5 rounded-lg border text-sm transition-all
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                     ${
                       filterStatus === status.value
                         ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                     }
                   `}
+                  aria-pressed={filterStatus === status.value}
                 >
                   {status.label}
                   {status.value !== 'all' && (
@@ -473,6 +477,8 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                     size="sm"
                     onClick={() => handleDeleteHardware(hw.id)}
                     className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    title={`Delete ${hw.model}`}
+                    aria-label={`Delete ${hw.model}`}
                   >
                     <Icon name="trash" className="w-4 h-4" />
                   </Button>

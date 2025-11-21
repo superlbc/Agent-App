@@ -69,6 +69,7 @@ const AppContent: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { user } = useAuth();
   const {
@@ -131,6 +132,9 @@ const AppContent: React.FC = () => {
   // Approval Modal States
   const [showApprovalQueue, setShowApprovalQueue] = useState(false);
   const [showHelixTicketList, setShowHelixTicketList] = useState(false);
+
+  // Loading state for initial data fetch simulation
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [approvingRequest, setApprovingRequest] = useState<ApprovalRequest | null>(null);
   const [rejectingRequest, setRejectingRequest] = useState<ApprovalRequest | null>(null);
 
@@ -189,6 +193,16 @@ const AppContent: React.FC = () => {
       setShowWelcomeModal(true);
       localStorage.setItem('hasSeenWelcome', 'true');
     }
+  }, []);
+
+  // Simulate initial data loading (demonstrates skeleton loaders)
+  useEffect(() => {
+    // Simulate API call delay (in real app, this would be actual data fetching)
+    const loadingTimer = setTimeout(() => {
+      setIsLoadingData(false);
+    }, 1200); // 1.2 second delay to showcase skeleton loaders
+
+    return () => clearTimeout(loadingTimer);
   }, []);
 
   const addToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -451,7 +465,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Version Update Banner */}
       {updateAvailable && currentVersion && serverVersion && (
         <VersionUpdateBanner
@@ -472,12 +486,23 @@ const AppContent: React.FC = () => {
         onReset={handleResetData}
       />
 
+      {/* Mobile Menu Button (Hamburger) - Only visible on mobile */}
+      <button
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="fixed top-4 left-4 z-30 lg:hidden p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+        aria-label="Open navigation menu"
+      >
+        <Icon name="menu" className="w-6 h-6" />
+      </button>
+
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Navigation Sidebar */}
         <CollapsibleNavigation
           currentSection={currentSection}
           onSectionChange={setCurrentSection}
+          isMobileOpen={isMobileMenuOpen}
+          onMobileClose={() => setIsMobileMenuOpen(false)}
         />
 
         {/* Content Area */}
@@ -492,6 +517,7 @@ const AppContent: React.FC = () => {
                 onView={handleViewPreHire}
                 onAssignPackage={handleAssignPackage}
                 onCreate={handleCreatePreHire}
+                loading={isLoadingData}
               />
             </div>
           )}

@@ -17,7 +17,7 @@ const FlagIcon: React.FC<{ language: Language; size?: 'sm' | 'md' | 'lg' }> = ({
   const flags: Record<Language, JSX.Element> = {
     en: (
       // US/UK Combined flag (US flag with UK corner accent)
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm`}>
+      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm`}>
         <svg viewBox="0 0 32 32" className="w-full h-full">
           {/* US Flag base */}
           <rect width="32" height="32" fill="#B22234"/>
@@ -54,7 +54,7 @@ const FlagIcon: React.FC<{ language: Language; size?: 'sm' | 'md' | 'lg' }> = ({
     ),
     es: (
       // Spanish flag
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm`}>
+      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm`}>
         <svg viewBox="0 0 32 32" className="w-full h-full">
           <rect width="32" height="32" fill="#AA151B"/>
           <rect y="8" width="32" height="16" fill="#F1BF00"/>
@@ -65,7 +65,7 @@ const FlagIcon: React.FC<{ language: Language; size?: 'sm' | 'md' | 'lg' }> = ({
     ),
     ja: (
       // Japanese flag
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm`}>
+      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm`}>
         <svg viewBox="0 0 32 32" className="w-full h-full">
           <rect width="32" height="32" fill="white"/>
           <circle cx="16" cy="16" r="6" fill="#BC002D"/>
@@ -110,7 +110,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center gap-3 px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md transition-colors text-left"
+          className="w-full flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors text-left"
           aria-label="Select language"
         >
           <FlagIcon language={currentLanguage} size="sm" />
@@ -120,12 +120,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 mt-1 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-600 py-1 z-50">
+          <div className="absolute left-0 mt-1 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 py-1 z-50">
             {languageOptions.map((option) => (
               <button
                 key={option.code}
                 onClick={() => handleSelectLanguage(option.code)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                   currentLanguage === option.code
                     ? 'bg-primary bg-opacity-5 dark:bg-primary dark:bg-opacity-10'
                     : ''
@@ -133,8 +133,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               >
                 <FlagIcon language={option.code} size="sm" />
                 <div className="flex-1 text-left">
-                  <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{option.label}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">{option.region}</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{option.label}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{option.region}</div>
                 </div>
                 {currentLanguage === option.code && (
                   <svg
@@ -160,7 +160,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   // Full version for Settings drawer
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
         Language
       </label>
       <div className="grid grid-cols-1 gap-2">
@@ -171,13 +171,13 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
               currentLanguage === option.code
                 ? 'border-primary bg-primary bg-opacity-5 dark:bg-primary dark:bg-opacity-10'
-                : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <FlagIcon language={option.code} size="md" />
             <div className="flex-1 text-left">
-              <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{option.label}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">{option.region}</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{option.label}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{option.region}</div>
             </div>
             {currentLanguage === option.code && (
               <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -193,7 +193,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           </button>
         ))}
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
         Language is detected automatically. You can override it here.
       </p>
     </div>

@@ -62,42 +62,42 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
 
   return (
     <>
-    <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800">
+    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800">
       <div className="w-full px-4">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-3">
              <Icon name="logo" className="h-10 w-10 text-primary flex-shrink-0"/>
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Employee Onboarding System</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Employee Onboarding System</h1>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500 text-white">Beta</span>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 italic">Streamline employee onboarding from pre-hire to day one.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">Streamline employee onboarding from pre-hire to day one.</p>
             </div>
           </div>
           <div id="user-profile-menu" className="relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center space-x-3 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-900 transition-colors"
+              className="flex items-center space-x-3 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-900 transition-colors"
               aria-label="Open user menu"
               aria-haspopup="true"
               aria-expanded={isMenuOpen}
             >
                 <div className="hidden sm:flex flex-col text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{graphData?.displayName || user?.name}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{graphData?.displayName || user?.name}</span>
                       {isAdmin && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-500 text-white">
                           {t('common:header.adminBadge')}
                         </span>
                       )}
                     </div>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{graphData?.jobTitle || graphData?.mail || user?.username}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{graphData?.jobTitle || graphData?.mail || user?.username}</span>
                 </div>
               {graphData?.photoUrl ? (
                 <img src={graphData.photoUrl} alt="User profile" className="h-9 w-9 rounded-full" />
               ) : (
-                <div className="h-9 w-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-semibold text-slate-600 dark:text-slate-300">
+                <div className="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-semibold text-gray-600 dark:text-gray-300">
                     {getInitials(graphData?.displayName || user?.name)}
                 </div>
               )}
@@ -106,18 +106,18 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
               <div ref={menuRef} className="absolute right-0 mt-2 w-64 origin-top-right z-[100] animate-fade-in">
                 <Card className="p-1.5">
                   {/* User Info Header */}
-                  <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-700">
+                  <div className="px-3 py-3 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center gap-3">
                       {graphData?.photoUrl ? (
                         <img src={graphData.photoUrl} alt="User profile" className="h-10 w-10 rounded-full" />
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-semibold text-slate-600 dark:text-slate-300">
+                        <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-semibold text-gray-600 dark:text-gray-300">
                           {getInitials(graphData?.displayName || user?.name)}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                             {graphData?.displayName || user?.name}
                           </p>
                           {isAdmin && (
@@ -127,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {graphData?.jobTitle || graphData?.mail || user?.username}
                         </p>
                       </div>
@@ -135,30 +135,30 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
                   </div>
                   <div className="py-1">
                     {/* Toggle Theme */}
-                    <button key={menuItems[0].label} id={menuItems[0].id} onClick={() => { menuItems[0].action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">
-                      <Icon name={menuItems[0].icon} className="h-5 w-5 text-slate-500 dark:text-slate-400"/>
+                    <button key={menuItems[0].label} id={menuItems[0].id} onClick={() => { menuItems[0].action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
+                      <Icon name={menuItems[0].icon} className="h-5 w-5 text-gray-500 dark:text-gray-400"/>
                       <span>{menuItems[0].label}</span>
                     </button>
                     {/* Language Selector - inserted between Toggle Theme and Replay Tutorial */}
                     <LanguageSelector variant="menu" />
                     {/* Remaining menu items */}
                     {menuItems.slice(1).map(item => (
-                       <button key={item.label} id={item.id} onClick={() => { item.action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">
-                          <Icon name={item.icon} className="h-5 w-5 text-slate-500 dark:text-slate-400"/>
+                       <button key={item.label} id={item.id} onClick={() => { item.action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
+                          <Icon name={item.icon} className="h-5 w-5 text-gray-500 dark:text-gray-400"/>
                           <span>{item.label}</span>
                        </button>
                     ))}
                   </div>
-                  <div className="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                  <div className="my-1 h-px bg-gray-200 dark:bg-gray-700"></div>
                   <div className="py-1">
-                     <button onClick={() => { setShowAbout(true); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700/50">
-                        <Icon name="info" className="h-5 w-5 text-slate-500 dark:text-slate-400"/>
+                     <button onClick={() => { setShowAbout(true); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
+                        <Icon name="info" className="h-5 w-5 text-gray-500 dark:text-gray-400"/>
                         <span>{t('common:header.menu.about')}</span>
                      </button>
                   </div>
-                  <div className="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                  <div className="my-1 h-px bg-gray-200 dark:bg-gray-700"></div>
                   <div className="py-1">
-                     <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20">
+                     <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
                         <Icon name="logout" className="h-5 w-5"/>
                         <span>{t('common:header.menu.signOut')}</span>
                      </button>

@@ -51,12 +51,12 @@ const colorClasses = {
   },
   yellow: {
     bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-    text: 'text-yellow-700 dark:text-yellow-300',
+    text: 'text-yellow-800 dark:text-yellow-200',
     border: 'border-yellow-300 dark:border-yellow-600',
   },
   orange: {
     bg: 'bg-orange-100 dark:bg-orange-900/30',
-    text: 'text-orange-700 dark:text-orange-300',
+    text: 'text-orange-800 dark:text-orange-200',
     border: 'border-orange-300 dark:border-orange-600',
   },
   red: {

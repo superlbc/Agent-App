@@ -130,8 +130,8 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
                         </defs>
 
                         {/* Base "empty" layer */}
-                        <path d="M450.41 225.205 C450.41 349.583 349.583 450.41 225.205 450.41 C100.828 450.41 0 349.583 0 225.205 C0 100.828 100.828 0 225.205 0 C349.583 0 450.41 100.828 450.41 225.205" className="fill-slate-200 dark:fill-slate-800" />
-                        <path d={M_PATH_DATA} transform="translate(84.6225, 138.006)" className="fill-slate-300 dark:fill-slate-600" />
+                        <path d="M450.41 225.205 C450.41 349.583 349.583 450.41 225.205 450.41 C100.828 450.41 0 349.583 0 225.205 C0 100.828 100.828 0 225.205 0 C349.583 0 450.41 100.828 450.41 225.205" className="fill-gray-200 dark:fill-gray-800" />
+                        <path d={M_PATH_DATA} transform="translate(84.6225, 138.006)" className="fill-gray-300 dark:fill-gray-600" />
 
                         {/* Filled layer (clipped) */}
                         <g clipPath="url(#logo-progress-clip)">
@@ -140,13 +140,13 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
                         </g>
                     </svg>
                 </div>
-                <p className="mt-6 text-lg font-semibold text-slate-700 dark:text-slate-200">{displayTitle}</p>
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 min-h-[40px]">{currentMessage}</p>
+                <p className="mt-6 text-lg font-semibold text-gray-700 dark:text-gray-200">{displayTitle}</p>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 min-h-[40px]">{currentMessage}</p>
 
                 {onCancel && (
                   <button
                     onClick={onCancel}
-                    className="mt-6 px-6 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200 border border-slate-300 dark:border-slate-600"
+                    className="mt-6 px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 border border-gray-300 dark:border-gray-600"
                     aria-label={t('common:buttons.cancel')}
                   >
                     {t('common:buttons.cancel')}

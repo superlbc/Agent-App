@@ -166,14 +166,14 @@ const EmphasisSpan: React.FC<{ type: EmphasisMarker['type']; text: string }> = (
       }
       // Default status styling
       return (
-        <span className={`${baseClasses} font-semibold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/30`}>
+        <span className={`${baseClasses} font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/30`}>
           {text}
         </span>
       );
 
     case 'task':
       return (
-        <span className={`${baseClasses} font-bold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700/40`}>
+        <span className={`${baseClasses} font-bold text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-700/40`}>
           {text}
         </span>
       );
@@ -201,7 +201,7 @@ const EmphasisSpan: React.FC<{ type: EmphasisMarker['type']; text: string }> = (
 
     case 'general':
       return (
-        <span className={`${baseClasses} font-semibold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-700/30`}>
+        <span className={`${baseClasses} font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/30`}>
           {text}
         </span>
       );

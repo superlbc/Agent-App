@@ -52,7 +52,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ bullets, className = '
             {bullets.map((bullet, idx) => (
               <li
                 key={idx}
-                className="flex items-start gap-3 text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed"
+                className="flex items-start gap-3 text-[15px] text-gray-700 dark:text-gray-300 leading-relaxed"
               >
                 <span className="text-amber-500 dark:text-amber-400 mt-0.5 flex-shrink-0 font-bold">
                   •

@@ -20,7 +20,7 @@ export const TourWelcomeModal: React.FC<TourWelcomeModalProps> = ({ isOpen, onSt
       <Card className="w-full max-w-sm p-8 text-center" onClick={e => e.stopPropagation()}>
         <Icon name="logo" className="h-20 w-20 text-primary mx-auto" />
         <h2 className="mt-6 text-2xl font-bold">{t('tour:welcome.title')}</h2>
-        <p className="mt-2 text-slate-600 dark:text-slate-400">
+        <p className="mt-2 text-gray-600 dark:text-gray-400">
           {t('tour:welcome.description')}
         </p>
         <div className="mt-8 flex gap-4">
