@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { Icon } from './ui/Icon';
 import { PreHire } from '../types';
+import { StatsSkeleton } from './ui/StatsSkeleton';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -14,6 +15,7 @@ import { PreHire } from '../types';
 interface PreHireDashboardProps {
   preHires: PreHire[];
   onCreate?: () => void;
+  loading?: boolean;
 }
 
 interface StatCard {
@@ -31,7 +33,8 @@ interface StatCard {
 
 export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
   preHires,
-  onCreate
+  onCreate,
+  loading = false
 }) => {
   // Calculate statistics
   const stats = useMemo(() => {
@@ -90,6 +93,15 @@ export const PreHireDashboard: React.FC<PreHireDashboardProps> = ({
       description: 'Equipment packages assigned',
     },
   ];
+
+  // Show skeleton loader while loading
+  if (loading) {
+    return (
+      <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <StatsSkeleton count={4} />
+      </div>
+    );
+  }
 
   return (
     <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">

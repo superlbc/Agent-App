@@ -13,6 +13,7 @@ import { Card } from './ui/Card';
 import { StatusBadge } from './ui/StatusBadge';
 import { FreezePeriodAlert, isInFreezePeriod } from './ui/FreezePeriodBanner';
 import { DEPARTMENTS, ROLES, PRE_HIRE_STATUSES } from '../constants';
+import { TableSkeleton } from './ui/TableSkeleton';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -26,6 +27,7 @@ interface PreHireListProps {
   onAssignPackage: (preHire: PreHire) => void;
   onCreate: () => void;
   className?: string;
+  loading?: boolean;
 }
 
 type SortField = 'candidateName' | 'role' | 'department' | 'startDate' | 'status';
@@ -56,6 +58,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   onAssignPackage,
   onCreate,
   className = '',
+  loading = false,
 }) => {
   // ============================================================================
   // STATE
@@ -503,6 +506,19 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   // ============================================================================
   // RENDER
   // ============================================================================
+
+  // Show skeleton loader while loading
+  if (loading) {
+    return (
+      <Card className={`p-6 ${className}`}>
+        <div className="mb-6">
+          <div className="h-7 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded mt-2 animate-pulse"></div>
+        </div>
+        <TableSkeleton rows={8} columns={7} />
+      </Card>
+    );
+  }
 
   return (
     <Card className={`p-6 ${className}`}>

@@ -10,6 +10,7 @@ interface OutputPanelProps {
   onView: (preHire: PreHire) => void;
   onAssignPackage: (preHire: PreHire) => void;
   onCreate: () => void;
+  loading?: boolean;
 }
 
 export const OutputPanel: React.FC<OutputPanelProps> = ({
@@ -19,11 +20,12 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
   onView,
   onAssignPackage,
   onCreate,
+  loading = false,
 }) => {
   return (
     <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Compact Dashboard - Sticky Header */}
-      <PreHireDashboard preHires={preHires} onCreate={onCreate} />
+      <PreHireDashboard preHires={preHires} onCreate={onCreate} loading={loading} />
 
       {/* Pre-hire List - Main Content */}
       <div className="flex-1 overflow-y-auto p-6">
@@ -34,6 +36,7 @@ export const OutputPanel: React.FC<OutputPanelProps> = ({
           onView={onView}
           onAssignPackage={onAssignPackage}
           onCreate={onCreate}
+          loading={loading}
         />
       </div>
     </div>

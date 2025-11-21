@@ -132,6 +132,9 @@ const AppContent: React.FC = () => {
   // Approval Modal States
   const [showApprovalQueue, setShowApprovalQueue] = useState(false);
   const [showHelixTicketList, setShowHelixTicketList] = useState(false);
+
+  // Loading state for initial data fetch simulation
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [approvingRequest, setApprovingRequest] = useState<ApprovalRequest | null>(null);
   const [rejectingRequest, setRejectingRequest] = useState<ApprovalRequest | null>(null);
 
@@ -190,6 +193,16 @@ const AppContent: React.FC = () => {
       setShowWelcomeModal(true);
       localStorage.setItem('hasSeenWelcome', 'true');
     }
+  }, []);
+
+  // Simulate initial data loading (demonstrates skeleton loaders)
+  useEffect(() => {
+    // Simulate API call delay (in real app, this would be actual data fetching)
+    const loadingTimer = setTimeout(() => {
+      setIsLoadingData(false);
+    }, 1200); // 1.2 second delay to showcase skeleton loaders
+
+    return () => clearTimeout(loadingTimer);
   }, []);
 
   const addToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -504,6 +517,7 @@ const AppContent: React.FC = () => {
                 onView={handleViewPreHire}
                 onAssignPackage={handleAssignPackage}
                 onCreate={handleCreatePreHire}
+                loading={isLoadingData}
               />
             </div>
           )}
