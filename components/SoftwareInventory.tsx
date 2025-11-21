@@ -1,7 +1,8 @@
 // ============================================================================
-// SOFTWARE INVENTORY
+// SOFTWARE & LICENSE MANAGEMENT
 // ============================================================================
-// View and manage software applications in inventory (separate from license pools)
+// View and manage software applications, licenses, and seat allocations
+// Note: Software and Licenses are merged - software with seatCount becomes a license pool
 
 import React, { useState } from 'react';
 import { Software } from '../types';
@@ -76,9 +77,9 @@ const SoftwareInventory: React.FC<SoftwareInventoryProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Software Inventory</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Software & License Management</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Manage software applications and tools
+            Manage software applications, licenses, and seat allocations
           </p>
         </div>
 
@@ -89,7 +90,7 @@ const SoftwareInventory: React.FC<SoftwareInventoryProps> = ({
           title={!canCreate ? 'You do not have permission to create software' : undefined}
         >
           <Icon name="add" className="w-4 h-4 mr-2" />
-          Add Software
+          Add Software/License
         </Button>
       </div>
 
@@ -233,6 +234,42 @@ const SoftwareInventory: React.FC<SoftwareInventoryProps> = ({
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                   {item.description}
                 </p>
+              )}
+
+              {/* Seat Allocation (if applicable) */}
+              {item.seatCount && (
+                <div className="mb-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {item.assignedSeats || 0} of {item.seatCount} seats assigned
+                    </span>
+                    {item.seatCount - (item.assignedSeats || 0) > 0 ? (
+                      <span className="text-green-600 dark:text-green-400">
+                        {item.seatCount - (item.assignedSeats || 0)} available
+                      </span>
+                    ) : (
+                      <span className="text-red-600 dark:text-red-400">
+                        {Math.abs(item.seatCount - (item.assignedSeats || 0))} over
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        (item.assignedSeats || 0) > item.seatCount
+                          ? 'bg-red-500'
+                          : (item.assignedSeats || 0) / item.seatCount >= 0.9
+                          ? 'bg-orange-500'
+                          : (item.assignedSeats || 0) / item.seatCount >= 0.75
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
+                      }`}
+                      style={{
+                        width: `${Math.min(((item.assignedSeats || 0) / item.seatCount) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
               )}
 
               <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
