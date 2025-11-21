@@ -9,6 +9,7 @@ import { Icon } from './ui/Icon';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
+import { Pagination } from './ui/Pagination';
 import HardwareCreateModal from './HardwareCreateModal';
 import HardwareEditModal from './HardwareEditModal';
 import HardwareBulkImportModal from './HardwareBulkImportModal';
@@ -37,10 +38,15 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
   const [hardware, setHardware] = useState<Hardware[]>(initialHardware);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<Hardware['type'] | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'model' | 'manufacturer' | 'cost' | 'purchaseDate'>('model');
+  const [filterStatus, setFilterStatus] = useState<Hardware['status'] | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'model' | 'manufacturer' | 'type' | 'status' | 'cost' | 'purchaseDate'>('model');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -133,6 +139,9 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       // Type filter
       if (filterType !== 'all' && hw.type !== filterType) return false;
 
+      // Status filter
+      if (filterStatus !== 'all' && hw.status !== filterStatus) return false;
+
       return true;
     })
     .sort((a, b) => {
@@ -144,6 +153,12 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
           break;
         case 'manufacturer':
           compareValue = a.manufacturer.localeCompare(b.manufacturer);
+          break;
+        case 'type':
+          compareValue = a.type.localeCompare(b.type);
+          break;
+        case 'status':
+          compareValue = a.status.localeCompare(b.status);
           break;
         case 'cost':
           compareValue = (a.cost || 0) - (b.cost || 0);
@@ -157,6 +172,34 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
 
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
+
+  // Pagination
+  const totalFilteredItems = filteredAndSortedHardware.length;
+  const paginatedHardware = filteredAndSortedHardware.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Handler for column sort
+  const handleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType, filterStatus, itemsPerPage]);
+
+  // Refresh data
+  const handleRefresh = () => {
+    setHardware([...initialHardware]);
+    onHardwareChange?.(initialHardware);
+  };
 
   // Calculate statistics
   const stats = {
@@ -192,6 +235,13 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            onClick={handleRefresh}
+            title="Refresh hardware list"
+          >
+            <Icon name="refresh" className="w-4 h-4" />
+          </Button>
           <Button
             variant="ghost"
             onClick={() => setShowBulkImportModal(true)}
@@ -333,36 +383,33 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
               </div>
             </div>
 
-            {/* Sort */}
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sort By
-                </label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="model">Model</option>
-                  <option value="manufacturer">Manufacturer</option>
-                  <option value="cost">Cost</option>
-                  <option value="purchaseDate">Purchase Date</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Order
-                </label>
-                <button
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <Icon
-                    name={sortOrder === 'asc' ? 'chevron-up' : 'chevron-down'}
-                    className="w-5 h-5 text-gray-600 dark:text-gray-400"
-                  />
-                </button>
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Filter by Status
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {statusOptions.map((status) => (
+                  <button
+                    key={status.value}
+                    onClick={() => setFilterStatus(status.value)}
+                    className={`
+                      flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all
+                      ${
+                        filterStatus === status.value
+                          ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
+                          : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                      }
+                    `}
+                  >
+                    {status.label}
+                    {status.value !== 'all' && (
+                      <span className="text-xs opacity-70">
+                        ({stats.byStatus.find((s) => s.status === status.value)?.count || 0})
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -370,11 +417,11 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       )}
 
       {/* Hardware List */}
-      {filteredAndSortedHardware.length > 0 ? (
+      {totalFilteredItems > 0 ? (
         viewMode === 'card' ? (
           // Card View - Compact
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {filteredAndSortedHardware.map((hw) => (
+            {paginatedHardware.map((hw) => (
               <Card key={hw.id} className="p-3 hover:shadow-md transition-all group">
                 {/* Header with Icon and Model */}
                 <div className="flex items-start gap-2 mb-2">
@@ -460,7 +507,22 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                 </div>
               </Card>
             ))}
-        </div>
+          </div>
+
+          {/* Pagination for card view */}
+          {totalFilteredItems > itemsPerPage && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalFilteredItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                itemsPerPageOptions={[10, 25, 50, 100]}
+              />
+            </div>
+          )}
+        </>
       ) : (
           // List View - Table
           <Card className="overflow-hidden">
@@ -468,32 +530,99 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Hardware
+                    {/* Sortable Hardware Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('model')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Hardware
+                        {sortBy === 'model' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Type
+
+                    {/* Sortable Type Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('type')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Type
+                        {sortBy === 'type' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Specifications
+
+                    {/* Sortable Manufacturer Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('manufacturer')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Manufacturer
+                        {sortBy === 'manufacturer' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Status
+
+                    {/* Sortable Status Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('status')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Status
+                        {sortBy === 'status' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Cost
+
+                    {/* Sortable Cost Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('cost')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Cost
+                        {sortBy === 'cost' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
                     </th>
+
+                    {/* Non-sortable Actions Column */}
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {filteredAndSortedHardware.map((hw) => (
+                  {paginatedHardware.map((hw) => (
                     <tr
                       key={hw.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
+                      {/* Hardware (Model) */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded flex-shrink-0">
@@ -512,9 +641,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                             <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
                               {hw.model}
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                              {hw.manufacturer}
-                            </div>
                             {hw.serialNumber && (
                               <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">
                                 {hw.serialNumber}
@@ -523,27 +649,35 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                           </div>
                         </div>
                       </td>
+
+                      {/* Type */}
                       <td className="px-4 py-3">
                         <span className="text-sm text-gray-900 dark:text-gray-100 capitalize">
                           {hw.type}
                         </span>
                       </td>
+
+                      {/* Manufacturer */}
                       <td className="px-4 py-3">
-                        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5">
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
+                          {hw.manufacturer}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5 mt-1">
                           {hw.specifications?.processor && (
-                            <div className="truncate">{hw.specifications.processor}</div>
+                            <div className="truncate text-xs">{hw.specifications.processor}</div>
                           )}
                           {hw.specifications?.ram && hw.specifications?.storage && (
-                            <div>{hw.specifications.ram} • {hw.specifications.storage}</div>
+                            <div className="text-xs">{hw.specifications.ram} • {hw.specifications.storage}</div>
                           )}
                           {hw.specifications?.screenSize && (
-                            <div>{hw.specifications.screenSize}</div>
+                            <div className="text-xs">{hw.specifications.screenSize}</div>
                           )}
                           {hw.specifications?.connectivity && (
                             <div className="text-xs">{hw.specifications.connectivity}</div>
                           )}
                         </div>
                       </td>
+                      {/* Status */}
                       <td className="px-4 py-3">
                         <span
                           className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -559,6 +693,8 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                           {hw.status}
                         </span>
                       </td>
+
+                      {/* Cost */}
                       <td className="px-4 py-3">
                         {hw.cost ? (
                           <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -573,6 +709,8 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                           </div>
                         )}
                       </td>
+
+                      {/* Actions */}
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
                           <Button
@@ -603,6 +741,20 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination for table view */}
+            {totalFilteredItems > itemsPerPage && (
+              <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalFilteredItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  itemsPerPageOptions={[10, 25, 50, 100]}
+                />
+              </div>
+            )}
           </Card>
         )
       ) : (
