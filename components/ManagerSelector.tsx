@@ -1,116 +1,36 @@
 // ============================================================================
 // MANAGER SELECTOR COMPONENT
 // ============================================================================
-// Azure AD search for hiring managers with profile images/initials
+// Searchable component for selecting hiring managers via Graph API
+// Shows user profile with photo, name, title, department, and email
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Participant } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { GraphService } from '../services/graphService';
 import { Icon } from './ui/Icon';
-import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
-interface ManagerSelectorProps {
-  value?: Participant | null;
-  onChange: (manager: Participant | null) => void;
-  label?: string;
-  placeholder?: string;
-  required?: boolean;
-  error?: string;
-  helpText?: string;
-  disabled?: boolean;
-  className?: string;
+export interface ManagerProfile {
+  displayName: string;
+  email: string;
+  jobTitle?: string;
+  department?: string;
+  photoUrl?: string;
 }
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Get initials from name
- */
-const getInitials = (name: string): string => {
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) {
-    return parts[0].substring(0, 2).toUpperCase();
-  }
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-};
-
-/**
- * Get background color for initials based on name
- */
-const getInitialsColor = (name: string): string => {
-  const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-red-500',
-    'bg-yellow-500',
-    'bg-teal-500',
-  ];
-  const index = name.length % colors.length;
-  return colors[index];
-};
-
-/**
- * Search Microsoft Graph API for users
- */
-const searchUsers = async (query: string): Promise<Participant[]> => {
-  // TODO: Implement actual Microsoft Graph API search
-  // For now, return mock data for development
-
-  if (!query || query.length < 2) {
-    return [];
-  }
-
-  // Mock implementation - replace with real Graph API call
-  // Example: GET https://graph.microsoft.com/v1.0/users?$filter=startswith(displayName,'${query}')&$select=id,displayName,mail,jobTitle,department
-
-  const mockUsers: Participant[] = [
-    {
-      id: 'user-001',
-      displayName: 'Sarah Johnson',
-      email: 'sarah.johnson@momentumww.com',
-      jobTitle: 'VP of Creative',
-      department: 'Creative',
-      photoUrl: undefined,
-      source: 'graph',
-    },
-    {
-      id: 'user-002',
-      displayName: 'Michael Chen',
-      email: 'michael.chen@momentumww.com',
-      jobTitle: 'Director of Technology',
-      department: 'Technology',
-      photoUrl: undefined,
-      source: 'graph',
-    },
-    {
-      id: 'user-003',
-      displayName: 'Emily Rodriguez',
-      email: 'emily.rodriguez@momentumww.com',
-      jobTitle: 'Senior Manager',
-      department: 'Operations',
-      photoUrl: undefined,
-      source: 'graph',
-    },
-  ];
-
-  // Filter mock data based on query
-  const lowerQuery = query.toLowerCase();
-  return mockUsers.filter(
-    (user) =>
-      user.displayName?.toLowerCase().includes(lowerQuery) ||
-      user.email?.toLowerCase().includes(lowerQuery) ||
-      user.department?.toLowerCase().includes(lowerQuery)
-  );
-};
+interface ManagerSelectorProps {
+  value: ManagerProfile | null;
+  onChange: (manager: ManagerProfile | null) => void;
+  placeholder?: string;
+  error?: string;
+  disabled?: boolean;
+  className?: string;
+  label?: string;
+  required?: boolean;
+}
 
 // ============================================================================
 // COMPONENT
@@ -119,133 +39,184 @@ const searchUsers = async (query: string): Promise<Participant[]> => {
 export const ManagerSelector: React.FC<ManagerSelectorProps> = ({
   value,
   onChange,
-  label = 'Hiring Manager',
-  placeholder = 'Search for a manager...',
-  required = false,
+  placeholder = 'Search for hiring manager...',
   error,
-  helpText,
   disabled = false,
   className = '',
+  label,
+  required = false,
 }) => {
-  // ============================================================================
-  // STATE
-  // ============================================================================
-
-  const [searchQuery, setSearchQuery] = useState('');
+  // State
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<Participant[]>([]);
-  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [results, setResults] = useState<ManagerProfile[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Refs
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<number | null>(null);
+
+  // Graph service
+  const graphService = GraphService.getInstance();
 
   // ============================================================================
-  // SEARCH LOGIC
+  // EFFECTS
   // ============================================================================
 
-  const handleSearch = useCallback(async (query: string) => {
-    if (!query || query.length < 2) {
-      setSearchResults([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const results = await searchUsers(query);
-      setSearchResults(results);
-    } catch (err) {
-      console.error('Error searching users:', err);
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleSearch(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, handleSearch]);
-
-  // ============================================================================
-  // SELECTION LOGIC
-  // ============================================================================
-
-  const handleSelect = (user: Participant) => {
-    onChange(user);
-    setSearchQuery('');
-    setIsOpen(false);
-    setFocusedIndex(-1);
-  };
-
-  const handleClear = () => {
-    onChange(null);
-    setSearchQuery('');
-    setFocusedIndex(-1);
-  };
-
-  // ============================================================================
-  // KEYBOARD NAVIGATION
-  // ============================================================================
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen) return;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setFocusedIndex((prev) =>
-          prev < searchResults.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setFocusedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (focusedIndex >= 0 && focusedIndex < searchResults.length) {
-          handleSelect(searchResults[focusedIndex]);
-        }
-        break;
-      case 'Escape':
-        e.preventDefault();
-        setIsOpen(false);
-        setFocusedIndex(-1);
-        break;
-    }
-  };
-
-  // ============================================================================
-  // CLICK OUTSIDE TO CLOSE
-  // ============================================================================
-
+  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setFocusedIndex(-1);
+        setSearchQuery('');
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // Search handler with debounce
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      return;
+    }
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      window.clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce search
+    searchTimeoutRef.current = window.setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const users = await graphService.searchUsers(searchQuery);
+
+        // Map to ManagerProfile format
+        const profiles: ManagerProfile[] = await Promise.all(
+          users.slice(0, 10).map(async (user: any) => {
+            let photoUrl: string | undefined;
+            try {
+              photoUrl = await graphService.getUserPhoto(user.userPrincipalName || user.mail);
+            } catch {
+              // Photo not available
+            }
+
+            return {
+              displayName: user.displayName,
+              email: user.userPrincipalName || user.mail,
+              jobTitle: user.jobTitle,
+              department: user.department,
+              photoUrl,
+            };
+          })
+        );
+
+        setResults(profiles);
+        setHighlightedIndex(0);
+      } catch (error) {
+        console.error('[ManagerSelector] Search error:', error);
+        setResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        window.clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen || results.length === 0) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (results[highlightedIndex]) {
+            handleSelect(results[highlightedIndex]);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setIsOpen(false);
+          setSearchQuery('');
+          break;
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, highlightedIndex, results]);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      const highlightedElement = dropdownRef.current.querySelector(
+        `[data-index="${highlightedIndex}"]`
+      );
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [highlightedIndex, isOpen]);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleSelect = (manager: ManagerProfile) => {
+    onChange(manager);
+    setIsOpen(false);
+    setSearchQuery('');
+    setResults([]);
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange(null);
+    setSearchQuery('');
+    inputRef.current?.focus();
+  };
+
+  const handleInputFocus = () => {
+    setIsOpen(true);
+    setHighlightedIndex(0);
+  };
 
   // ============================================================================
   // RENDER
   // ============================================================================
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div ref={containerRef} className={`relative ${className}`}>
       {/* Label */}
       {label && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -254,207 +225,172 @@ export const ManagerSelector: React.FC<ManagerSelectorProps> = ({
         </label>
       )}
 
-      {/* Selected Manager Display */}
-      {value && !isOpen ? (
-        <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg">
-          {/* Avatar */}
-          {value.photoUrl ? (
-            <img
-              src={value.photoUrl}
-              alt={value.displayName}
-              className="w-10 h-10 rounded-full"
-            />
-          ) : (
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${getInitialsColor(
-                value.displayName || ''
-              )}`}
-            >
-              {getInitials(value.displayName || '')}
-            </div>
-          )}
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-              {value.displayName}
-            </div>
-            {value.email && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {value.email}
+      {/* Input Field */}
+      <div
+        className={`
+          relative flex items-center px-3 py-2 bg-white dark:bg-gray-700
+          border rounded-lg cursor-text transition-all
+          ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400 dark:hover:border-gray-500'}
+          ${isOpen ? 'ring-2 ring-indigo-500 border-indigo-500' : ''}
+        `}
+        onClick={() => !disabled && inputRef.current?.focus()}
+      >
+        {/* Selected Manager Display */}
+        {value && !isOpen ? (
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {value.photoUrl ? (
+              <img
+                src={value.photoUrl}
+                alt={value.displayName}
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {value.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                </span>
               </div>
             )}
-            {value.jobTitle && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {value.jobTitle}
-              </div>
-            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {value.displayName}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                {value.jobTitle || value.email}
+              </p>
+            </div>
           </div>
-
-          {/* Clear Button */}
-          {!disabled && (
-            <Button
-              variant="outline"
-              onClick={handleClear}
-              title="Clear selection"
-              className="!p-2"
-            >
-              <Icon name="x" className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      ) : (
-        <>
-          {/* Search Input */}
-          <div className="relative">
-            <Input
+        ) : (
+          <>
+            <Icon
+              name="search"
+              className="w-5 h-5 text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0"
+            />
+            <input
               ref={inputRef}
               type="text"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setIsOpen(true);
-              }}
-              onFocus={() => setIsOpen(true)}
-              onKeyDown={handleKeyDown}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={handleInputFocus}
               placeholder={placeholder}
               disabled={disabled}
-              error={error}
-              className="pr-10"
+              className="flex-1 bg-transparent border-none outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              {isLoading ? (
-                <Icon name="loader" className="w-5 h-5 text-gray-400 animate-spin" />
-              ) : (
-                <Icon name="search" className="w-5 h-5 text-gray-400" />
-              )}
+          </>
+        )}
+
+        {/* Loading/Clear Button */}
+        {isSearching ? (
+          <Icon name="refresh" className="w-4 h-4 text-gray-400 animate-spin ml-2" />
+        ) : value && !disabled ? (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition-colors ml-2"
+            aria-label="Clear selection"
+          >
+            <Icon name="x" className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+          </button>
+        ) : null}
+
+        <Icon
+          name="chevron-down"
+          className={`w-4 h-4 text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0 transition-transform ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </div>
+
+      {/* Error Message */}
+      {error && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{error}</p>}
+
+      {/* Dropdown */}
+      {isOpen && !disabled && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+        >
+          {isSearching ? (
+            <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <Icon name="refresh" className="w-5 h-5 mx-auto mb-2 animate-spin" />
+              Searching...
             </div>
-          </div>
+          ) : results.length === 0 ? (
+            <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              {searchQuery.trim() ? 'No users found' : 'Start typing to search...'}
+            </div>
+          ) : (
+            <div className="py-2">
+              {results.map((manager, index) => {
+                const isHighlighted = index === highlightedIndex;
 
-          {/* Dropdown Results */}
-          {isOpen && searchQuery.length >= 2 && (
-            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-              {searchResults.length > 0 ? (
-                <ul className="py-1">
-                  {searchResults.map((user, index) => (
-                    <li
-                      key={user.id}
-                      className={`
-                        flex items-center gap-3 px-3 py-2 cursor-pointer
-                        ${
-                          index === focusedIndex
-                            ? 'bg-primary-50 dark:bg-primary-900/30'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                        }
-                      `}
-                      onClick={() => handleSelect(user)}
-                      onMouseEnter={() => setFocusedIndex(index)}
-                    >
-                      {/* Avatar */}
-                      {user.photoUrl ? (
-                        <img
-                          src={user.photoUrl}
-                          alt={user.displayName}
-                          className="w-10 h-10 rounded-full"
-                        />
-                      ) : (
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm ${getInitialsColor(
-                            user.displayName || ''
-                          )}`}
-                        >
-                          {getInitials(user.displayName || '')}
-                        </div>
-                      )}
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {user.displayName}
-                        </div>
-                        {user.email && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {user.email}
-                          </div>
-                        )}
-                        {user.jobTitle && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {user.jobTitle} • {user.department}
-                          </div>
-                        )}
+                return (
+                  <button
+                    key={manager.email}
+                    type="button"
+                    data-index={index}
+                    onClick={() => handleSelect(manager)}
+                    className={`
+                      w-full px-4 py-3 text-left transition-colors flex items-center gap-3
+                      ${
+                        isHighlighted
+                          ? 'bg-indigo-50 dark:bg-indigo-900/30'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }
+                    `}
+                  >
+                    {/* Photo */}
+                    {manager.photoUrl ? (
+                      <img
+                        src={manager.photoUrl}
+                        alt={manager.displayName}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {manager.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </span>
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : isLoading ? (
-                <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Searching...
-                </div>
-              ) : (
-                <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                  No managers found
-                </div>
-              )}
+                    )}
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {manager.displayName}
+                      </p>
+                      {manager.jobTitle && (
+                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                          {manager.jobTitle}
+                        </p>
+                      )}
+                      {manager.department && (
+                        <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                          {manager.department}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                        {manager.email}
+                      </p>
+                    </div>
+
+                    {/* Check mark if selected */}
+                    {value?.email === manager.email && (
+                      <Icon
+                        name="check"
+                        className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0"
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
-        </>
-      )}
-
-      {/* Help Text */}
-      {helpText && !error && (
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
+        </div>
       )}
     </div>
   );
 };
 
-// ============================================================================
-// USAGE EXAMPLE
-// ============================================================================
-
-/**
- * Basic usage:
- *
- * const [manager, setManager] = useState<Participant | null>(null);
- *
- * <ManagerSelector
- *   value={manager}
- *   onChange={setManager}
- *   label="Hiring Manager"
- *   required
- * />
- *
- * Integration with forms:
- *
- * <ManagerSelector
- *   value={formData.hiringManager}
- *   onChange={(manager) => handleChange('hiringManager', manager)}
- *   label="Select Hiring Manager"
- *   placeholder="Search by name or email..."
- *   required
- *   error={errors.hiringManager}
- *   helpText="Start typing to search for managers in Azure AD"
- * />
- *
- * TODO: Replace mock searchUsers function with real Microsoft Graph API call:
- *
- * const searchUsers = async (query: string): Promise<Participant[]> => {
- *   const graphClient = getGraphClient(); // Your Graph client setup
- *   const response = await graphClient
- *     .api('/users')
- *     .filter(`startswith(displayName,'${query}') or startswith(mail,'${query}')`)
- *     .select('id,displayName,mail,jobTitle,department,officeLocation')
- *     .top(10)
- *     .get();
- *
- *   return response.value.map((user: any) => ({
- *     id: user.id,
- *     displayName: user.displayName,
- *     email: user.mail,
- *     jobTitle: user.jobTitle,
- *     department: user.department,
- *     officeLocation: user.officeLocation,
- *     source: 'graph',
- *   }));
- * };
- */
+export default ManagerSelector;

@@ -11,6 +11,8 @@ import { Icon } from './ui/Icon';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Card } from './ui/Card';
+import { LicensePoolCreateModal } from './LicensePoolCreateModal';
+import { LicensePoolEditModal } from './LicensePoolEditModal';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -21,6 +23,8 @@ interface LicensePoolDashboardProps {
   onAssignLicense?: (license: Software) => void;
   onViewAssignments?: (license: Software) => void;
   onEditLicense?: (license: Software) => void;
+  onCreateLicense?: (license: Partial<Software>) => void;
+  onUpdateLicense?: (license: Software) => void;
   className?: string;
 }
 
@@ -88,6 +92,8 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
   onAssignLicense,
   onViewAssignments,
   onEditLicense,
+  onCreateLicense,
+  onUpdateLicense,
   className = '',
 }) => {
   // State
@@ -95,6 +101,8 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
   const [licenseTypeFilter, setLicenseTypeFilter] = useState<LicenseTypeFilter>('all');
   const [utilizationFilter, setUtilizationFilter] = useState<UtilizationFilter>('all');
   const [vendorFilter, setVendorFilter] = useState<string>('all');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingLicense, setEditingLicense] = useState<Software | null>(null);
 
   // ============================================================================
   // STATS CALCULATION
@@ -192,6 +200,28 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
   // RENDER
   // ============================================================================
 
+  // Handlers
+  const handleCreateLicense = (license: Partial<Software>) => {
+    if (onCreateLicense) {
+      onCreateLicense(license);
+    }
+    setIsCreateModalOpen(false);
+  };
+
+  const handleUpdateLicense = (license: Software) => {
+    if (onUpdateLicense) {
+      onUpdateLicense(license);
+    }
+    setEditingLicense(null);
+  };
+
+  const handleEditClick = (license: Software) => {
+    if (onEditLicense) {
+      onEditLicense(license);
+    }
+    setEditingLicense(license);
+  };
+
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
@@ -202,6 +232,13 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
             Monitor license utilization and manage software seat allocations
           </p>
         </div>
+
+        {onCreateLicense && (
+          <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
+            <Icon name="add" className="w-4 h-4 mr-2" />
+            Create License Pool
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -436,8 +473,8 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
                         Assign
                       </Button>
                     )}
-                    {onEditLicense && (
-                      <Button variant="ghost" size="sm" onClick={() => onEditLicense(license)}>
+                    {(onEditLicense || onUpdateLicense) && (
+                      <Button variant="outline" size="sm" onClick={() => handleEditClick(license)}>
                         <Icon name="edit" className="w-4 h-4" />
                       </Button>
                     )}
@@ -463,6 +500,22 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
             )}
           </div>
         </Card>
+      )}
+
+      {/* Modals */}
+      {isCreateModalOpen && (
+        <LicensePoolCreateModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSubmit={handleCreateLicense}
+        />
+      )}
+
+      {editingLicense && (
+        <LicensePoolEditModal
+          license={editingLicense}
+          onClose={() => setEditingLicense(null)}
+          onSubmit={handleUpdateLicense}
+        />
       )}
     </div>
   );

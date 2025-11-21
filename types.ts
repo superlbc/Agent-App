@@ -232,8 +232,7 @@ export interface Package {
   departmentTarget?: string[]; // DEPRECATED: Use roleTargets instead
 
   hardware: Hardware[];
-  software: Software[];
-  licenses: Software[];
+  software: Software[]; // Includes all software, subscriptions, and licenses
 
   // Phase 7: Configurable approval workflow
   approverIds: string[]; // Empty array = auto-approve, populated = requires approval from these users (emails or IDs)

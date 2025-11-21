@@ -7,16 +7,16 @@ import React, { useState, useEffect } from 'react';
 import { PreHire, Package } from '../types';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
-import { Combobox, ComboboxOption } from './ui/Combobox';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { FreezePeriodAlert, isInFreezePeriod } from './ui/FreezePeriodBanner';
+import { HierarchicalRoleSelector, RoleSelection } from './ui/HierarchicalRoleSelector';
+import { ManagerSelector, ManagerProfile } from './ManagerSelector';
 import {
   PRE_HIRE_STATUSES,
-  COMMON_HIRING_MANAGERS,
 } from '../constants';
 import { mockPackages } from '../utils/mockData';
-import { getDepartmentGroups, getRoles } from '../services/departmentDataService';
+import { getHierarchicalData } from '../services/departmentDataService';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -32,10 +32,9 @@ interface PreHireFormProps {
 interface FormData {
   candidateName: string;
   email: string;
-  role: string;
-  department: string;
+  roleSelection: RoleSelection | null;
   startDate: string; // ISO date string
-  hiringManager: string;
+  hiringManager: ManagerProfile | null;
   status: PreHire['status'];
   assignedPackageId?: string;
 }
@@ -43,8 +42,7 @@ interface FormData {
 interface FormErrors {
   candidateName?: string;
   email?: string;
-  role?: string;
-  department?: string;
+  roleSelection?: string;
   startDate?: string;
   hiringManager?: string;
 }
@@ -68,12 +66,22 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
   const [formData, setFormData] = useState<FormData>({
     candidateName: preHire?.candidateName || '',
     email: preHire?.email || '',
-    role: preHire?.role || '',
-    department: preHire?.department || '',
+    roleSelection: preHire
+      ? {
+          departmentGroup: preHire.department || '',
+          role: preHire.role || '',
+          fullDisplay: `${preHire.department || ''} > ${preHire.role || ''}`,
+        }
+      : null,
     startDate: preHire?.startDate
       ? new Date(preHire.startDate).toISOString().split('T')[0]
       : '',
-    hiringManager: preHire?.hiringManager || '',
+    hiringManager: preHire?.hiringManager
+      ? {
+          displayName: preHire.hiringManager,
+          email: '', // We only have the name stored
+        }
+      : null,
     status: preHire?.status || 'candidate',
     assignedPackageId: preHire?.assignedPackage?.id || '',
   });
@@ -82,38 +90,33 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedPackages, setSuggestedPackages] = useState<Package[]>([]);
 
-  // Department and role options from CSV
-  const [departmentOptions, setDepartmentOptions] = useState<ComboboxOption[]>([]);
-  const [roleOptions, setRoleOptions] = useState<ComboboxOption[]>([]);
+  // Hierarchical department/role data from CSV
+  const [hierarchicalData, setHierarchicalData] = useState<any[]>([]);
 
   // ============================================================================
   // EFFECTS
   // ============================================================================
 
-  // Load department and role options from CSV on mount
+  // Load hierarchical department/role data from CSV on mount
   useEffect(() => {
-    const loadOptions = async () => {
+    const loadData = async () => {
       try {
-        const [departments, roles] = await Promise.all([
-          getDepartmentGroups(),
-          getRoles(),
-        ]);
-        setDepartmentOptions(departments);
-        setRoleOptions(roles);
+        const data = await getHierarchicalData();
+        setHierarchicalData(data);
       } catch (error) {
-        console.error('Error loading department/role options:', error);
+        console.error('Error loading hierarchical data:', error);
       }
     };
 
-    loadOptions();
+    loadData();
   }, []);
 
   // Auto-suggest packages based on role
   useEffect(() => {
-    if (formData.role) {
+    if (formData.roleSelection?.role) {
       const suggested = mockPackages.filter((pkg) =>
         pkg.roleTarget.some((r) =>
-          r.toLowerCase().includes(formData.role.toLowerCase())
+          r.toLowerCase().includes(formData.roleSelection!.role.toLowerCase())
         )
       );
       setSuggestedPackages(suggested);
@@ -126,7 +129,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
         }));
       }
     }
-  }, [formData.role]);
+  }, [formData.roleSelection]);
 
   // ============================================================================
   // VALIDATION
@@ -147,14 +150,9 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
       newErrors.email = 'Invalid email format';
     }
 
-    // Role
-    if (!formData.role) {
-      newErrors.role = 'Role is required';
-    }
-
-    // Department
-    if (!formData.department) {
-      newErrors.department = 'Department is required';
+    // Role and Department
+    if (!formData.roleSelection || !formData.roleSelection.role) {
+      newErrors.roleSelection = 'Role and department are required';
     }
 
     // Start date
@@ -171,7 +169,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
     }
 
     // Hiring manager
-    if (!formData.hiringManager.trim()) {
+    if (!formData.hiringManager) {
       newErrors.hiringManager = 'Hiring manager is required';
     }
 
@@ -212,10 +210,10 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
         id: preHire?.id || `pre-${Date.now()}`,
         candidateName: formData.candidateName.trim(),
         email: formData.email.trim() || undefined,
-        role: formData.role,
-        department: formData.department,
+        role: formData.roleSelection?.role || '',
+        department: formData.roleSelection?.departmentGroup || '',
         startDate: new Date(formData.startDate),
-        hiringManager: formData.hiringManager.trim(),
+        hiringManager: formData.hiringManager?.displayName || '',
         status: formData.status,
         assignedPackage: selectedPackage,
         createdBy: isEditMode
@@ -263,51 +261,47 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Candidate Name"
-              name="candidateName"
-              value={formData.candidateName}
-              onChange={(e) => handleChange('candidateName', e.target.value)}
-              placeholder="Enter full name"
-              required
-              error={errors.candidateName}
-              autoFocus
-            />
+            <div>
+              <Input
+                label="Candidate Name"
+                id="candidateName"
+                name="candidateName"
+                value={formData.candidateName}
+                onChange={(e) => handleChange('candidateName', e.target.value)}
+                placeholder="Enter full name"
+                required
+                autoFocus
+              />
+              {errors.candidateName && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.candidateName}</p>
+              )}
+            </div>
 
-            <Input
-              label="Email Address"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="candidate@momentumww.com"
-              error={errors.email}
-            />
+            <div>
+              <Input
+                label="Email Address"
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="candidate@momentumww.com"
+              />
+              {errors.email && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.email}</p>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Combobox
-              label="Role"
-              name="role"
-              value={formData.role}
-              onChange={(value) => handleChange('role', value)}
-              options={roleOptions}
-              placeholder="Search roles..."
-              required
-              error={errors.role}
-            />
-
-            <Combobox
-              label="Department"
-              name="department"
-              value={formData.department}
-              onChange={(value) => handleChange('department', value)}
-              options={departmentOptions}
-              placeholder="Search departments..."
-              required
-              error={errors.department}
-            />
-          </div>
+          <HierarchicalRoleSelector
+            data={hierarchicalData}
+            value={formData.roleSelection}
+            onChange={(selection) =>
+              setFormData((prev) => ({ ...prev, roleSelection: selection }))
+            }
+            error={errors.roleSelection}
+            required
+          />
         </div>
 
         {/* Start Date & Hiring Manager */}
@@ -320,13 +314,16 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
             <div>
               <Input
                 label="Start Date"
+                id="startDate"
                 name="startDate"
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => handleChange('startDate', e.target.value)}
                 required
-                error={errors.startDate}
               />
+              {errors.startDate && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.startDate}</p>
+              )}
               {isInFreeze && (
                 <div className="mt-2">
                   <FreezePeriodAlert date={startDate!} size="sm" />
@@ -334,16 +331,13 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
               )}
             </div>
 
-            <Select
+            <ManagerSelector
               label="Hiring Manager"
-              name="hiringManager"
               value={formData.hiringManager}
-              onChange={(e) => handleChange('hiringManager', e.target.value)}
-              options={COMMON_HIRING_MANAGERS.map((manager) => ({
-                value: manager,
-                label: manager,
-              }))}
-              placeholder="Select hiring manager"
+              onChange={(manager) =>
+                setFormData((prev) => ({ ...prev, hiringManager: manager }))
+              }
+              placeholder="Search for hiring manager..."
               required
               error={errors.hiringManager}
             />
@@ -358,6 +352,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
 
           <Select
             label="Assigned Package"
+            id="assignedPackageId"
             name="assignedPackageId"
             value={formData.assignedPackageId}
             onChange={(e) => handleChange('assignedPackageId', e.target.value)}
@@ -365,12 +360,11 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
               value: pkg.id,
               label: `${pkg.name}${pkg.isStandard ? '' : ' (Exception - Requires Approval)'}`,
             }))}
-            placeholder="Select equipment package"
           />
 
-          {suggestedPackages.length > 0 && (
+          {suggestedPackages.length > 0 && formData.roleSelection?.role && (
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              <strong>Suggested packages for {formData.role}:</strong>{' '}
+              <strong>Suggested packages for {formData.roleSelection.role}:</strong>{' '}
               {suggestedPackages.map((pkg) => pkg.name).join(', ')}
             </div>
           )}
@@ -402,7 +396,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onCancel}
             disabled={isSubmitting}
           >
@@ -412,7 +406,6 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
             type="submit"
             variant="primary"
             disabled={isSubmitting}
-            loading={isSubmitting}
           >
             {isEditMode ? 'Update Pre-hire' : 'Create Pre-hire'}
           </Button>

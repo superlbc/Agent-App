@@ -418,7 +418,6 @@ export const mockPackages: Package[] = [
       mockSoftware[6], // Zoom
       mockSoftware[7], // Miro
     ],
-    licenses: [],
     isStandard: true,
     createdBy: 'IT Admin',
     createdDate: new Date('2025-01-15'),
@@ -458,7 +457,6 @@ export const mockPackages: Package[] = [
       mockSoftware[6], // Zoom
       mockSoftware[7], // Miro
     ],
-    licenses: [],
     isStandard: false, // Exception package - requires SVP approval
     createdBy: 'IT Admin',
     createdDate: new Date('2025-01-15'),
@@ -496,7 +494,6 @@ export const mockPackages: Package[] = [
       mockSoftware[8], // Notion
       mockSoftware[9], // Airtable
     ],
-    licenses: [],
     isStandard: true,
     createdBy: 'IT Admin',
     createdDate: new Date('2025-01-15'),
@@ -534,7 +531,6 @@ export const mockPackages: Package[] = [
       mockSoftware[6], // Zoom
       mockSoftware[1], // Figma (for UI work)
     ],
-    licenses: [],
     isStandard: true,
     createdBy: 'IT Admin',
     createdDate: new Date('2025-01-15'),
@@ -570,7 +566,6 @@ export const mockPackages: Package[] = [
       mockSoftware[6], // Zoom
       mockSoftware[9], // Airtable
     ],
-    licenses: [],
     isStandard: true,
     createdBy: 'IT Admin',
     createdDate: new Date('2025-01-15'),
@@ -1016,7 +1011,7 @@ export function calculatePackageCost(pkg: Package): PackageCostBreakdown {
   let monthlySoftware = 0;
   let annualSoftware = 0;
 
-  [...pkg.software, ...pkg.licenses].forEach(sw => {
+  pkg.software.forEach(sw => {
     if (!sw.cost) return;
 
     // Determine cost frequency
