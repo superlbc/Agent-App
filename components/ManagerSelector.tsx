@@ -57,7 +57,7 @@ export const ManagerSelector: React.FC<ManagerSelectorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<number | null>(null);
 
   // Graph service
   const graphService = GraphService.getInstance();
@@ -93,11 +93,11 @@ export const ManagerSelector: React.FC<ManagerSelectorProps> = ({
 
     // Clear previous timeout
     if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
+      window.clearTimeout(searchTimeoutRef.current);
     }
 
     // Debounce search
-    searchTimeoutRef.current = setTimeout(async () => {
+    searchTimeoutRef.current = window.setTimeout(async () => {
       setIsSearching(true);
       try {
         const users = await graphService.searchUsers(searchQuery);
@@ -134,7 +134,7 @@ export const ManagerSelector: React.FC<ManagerSelectorProps> = ({
 
     return () => {
       if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+        window.clearTimeout(searchTimeoutRef.current);
       }
     };
   }, [searchQuery]);

@@ -701,4 +701,53 @@ export class GraphService {
 
     return firstParagraph;
   }
+
+  /**
+   * Search for users in Azure AD
+   */
+  async searchUsers(query: string): Promise<any[]> {
+    try {
+      if (!query || query.length < 2) {
+        return [];
+      }
+
+      console.log(`[GraphService] Searching for users: "${query}"`);
+
+      const response = await this.client
+        .api('/users')
+        .search(`"displayName:${query}"`)
+        .select('id,displayName,mail,userPrincipalName,jobTitle,department')
+        .top(10)
+        .get();
+
+      console.log(`[GraphService] Found ${response.value.length} users`);
+      return response.value;
+    } catch (error) {
+      console.error('[GraphService] searchUsers error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user profile photo
+   */
+  async getUserPhoto(emailOrUpn: string): Promise<string | undefined> {
+    try {
+      const photoResponse = await this.client
+        .api(`/users/${emailOrUpn}/photo/$value`)
+        .get();
+
+      // Convert blob to base64
+      const blob = photoResponse as Blob;
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error(`[GraphService] getUserPhoto error for ${emailOrUpn}:`, error);
+      return undefined;
+    }
+  }
 }

@@ -70,6 +70,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
       ? {
           departmentGroup: preHire.department || '',
           role: preHire.role || '',
+          fullDisplay: `${preHire.department || ''} > ${preHire.role || ''}`,
         }
       : null,
     startDate: preHire?.startDate
@@ -260,26 +261,36 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Candidate Name"
-              name="candidateName"
-              value={formData.candidateName}
-              onChange={(e) => handleChange('candidateName', e.target.value)}
-              placeholder="Enter full name"
-              required
-              error={errors.candidateName}
-              autoFocus
-            />
+            <div>
+              <Input
+                label="Candidate Name"
+                id="candidateName"
+                name="candidateName"
+                value={formData.candidateName}
+                onChange={(e) => handleChange('candidateName', e.target.value)}
+                placeholder="Enter full name"
+                required
+                autoFocus
+              />
+              {errors.candidateName && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.candidateName}</p>
+              )}
+            </div>
 
-            <Input
-              label="Email Address"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="candidate@momentumww.com"
-              error={errors.email}
-            />
+            <div>
+              <Input
+                label="Email Address"
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                placeholder="candidate@momentumww.com"
+              />
+              {errors.email && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.email}</p>
+              )}
+            </div>
           </div>
 
           <HierarchicalRoleSelector
@@ -303,13 +314,16 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
             <div>
               <Input
                 label="Start Date"
+                id="startDate"
                 name="startDate"
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => handleChange('startDate', e.target.value)}
                 required
-                error={errors.startDate}
               />
+              {errors.startDate && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.startDate}</p>
+              )}
               {isInFreeze && (
                 <div className="mt-2">
                   <FreezePeriodAlert date={startDate!} size="sm" />
@@ -338,6 +352,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
 
           <Select
             label="Assigned Package"
+            id="assignedPackageId"
             name="assignedPackageId"
             value={formData.assignedPackageId}
             onChange={(e) => handleChange('assignedPackageId', e.target.value)}
@@ -345,7 +360,6 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
               value: pkg.id,
               label: `${pkg.name}${pkg.isStandard ? '' : ' (Exception - Requires Approval)'}`,
             }))}
-            placeholder="Select equipment package"
           />
 
           {suggestedPackages.length > 0 && formData.roleSelection?.role && (
@@ -382,7 +396,7 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={onCancel}
             disabled={isSubmitting}
           >
@@ -392,7 +406,6 @@ export const PreHireForm: React.FC<PreHireFormProps> = ({
             type="submit"
             variant="primary"
             disabled={isSubmitting}
-            loading={isSubmitting}
           >
             {isEditMode ? 'Update Pre-hire' : 'Create Pre-hire'}
           </Button>

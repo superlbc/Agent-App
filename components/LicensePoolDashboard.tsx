@@ -474,7 +474,7 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
                       </Button>
                     )}
                     {(onEditLicense || onUpdateLicense) && (
-                      <Button variant="ghost" size="sm" onClick={() => handleEditClick(license)}>
+                      <Button variant="outline" size="sm" onClick={() => handleEditClick(license)}>
                         <Icon name="edit" className="w-4 h-4" />
                       </Button>
                     )}

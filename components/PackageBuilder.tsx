@@ -56,10 +56,14 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
   const [roleSelections, setRoleSelections] = useState<RoleSelection[]>(() => {
     // Convert existing package data to RoleSelection format
     if (existingPackage?.roleTarget && existingPackage?.departmentTarget) {
-      return existingPackage.roleTarget.map((role, index) => ({
-        departmentGroup: existingPackage.departmentTarget[index] || '',
-        role: role,
-      }));
+      return existingPackage.roleTarget.map((role, index) => {
+        const deptGroup = existingPackage.departmentTarget[index] || '';
+        return {
+          departmentGroup: deptGroup,
+          role: role,
+          fullDisplay: `${deptGroup} > ${role}`,
+        };
+      });
     }
     return [];
   });
@@ -207,17 +211,23 @@ export const PackageBuilder: React.FC<PackageBuilderProps> = ({
           Basic Information
         </h3>
         <div className="space-y-4">
-          <Input
-            label="Package Name *"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., XD Designer Standard"
-            error={name && name.trim().length < 3 ? 'Name must be at least 3 characters' : undefined}
-          />
+          <div>
+            <Input
+              label="Package Name *"
+              id="packageName"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., XD Designer Standard"
+            />
+            {name && name.trim().length < 3 && (
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">Name must be at least 3 characters</p>
+            )}
+          </div>
 
           <Textarea
             label="Description *"
+            id="packageDescription"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe this equipment package and who it's designed for..."
