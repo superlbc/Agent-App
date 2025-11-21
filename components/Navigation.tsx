@@ -18,7 +18,8 @@ export type NavigationSection =
   | 'freeze-period-dashboard'
   | 'refresh-calendar'
   | 'refresh-finance'
-  | 'refresh-notifications';
+  | 'refresh-notifications'
+  | 'role-management';
 
 interface NavigationProps {
   currentSection: NavigationSection;
@@ -87,6 +88,12 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Freeze Period Dashboard',
     icon: 'inbox',
     description: 'Monitor freeze period notifications',
+  },
+  {
+    id: 'role-management',
+    label: 'Role Management',
+    icon: 'shield',
+    description: 'Manage system roles and permissions (Admin)',
   },
 ];
 

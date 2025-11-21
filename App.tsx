@@ -46,6 +46,7 @@ import { RefreshFinanceView } from './components/RefreshFinanceView';
 import { RefreshNotifications } from './components/RefreshNotifications';
 import { FreezePeriodAdmin } from './components/FreezePeriodAdmin';
 import { FreezePeriodDashboard } from './components/FreezePeriodDashboard';
+import { RoleManagement } from './components/RoleManagement';
 import {
   mockHardware,
   mockSoftware,
@@ -732,6 +733,13 @@ const AppContent: React.FC = () => {
                   // No-op - not needed for navigation-based UI
                 }}
               />
+            </div>
+          )}
+
+          {/* Role Management Section */}
+          {currentSection === 'role-management' && (
+            <div className="h-full overflow-auto">
+              <RoleManagement />
             </div>
           )}
         </div>

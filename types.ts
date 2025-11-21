@@ -338,6 +338,7 @@ export interface PreHire {
 
   // Phase 8: Employee linking fields
   employeeId?: string; // FK to vw_Personnel Employee ID
+  workdayId?: string; // Workday ID for pre-hires (before employee record created)
   linkedDate?: Date; // When pre-hire was linked to employee record
   linkConfidence?: "auto" | "manual" | "verified"; // How link was established
 
@@ -877,6 +878,193 @@ export interface CriticalThinkingAnalysis {
   connections?: string;
   actionable_insights?: string[];
 }
+
+// ============================================================================
+// ROLE-BASED ACCESS CONTROL (RBAC) SYSTEM
+// ============================================================================
+
+/**
+ * User role enumeration
+ * Defines all roles in the system with their access levels
+ *
+ * **Role Hierarchy** (ascending privilege):
+ * 1. EMPLOYEE - View own data only
+ * 2. HIRING_MANAGER - Create pre-hires for own team
+ * 3. MANAGER - Approve team equipment requests
+ * 4. IT - Manage hardware, process Helix tickets
+ * 5. FINANCE - View costs, approve >$5K purchases
+ * 6. HR - Create pre-hires, manage pre-hires, VIEW hardware/software (CANNOT create)
+ * 7. DIRECTOR - Full HR access + create packages + all approvals
+ * 8. ADMIN - Full system access + user management
+ */
+export type UserRole =
+  | "EMPLOYEE"
+  | "HIRING_MANAGER"
+  | "MANAGER"
+  | "IT"
+  | "FINANCE"
+  | "HR"
+  | "DIRECTOR"
+  | "ADMIN";
+
+/**
+ * Permission enumeration
+ * Defines all granular permissions in the system
+ *
+ * **Naming Convention**: {ENTITY}_{ACTION}
+ * - ENTITY: PreHire, Package, Hardware, Software, License, Employee, Approval, etc.
+ * - ACTION: Create, Read, Update, Delete, Assign, Approve, Export, etc.
+ */
+export type Permission =
+  // Pre-hire permissions
+  | "PREHIRE_CREATE"
+  | "PREHIRE_READ"
+  | "PREHIRE_READ_OWN" // View only own team's pre-hires
+  | "PREHIRE_UPDATE"
+  | "PREHIRE_DELETE"
+  | "PREHIRE_ASSIGN_PACKAGE"
+  | "PREHIRE_LINK_EMPLOYEE"
+  | "PREHIRE_EXPORT"
+
+  // Package permissions
+  | "PACKAGE_CREATE"
+  | "PACKAGE_CREATE_STANDARD" // Create standard packages (auto-approve)
+  | "PACKAGE_CREATE_EXCEPTION" // Create exception packages (require approval)
+  | "PACKAGE_READ"
+  | "PACKAGE_UPDATE"
+  | "PACKAGE_DELETE"
+  | "PACKAGE_ASSIGN"
+  | "PACKAGE_EXPORT"
+
+  // Hardware permissions
+  | "HARDWARE_CREATE"
+  | "HARDWARE_READ"
+  | "HARDWARE_UPDATE"
+  | "HARDWARE_DELETE"
+  | "HARDWARE_ASSIGN"
+  | "HARDWARE_MAINTENANCE"
+  | "HARDWARE_RETIRE"
+  | "HARDWARE_EXPORT"
+  | "HARDWARE_VIEW_COST" // View hardware costs
+  | "HARDWARE_REFRESH_VIEW" // View hardware refresh calendar
+
+  // Software/License permissions
+  | "SOFTWARE_CREATE"
+  | "SOFTWARE_READ"
+  | "SOFTWARE_UPDATE"
+  | "SOFTWARE_DELETE"
+  | "SOFTWARE_ASSIGN"
+  | "SOFTWARE_REVOKE"
+  | "SOFTWARE_VIEW_COST"
+  | "LICENSE_CREATE"
+  | "LICENSE_ASSIGN"
+  | "LICENSE_RECLAIM"
+  | "LICENSE_VIEW_UTILIZATION"
+
+  // Employee permissions
+  | "EMPLOYEE_READ"
+  | "EMPLOYEE_READ_OWN" // View only own profile
+  | "EMPLOYEE_READ_TEAM" // View own team's profiles
+  | "EMPLOYEE_UPDATE"
+  | "EMPLOYEE_UPDATE_OWN" // Update only own profile
+  | "EMPLOYEE_DELETE"
+  | "EMPLOYEE_EXPORT"
+
+  // Approval permissions
+  | "APPROVAL_CREATE"
+  | "APPROVAL_READ"
+  | "APPROVAL_APPROVE"
+  | "APPROVAL_APPROVE_OWN_TEAM" // Approve only own team's requests
+  | "APPROVAL_APPROVE_ALL" // Approve any request
+  | "APPROVAL_REJECT"
+  | "APPROVAL_CANCEL"
+  | "APPROVAL_ESCALATE"
+
+  // Freeze period permissions
+  | "FREEZEPERIOD_CREATE"
+  | "FREEZEPERIOD_READ"
+  | "FREEZEPERIOD_UPDATE"
+  | "FREEZEPERIOD_DELETE"
+  | "FREEZEPERIOD_SEND_EMAIL"
+
+  // Helix/IT permissions
+  | "HELIX_CREATE_TICKET"
+  | "HELIX_READ_TICKET"
+  | "HELIX_UPDATE_TICKET"
+  | "HELIX_CLOSE_TICKET"
+
+  // Admin permissions
+  | "ADMIN_USER_MANAGE" // Manage users and role assignments
+  | "ADMIN_ROLE_MANAGE" // Create/edit roles
+  | "ADMIN_PERMISSION_MANAGE" // Assign permissions to roles
+  | "ADMIN_SYSTEM_CONFIG" // Configure system settings
+  | "ADMIN_AUDIT_LOG" // View audit logs
+  | "ADMIN_EXPORT_ALL"; // Export all data
+
+/**
+ * Role definition
+ * Maps a role name to its display information and default permissions
+ */
+export interface Role {
+  id: string;
+  name: UserRole;
+  displayName: string; // e.g., "Human Resources"
+  description: string;
+  permissions: Permission[]; // Default permissions for this role
+  isSystemRole: boolean; // true for built-in roles, false for custom roles
+  createdDate: Date;
+  modifiedDate: Date;
+}
+
+/**
+ * User role assignment
+ * Links a user to one or more roles
+ *
+ * **Multi-role support**: Users can have multiple roles
+ * Example: Luis could be both "IT" and "ADMIN"
+ */
+export interface UserRoleAssignment {
+  id: string;
+  userId: string; // Azure AD user ID or Employee ID
+  userEmail: string;
+  userName: string;
+  roleId: string; // FK to Role.id
+  roleName: UserRole;
+  assignedBy: string; // Who assigned this role
+  assignedDate: Date;
+  expirationDate?: Date; // Optional: for temporary role assignments
+  isActive: boolean;
+}
+
+/**
+ * Permission check result
+ * Response from hasPermission() helper function
+ */
+export interface PermissionCheckResult {
+  hasPermission: boolean;
+  roles: UserRole[]; // Roles that user has
+  reason?: string; // Why permission was denied (for debugging)
+}
+
+/**
+ * Role context state
+ * Manages current user's roles and permissions
+ */
+export interface RoleContextState {
+  currentUser?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  userRoles: UserRoleAssignment[]; // User's assigned roles
+  permissions: Permission[]; // Flattened list of all permissions from all roles
+  isLoading: boolean;
+  error?: string;
+}
+
+// ============================================================================
+// LEGACY TYPES (Preserved from Meeting Notes Generator)
+// ============================================================================
 
 /**
  * @deprecated Legacy type from Meeting Notes Generator - will be removed in Phase 2
