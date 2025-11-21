@@ -269,7 +269,7 @@ interface RoleProviderProps {
 }
 
 export const RoleProvider: React.FC<RoleProviderProps> = ({ children, mockRoles }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin } = useAuth();
 
   const [state, setState] = useState<RoleContextState>({
     userRoles: [],
@@ -317,6 +317,20 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children, mockRoles 
           assignedDate: new Date(),
           isActive: true,
         }));
+      } else if (isAdmin) {
+        // User is in Admin Azure AD group - grant ADMIN role automatically
+        assignedRoles = [{
+          id: "admin-ad-group-assignment",
+          userId: user.localAccountId || user.username,
+          userEmail: user.username,
+          userName: user.name || user.username,
+          roleId: "role-admin",
+          roleName: "ADMIN",
+          assignedBy: "Azure AD Group (MOM Tech Admin Users SG)",
+          assignedDate: new Date(),
+          isActive: true,
+        }];
+        console.log('[RoleContext] 🔐 User is in Admin AD group - granting ADMIN role');
       } else {
         // Default: Assign EMPLOYEE role to all authenticated users
         assignedRoles = [{
@@ -367,7 +381,7 @@ export const RoleProvider: React.FC<RoleProviderProps> = ({ children, mockRoles 
         error: error instanceof Error ? error.message : 'Failed to load roles',
       }));
     }
-  }, [isAuthenticated, user, mockRoles]);
+  }, [isAuthenticated, user, isAdmin, mockRoles]);
 
   // Load roles on mount and when authentication changes
   useEffect(() => {
