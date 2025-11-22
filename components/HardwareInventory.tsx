@@ -419,8 +419,9 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       {/* Hardware List */}
       {totalFilteredItems > 0 ? (
         viewMode === 'card' ? (
-          // Card View - Compact
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <>
+            {/* Card View - Compact */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {paginatedHardware.map((hw) => (
               <Card key={hw.id} className="p-3 hover:shadow-md transition-all group">
                 {/* Header with Icon and Model */}
