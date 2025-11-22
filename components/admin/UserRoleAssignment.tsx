@@ -1,7 +1,7 @@
 // ============================================================================
 // USER ROLE ASSIGNMENT COMPONENT
 // ============================================================================
-// Modal for assigning and revoking roles to/from users
+// Interface for assigning and revoking roles to/from users
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Icon } from '../ui/Icon';
@@ -286,25 +286,18 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
   // ============================================================================
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              User Role Assignments
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Assign or revoke roles for users in the system
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <Icon name="x" className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-          </button>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            User Role Assignments
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Assign or revoke roles for users in the system
+          </p>
         </div>
+      </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
@@ -543,14 +536,6 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end p-6 border-t border-gray-200 dark:border-gray-700">
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      </div>
 
       {/* Confirmation Modal */}
       <ConfirmModal
