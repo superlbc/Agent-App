@@ -3,11 +3,8 @@
 // ============================================================================
 // Visual matrix interface showing all roles and their assigned permissions
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Icon } from '../ui/Icon';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Select } from '../ui/Select';
 import type { Role, Permission } from '../../types';
 
 // ============================================================================
@@ -19,20 +16,6 @@ interface PermissionMatrixProps {
   onClose: () => void;
 }
 
-// Permission modules for grouping
-const PERMISSION_MODULES = [
-  'PREHIRE',
-  'PACKAGE',
-  'HARDWARE',
-  'SOFTWARE',
-  'LICENSE',
-  'EMPLOYEE',
-  'APPROVAL',
-  'FREEZEPERIOD',
-  'HELIX',
-  'ADMIN',
-] as const;
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -42,15 +25,7 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
   onClose,
 }) => {
   // ============================================================================
-  // STATE
-  // ============================================================================
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedModule, setSelectedModule] = useState<string>('all');
-  const [showOnlyDifferences, setShowOnlyDifferences] = useState(false);
-
-  // ============================================================================
-  // ALL PERMISSIONS
+  // PERMISSIONS DATA
   // ============================================================================
 
   const allPermissions = useMemo(() => {
@@ -61,36 +36,11 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
     return Array.from(permSet).sort();
   }, [roles]);
 
-  // ============================================================================
-  // FILTERING
-  // ============================================================================
-
-  const filteredPermissions = useMemo(() => {
-    return allPermissions.filter(permission => {
-      // Search filter
-      const matchesSearch = !searchQuery ||
-        permission.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Module filter
-      const matchesModule = selectedModule === 'all' ||
-        permission.startsWith(selectedModule + '_');
-
-      // Show only differences filter
-      if (showOnlyDifferences) {
-        const rolesWithPerm = roles.filter(r => r.permissions.includes(permission)).length;
-        const hasDifference = rolesWithPerm > 0 && rolesWithPerm < roles.length;
-        return matchesSearch && matchesModule && hasDifference;
-      }
-
-      return matchesSearch && matchesModule;
-    });
-  }, [allPermissions, searchQuery, selectedModule, showOnlyDifferences, roles]);
-
   // Group permissions by module
   const permissionsByModule = useMemo(() => {
     const grouped: Record<string, Permission[]> = {};
 
-    filteredPermissions.forEach(permission => {
+    allPermissions.forEach(permission => {
       const module = permission.split('_')[0];
       if (!grouped[module]) {
         grouped[module] = [];
@@ -99,7 +49,7 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
     });
 
     return grouped;
-  }, [filteredPermissions]);
+  }, [allPermissions]);
 
   // ============================================================================
   // HELPER FUNCTIONS
@@ -132,55 +82,9 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
         </div>
       </div>
 
-        {/* Filters */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Input
-              label="Search Permissions"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by permission name..."
-              icon="search"
-            />
-            <Select
-              label="Module"
-              value={selectedModule}
-              onChange={(e) => setSelectedModule(e.target.value)}
-            >
-              <option value="all">All Modules</option>
-              {PERMISSION_MODULES.map(module => (
-                <option key={module} value={module}>
-                  {module}
-                </option>
-              ))}
-            </Select>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showOnlyDifferences}
-                  onChange={(e) => setShowOnlyDifferences(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Show only differences
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Matrix */}
-        <div className="flex-1 overflow-auto p-6">
-          {filteredPermissions.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-600 dark:text-gray-400">
-              <div className="text-center">
-                <Icon name="search" className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>No permissions match your filters</p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
+      {/* Matrix */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="space-y-6">
               {Object.entries(permissionsByModule).map(([module, permissions]) => (
                 <div key={module} className="space-y-3">
                   {/* Module Header - Fully opaque sticky header */}
@@ -274,14 +178,12 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                 </div>
               ))}
             </div>
-          )}
         </div>
 
       {/* Footer */}
       <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredPermissions.length} of {allPermissions.length} permissions
-          across {roles.length} roles
+          {allPermissions.length} permissions across {roles.length} roles
         </div>
       </div>
     </div>
