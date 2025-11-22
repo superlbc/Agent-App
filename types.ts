@@ -115,10 +115,15 @@ export interface Hardware {
 /**
  * Software license assignment
  * Tracks individual license assignments to employees
+ *
+ * **Phase 10: License Pool Separation**
+ * Updated to reference LicensePool instead of Software directly
  */
 export interface LicenseAssignment {
   id: string;
-  licenseId: string;
+  licensePoolId: string; // FK to LicensePool.id (new architecture)
+  /** @deprecated Use licensePoolId instead */
+  licenseId?: string; // Legacy FK to Software.id (for backward compatibility)
   employeeId: string;
   employeeName: string;
   employeeEmail: string;
@@ -130,9 +135,66 @@ export interface LicenseAssignment {
 }
 
 /**
+ * License Pool
+ * Phase 10: NEW - Separated from Software interface for clarity
+ *
+ * **Purpose**: Tracks license inventory with seat counts and assignments
+ *
+ * **Key Design Decision**: Separated from Software Catalog
+ * - Software = "What software exists in our organization?" (catalog)
+ * - LicensePool = "How many seats do we own? Who's using them?" (inventory)
+ * - LicenseAssignment = "Individual seat assignments" (provisioning)
+ *
+ * **Benefits of Separation**:
+ * - ✅ Clarity: No confusion about catalog vs inventory
+ * - ✅ Flexibility: Software can exist WITHOUT a license pool (e.g., free/open-source tools)
+ * - ✅ Multiple pools: Same software, different tiers/regions
+ * - ✅ Accurate costing: Package costs from Software.cost, utilization from LicensePool
+ *
+ * **Example**:
+ * ```
+ * Software: { id: "sw-adobe-cc-001", name: "Adobe CC", cost: 54.99 }
+ * LicensePool: { softwareId: "sw-adobe-cc-001", totalSeats: 10, assignedSeats: 3 }
+ * ```
+ */
+export interface LicensePool {
+  id: string;
+  softwareId: string; // FK to Software.id (which software this pool is for)
+
+  // Pool Sizing
+  totalSeats: number; // Total licenses purchased
+  assignedSeats: number; // Currently assigned (calculated from assignments.length)
+  // availableSeats is calculated: totalSeats - assignedSeats
+
+  // License Type
+  licenseType: "perpetual" | "subscription" | "concurrent";
+
+  // Lifecycle
+  purchaseDate?: Date; // When licenses were purchased
+  renewalDate?: Date; // Next renewal date for subscriptions
+  renewalFrequency?: "monthly" | "annual";
+  autoRenew: boolean; // Auto-renewal enabled
+
+  // Contacts
+  vendorContact?: string; // Vendor sales/support contact
+  internalContact?: string; // Internal license administrator
+
+  // Tracking
+  assignments: LicenseAssignment[]; // Individual seat assignments
+
+  // Metadata
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+}
+
+/**
  * Software license item
  * Represents applications, subscriptions, and concurrent licenses
- * Now includes license pool tracking for availability management
+ *
+ * **Phase 10: License Pool Separation**
+ * This is now a PURE CATALOG - license inventory moved to LicensePool
+ * Deprecated fields marked for removal after migration
  */
 export interface Software {
   id: string;
@@ -144,21 +206,32 @@ export interface Software {
   cost: number;
   // Phase 2: Cost Calculation Fix
   costFrequency?: "one-time" | "monthly" | "annual"; // For accurate cost calculation
-  renewalFrequency?: "monthly" | "annual";
-  seatCount?: number; // Total number of seats available (for concurrent/subscription licenses)
   description?: string;
 
-  // License Pool Tracking (Phase 2 - NEW)
-  assignedSeats?: number; // Number of seats currently assigned
-  assignments?: LicenseAssignment[]; // Individual license assignments
-  // availableSeats is calculated: seatCount - assignedSeats
+  // ============================================================================
+  // DEPRECATED FIELDS - Use LicensePool instead (Phase 10)
+  // ============================================================================
+  // These fields will be removed after migration to LicensePool architecture
+  // For backward compatibility during migration only
 
-  // License Lifecycle (Phase 2 - NEW)
-  renewalDate?: Date; // Next renewal date for subscriptions
-  purchaseDate?: Date; // Original purchase date
-  vendorContact?: string; // Vendor sales/support contact
-  internalContact?: string; // Internal license administrator
-  autoRenew?: boolean; // Auto-renewal enabled
+  /** @deprecated Use LicensePool.totalSeats instead */
+  seatCount?: number;
+  /** @deprecated Use LicensePool.assignedSeats instead */
+  assignedSeats?: number;
+  /** @deprecated Use LicensePool.assignments instead */
+  assignments?: LicenseAssignment[];
+  /** @deprecated Use LicensePool.renewalDate instead */
+  renewalDate?: Date;
+  /** @deprecated Use LicensePool.renewalFrequency instead */
+  renewalFrequency?: "monthly" | "annual";
+  /** @deprecated Use LicensePool.purchaseDate instead */
+  purchaseDate?: Date;
+  /** @deprecated Use LicensePool.vendorContact instead */
+  vendorContact?: string;
+  /** @deprecated Use LicensePool.internalContact instead */
+  internalContact?: string;
+  /** @deprecated Use LicensePool.autoRenew instead */
+  autoRenew?: boolean;
 }
 
 /**

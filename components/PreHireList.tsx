@@ -14,6 +14,7 @@ import { StatusBadge } from './ui/StatusBadge';
 import { FreezePeriodAlert, isInFreezePeriod } from './ui/FreezePeriodBanner';
 import { DEPARTMENTS, ROLES, PRE_HIRE_STATUSES } from '../constants';
 import { TableSkeleton } from './ui/TableSkeleton';
+import { ConfirmModal } from './ui/ConfirmModal';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -90,6 +91,13 @@ export const PreHireList: React.FC<PreHireListProps> = ({
 
   // Advanced filters toggle
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // Confirmation modal state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<PreHire | null>(null);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [showBulkStatusConfirm, setShowBulkStatusConfirm] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<PreHire['status'] | null>(null);
 
   // ============================================================================
   // FILTERING & SORTING
@@ -236,12 +244,14 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   };
 
   const handleDeleteClick = (preHire: PreHire) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete pre-hire record for ${preHire.candidateName}?`
-      )
-    ) {
-      onDelete(preHire);
+    setItemToDelete(preHire);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      onDelete(itemToDelete);
+      setItemToDelete(null);
     }
   };
 
@@ -274,31 +284,31 @@ export const PreHireList: React.FC<PreHireListProps> = ({
   };
 
   const handleBulkDelete = () => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete ${selectedIds.size} pre-hire record(s)?`
-      )
-    ) {
-      selectedIds.forEach((id) => {
-        const preHire = preHires.find((ph) => ph.id === id);
-        if (preHire) onDelete(preHire);
-      });
-      setSelectedIds(new Set());
-      setShowBulkActions(false);
-    }
+    setShowBulkDeleteConfirm(true);
+  };
+
+  const confirmBulkDelete = () => {
+    selectedIds.forEach((id) => {
+      const preHire = preHires.find((ph) => ph.id === id);
+      if (preHire) onDelete(preHire);
+    });
+    setSelectedIds(new Set());
+    setShowBulkActions(false);
   };
 
   const handleBulkStatusUpdate = (status: PreHire['status']) => {
-    if (
-      window.confirm(
-        `Are you sure you want to update ${selectedIds.size} pre-hire record(s) to status "${status}"?`
-      )
-    ) {
+    setPendingStatus(status);
+    setShowBulkStatusConfirm(true);
+  };
+
+  const confirmBulkStatusUpdate = () => {
+    if (pendingStatus) {
       // Note: This requires adding an onUpdateStatus prop or using the onEdit callback
       // For now, we'll just show a message
-      alert(`Bulk status update to "${status}" is not yet implemented. Coming soon!`);
+      alert(`Bulk status update to "${pendingStatus}" is not yet implemented. Coming soon!`);
       setSelectedIds(new Set());
       setShowBulkActions(false);
+      setPendingStatus(null);
     }
   };
 
@@ -899,15 +909,14 @@ export const PreHireList: React.FC<PreHireListProps> = ({
 
                   {/* Start Date */}
                   <td className="px-4 py-3">
-                    <div>
-                      <div className="text-sm text-gray-900 dark:text-gray-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         {formatDate(preHire.startDate)}
-                      </div>
+                      </span>
                       {isInFreezePeriod(new Date(preHire.startDate)) && (
                         <FreezePeriodAlert
                           date={new Date(preHire.startDate)}
                           size="sm"
-                          className="mt-1"
                         />
                       )}
                     </div>
@@ -1018,6 +1027,43 @@ export const PreHireList: React.FC<PreHireListProps> = ({
           </div>
         </div>
       )}
+
+      {/* Confirmation Modals */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Pre-hire Record?"
+        message={`Are you sure you want to delete the pre-hire record for ${itemToDelete?.candidateName}? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showBulkDeleteConfirm}
+        onClose={() => setShowBulkDeleteConfirm(false)}
+        onConfirm={confirmBulkDelete}
+        title="Delete Multiple Records?"
+        message={`Are you sure you want to delete ${selectedIds.size} pre-hire record(s)? This action cannot be undone.`}
+        confirmText="Delete All"
+        variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showBulkStatusConfirm}
+        onClose={() => {
+          setShowBulkStatusConfirm(false);
+          setPendingStatus(null);
+        }}
+        onConfirm={confirmBulkStatusUpdate}
+        title="Update Status for Multiple Records?"
+        message={`Are you sure you want to update ${selectedIds.size} pre-hire record(s) to status "${pendingStatus}"?`}
+        confirmText="Update Status"
+        variant="warning"
+      />
     </Card>
   );
 };

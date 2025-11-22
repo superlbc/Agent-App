@@ -8,6 +8,7 @@ import { Toast } from './components/ui/Toast';
 import { ScrollToTop } from './components/ui/ScrollToTop';
 import { Button } from './components/ui/Button';
 import { Icon } from './components/ui/Icon';
+import { ConfirmModal } from './components/ui/ConfirmModal';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { ToastState, ApiConfig, PreHire } from './types';
 import { TourProvider } from './contexts/TourContext';
@@ -24,6 +25,7 @@ import { useVersionCheck } from './hooks/useVersionCheck';
 import { VersionUpdateBanner } from './components/ui/VersionUpdateBanner';
 import { PackageProvider, usePackages } from './contexts/PackageContext';
 import { ApprovalProvider, useApprovals } from './contexts/ApprovalContext';
+import { LicenseProvider, useLicense } from './contexts/LicenseContext';
 import { PackageAssignmentModal } from './components/PackageAssignmentModal';
 import { PackageBuilder } from './components/PackageBuilder';
 import { PackageDetailView } from './components/PackageDetailView';
@@ -73,6 +75,7 @@ const AppContent: React.FC = () => {
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const { user } = useAuth();
   const {
@@ -104,6 +107,14 @@ const AppContent: React.FC = () => {
     startView: startViewPackage,
     cancelView: cancelViewPackage,
   } = usePackages();
+
+  // License Pool Management
+  const {
+    licensePools,
+    assignLicenseToPool,
+    getPoolUtilization,
+    getPoolAvailableSeats,
+  } = useLicense();
 
   // Pre-hire Modal States
   const [viewingPreHire, setViewingPreHire] = useState<PreHire | null>(null);
@@ -539,13 +550,15 @@ const AppContent: React.FC = () => {
   };
 
   const handleResetData = () => {
-    if (window.confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
-      // Clear all pre-hires
-      preHires.forEach(ph => deletePreHire(ph.id));
-      // Clear all packages
-      packages.forEach(pkg => deletePackage(pkg.id));
-      addToast('All data has been reset', 'success');
-    }
+    setShowResetConfirm(true);
+  };
+
+  const confirmReset = () => {
+    // Clear all pre-hires
+    preHires.forEach(ph => deletePreHire(ph.id));
+    // Clear all packages
+    packages.forEach(pkg => deletePackage(pkg.id));
+    addToast('All data has been reset', 'success');
   };
 
   const handleReplayTour = () => {
@@ -596,7 +609,7 @@ const AppContent: React.FC = () => {
 
         {/* Content Area */}
         <div className="flex-1 overflow-hidden">
-          {/* Pre-hires & Packages Section */}
+          {/* Pre-hires Section */}
           {currentSection === 'pre-hires' && (
             <div className="h-full overflow-hidden relative">
               <OutputPanel
@@ -608,6 +621,35 @@ const AppContent: React.FC = () => {
                 onMerge={handleMergePreHire}
                 onCreate={handleCreatePreHire}
                 loading={preHiresLoading}
+              />
+            </div>
+          )}
+
+          {/* Packages Section */}
+          {currentSection === 'packages' && (
+            <div className="h-full overflow-auto p-6">
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          )}
+
+          {/* Approvals Section */}
+          {currentSection === 'approvals' && (
+            <div className="h-full overflow-auto p-6">
+              <ApprovalQueue
+                approvals={approvals}
+                statistics={approvalStatistics}
+                onView={handleViewApprovalDetail}
+                onApprove={handleStartApprove}
+                onReject={handleStartReject}
+                onViewTicket={handleViewTicketById}
               />
             </div>
           )}
@@ -625,14 +667,14 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {/* Software Inventory Section */}
-          {currentSection === 'software-inventory' && (
+          {/* Software Catalog Section */}
+          {currentSection === 'software-catalog' && (
             <div className="h-full overflow-auto p-6">
               <SoftwareInventory
                 initialSoftware={mockSoftware}
                 onSoftwareChange={(updatedSoftware) => {
                   console.log('Software updated:', updatedSoftware);
-                  addToast('Software inventory updated', 'success');
+                  addToast('Software catalog updated', 'success');
                 }}
               />
             </div>
@@ -642,80 +684,19 @@ const AppContent: React.FC = () => {
           {currentSection === 'license-pools' && (
             <div className="h-full overflow-auto p-6">
               <LicensePoolDashboard
-                licenses={mockSoftware}
-                onAssignLicense={(license) => {
-                  console.log('Assign license:', license);
-                  addToast(`Assigning ${license.name}...`, 'success');
+                licensePools={licensePools}
+                software={mockSoftware}
+                onAssignLicense={(pool) => {
+                  console.log('Assign license from pool:', pool);
+                  addToast(`Assigning from pool ${pool.id}...`, 'success');
                 }}
-                onViewAssignments={(license) => {
-                  console.log('View assignments for:', license);
-                  addToast(`Viewing assignments for ${license.name}`, 'success');
+                onViewAssignments={(pool) => {
+                  console.log('View assignments for pool:', pool);
+                  addToast(`Viewing assignments for pool ${pool.id}`, 'success');
                 }}
-                onEditLicense={(license) => {
-                  console.log('Edit license:', license);
-                  addToast(`Editing ${license.name}...`, 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Manage Packages Section */}
-          {currentSection === 'manage-packages' && (
-            <div className="h-full overflow-auto p-6">
-              <PackageLibrary
-                packages={packages}
-                selectedPackage={null}
-                onView={handleViewPackage}
-                onEdit={handleEditPackage}
-                onDelete={handleDeletePackage}
-                onDuplicate={handleDuplicatePackage}
-                onCreate={handleCreatePackage}
-              />
-            </div>
-          )}
-
-          {/* Packages > Hardware Section */}
-          {currentSection === 'packages-hardware' && (
-            <div className="h-full overflow-auto p-6">
-              <HardwareInventory
-                initialHardware={mockHardware}
-                onHardwareChange={(updatedHardware) => {
-                  console.log('Hardware updated:', updatedHardware);
-                  addToast('Hardware inventory updated', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Packages > Software Section */}
-          {currentSection === 'packages-software' && (
-            <div className="h-full overflow-auto p-6">
-              <SoftwareInventory
-                initialSoftware={mockSoftware}
-                onSoftwareChange={(updatedSoftware) => {
-                  console.log('Software updated:', updatedSoftware);
-                  addToast('Software inventory updated', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Packages > Licenses Section */}
-          {currentSection === 'packages-licenses' && (
-            <div className="h-full overflow-auto p-6">
-              <LicensePoolDashboard
-                licenses={mockSoftware}
-                onAssignLicense={(license) => {
-                  console.log('Assign license:', license);
-                  addToast(`Assigning ${license.name}...`, 'success');
-                }}
-                onViewAssignments={(license) => {
-                  console.log('View assignments for:', license);
-                  addToast(`Viewing assignments for ${license.name}`, 'success');
-                }}
-                onEditLicense={(license) => {
-                  console.log('Edit license:', license);
-                  addToast(`Editing ${license.name}...`, 'success');
+                onEditLicense={(pool) => {
+                  console.log('Edit pool:', pool);
+                  addToast(`Editing pool ${pool.id}...`, 'success');
                 }}
               />
             </div>
@@ -734,16 +715,16 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {/* Refresh Finance View Section */}
-          {currentSection === 'refresh-finance' && (
+          {/* Refresh Budget Forecast Section */}
+          {currentSection === 'refresh-budget' && (
             <div className="h-full overflow-hidden">
               <RefreshFinanceView
                 schedules={[]} // TODO: Add mock refresh schedules
                 onExportCSV={() => {
-                  addToast('Exported refresh forecast to CSV', 'success');
+                  addToast('Exported budget forecast to CSV', 'success');
                 }}
                 onExportPDF={() => {
-                  addToast('Exported refresh forecast to PDF', 'success');
+                  addToast('Exported budget forecast to PDF', 'success');
                 }}
               />
             </div>
@@ -1094,6 +1075,17 @@ const AppContent: React.FC = () => {
           />
         ))}
       </div>
+
+      {/* Confirmation Modals */}
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={confirmReset}
+        title="Reset All Data?"
+        message="Are you sure you want to reset all data? This will delete all pre-hires and packages. This action cannot be undone."
+        confirmText="Reset All Data"
+        variant="danger"
+      />
     </div>
   );
 };
@@ -1105,9 +1097,11 @@ function App() {
         <DepartmentProvider>
           <PreHireProvider>
             <PackageProvider>
-              <ApprovalProvider>
-                <AppContent />
-              </ApprovalProvider>
+              <LicenseProvider useMockData={true}>
+                <ApprovalProvider>
+                  <AppContent />
+                </ApprovalProvider>
+              </LicenseProvider>
             </PackageProvider>
           </PreHireProvider>
         </DepartmentProvider>

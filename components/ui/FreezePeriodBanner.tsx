@@ -184,6 +184,7 @@ interface FreezePeriodAlertProps {
 
 /**
  * Small inline freeze period indicator (for use in forms, cards, etc.)
+ * Displays as a small snowflake icon with tooltip on hover
  */
 export const FreezePeriodAlert: React.FC<FreezePeriodAlertProps> = ({
   date,
@@ -195,26 +196,30 @@ export const FreezePeriodAlert: React.FC<FreezePeriodAlertProps> = ({
   }
 
   const sizeClasses = {
-    sm: 'text-xs px-2 py-1',
-    md: 'text-sm px-3 py-1.5',
+    sm: 'w-3.5 h-3.5',
+    md: 'w-4 h-4',
   };
 
   return (
     <span
       className={`
-        inline-flex items-center gap-1.5
-        ${sizeClasses[size]}
-        bg-orange-100 dark:bg-orange-900/30
-        text-orange-700 dark:text-orange-300
-        border border-orange-300 dark:border-orange-600
-        rounded-md
-        font-medium
+        inline-flex items-center
+        group relative
         ${className}
       `}
       title="This date falls within the Workday freeze period (Nov 1 - Jan 5)"
     >
-      <Icon name="snowflake" className="w-3.5 h-3.5" aria-hidden="true" />
-      <span>Freeze Period</span>
+      <Icon
+        name="snowflake"
+        className={`${sizeClasses[size]} text-blue-500 dark:text-blue-400 cursor-help`}
+        aria-label="Freeze period"
+      />
+
+      {/* Tooltip */}
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none">
+        Freeze Period
+        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+      </span>
     </span>
   );
 };

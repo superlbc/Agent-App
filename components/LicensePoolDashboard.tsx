@@ -3,9 +3,11 @@
 // ============================================================================
 // Displays license utilization, tracks available vs assigned seats,
 // highlights over-allocated and expiring licenses
+//
+// **Phase 3 Update**: Now uses LicensePool interface instead of deprecated Software fields
 
 import React, { useState, useMemo } from 'react';
-import { Software, LicenseAssignment } from '../types';
+import { LicensePool, Software } from '../types';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { Input } from './ui/Input';
@@ -19,17 +21,18 @@ import { LicensePoolEditModal } from './LicensePoolEditModal';
 // ============================================================================
 
 interface LicensePoolDashboardProps {
-  licenses: Software[];
-  onAssignLicense?: (license: Software) => void;
-  onViewAssignments?: (license: Software) => void;
-  onEditLicense?: (license: Software) => void;
-  onCreateLicense?: (license: Partial<Software>) => void;
-  onUpdateLicense?: (license: Software) => void;
+  licensePools: LicensePool[];
+  software?: Software[]; // Optional: for fetching software names/vendors
+  onAssignLicense?: (pool: LicensePool) => void;
+  onViewAssignments?: (pool: LicensePool) => void;
+  onEditLicense?: (pool: LicensePool) => void;
+  onCreateLicense?: (pool: Partial<LicensePool>) => void;
+  onUpdateLicense?: (pool: LicensePool) => void;
   className?: string;
 }
 
 interface LicenseStats {
-  totalLicenses: number;
+  totalPools: number;
   totalSeats: number;
   assignedSeats: number;
   availableSeats: number;
@@ -45,28 +48,25 @@ type UtilizationFilter = 'all' | 'available' | 'near-capacity' | 'full' | 'over-
 // ============================================================================
 
 /**
- * Calculate available seats for a license
+ * Calculate available seats for a license pool
  */
-const getAvailableSeats = (license: Software): number => {
-  if (!license.seatCount) return 0;
-  const assigned = license.assignedSeats || 0;
-  return license.seatCount - assigned;
+const getAvailableSeats = (pool: LicensePool): number => {
+  return Math.max(0, pool.totalSeats - pool.assignedSeats);
 };
 
 /**
  * Calculate utilization percentage
  */
-const getUtilization = (license: Software): number => {
-  if (!license.seatCount) return 0;
-  const assigned = license.assignedSeats || 0;
-  return (assigned / license.seatCount) * 100;
+const getUtilization = (pool: LicensePool): number => {
+  if (pool.totalSeats === 0) return 0;
+  return (pool.assignedSeats / pool.totalSeats) * 100;
 };
 
 /**
  * Get utilization status
  */
-const getUtilizationStatus = (license: Software): 'ok' | 'warning' | 'critical' | 'over' => {
-  const utilization = getUtilization(license);
+const getUtilizationStatus = (pool: LicensePool): 'ok' | 'warning' | 'critical' | 'over' => {
+  const utilization = getUtilization(pool);
   if (utilization > 100) return 'over';
   if (utilization >= 90) return 'critical';
   if (utilization >= 75) return 'warning';
@@ -76,11 +76,12 @@ const getUtilizationStatus = (license: Software): 'ok' | 'warning' | 'critical' 
 /**
  * Check if license is expiring within 30 days
  */
-const isExpiringSoon = (license: Software): boolean => {
-  if (!license.renewalDate) return false;
+const isExpiringSoon = (pool: LicensePool): boolean => {
+  if (!pool.renewalDate) return false;
   const thirtyDaysFromNow = new Date();
   thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-  return license.renewalDate <= thirtyDaysFromNow;
+  const renewalDate = new Date(pool.renewalDate);
+  return renewalDate <= thirtyDaysFromNow;
 };
 
 // ============================================================================
@@ -88,7 +89,8 @@ const isExpiringSoon = (license: Software): boolean => {
 // ============================================================================
 
 export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
-  licenses,
+  licensePools,
+  software = [],
   onAssignLicense,
   onViewAssignments,
   onEditLicense,
@@ -102,29 +104,34 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
   const [utilizationFilter, setUtilizationFilter] = useState<UtilizationFilter>('all');
   const [vendorFilter, setVendorFilter] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingLicense, setEditingLicense] = useState<Software | null>(null);
+  const [editingPool, setEditingPool] = useState<LicensePool | null>(null);
+
+  // Helper to get software info by ID
+  const getSoftwareInfo = (softwareId: string): { name: string; vendor: string } => {
+    const sw = software.find((s) => s.id === softwareId);
+    return sw
+      ? { name: sw.name, vendor: sw.vendor }
+      : { name: 'Unknown Software', vendor: 'Unknown Vendor' };
+  };
 
   // ============================================================================
   // STATS CALCULATION
   // ============================================================================
 
   const stats: LicenseStats = useMemo(() => {
-    return licenses.reduce(
-      (acc, license) => {
-        const seatCount = license.seatCount || 0;
-        const assigned = license.assignedSeats || 0;
-
+    return licensePools.reduce(
+      (acc, pool) => {
         return {
-          totalLicenses: acc.totalLicenses + 1,
-          totalSeats: acc.totalSeats + seatCount,
-          assignedSeats: acc.assignedSeats + assigned,
-          availableSeats: acc.availableSeats + Math.max(0, seatCount - assigned),
-          overAllocated: acc.overAllocated + (assigned > seatCount ? 1 : 0),
-          expiringWithin30Days: acc.expiringWithin30Days + (isExpiringSoon(license) ? 1 : 0),
+          totalPools: acc.totalPools + 1,
+          totalSeats: acc.totalSeats + pool.totalSeats,
+          assignedSeats: acc.assignedSeats + pool.assignedSeats,
+          availableSeats: acc.availableSeats + Math.max(0, pool.totalSeats - pool.assignedSeats),
+          overAllocated: acc.overAllocated + (pool.assignedSeats > pool.totalSeats ? 1 : 0),
+          expiringWithin30Days: acc.expiringWithin30Days + (isExpiringSoon(pool) ? 1 : 0),
         };
       },
       {
-        totalLicenses: 0,
+        totalPools: 0,
         totalSeats: 0,
         assignedSeats: 0,
         availableSeats: 0,
@@ -132,39 +139,44 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
         expiringWithin30Days: 0,
       }
     );
-  }, [licenses]);
+  }, [licensePools]);
 
   // ============================================================================
   // FILTERING
   // ============================================================================
 
   const uniqueVendors = useMemo(() => {
-    return Array.from(new Set(licenses.map((l) => l.vendor))).sort();
-  }, [licenses]);
+    const vendors = licensePools
+      .map((pool) => getSoftwareInfo(pool.softwareId).vendor)
+      .filter((v) => v !== 'Unknown Vendor');
+    return Array.from(new Set(vendors)).sort();
+  }, [licensePools, software]);
 
-  const filteredLicenses = useMemo(() => {
-    return licenses.filter((license) => {
+  const filteredPools = useMemo(() => {
+    return licensePools.filter((pool) => {
+      const swInfo = getSoftwareInfo(pool.softwareId);
+
       // Search query
       const searchLower = searchQuery.toLowerCase();
       const searchMatch =
         !searchQuery ||
-        license.name.toLowerCase().includes(searchLower) ||
-        license.vendor.toLowerCase().includes(searchLower) ||
-        license.description?.toLowerCase().includes(searchLower);
+        swInfo.name.toLowerCase().includes(searchLower) ||
+        swInfo.vendor.toLowerCase().includes(searchLower) ||
+        pool.id.toLowerCase().includes(searchLower);
 
       // License type filter
-      const typeMatch = licenseTypeFilter === 'all' || license.licenseType === licenseTypeFilter;
+      const typeMatch = licenseTypeFilter === 'all' || pool.licenseType === licenseTypeFilter;
 
       // Vendor filter
-      const vendorMatch = vendorFilter === 'all' || license.vendor === vendorFilter;
+      const vendorMatch = vendorFilter === 'all' || swInfo.vendor === vendorFilter;
 
       // Utilization filter
       let utilizationMatch = true;
       if (utilizationFilter !== 'all') {
-        const status = getUtilizationStatus(license);
+        const status = getUtilizationStatus(pool);
         switch (utilizationFilter) {
           case 'available':
-            utilizationMatch = getAvailableSeats(license) > 0;
+            utilizationMatch = getAvailableSeats(pool) > 0;
             break;
           case 'near-capacity':
             utilizationMatch = status === 'warning';
@@ -180,7 +192,7 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
 
       return searchMatch && typeMatch && vendorMatch && utilizationMatch;
     });
-  }, [licenses, searchQuery, licenseTypeFilter, vendorFilter, utilizationFilter]);
+  }, [licensePools, searchQuery, licenseTypeFilter, vendorFilter, utilizationFilter, software]);
 
   // ============================================================================
   // HANDLERS
@@ -201,25 +213,25 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
   // ============================================================================
 
   // Handlers
-  const handleCreateLicense = (license: Partial<Software>) => {
+  const handleCreatePool = (pool: Partial<LicensePool>) => {
     if (onCreateLicense) {
-      onCreateLicense(license);
+      onCreateLicense(pool);
     }
     setIsCreateModalOpen(false);
   };
 
-  const handleUpdateLicense = (license: Software) => {
+  const handleUpdatePool = (pool: LicensePool) => {
     if (onUpdateLicense) {
-      onUpdateLicense(license);
+      onUpdateLicense(pool);
     }
-    setEditingLicense(null);
+    setEditingPool(null);
   };
 
-  const handleEditClick = (license: Software) => {
+  const handleEditClick = (pool: LicensePool) => {
     if (onEditLicense) {
-      onEditLicense(license);
+      onEditLicense(pool);
     }
-    setEditingLicense(license);
+    setEditingPool(pool);
   };
 
   return (
@@ -243,12 +255,12 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Licenses */}
+        {/* Total Pools */}
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Licenses</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalLicenses}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Pools</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalPools}</p>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{stats.totalSeats} total seats</p>
             </div>
             <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
@@ -326,7 +338,7 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
           <Icon name="search" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search licenses by name, vendor, or description..."
+            placeholder="Search license pools by software name, vendor, or pool ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="block w-full pl-10 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
@@ -385,14 +397,15 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
         </div>
       </div>
 
-      {/* License List */}
-      {filteredLicenses.length > 0 ? (
+      {/* License Pool List */}
+      {filteredPools.length > 0 ? (
         <div className="space-y-3">
-          {filteredLicenses.map((license) => {
-            const available = getAvailableSeats(license);
-            const utilization = getUtilization(license);
-            const status = getUtilizationStatus(license);
-            const expiringSoon = isExpiringSoon(license);
+          {filteredPools.map((pool) => {
+            const swInfo = getSoftwareInfo(pool.softwareId);
+            const available = getAvailableSeats(pool);
+            const utilization = getUtilization(pool);
+            const status = getUtilizationStatus(pool);
+            const expiringSoon = isExpiringSoon(pool);
 
             // Determine bar color based on status
             let barColor = 'bg-blue-500';
@@ -402,12 +415,12 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
             else barColor = 'bg-green-500';
 
             return (
-              <Card key={license.id} className="p-4">
+              <Card key={pool.id} className="p-4">
                 <div className="flex items-start justify-between gap-4">
-                  {/* License Info */}
+                  {/* Pool Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{license.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{swInfo.name}</h3>
                       {expiringSoon && (
                         <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 rounded">
                           Expiring Soon
@@ -418,63 +431,61 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
                     <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
                       <span className="flex items-center gap-1">
                         <Icon name="building" className="w-4 h-4" />
-                        {license.vendor}
+                        {swInfo.vendor}
                       </span>
                       <span className="flex items-center gap-1">
                         <Icon name="key" className="w-4 h-4" />
-                        {license.licenseType.charAt(0).toUpperCase() + license.licenseType.slice(1)}
+                        {pool.licenseType.charAt(0).toUpperCase() + pool.licenseType.slice(1)}
                       </span>
-                      {license.renewalFrequency && (
+                      {pool.renewalFrequency && (
                         <span className="flex items-center gap-1">
                           <Icon name="refresh" className="w-4 h-4" />
-                          {license.renewalFrequency.charAt(0).toUpperCase() + license.renewalFrequency.slice(1)}
+                          {pool.renewalFrequency.charAt(0).toUpperCase() + pool.renewalFrequency.slice(1)}
                         </span>
                       )}
                     </div>
 
                     {/* Utilization Bar */}
-                    {license.seatCount && (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {license.assignedSeats || 0} of {license.seatCount} seats assigned
-                            {available > 0 && (
-                              <span className="text-green-600 dark:text-green-400 ml-2">({available} available)</span>
-                            )}
-                            {available < 0 && (
-                              <span className="text-red-600 dark:text-red-400 ml-2">
-                                ({Math.abs(available)} over-allocated)
-                              </span>
-                            )}
-                          </span>
-                          <span className="font-medium text-gray-900 dark:text-white">{Math.round(utilization)}%</span>
-                        </div>
-                        <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${barColor} transition-all duration-300`}
-                            style={{ width: `${Math.min(100, utilization)}%` }}
-                          />
-                        </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          {pool.assignedSeats} of {pool.totalSeats} seats assigned
+                          {available > 0 && (
+                            <span className="text-green-600 dark:text-green-400 ml-2">({available} available)</span>
+                          )}
+                          {available < 0 && (
+                            <span className="text-red-600 dark:text-red-400 ml-2">
+                              ({Math.abs(available)} over-allocated)
+                            </span>
+                          )}
+                        </span>
+                        <span className="font-medium text-gray-900 dark:text-white">{Math.round(utilization)}%</span>
                       </div>
-                    )}
+                      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${barColor} transition-all duration-300`}
+                          style={{ width: `${Math.min(100, utilization)}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
                     {onViewAssignments && (
-                      <Button variant="outline" size="sm" onClick={() => onViewAssignments(license)}>
+                      <Button variant="outline" size="sm" onClick={() => onViewAssignments(pool)}>
                         <Icon name="users" className="w-4 h-4 mr-1" />
-                        View ({license.assignments?.length || 0})
+                        View ({pool.assignments?.length || 0})
                       </Button>
                     )}
                     {onAssignLicense && available > 0 && (
-                      <Button variant="primary" size="sm" onClick={() => onAssignLicense(license)}>
+                      <Button variant="primary" size="sm" onClick={() => onAssignLicense(pool)}>
                         <Icon name="add" className="w-4 h-4 mr-1" />
                         Assign
                       </Button>
                     )}
                     {(onEditLicense || onUpdateLicense) && (
-                      <Button variant="outline" size="sm" onClick={() => handleEditClick(license)}>
+                      <Button variant="outline" size="sm" onClick={() => handleEditClick(pool)}>
                         <Icon name="edit" className="w-4 h-4" />
                       </Button>
                     )}
@@ -488,9 +499,9 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
         <Card className="p-8">
           <div className="text-center">
             <Icon name="key" className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No licenses found</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No license pools found</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {hasActiveFilters ? 'Try adjusting your search or filter criteria' : 'No software licenses available'}
+              {hasActiveFilters ? 'Try adjusting your search or filter criteria' : 'No license pools available'}
             </p>
             {hasActiveFilters && (
               <Button variant="outline" onClick={handleClearFilters}>
@@ -506,15 +517,15 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
       {isCreateModalOpen && (
         <LicensePoolCreateModal
           onClose={() => setIsCreateModalOpen(false)}
-          onSubmit={handleCreateLicense}
+          onSubmit={handleCreatePool}
         />
       )}
 
-      {editingLicense && (
+      {editingPool && (
         <LicensePoolEditModal
-          license={editingLicense}
-          onClose={() => setEditingLicense(null)}
-          onSubmit={handleUpdateLicense}
+          license={editingPool as any} // Type compatibility with existing modal
+          onClose={() => setEditingPool(null)}
+          onSubmit={handleUpdatePool as any} // Type compatibility with existing modal
         />
       )}
     </div>

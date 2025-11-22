@@ -40,24 +40,64 @@ function getRoleIcon(role: string): string {
   if (roleLower.includes('designer') || roleLower.includes('xd') || roleLower.includes('ux')) {
     return 'design';
   }
-  // Developer roles
+  // Developer/Engineer roles
   if (roleLower.includes('developer') || roleLower.includes('engineer') || roleLower.includes('code')) {
     return 'code';
   }
-  // Manager/Leadership roles
-  if (roleLower.includes('manager') || roleLower.includes('director') || roleLower.includes('lead')) {
-    return 'users';
+  // Copywriter & Content roles
+  if (roleLower.includes('copywriter') || roleLower.includes('content')) {
+    return 'edit';
   }
-  // Analyst roles
+  // Producer/Production roles
+  if (roleLower.includes('producer') || roleLower.includes('production')) {
+    return 'monitor'; // film not available, using monitor as production/media icon
+  }
+  // Researcher roles
+  if (roleLower.includes('researcher') || roleLower.includes('research')) {
+    return 'search';
+  }
+  // Account/Client roles
+  if (roleLower.includes('account') || roleLower.includes('client partner')) {
+    return 'building'; // handshake not available, using building for account/client roles
+  }
+  // Business Development roles
+  if (roleLower.includes('business development')) {
+    return 'bar-chart'; // trending-up not available, using bar-chart for business development
+  }
+  // Finance roles
+  if (roleLower.includes('finance')) {
+    return 'dollar-sign';
+  }
+  // HR/Recruiting roles
+  if (roleLower.includes('hr ') || roleLower.includes('recruiter') || roleLower.includes('human resources')) {
+    return 'users'; // user-plus not available, using users for HR/recruiting
+  }
+  // Scrum Master/Agile Coach
+  if (roleLower.includes('scrum') || roleLower.includes('agile')) {
+    return 'sparkles'; // zap not available, using sparkles for agile/scrum (energy/innovation)
+  }
+  // Operations/Office Manager
+  if (roleLower.includes('operations') || roleLower.includes('office manager')) {
+    return 'settings';
+  }
+  // Executive Assistant
+  if (roleLower.includes('assistant')) {
+    return 'calendar';
+  }
+  // Analyst roles (must come after Finance Analyst check)
   if (roleLower.includes('analyst') || roleLower.includes('data')) {
     return 'chart';
+  }
+  // Manager/Leadership roles (must come after specific manager checks)
+  if (roleLower.includes('manager') || roleLower.includes('director') || roleLower.includes('lead')) {
+    return 'users';
   }
   // Creative roles
   if (roleLower.includes('creative') || roleLower.includes('art') || roleLower.includes('motion')) {
     return 'image';
   }
   // Strategy roles
-  if (roleLower.includes('strategy') || roleLower.includes('consultant')) {
+  if (roleLower.includes('strategy') || roleLower.includes('strategist') || roleLower.includes('consultant')) {
     return 'lightbulb';
   }
   // Default

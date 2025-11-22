@@ -9,11 +9,13 @@ import { Icon } from './ui/Icon';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
+import { Pagination } from './ui/Pagination';
 import HardwareCreateModal from './HardwareCreateModal';
 import HardwareEditModal from './HardwareEditModal';
 import HardwareBulkImportModal from './HardwareBulkImportModal';
 import { Hardware } from '../types';
 import { useRole } from '../contexts/RoleContext';
+import { ConfirmModal } from './ui/ConfirmModal';
 
 interface HardwareInventoryProps {
   // Optional: pass in hardware data from parent
@@ -37,15 +39,24 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
   const [hardware, setHardware] = useState<Hardware[]>(initialHardware);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<Hardware['type'] | 'all'>('all');
-  const [filterStatus, setFilterStatus] = useState<Hardware['status'] | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'model' | 'manufacturer' | 'cost' | 'purchaseDate'>('model');
+  const [sortBy, setSortBy] = useState<'model' | 'manufacturer' | 'type' | 'cost' | 'purchaseDate'>('model');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [selectedHardware, setSelectedHardware] = useState<Hardware | null>(null);
+
+  // Confirmation modal state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [hardwareToDelete, setHardwareToDelete] = useState<Hardware | null>(null);
 
   // Hardware types for filtering
   const hardwareTypes: Array<{ value: Hardware['type'] | 'all'; label: string; icon: string }> = [
@@ -57,15 +68,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
     { value: 'dock', label: 'Docks', icon: 'link' },
     { value: 'headset', label: 'Headsets', icon: 'headphones' },
     { value: 'accessory', label: 'Accessories', icon: 'package' },
-  ];
-
-  // Status options for filtering
-  const statusOptions: Array<{ value: Hardware['status'] | 'all'; label: string; color: string }> = [
-    { value: 'all', label: 'All Status', color: 'text-gray-600 dark:text-gray-400' },
-    { value: 'available', label: 'Available', color: 'text-green-600 dark:text-green-400' },
-    { value: 'assigned', label: 'Assigned', color: 'text-blue-600 dark:text-blue-400' },
-    { value: 'maintenance', label: 'Maintenance', color: 'text-orange-600 dark:text-orange-400' },
-    { value: 'retired', label: 'Retired', color: 'text-gray-600 dark:text-gray-400' },
   ];
 
   // Create hardware
@@ -89,13 +91,20 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
 
   // Delete hardware
   const handleDeleteHardware = (hardwareId: string) => {
-    if (!confirm('Are you sure you want to delete this hardware item?')) {
-      return;
+    const hw = hardware.find((h) => h.id === hardwareId);
+    if (hw) {
+      setHardwareToDelete(hw);
+      setShowDeleteConfirm(true);
     }
+  };
 
-    const updatedHardware = hardware.filter((hw) => hw.id !== hardwareId);
-    setHardware(updatedHardware);
-    onHardwareChange?.(updatedHardware);
+  const confirmDelete = () => {
+    if (hardwareToDelete) {
+      const updatedHardware = hardware.filter((hw) => hw.id !== hardwareToDelete.id);
+      setHardware(updatedHardware);
+      onHardwareChange?.(updatedHardware);
+      setHardwareToDelete(null);
+    }
   };
 
   // Bulk import hardware
@@ -132,9 +141,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       // Type filter
       if (filterType !== 'all' && hw.type !== filterType) return false;
 
-      // Status filter
-      if (filterStatus !== 'all' && hw.status !== filterStatus) return false;
-
       return true;
     })
     .sort((a, b) => {
@@ -146,6 +152,9 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
           break;
         case 'manufacturer':
           compareValue = a.manufacturer.localeCompare(b.manufacturer);
+          break;
+        case 'type':
+          compareValue = a.type.localeCompare(b.type);
           break;
         case 'cost':
           compareValue = (a.cost || 0) - (b.cost || 0);
@@ -160,6 +169,34 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
+  // Pagination
+  const totalFilteredItems = filteredAndSortedHardware.length;
+  const paginatedHardware = filteredAndSortedHardware.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Handler for column sort
+  const handleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType, itemsPerPage]);
+
+  // Refresh data
+  const handleRefresh = () => {
+    setHardware([...initialHardware]);
+    onHardwareChange?.(initialHardware);
+  };
+
   // Calculate statistics
   const stats = {
     total: hardware.length,
@@ -169,14 +206,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
         type: type.value as Hardware['type'],
         label: type.label,
         count: hardware.filter((hw) => hw.type === type.value).length,
-      })),
-    byStatus: statusOptions
-      .filter((s) => s.value !== 'all')
-      .map((status) => ({
-        status: status.value as Hardware['status'],
-        label: status.label,
-        count: hardware.filter((hw) => hw.status === status.value).length,
-        color: status.color,
       })),
     totalCost: hardware.reduce((sum, hw) => sum + (hw.cost || 0), 0),
   };
@@ -194,6 +223,13 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            onClick={handleRefresh}
+            title="Refresh hardware list"
+          >
+            <Icon name="refresh" className="w-4 h-4" />
+          </Button>
           <Button
             variant="ghost"
             onClick={() => setShowBulkImportModal(true)}
@@ -247,78 +283,64 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
         </div>
       )}
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-              <Icon name="package" className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Total Hardware</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {stats.total}
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <Icon name="check" className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Available</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {stats.byStatus.find((s) => s.status === 'available')?.count || 0}
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <Icon name="user" className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Assigned</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {stats.byStatus.find((s) => s.status === 'assigned')?.count || 0}
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-              <Icon name="alert" className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Maintenance</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {stats.byStatus.find((s) => s.status === 'maintenance')?.count || 0}
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card className="p-4">
-        <div className="space-y-4">
-          {/* Search */}
+      {/* Search and View Controls */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
           <Input
             placeholder="Search by model, manufacturer, or serial number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             leftIcon="search"
           />
+        </div>
 
-          {/* Type Filter */}
+        {/* View Toggle */}
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+          <button
+            onClick={() => setViewMode('card')}
+            className={`p-2 rounded transition-colors ${
+              viewMode === 'card'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            title="Card view"
+          >
+            <Icon name="grid" className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-2 rounded transition-colors ${
+              viewMode === 'list'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            title="List view"
+          >
+            <Icon name="list" className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Filters Toggle Button */}
+        <Button
+          variant="outline"
+          onClick={() => setShowFilters(!showFilters)}
+          className={showFilters ? 'bg-gray-100 dark:bg-gray-800' : ''}
+        >
+          <Icon name="filter" className="w-4 h-4 mr-2" />
+          Filters
+          {filterType !== 'all' && (
+            <span className="ml-2 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded-full">
+              1
+            </span>
+          )}
+        </Button>
+      </div>
+
+      {/* Collapsible Filters */}
+      {showFilters && (
+        <Card className="p-4">
           <div>
+            {/* Type Filter */}
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Filter by Type
             </label>
@@ -329,14 +351,12 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                   onClick={() => setFilterType(type.value)}
                   className={`
                     flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
                     ${
                       filterType === type.value
                         ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
                         : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
                     }
                   `}
-                  aria-pressed={filterType === type.value}
                 >
                   <Icon name={type.icon} className="w-4 h-4" />
                   {type.label}
@@ -349,203 +369,302 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
               ))}
             </div>
           </div>
-
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Filter by Status
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {statusOptions.map((status) => (
-                <button
-                  key={status.value}
-                  onClick={() => setFilterStatus(status.value)}
-                  className={`
-                    px-3 py-1.5 rounded-lg border text-sm transition-all
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
-                    ${
-                      filterStatus === status.value
-                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
-                        : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                    }
-                  `}
-                  aria-pressed={filterStatus === status.value}
-                >
-                  {status.label}
-                  {status.value !== 'all' && (
-                    <span className="text-xs opacity-70 ml-1">
-                      ({stats.byStatus.find((s) => s.status === status.value)?.count || 0})
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sort */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Sort By
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              >
-                <option value="model">Model</option>
-                <option value="manufacturer">Manufacturer</option>
-                <option value="cost">Cost</option>
-                <option value="purchaseDate">Purchase Date</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Order
-              </label>
-              <button
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-              >
-                <Icon
-                  name={sortOrder === 'asc' ? 'chevron-up' : 'chevron-down'}
-                  className="w-5 h-5 text-gray-600 dark:text-gray-400"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Hardware List */}
-      {filteredAndSortedHardware.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAndSortedHardware.map((hw) => (
-            <Card key={hw.id} className="p-4 hover:shadow-lg transition-shadow">
-              <div className="space-y-3">
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <Icon
-                        name={
-                          hw.type === 'computer'
-                            ? 'monitor'
-                            : hw.type === 'keyboard'
-                            ? 'keyboard'
-                            : hw.type === 'mouse'
-                            ? 'mouse'
-                            : hw.type === 'dock'
-                            ? 'link'
-                            : hw.type === 'headset'
-                            ? 'headphones'
-                            : 'package'
-                        }
-                        className="w-5 h-5 text-gray-600 dark:text-gray-400"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                        {hw.model}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {hw.manufacturer}
-                      </p>
-                    </div>
+      {totalFilteredItems > 0 ? (
+        viewMode === 'card' ? (
+          <>
+            {/* Card View - Compact */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {paginatedHardware.map((hw) => (
+              <Card key={hw.id} className="p-3 hover:shadow-md transition-all group">
+                {/* Header with Icon and Model */}
+                <div className="flex items-start gap-2 mb-2">
+                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded flex-shrink-0">
+                    <Icon
+                      name={
+                        hw.type === 'computer' ? 'monitor' :
+                        hw.type === 'keyboard' ? 'keyboard' :
+                        hw.type === 'mouse' ? 'mouse' :
+                        hw.type === 'dock' ? 'link' :
+                        hw.type === 'headset' ? 'headphones' : 'package'
+                      }
+                      className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                    />
                   </div>
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      hw.status === 'available'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                        : hw.status === 'assigned'
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : hw.status === 'maintenance'
-                        ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    {hw.status}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate" title={hw.model}>
+                      {hw.model}
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{hw.manufacturer}</p>
+                  </div>
                 </div>
 
-                {/* Details */}
-                <div className="space-y-1 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Type:</span>
-                    <span className="text-gray-900 dark:text-gray-100 capitalize">{hw.type}</span>
-                  </div>
-                  {hw.serialNumber && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Serial:</span>
-                      <span className="text-gray-900 dark:text-gray-100 font-mono text-xs">
-                        {hw.serialNumber}
-                      </span>
-                    </div>
+                {/* Key Specs (Inline) */}
+                <div className="text-xs text-gray-600 dark:text-gray-400 space-y-0.5 mb-2">
+                  {hw.specifications?.processor && (
+                    <div className="truncate" title={hw.specifications.processor}>{hw.specifications.processor}</div>
+                  )}
+                  {hw.specifications?.ram && hw.specifications?.storage && (
+                    <div>{hw.specifications.ram} • {hw.specifications.storage}</div>
+                  )}
+                  {hw.specifications?.screenSize && (
+                    <div>{hw.specifications.screenSize}</div>
                   )}
                   {hw.cost && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Cost:</span>
-                      <span className="text-gray-900 dark:text-gray-100 font-semibold">
-                        ${hw.cost.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                  {hw.purchaseDate && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Purchased:</span>
-                      <span className="text-gray-900 dark:text-gray-100">
-                        {new Date(hw.purchaseDate).toLocaleDateString()}
-                      </span>
+                    <div className="font-semibold text-gray-900 dark:text-gray-100">
+                      ${hw.cost.toLocaleString()}
                     </div>
                   )}
                 </div>
 
-                {/* Specifications */}
-                {hw.specifications && Object.keys(hw.specifications).length > 0 && (
-                  <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                      {hw.specifications.processor && (
-                        <div>CPU: {hw.specifications.processor}</div>
-                      )}
-                      {hw.specifications.ram && <div>RAM: {hw.specifications.ram}</div>}
-                      {hw.specifications.storage && <div>Storage: {hw.specifications.storage}</div>}
-                      {hw.specifications.screenSize && <div>Size: {hw.specifications.screenSize}</div>}
-                      {hw.specifications.connectivity && (
-                        <div>Connectivity: {hw.specifications.connectivity}</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
                 {/* Actions */}
-                <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-1 pt-2 border-t border-gray-200 dark:border-gray-700">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleEdit(hw)}
-                    className="flex-1"
+                    className="flex-1 text-xs h-7"
                     disabled={!canUpdate}
-                    title={!canUpdate ? 'You do not have permission to edit hardware' : undefined}
+                    title={!canUpdate ? 'No permission to edit' : 'Edit hardware'}
                   >
-                    <Icon name="edit" className="w-4 h-4" />
+                    <Icon name="edit" className="w-3 h-3 mr-1" />
                     Edit
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteHardware(hw.id)}
-                    className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 px-2"
                     disabled={!canDelete}
-                    title={!canDelete ? 'You do not have permission to delete hardware' : `Delete ${hw.model}`}
+                    title={!canDelete ? 'No permission to delete' : `Delete ${hw.model}`}
                     aria-label={`Delete ${hw.model}`}
                   >
-                    <Icon name="trash" className="w-4 h-4" />
+                    <Icon name="trash" className="w-3 h-3" />
                   </Button>
                 </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pagination for card view */}
+          {totalFilteredItems > itemsPerPage && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalFilteredItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                itemsPerPageOptions={[10, 25, 50, 100]}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+          // List View - Table
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    {/* Sortable Hardware Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('model')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Hardware
+                        {sortBy === 'model' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Sortable Type Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('type')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Type
+                        {sortBy === 'type' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Sortable Manufacturer Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('manufacturer')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Manufacturer
+                        {sortBy === 'manufacturer' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Sortable Cost Column */}
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleSort('cost')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Cost
+                        {sortBy === 'cost' && (
+                          <Icon
+                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+                            className="w-3 h-3"
+                          />
+                        )}
+                      </div>
+                    </th>
+
+                    {/* Non-sortable Actions Column */}
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                  {paginatedHardware.map((hw) => (
+                    <tr
+                      key={hw.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      {/* Hardware (Model) */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded flex-shrink-0">
+                            <Icon
+                              name={
+                                hw.type === 'computer' ? 'monitor' :
+                                hw.type === 'keyboard' ? 'keyboard' :
+                                hw.type === 'mouse' ? 'mouse' :
+                                hw.type === 'dock' ? 'link' :
+                                hw.type === 'headset' ? 'headphones' : 'package'
+                              }
+                              className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                              {hw.model}
+                            </div>
+                            {hw.serialNumber && (
+                              <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">
+                                {hw.serialNumber}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Type */}
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-gray-900 dark:text-gray-100 capitalize">
+                          {hw.type}
+                        </span>
+                      </td>
+
+                      {/* Manufacturer */}
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
+                          {hw.manufacturer}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5 mt-1">
+                          {hw.specifications?.processor && (
+                            <div className="truncate text-xs">{hw.specifications.processor}</div>
+                          )}
+                          {hw.specifications?.ram && hw.specifications?.storage && (
+                            <div className="text-xs">{hw.specifications.ram} • {hw.specifications.storage}</div>
+                          )}
+                          {hw.specifications?.screenSize && (
+                            <div className="text-xs">{hw.specifications.screenSize}</div>
+                          )}
+                          {hw.specifications?.connectivity && (
+                            <div className="text-xs">{hw.specifications.connectivity}</div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Cost */}
+                      <td className="px-4 py-3">
+                        {hw.cost ? (
+                          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            ${hw.cost.toLocaleString()}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
+                        )}
+                        {hw.purchaseDate && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(hw.purchaseDate).toLocaleDateString()}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(hw)}
+                            disabled={!canUpdate}
+                            title={!canUpdate ? 'No permission to edit' : 'Edit hardware'}
+                            className="h-8"
+                          >
+                            <Icon name="edit" className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteHardware(hw.id)}
+                            className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-8"
+                            disabled={!canDelete}
+                            title={!canDelete ? 'No permission to delete' : `Delete ${hw.model}`}
+                            aria-label={`Delete ${hw.model}`}
+                          >
+                            <Icon name="trash" className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination for table view */}
+            {totalFilteredItems > itemsPerPage && (
+              <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalFilteredItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={setItemsPerPage}
+                  itemsPerPageOptions={[10, 25, 50, 100]}
+                />
               </div>
-            </Card>
-          ))}
-        </div>
+            )}
+          </Card>
+        )
       ) : (
         <Card className="p-12 text-center">
           <div className="flex flex-col items-center gap-4">
@@ -557,12 +676,12 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                 No hardware found
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {searchQuery || filterType !== 'all' || filterStatus !== 'all'
+                {searchQuery || filterType !== 'all'
                   ? 'Try adjusting your filters or search query'
                   : 'Get started by adding your first hardware item'}
               </p>
             </div>
-            {!searchQuery && filterType === 'all' && filterStatus === 'all' && (
+            {!searchQuery && filterType === 'all' && (
               <Button
                 variant="primary"
                 onClick={() => setShowCreateModal(true)}
@@ -598,6 +717,19 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
         isOpen={showBulkImportModal}
         onClose={() => setShowBulkImportModal(false)}
         onImportHardware={handleImportHardware}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setHardwareToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Hardware Item?"
+        message={`Are you sure you want to delete ${hardwareToDelete?.model}? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from './ui/Card';
 import { Icon } from './ui/Icon';
@@ -39,6 +39,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
   const [developerData, setDeveloperData] = useState<GraphData | null>(null);
   const [isLoadingDeveloper, setIsLoadingDeveloper] = useState(false);
 
+  // Refs for focus management
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
   // Fetch developer data from Azure AD when modal opens
   useEffect(() => {
     if (isOpen && !developerData && !isLoadingDeveloper) {
@@ -58,6 +62,82 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
     }
   }, [isOpen, developerData, isLoadingDeveloper]);
 
+  // Focus management when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Store the currently focused element to restore later
+      const previouslyFocusedElement = document.activeElement as HTMLElement;
+
+      // Focus the close button when modal opens
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
+
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+
+      // Return cleanup function
+      return () => {
+        document.body.style.overflow = '';
+        // Restore focus to previously focused element
+        previouslyFocusedElement?.focus();
+      };
+    }
+  }, [isOpen]);
+
+  // Handle Escape key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
+
+  // Focus trap - keep focus within modal
+  useEffect(() => {
+    if (!isOpen || !modalRef.current) return;
+
+    const handleTabKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (!focusableElements || focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (event.shiftKey) {
+        // Shift + Tab: if focused on first element, move to last
+        if (document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab: if focused on last element, move to first
+        if (document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleTabKey);
+    return () => {
+      document.removeEventListener('keydown', handleTabKey);
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Determine if we have live data or should use fallback
@@ -65,13 +145,25 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, user, g
   const displayData = hasLiveData ? developerData : DEVELOPER_FALLBACK;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/50"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="about-modal-title"
+    >
       <div className="flex min-h-full items-center justify-center p-4">
-        <Card className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <Card className="w-full max-w-md" onClick={e => e.stopPropagation()} ref={modalRef}>
         <div className="p-5">
           <div className="relative mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">{t('common:about.title')}</h2>
+            <h2
+              id="about-modal-title"
+              className="text-xl font-semibold text-gray-900 dark:text-white text-center"
+            >
+              {t('common:about.title')}
+            </h2>
             <button
+              ref={closeButtonRef}
               onClick={onClose}
               className="absolute -top-2 -right-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label="Close about"
