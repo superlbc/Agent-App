@@ -189,32 +189,34 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
           ) : (
             <div className="space-y-6">
               {Object.entries(permissionsByModule).map(([module, permissions]) => (
-                <div key={module} className="space-y-2">
-                  {/* Module Header */}
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white sticky top-0 bg-white dark:bg-gray-800 py-2 z-10">
-                    {module} ({permissions.length})
-                  </h3>
+                <div key={module} className="space-y-3">
+                  {/* Module Header - Fully opaque sticky header */}
+                  <div className="sticky top-0 bg-white dark:bg-gray-800 py-3 z-30 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                      {module} <span className="text-sm text-gray-500 dark:text-gray-400 font-normal">({permissions.length})</span>
+                    </h3>
+                  </div>
 
                   {/* Matrix Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse border border-gray-200 dark:border-gray-700">
-                      {/* Table Header */}
-                      <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-700/50">
-                          <th className="border border-gray-200 dark:border-gray-700 p-3 text-left font-semibold text-gray-900 dark:text-white sticky left-0 bg-gray-50 dark:bg-gray-700/50 z-20 min-w-[300px]">
+                      {/* Table Header - Sticky on vertical scroll */}
+                      <thead className="sticky top-[52px] z-20">
+                        <tr className="bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-300 dark:border-gray-600">
+                          <th className="border border-gray-200 dark:border-gray-700 p-2 text-left font-semibold text-gray-900 dark:text-white sticky left-0 bg-gray-50 dark:bg-gray-800 z-30 min-w-[250px] text-sm">
                             Permission
                           </th>
-                          <th className="border border-gray-200 dark:border-gray-700 p-3 text-center font-semibold text-gray-900 dark:text-white min-w-[80px]">
+                          <th className="border border-gray-200 dark:border-gray-700 p-2 text-center font-semibold text-gray-900 dark:text-white min-w-[100px] text-sm bg-gray-50 dark:bg-gray-800">
                             Coverage
                           </th>
                           {roles.map(role => (
                             <th
                               key={role.id}
-                              className="border border-gray-200 dark:border-gray-700 p-3 text-center font-semibold text-gray-900 dark:text-white min-w-[120px]"
+                              className="border border-gray-200 dark:border-gray-700 p-2 text-center font-semibold text-gray-900 dark:text-white min-w-[140px] bg-gray-50 dark:bg-gray-800"
                             >
-                              <div className="flex flex-col items-center">
-                                <Icon name="shield" className="w-5 h-5 mb-1 text-blue-500" />
-                                <span className="text-xs">{role.displayName}</span>
+                              <div className="flex flex-col items-center gap-1">
+                                <Icon name="shield" className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                                <span className="text-xs leading-tight">{role.displayName}</span>
                               </div>
                             </th>
                           ))}
@@ -229,23 +231,23 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                           return (
                             <tr
                               key={permission}
-                              className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                              className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                             >
-                              {/* Permission Name */}
-                              <td className="border border-gray-200 dark:border-gray-700 p-3 font-mono text-sm text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800 z-10">
+                              {/* Permission Name - Sticky left column */}
+                              <td className="border border-gray-200 dark:border-gray-700 p-2 font-mono text-xs text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-gray-50 group-hover:dark:bg-gray-700/30">
                                 {permission}
                               </td>
 
                               {/* Coverage Percentage */}
-                              <td className="border border-gray-200 dark:border-gray-700 p-3 text-center">
+                              <td className="border border-gray-200 dark:border-gray-700 p-2 text-center bg-white dark:bg-gray-800">
                                 <div className="flex items-center justify-center gap-2">
-                                  <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div className="w-20 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                     <div
-                                      className="h-full bg-blue-500 transition-all"
+                                      className="h-full bg-blue-500 dark:bg-blue-400 transition-all"
                                       style={{ width: `${coverage}%` }}
                                     />
                                   </div>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                                  <span className="text-[11px] text-gray-600 dark:text-gray-400 font-medium min-w-[32px]">
                                     {coverage}%
                                   </span>
                                 </div>
@@ -255,17 +257,17 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                               {roles.map(role => (
                                 <td
                                   key={role.id}
-                                  className="border border-gray-200 dark:border-gray-700 p-3 text-center"
+                                  className="border border-gray-200 dark:border-gray-700 p-2 text-center bg-white dark:bg-gray-800"
                                 >
                                   {hasPermission(role, permission) ? (
                                     <Icon
                                       name="check"
-                                      className="w-5 h-5 mx-auto text-green-500"
+                                      className="w-4 h-4 mx-auto text-green-500 dark:text-green-400"
                                     />
                                   ) : (
                                     <Icon
                                       name="x"
-                                      className="w-5 h-5 mx-auto text-gray-300 dark:text-gray-600"
+                                      className="w-4 h-4 mx-auto text-gray-300 dark:text-gray-600"
                                     />
                                   )}
                                 </td>
