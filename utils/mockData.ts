@@ -960,10 +960,10 @@ export const mockEvents: Event[] = [
 ];
 
 // ============================================================================
-// VENUES (15 major venues with complete details)
+// EVENT VENUES (15 major venues linked to events)
 // ============================================================================
 
-export const mockVenues: Venue[] = [
+export const mockEventVenues: Venue[] = [
   {
     id: 'venue-001',
     eventId: 'evt-001',
@@ -2771,3 +2771,237 @@ export const mockVenueStatistics = {
   averageEventsPerVenue: mockVenues.reduce((sum, v) => sum + (v.eventsCount || 0), 0) / mockVenues.length,
   topVenue: getMostUsedVenues(1)[0],
 };
+
+// ============================================================================
+// EMPLOYEE ONBOARDING SYSTEM - MOCK DATA
+// ============================================================================
+
+import type { PreHire, Hardware, Software, Package } from '../types';
+
+/**
+ * Mock Hardware Inventory
+ * Sample hardware items for equipment provisioning
+ */
+export const mockHardware: Hardware[] = [
+  {
+    id: 'hw-001',
+    type: 'computer',
+    model: 'MacBook Pro 16" M3 Max',
+    manufacturer: 'Apple',
+    specifications: {
+      processor: 'M3 Max',
+      ram: '64GB',
+      storage: '2TB SSD',
+    },
+    status: 'available',
+    cost: 4299.00,
+  },
+  {
+    id: 'hw-002',
+    type: 'monitor',
+    model: 'Dell UltraSharp 27" 4K',
+    manufacturer: 'Dell',
+    specifications: {
+      screenSize: '27" 4K',
+    },
+    status: 'available',
+    cost: 599.99,
+  },
+];
+
+/**
+ * Mock Software Catalog
+ * Sample software and licenses
+ */
+export const mockSoftware: Software[] = [
+  {
+    id: 'sw-001',
+    name: 'Adobe Creative Cloud',
+    vendor: 'Adobe',
+    licenseType: 'subscription',
+    requiresApproval: false,
+    cost: 54.99,
+    renewalFrequency: 'monthly',
+    description: 'Complete creative suite',
+  },
+  {
+    id: 'sw-002',
+    name: 'Cinema 4D Studio',
+    vendor: 'Maxon',
+    licenseType: 'subscription',
+    requiresApproval: true,
+    approver: 'Steve Sanderson',
+    cost: 94.99,
+    renewalFrequency: 'monthly',
+    description: '3D modeling and animation',
+  },
+];
+
+/**
+ * Mock Equipment Packages
+ * Pre-configured bundles for common roles
+ */
+export const mockPackages: Package[] = [
+  {
+    id: 'pkg-xd-std-001',
+    name: 'XD Designer Standard',
+    description: 'Standard equipment package for Experience Designers',
+    roleTarget: ['XD Designer', 'Senior XD Designer'],
+    departmentTarget: ['Creative', 'IPTC'],
+    hardware: mockHardware,
+    software: mockSoftware,
+    licenses: mockSoftware,
+    isStandard: true,
+    createdBy: 'IT Admin',
+    createdDate: new Date('2024-01-15'),
+    lastModified: new Date('2024-01-15'),
+  },
+];
+
+/**
+ * Mock Pre-Hire Records
+ * Sample candidate tracking data
+ */
+export const mockPreHires: PreHire[] = [
+  {
+    id: 'pre-2025-001',
+    candidateName: 'Jane Smith',
+    email: 'jane.smith@momentumww.com',
+    role: 'XD Designer',
+    department: 'Creative',
+    startDate: new Date('2025-12-01'),
+    hiringManager: 'John Doe',
+    status: 'accepted',
+    assignedPackage: mockPackages[0],
+    createdBy: 'Camille (HR)',
+    createdDate: new Date('2024-11-10'),
+    lastModified: new Date('2024-11-10'),
+  },
+  {
+    id: 'pre-2025-002',
+    candidateName: 'Michael Chen',
+    email: 'michael.chen@momentumww.com',
+    role: 'Motion Designer',
+    department: 'Creative',
+    startDate: new Date('2025-11-25'),
+    hiringManager: 'Sarah Johnson',
+    status: 'offered',
+    createdBy: 'Payton (HR)',
+    createdDate: new Date('2024-11-12'),
+    lastModified: new Date('2024-11-12'),
+  },
+  {
+    id: 'pre-2025-003',
+    candidateName: 'Emily Rodriguez',
+    email: 'emily.rodriguez@momentumww.com',
+    role: 'Project Manager',
+    department: 'IPTC',
+    startDate: new Date('2025-12-15'),
+    hiringManager: 'Alex Thompson',
+    status: 'candidate',
+    createdBy: 'Camille (HR)',
+    createdDate: new Date('2024-11-08'),
+    lastModified: new Date('2024-11-08'),
+  },
+];
+
+/**
+ * Get pre-hires by status
+ */
+export function getPreHiresByStatus(status: PreHire['status']): PreHire[] {
+  return mockPreHires.filter((p) => p.status === status);
+}
+
+/**
+ * Get pre-hires by department
+ */
+export function getPreHiresByDepartment(department: string): PreHire[] {
+  return mockPreHires.filter((p) => p.department === department);
+}
+
+/**
+ * Get pre-hires starting in date range
+ */
+export function getPreHiresByDateRange(startDate: Date, endDate: Date): PreHire[] {
+  return mockPreHires.filter((p) => p.startDate >= startDate && p.startDate <= endDate);
+}
+
+// ============================================================================
+// ADDITIONAL ONBOARDING EXPORTS
+// ============================================================================
+
+/**
+ * Mock Employees
+ * Full employee records with onboarding status
+ */
+export const mockEmployees: Employee[] = [
+  {
+    id: 'emp-001',
+    activeDirectoryId: 'ad-001',
+    workdayId: 'wd-001',
+    name: 'John Smith',
+    email: 'john.smith@momentumww.com',
+    department: 'Creative',
+    role: 'Senior Designer',
+    startDate: new Date('2023-06-15'),
+    manager: 'Jane Doe',
+    assignedPackage: mockPackages[0],
+    actualHardware: mockHardware,
+    actualSoftware: mockSoftware,
+    onboardingStatus: 'active',
+    onboardingPhases: {
+      adCreated: new Date('2023-06-10'),
+      vantageCreated: new Date('2023-06-10'),
+      workdayCreated: new Date('2023-06-12'),
+      equipmentOrdered: new Date('2023-06-13'),
+      equipmentReceived: new Date('2023-06-14'),
+      onboardingComplete: new Date('2023-06-15'),
+    },
+    isPreloaded: false,
+    needsPasswordReset: false,
+    createdBy: 'HR System',
+    createdDate: new Date('2023-06-10'),
+    lastModified: new Date('2023-06-15'),
+  },
+];
+
+/**
+ * Mock Freeze Periods
+ * Workday freeze period configurations
+ */
+export const mockFreezePeriods: any[] = [];
+
+/**
+ * Mock Freeze Period Notifications
+ * Password reset and termination notifications during freeze periods
+ */
+export const mockFreezePeriodNotifications: any[] = [];
+
+/**
+ * Mock Approval Requests
+ * Equipment and software approval tracking
+ */
+export const mockApprovalRequests: any[] = [];
+
+/**
+ * Mock Helix Tickets
+ * IT ticketing system integration
+ */
+export const mockHelixTickets: any[] = [];
+
+/**
+ * Mock License Pools
+ * Software license pool management
+ */
+export const mockLicensePools: any[] = [];
+
+/**
+ * Calculate total cost of a package
+ * Helper function for package cost calculations
+ */
+export function calculatePackageCost(pkg: Package): number {
+  const hardwareCost = pkg.hardware.reduce((sum, hw) => sum + (hw.cost || 0), 0);
+  const softwareCost = pkg.software.reduce((sum, sw) => sum + (sw.cost || 0), 0);
+  const licenseCost = pkg.licenses.reduce((sum, lic) => sum + (lic.cost || 0), 0);
+  return hardwareCost + softwareCost + licenseCost;
+}
