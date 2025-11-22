@@ -115,10 +115,18 @@ export const CampaignList: React.FC<CampaignListProps> = ({
           comparison = (a.clientName || '').localeCompare(b.clientName || '');
           break;
         case 'createdAt':
-          comparison = a.createdAt.getTime() - b.createdAt.getTime();
+          // Handle undefined dates - put them at the end
+          if (!a.createdAt && !b.createdAt) comparison = 0;
+          else if (!a.createdAt) comparison = 1;
+          else if (!b.createdAt) comparison = -1;
+          else comparison = a.createdAt.getTime() - b.createdAt.getTime();
           break;
         case 'updatedAt':
-          comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
+          // Handle undefined dates - put them at the end
+          if (!a.updatedAt && !b.updatedAt) comparison = 0;
+          else if (!a.updatedAt) comparison = 1;
+          else if (!b.updatedAt) comparison = -1;
+          else comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
           break;
       }
 
