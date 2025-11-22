@@ -38,7 +38,7 @@ export const RejectConfirmModal: React.FC<RejectConfirmModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      onConfirm(reason.trim());
+      await onConfirm(reason.trim());
     } finally {
       setIsSubmitting(false);
     }

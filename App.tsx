@@ -77,6 +77,8 @@ const AppContent: React.FC = () => {
   const { user } = useAuth();
   const {
     preHires,
+    loading: preHiresLoading,
+    error: preHiresError,
     editingPreHire: contextEditingPreHire,
     createPreHire,
     updatePreHire,
@@ -90,6 +92,8 @@ const AppContent: React.FC = () => {
     packages,
     hardware,
     software,
+    loading: packagesLoading,
+    error: packagesError,
     editingPackage,
     viewingPackage,
     createPackage,
@@ -120,6 +124,8 @@ const AppContent: React.FC = () => {
   const {
     approvals,
     tickets,
+    loading: approvalsLoading,
+    error: approvalsError,
     statistics: approvalStatistics,
     viewingApproval,
     viewingTicket,
@@ -138,9 +144,6 @@ const AppContent: React.FC = () => {
   // Approval Modal States
   const [showApprovalQueue, setShowApprovalQueue] = useState(false);
   const [showHelixTicketList, setShowHelixTicketList] = useState(false);
-
-  // Loading state for initial data fetch simulation
-  const [isLoadingData, setIsLoadingData] = useState(true);
   const [approvingRequest, setApprovingRequest] = useState<ApprovalRequest | null>(null);
   const [rejectingRequest, setRejectingRequest] = useState<ApprovalRequest | null>(null);
 
@@ -201,15 +204,24 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
-  // Simulate initial data loading (demonstrates skeleton loaders)
+  // Display error toasts from contexts
   useEffect(() => {
-    // Simulate API call delay (in real app, this would be actual data fetching)
-    const loadingTimer = setTimeout(() => {
-      setIsLoadingData(false);
-    }, 1200); // 1.2 second delay to showcase skeleton loaders
+    if (preHiresError) {
+      addToast(preHiresError, 'error');
+    }
+  }, [preHiresError]);
 
-    return () => clearTimeout(loadingTimer);
-  }, []);
+  useEffect(() => {
+    if (packagesError) {
+      addToast(packagesError, 'error');
+    }
+  }, [packagesError]);
+
+  useEffect(() => {
+    if (approvalsError) {
+      addToast(approvalsError, 'error');
+    }
+  }, [approvalsError]);
 
   const addToast = (message: string, type: 'success' | 'error' = 'success') => {
     const id = Date.now();
@@ -223,13 +235,20 @@ const AppContent: React.FC = () => {
   // PRE-HIRE HANDLERS
   // ============================================================================
 
-  const handleSavePreHire = (preHireData: Partial<PreHire>) => {
-    if (editingPreHire) {
-      // Update existing pre-hire
-      updatePreHire(editingPreHire.id, preHireData);
-    } else {
-      // Create new pre-hire
-      createPreHire(preHireData);
+  const handleSavePreHire = async (preHireData: Partial<PreHire>) => {
+    try {
+      if (editingPreHire) {
+        // Update existing pre-hire
+        await updatePreHire(editingPreHire.id, preHireData);
+        addToast(`Pre-hire record for ${preHireData.candidateName} updated successfully`, 'success');
+      } else {
+        // Create new pre-hire
+        await createPreHire(preHireData);
+        addToast(`Pre-hire record for ${preHireData.candidateName} created successfully`, 'success');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save pre-hire';
+      addToast(errorMessage, 'error');
     }
   };
 
@@ -238,9 +257,14 @@ const AppContent: React.FC = () => {
     setShowPreHireForm(true);
   };
 
-  const handleDeletePreHire = (preHire: PreHire) => {
-    deletePreHire(preHire.id);
-    addToast(`Pre-hire record for ${preHire.candidateName} deleted`, 'success');
+  const handleDeletePreHire = async (preHire: PreHire) => {
+    try {
+      await deletePreHire(preHire.id);
+      addToast(`Pre-hire record for ${preHire.candidateName} deleted successfully`, 'success');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete pre-hire';
+      addToast(errorMessage, 'error');
+    }
   };
 
   const handleViewPreHire = (preHire: PreHire) => {
@@ -256,36 +280,47 @@ const AppContent: React.FC = () => {
     setLinkingPreHire(preHire);
   };
 
-  const handleLinkEmployee = (employeeId: string, linkConfidence: 'auto' | 'manual' | 'verified') => {
+  const handleLinkEmployee = async (employeeId: string, linkConfidence: 'auto' | 'manual' | 'verified') => {
     if (linkingPreHire) {
-      // Update the pre-hire record with linked employee ID and change status to 'linked'
-      updatePreHire(linkingPreHire.id, {
-        linkedEmployeeId: employeeId,
-        status: 'linked',
-      });
+      try {
+        // Update the pre-hire record with linked employee ID and change status to 'linked'
+        await updatePreHire(linkingPreHire.id, {
+          linkedEmployeeId: employeeId,
+          status: 'linked',
+        });
 
-      addToast(
-        `Pre-hire ${linkingPreHire.candidateName} linked to employee ${employeeId}`,
-        'success'
-      );
+        addToast(
+          `Pre-hire ${linkingPreHire.candidateName} linked to employee ${employeeId} successfully`,
+          'success'
+        );
 
-      // Close the modal
-      setLinkingPreHire(null);
+        // Close the modal
+        setLinkingPreHire(null);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to link employee';
+        addToast(errorMessage, 'error');
+      }
     }
   };
 
-  const handlePreHireFormSubmit = (preHireData: Partial<PreHire>) => {
-    if (editingPreHire) {
-      // Update existing pre-hire
-      updatePreHire(editingPreHire.id, preHireData);
-      addToast(`Pre-hire record for ${preHireData.candidateName} updated`, 'success');
-    } else {
-      // Create new pre-hire
-      createPreHire(preHireData);
-      addToast(`Pre-hire record for ${preHireData.candidateName} created`, 'success');
+  const handlePreHireFormSubmit = async (preHireData: Partial<PreHire>) => {
+    try {
+      if (editingPreHire) {
+        // Update existing pre-hire
+        await updatePreHire(editingPreHire.id, preHireData);
+        addToast(`Pre-hire record for ${preHireData.candidateName} updated successfully`, 'success');
+      } else {
+        // Create new pre-hire
+        await createPreHire(preHireData);
+        addToast(`Pre-hire record for ${preHireData.candidateName} created successfully`, 'success');
+      }
+      setShowPreHireForm(false);
+      setEditingPreHire(null);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save pre-hire';
+      addToast(errorMessage, 'error');
+      // Don't close the form on error so user can retry
     }
-    setShowPreHireForm(false);
-    setEditingPreHire(null);
   };
 
   const handlePreHireFormCancel = () => {
@@ -306,11 +341,16 @@ const AppContent: React.FC = () => {
     setShowPackageAssignmentModal(true);
   };
 
-  const handlePackageAssignment = (preHire: PreHire, selectedPackage: Package) => {
-    updatePreHire(preHire.id, { assignedPackage: selectedPackage });
-    addToast(`Package "${selectedPackage.name}" assigned to ${preHire.candidateName}`, 'success');
-    setShowPackageAssignmentModal(false);
-    setAssigningPreHire(null);
+  const handlePackageAssignment = async (preHire: PreHire, selectedPackage: Package) => {
+    try {
+      await updatePreHire(preHire.id, { assignedPackage: selectedPackage });
+      addToast(`Package "${selectedPackage.name}" assigned to ${preHire.candidateName} successfully`, 'success');
+      setShowPackageAssignmentModal(false);
+      setAssigningPreHire(null);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to assign package';
+      addToast(errorMessage, 'error');
+    }
   };
 
   const handleCreatePackage = () => {
@@ -324,19 +364,25 @@ const AppContent: React.FC = () => {
     setShowPackageBuilder(true);
   };
 
-  const handleSavePackage = (packageData: Partial<Package>) => {
-    if (isCloning || !editingPackage) {
-      // Cloning or creating new package
-      createPackage(packageData);
-      addToast(`Package "${packageData.name}" created successfully`, 'success');
-    } else {
-      // Updating existing package
-      updatePackage(editingPackage.id, packageData);
-      addToast(`Package "${packageData.name}" updated successfully`, 'success');
+  const handleSavePackage = async (packageData: Partial<Package>) => {
+    try {
+      if (isCloning || !editingPackage) {
+        // Cloning or creating new package
+        await createPackage(packageData);
+        addToast(`Package "${packageData.name}" created successfully`, 'success');
+      } else {
+        // Updating existing package
+        await updatePackage(editingPackage.id, packageData);
+        addToast(`Package "${packageData.name}" updated successfully`, 'success');
+      }
+      setShowPackageBuilder(false);
+      setIsCloning(false);
+      cancelEditPackage();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save package';
+      addToast(errorMessage, 'error');
+      // Don't close the builder on error so user can retry
     }
-    setShowPackageBuilder(false);
-    setIsCloning(false);
-    cancelEditPackage();
   };
 
   const handleCancelPackageBuilder = () => {
@@ -345,11 +391,16 @@ const AppContent: React.FC = () => {
     cancelEditPackage();
   };
 
-  const handleDeletePackage = (pkg: Package) => {
-    deletePackage(pkg.id);
-    addToast(`Package "${pkg.name}" deleted successfully`, 'success');
-    if (viewingPackage?.id === pkg.id) {
-      cancelViewPackage();
+  const handleDeletePackage = async (pkg: Package) => {
+    try {
+      await deletePackage(pkg.id);
+      addToast(`Package "${pkg.name}" deleted successfully`, 'success');
+      if (viewingPackage?.id === pkg.id) {
+        cancelViewPackage();
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete package';
+      addToast(errorMessage, 'error');
     }
   };
 
@@ -397,11 +448,16 @@ const AppContent: React.FC = () => {
     setApprovingRequest(approval);
   };
 
-  const handleConfirmApprove = (notes?: string) => {
+  const handleConfirmApprove = async (notes?: string) => {
     if (approvingRequest) {
-      approveRequest(approvingRequest.id, notes);
-      addToast(`Request for ${approvingRequest.employeeName} approved successfully`, 'success');
-      setApprovingRequest(null);
+      try {
+        await approveRequest(approvingRequest.id, undefined, notes);
+        addToast(`Request for ${approvingRequest.employeeName} approved successfully`, 'success');
+        setApprovingRequest(null);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to approve request';
+        addToast(errorMessage, 'error');
+      }
     }
   };
 
@@ -413,11 +469,16 @@ const AppContent: React.FC = () => {
     setRejectingRequest(approval);
   };
 
-  const handleConfirmReject = (reason: string) => {
+  const handleConfirmReject = async (reason: string) => {
     if (rejectingRequest) {
-      rejectRequest(rejectingRequest.id, reason);
-      addToast(`Request for ${rejectingRequest.employeeName} rejected`, 'error');
-      setRejectingRequest(null);
+      try {
+        await rejectRequest(rejectingRequest.id, reason);
+        addToast(`Request for ${rejectingRequest.employeeName} rejected successfully`, 'success');
+        setRejectingRequest(null);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to reject request';
+        addToast(errorMessage, 'error');
+      }
     }
   };
 
@@ -546,7 +607,7 @@ const AppContent: React.FC = () => {
                 onAssignPackage={handleAssignPackage}
                 onMerge={handleMergePreHire}
                 onCreate={handleCreatePreHire}
-                loading={isLoadingData}
+                loading={preHiresLoading}
               />
             </div>
           )}

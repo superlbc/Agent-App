@@ -34,7 +34,7 @@ export const ApproveConfirmModal: React.FC<ApproveConfirmModalProps> = ({
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
-      onConfirm(notes || undefined);
+      await onConfirm(notes || undefined);
     } finally {
       setIsSubmitting(false);
     }
