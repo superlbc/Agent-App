@@ -298,46 +298,43 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
           {layoutMode === 'grid' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRoles.map((role) => (
-                <Card key={role.id} className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
+                <Card key={role.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                  {/* Radio button indicator */}
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <div className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                        {/* Inner dot for selected state - can be conditionally shown */}
+                        {/* <div className="w-2.5 h-2.5 rounded-full bg-blue-600" /> */}
+                      </div>
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Icon name="shield" className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {role.displayName}
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {role.name}
-                        </p>
-                        {role.isSystemRole && (
-                          <StatusBadge status="info" size="sm">
-                            System
-                          </StatusBadge>
-                        )}
-                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                        {role.displayName}
+                      </h3>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {role.name}
+                      </p>
                     </div>
                   </div>
 
                   {role.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
                       {role.description}
                     </p>
                   )}
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    <div className="flex items-center gap-1.5">
                       <Icon name="key" className="w-4 h-4" />
                       <span>{role.permissions.length} permissions</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <Icon name="users" className="w-4 h-4" />
                       <span>0 users</span> {/* TODO: Add user count */}
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
                     {canManageRoles && !role.isSystemRole && (
                       <>
                         <Button
@@ -364,9 +361,9 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditRole(role)}
-                        className="flex-1"
+                        className="w-full justify-center"
                       >
-                        <Icon name="eye" className="w-4 h-4 mr-1" />
+                        <Icon name="eye" className="w-4 h-4 mr-2" />
                         View Details
                       </Button>
                     )}
