@@ -385,16 +385,16 @@ export const RefreshFinanceView: React.FC<RefreshFinanceViewProps> = ({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th scope="col" className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
                     Hardware
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th scope="col" className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
                     Employee
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th scope="col" className="text-left py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
                     Eligibility Date
                   </th>
-                  <th className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
+                  <th scope="col" className="text-right py-3 px-4 font-medium text-gray-600 dark:text-gray-400">
                     Estimated Cost
                   </th>
                 </tr>

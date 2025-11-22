@@ -444,22 +444,22 @@ const HardwareBulkImportModal: React.FC<HardwareBulkImportModalProps> = ({
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
                       <tr>
-                        <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                           Row
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                           Type
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                           Model
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                           Manufacturer
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                           Status
                         </th>
-                        <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
                           Validation
                         </th>
                       </tr>

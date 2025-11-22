@@ -503,11 +503,11 @@ robert.martinez@momentumww.com,Smartsheet,2024-03-01,2024-12-01,revoked,Revoked 
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0">
                       <tr>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Status</th>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Employee</th>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">License</th>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Assigned</th>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Issues</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Status</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Employee</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">License</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Assigned</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Issues</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">

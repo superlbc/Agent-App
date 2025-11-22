@@ -216,7 +216,7 @@ export const RecapDetailModal: React.FC<RecapDetailModalProps> = ({
                 </span>
               </div>
 
-              <div className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-500 dark:text-gray-400">
                 Submitted {formatDate(recap.submittedAt)}
               </div>
 
@@ -245,7 +245,7 @@ export const RecapDetailModal: React.FC<RecapDetailModalProps> = ({
               onClick={onClose}
               className="ml-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
             >
-              <Icon name="x" className="w-5 h-5 text-gray-500" />
+              <Icon name="x" className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
 
@@ -332,9 +332,9 @@ export const RecapDetailModal: React.FC<RecapDetailModalProps> = ({
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 dark:bg-gray-900/50">
                       <tr>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300">Type</th>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300">Distributed</th>
-                        <th className="px-4 py-2 text-left text-gray-700 dark:text-gray-300">Remaining</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300">Type</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300">Distributed</th>
+                        <th scope="col" className="px-4 py-2 text-left text-gray-700 dark:text-gray-300">Remaining</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">

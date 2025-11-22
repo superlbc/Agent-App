@@ -458,19 +458,19 @@ export const ImportUsersCSVModal: React.FC<ImportUsersCSVModalProps> = ({
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
                           Status
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
                           Email
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
                           Display Name
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
                           Roles
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300">
                           Errors
                         </th>
                       </tr>

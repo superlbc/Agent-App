@@ -230,7 +230,7 @@ export const EventDashboard: React.FC<EventDashboardProps> = ({
                       <p className="text-sm font-bold text-gray-900 dark:text-white">
                         {new Date(event.eventDate).getDate()}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short' })}
                       </p>
                     </div>

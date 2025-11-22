@@ -132,10 +132,10 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                       {/* Table Header */}
                       <thead>
                         <tr className="bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-300 dark:border-gray-600">
-                          <th className="border border-gray-200 dark:border-gray-700 p-2 text-left font-semibold text-gray-900 dark:text-white min-w-[250px] text-sm bg-gray-50 dark:bg-gray-800">
+                          <th scope="col" className="border border-gray-200 dark:border-gray-700 p-2 text-left font-semibold text-gray-900 dark:text-white min-w-[250px] text-sm bg-gray-50 dark:bg-gray-800">
                             Permission
                           </th>
-                          <th className="border border-gray-200 dark:border-gray-700 p-2 text-center font-semibold text-gray-900 dark:text-white min-w-[100px] text-sm bg-gray-50 dark:bg-gray-800">
+                          <th scope="col" className="border border-gray-200 dark:border-gray-700 p-2 text-center font-semibold text-gray-900 dark:text-white min-w-[100px] text-sm bg-gray-50 dark:bg-gray-800">
                             Coverage
                           </th>
                           {roles.map(role => (

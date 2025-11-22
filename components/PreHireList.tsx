@@ -780,7 +780,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
         <table className="w-full min-w-[800px]">
           <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-4 py-3 text-left w-12">
+              <th scope="col" className="px-4 py-3 text-left w-12">
                 <input
                   type="checkbox"
                   checked={selectedIds.size === paginatedPreHires.length && paginatedPreHires.length > 0}
@@ -824,7 +824,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                 direction={sortDirection}
                 onSort={handleSort}
               />
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>

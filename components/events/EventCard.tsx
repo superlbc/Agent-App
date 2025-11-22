@@ -101,20 +101,20 @@ export const EventCard: React.FC<EventCardProps> = ({
       {/* Event Details */}
       <div className="space-y-2 mb-4">
         <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-          <Icon name="calendar" className="w-4 h-4 mr-2 text-gray-500" />
+          <Icon name="calendar" className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
           <span>{formatDate(event.eventDate)}</span>
         </div>
         <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-          <Icon name="clock" className="w-4 h-4 mr-2 text-gray-500" />
+          <Icon name="clock" className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
           <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
         </div>
         <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-          <Icon name="location" className="w-4 h-4 mr-2 text-gray-500" />
+          <Icon name="location" className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
           <span>{event.venueName}, {event.city}, {event.state}</span>
         </div>
         {event.businessLeaderName && (
           <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-            <Icon name="user" className="w-4 h-4 mr-2 text-gray-500" />
+            <Icon name="user" className="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" />
             <span>{event.businessLeaderName}</span>
           </div>
         )}

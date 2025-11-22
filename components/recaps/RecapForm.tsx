@@ -320,7 +320,7 @@ export const RecapForm: React.FC<RecapFormProps> = ({
         </div>
         <Icon
           name={expandedSections[key] ? 'chevron-up' : 'chevron-down'}
-          className="w-5 h-5 text-gray-500"
+          className="w-5 h-5 text-gray-500 dark:text-gray-400"
         />
       </button>
       {expandedSections[key] && <div className="p-4 pt-0 space-y-4">{content}</div>}
