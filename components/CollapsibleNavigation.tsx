@@ -12,19 +12,19 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 // ============================================================================
 
 export type NavigationSection =
-  | 'pre-hires'
-  | 'approvals'
-  | 'hardware-inventory'
-  | 'software-catalog'
-  | 'license-pools'
-  | 'user-license-assignments'
-  | 'manage-packages'
-  | 'refresh-calendar'
-  | 'refresh-finance'
-  | 'refresh-notifications'
-  | 'freeze-period-admin'
-  | 'freeze-period-dashboard'
-  | 'role-management';
+  | 'campaigns'
+  | 'events-calendar'
+  | 'events-map'
+  | 'events-list'
+  | 'venues'
+  | 'team-assignments'
+  | 'integrations'
+  | 'analytics-dashboard'
+  | 'analytics-export'
+  | 'admin-users'
+  | 'admin-clients'
+  | 'admin-programs'
+  | 'settings';
 
 interface NavigationProps {
   currentSection: NavigationSection;
@@ -53,129 +53,120 @@ interface NavigationGroup {
 
 const NAVIGATION_STRUCTURE: NavigationGroup[] = [
   {
-    section: 'CORE',
+    section: 'CAMPAIGNS',
     items: [
       {
-        id: 'pre-hires',
-        label: 'Pre-hires & Onboarding',
+        id: 'campaigns',
+        label: 'All Campaigns',
+        icon: 'briefcase',
+        description: 'Campaign list and grid view',
+      },
+    ],
+  },
+  {
+    section: 'EVENTS',
+    items: [
+      {
+        id: 'events-calendar',
+        label: 'Event Calendar',
+        icon: 'calendar',
+        description: 'Calendar view of all events',
+      },
+      {
+        id: 'events-map',
+        label: 'Event Map',
+        icon: 'map-pin',
+        description: 'Geographic map view',
+      },
+      {
+        id: 'events-list',
+        label: 'Event List',
+        icon: 'list',
+        description: 'Filterable event list',
+      },
+    ],
+  },
+  {
+    section: 'VENUES',
+    items: [
+      {
+        id: 'venues',
+        label: 'Venue Database',
+        icon: 'map',
+        description: 'All venues with search and filter',
+      },
+    ],
+  },
+  {
+    section: 'TEAM',
+    items: [
+      {
+        id: 'team-assignments',
+        label: 'Team Assignments',
         icon: 'users',
-        description: 'Primary dashboard for candidate onboarding',
-      },
-      {
-        id: 'approvals',
-        label: 'Approvals',
-        icon: 'check-circle',
-        description: 'Approval queue and workflow management',
-      },
-      {
-        id: 'role-management',
-        label: 'Role Management',
-        icon: 'shield',
-        description: 'Manage user roles and permissions',
+        description: 'Who\'s assigned to what event',
       },
     ],
   },
   {
-    section: 'INVENTORY',
+    section: 'INTEGRATIONS',
     items: [
       {
-        id: 'hardware-inventory',
-        label: 'Hardware Inventory',
-        icon: 'box',
-        description: 'Manage hardware items and inventory',
-      },
-      {
-        id: 'software-catalog',
-        label: 'Software Inventory',
-        icon: 'disc',
-        description: 'Manage software, licenses, and assignments',
-        children: [
-          {
-            id: 'software-catalog',
-            label: 'Software Catalog',
-            icon: 'grid',
-            description: 'All software and applications',
-          },
-          {
-            id: 'license-pools',
-            label: 'License Pool Dashboard',
-            icon: 'key',
-            description: 'License inventory and utilization',
-          },
-          {
-            id: 'user-license-assignments',
-            label: 'User License Assignments',
-            icon: 'user-check',
-            description: 'View all user license assignments',
-          },
-        ],
+        id: 'integrations',
+        label: 'Integration Settings',
+        icon: 'zap',
+        description: 'Brandscopic, QR Tiger, Qualtrics',
       },
     ],
   },
   {
-    section: 'PACKAGES',
+    section: 'ANALYTICS',
     items: [
       {
-        id: 'manage-packages',
-        label: 'Packages',
-        icon: 'clipboard-list',
-        description: 'Manage equipment packages',
+        id: 'analytics-dashboard',
+        label: 'Power BI Dashboard',
+        icon: 'bar-chart',
+        description: 'Reports and KPIs',
+      },
+      {
+        id: 'analytics-export',
+        label: 'Report Export',
+        icon: 'download',
+        description: 'Excel, PDF, and CSV exports',
       },
     ],
   },
   {
-    section: 'HARDWARE REFRESH',
+    section: 'ADMIN',
     items: [
       {
-        id: 'refresh-calendar',
-        label: 'Hardware Refresh',
-        icon: 'refresh-cw',
-        description: 'Hardware refresh management',
-        children: [
-          {
-            id: 'refresh-calendar',
-            label: 'Calendar',
-            icon: 'calendar',
-            description: 'View hardware refresh schedule',
-          },
-          {
-            id: 'refresh-finance',
-            label: 'Budget Forecast',
-            icon: 'dollar-sign',
-            description: 'Financial planning and cost projections',
-          },
-          {
-            id: 'refresh-notifications',
-            label: 'Notifications',
-            icon: 'bell',
-            description: 'Manage upcoming refresh notifications',
-          },
-        ],
+        id: 'admin-users',
+        label: 'User Management',
+        icon: 'user-check',
+        description: 'User roles and access',
+      },
+      {
+        id: 'admin-clients',
+        label: 'Client Management',
+        icon: 'building',
+        description: 'Client configuration',
+      },
+      {
+        id: 'admin-programs',
+        label: 'Program Management',
+        icon: 'folder',
+        description: 'Program setup',
       },
     ],
   },
   {
-    section: 'FREEZE PERIOD',
+    section: 'SETTINGS',
     items: [
       {
-        id: 'freeze-period-admin',
-        label: 'Freeze Period',
-        icon: 'snowflake',
-        description: 'Freeze period management',
-        children: [
-          {
-            id: 'freeze-period-admin',
-            label: 'Admin',
-            icon: 'settings',
-            description: 'Configure freeze period settings',
-          },
-          {
-            id: 'freeze-period-dashboard',
-            label: 'Dashboard',
-            icon: 'bar-chart',
-            description: 'Monitor freeze period notifications',
-          },
-        ],
+        id: 'settings',
+        label: 'Settings',
+        icon: 'settings',
+        description: 'Application settings',
       },
     ],
   },
@@ -293,11 +284,7 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
   const [isCollapsed, setIsCollapsed] = useLocalStorage('navCollapsed', false);
 
   // Expanded groups state (which parent items are expanded)
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    'software-catalog': false,
-    'hardware-refresh': false,
-    'freeze-period': false,
-  });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   // Toggle collapse
   const toggleCollapse = () => {
@@ -425,8 +412,8 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
       {!isCollapsed && (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
-            <p>Version 2.0.0</p>
-            <p className="mt-1">Employee Onboarding System</p>
+            <p>Version 3.0.0</p>
+            <p className="mt-1">UXP - Unified Experience Platform</p>
           </div>
         </div>
       )}

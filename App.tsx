@@ -52,6 +52,20 @@ import { RefreshNotifications } from './components/RefreshNotifications';
 import { FreezePeriodAdmin } from './components/FreezePeriodAdmin';
 import { FreezePeriodDashboard } from './components/FreezePeriodDashboard';
 import { RoleManagement } from './components/RoleManagement';
+
+// UXP Components
+import { CampaignList } from './components/campaign/CampaignList';
+import EventCalendar from './components/event/EventCalendar';
+import EventMap from './components/event/EventMap';
+import EventList from './components/event/EventList';
+import VenueDatabase from './components/venue/VenueDatabase';
+import { IntegrationSettings } from './components/integrations/IntegrationSettings';
+import { PowerBIDashboard } from './components/analytics/PowerBIDashboard';
+import { ReportExport } from './components/analytics/ReportExport';
+import { UserManagement } from './components/admin/UserManagement';
+import { ClientManagement } from './components/admin/ClientManagement';
+import { ProgramManagement } from './components/admin/ProgramManagement';
+
 import {
   mockHardware,
   mockSoftware,
@@ -69,7 +83,7 @@ const AppContent: React.FC = () => {
   );
   const [currentSection, setCurrentSection] = useLocalStorage<NavigationSection>(
     'currentSection',
-    'pre-hires'
+    'campaigns'
   );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -614,233 +628,116 @@ const AppContent: React.FC = () => {
 
         {/* Content Area */}
         <div className="flex-1 overflow-hidden">
-          {/* Pre-hires Section */}
-          {currentSection === 'pre-hires' && (
-            <div className="h-full overflow-hidden relative">
-              <OutputPanel
-                preHires={preHires}
-                onEdit={handleEditPreHire}
-                onDelete={handleDeletePreHire}
-                onView={handleViewPreHire}
-                onAssignPackage={handleAssignPackage}
-                onMerge={handleMergePreHire}
-                onCreate={handleCreatePreHire}
-                loading={preHiresLoading}
-              />
-            </div>
-          )}
-
-          {/* Packages Section */}
-          {currentSection === 'manage-packages' && (
-            <div className="h-full overflow-auto p-6">
-              <PackageLibrary
-                packages={packages}
-                selectedPackage={null}
-                onView={handleViewPackage}
-                onEdit={handleEditPackage}
-                onDelete={handleDeletePackage}
-                onDuplicate={handleDuplicatePackage}
-                onCreate={handleCreatePackage}
-              />
-            </div>
-          )}
-
-          {/* Approvals Section */}
-          {currentSection === 'approvals' && (
-            <div className="h-full overflow-auto p-6">
-              <ApprovalQueue
-                approvals={approvals}
-                statistics={approvalStatistics}
-                onView={handleViewApprovalDetail}
-                onApprove={handleStartApprove}
-                onReject={handleStartReject}
-                onViewTicket={handleViewTicketById}
-              />
-            </div>
-          )}
-
-          {/* Hardware Inventory Section */}
-          {currentSection === 'hardware-inventory' && (
-            <div className="h-full overflow-auto p-6">
-              <HardwareInventory
-                initialHardware={mockHardware}
-                onHardwareChange={(updatedHardware) => {
-                  console.log('Hardware updated:', updatedHardware);
-                  addToast('Hardware inventory updated', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Software Catalog Section */}
-          {currentSection === 'software-catalog' && (
-            <div className="h-full overflow-auto p-6">
-              <SoftwareInventory
-                initialSoftware={mockSoftware}
-                onSoftwareChange={(updatedSoftware) => {
-                  console.log('Software updated:', updatedSoftware);
-                  addToast('Software catalog updated', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* License Pool Dashboard Section */}
-          {currentSection === 'license-pools' && (
-            <div className="h-full overflow-auto p-6">
-              <LicensePoolDashboard
-                licensePools={licensePools}
-                software={mockSoftware}
-                onAssignLicense={(pool) => {
-                  setSelectedPoolForAssignment(pool.id);
-                  setShowLicenseAssignModal(true);
-                }}
-                onViewAssignments={(pool) => {
-                  // Navigate to User License Assignments section
-                  setCurrentSection('user-license-assignments');
-                  addToast(`Viewing assignments for ${pool.id}`, 'success');
-                }}
-                onEditLicense={(pool) => {
-                  console.log('Edit pool:', pool);
-                  addToast(`Editing pool ${pool.id}...`, 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* User License Assignments Section */}
-          {currentSection === 'user-license-assignments' && (
-            <div className="h-full overflow-hidden">
-              <UserLicenseAssignments
-                allEmployees={mockEmployees}
-                onAssignLicense={(employeeId) => {
-                  console.log('License assigned to employee:', employeeId);
-                  addToast('License assigned successfully!', 'success');
-                }}
-                onRevokeLicense={(assignmentId) => {
-                  console.log('Revoke license assignment:', assignmentId);
-                  addToast('Revoking license assignment...', 'success');
-                }}
-                onViewHistory={(assignmentId) => {
-                  console.log('View assignment history:', assignmentId);
-                  addToast('Opening assignment history...', 'success');
-                }}
-                onBulkImport={() => {
-                  console.log('Opening bulk import modal');
-                  addToast('Opening bulk import...', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Refresh Calendar Section */}
-          {currentSection === 'refresh-calendar' && (
-            <div className="h-full overflow-hidden">
-              <RefreshCalendar
-                schedules={[]} // TODO: Add mock refresh schedules
-                onScheduleClick={(schedule) => {
-                  console.log('Schedule clicked:', schedule);
-                  addToast(`Viewing refresh schedule for ${schedule.hardwareModel}`, 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Refresh Budget Forecast Section */}
-          {currentSection === 'refresh-finance' && (
-            <div className="h-full overflow-hidden">
-              <RefreshFinanceView
-                schedules={[]} // TODO: Add mock refresh schedules
-                onExportCSV={() => {
-                  addToast('Exported budget forecast to CSV', 'success');
-                }}
-                onExportPDF={() => {
-                  addToast('Exported budget forecast to PDF', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Refresh Notifications Section */}
-          {currentSection === 'refresh-notifications' && (
-            <div className="h-full overflow-hidden">
-              <RefreshNotifications
-                schedules={[]} // TODO: Add mock refresh schedules
-                onSendNotification={(schedule) => {
-                  console.log('Send notification:', schedule);
-                  addToast(`Notification sent to ${schedule.employeeName}`, 'success');
-                }}
-                onMarkAsNotified={(scheduleId) => {
-                  console.log('Mark as notified:', scheduleId);
-                  addToast('Schedule marked as notified', 'success');
-                }}
-                onScheduleClick={(schedule) => {
-                  console.log('Schedule clicked:', schedule);
-                  addToast(`Viewing refresh schedule for ${schedule.hardwareModel}`, 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Freeze Period Admin Section */}
-          {currentSection === 'freeze-period-admin' && (
-            <div className="h-full overflow-auto p-6">
-              <FreezePeriodAdmin
-                freezePeriods={mockFreezePeriods}
-                currentUser={{
-                  name: user?.name || 'Unknown User',
-                  email: user?.username || 'unknown@momentumww.com',
-                }}
-                onCreateFreezePeriod={(period) => {
-                  console.log('Create freeze period:', period);
-                  addToast('Freeze period created successfully', 'success');
-                }}
-                onUpdateFreezePeriod={(period) => {
-                  console.log('Update freeze period:', period);
-                  addToast('Freeze period updated successfully', 'success');
-                }}
-                onDeleteFreezePeriod={(periodId) => {
-                  console.log('Delete freeze period:', periodId);
-                  addToast('Freeze period deleted', 'success');
-                }}
-                onClose={() => {
-                  // No-op - not needed for navigation-based UI
-                }}
-              />
-            </div>
-          )}
-
-          {/* Freeze Period Dashboard Section */}
-          {currentSection === 'freeze-period-dashboard' && (
-            <div className="h-full overflow-auto p-6">
-              <FreezePeriodDashboard
-                freezePeriods={mockFreezePeriods}
-                preHires={mockPreHires}
-                employees={mockEmployees}
-                notifications={mockFreezePeriodNotifications}
-                onGenerateEmail={(notification) => {
-                  console.log('Generate email:', notification);
-                  addToast(`Email generated for ${notification.employeeName}`, 'success');
-                }}
-                onGenerateBulkEmails={(notifications) => {
-                  console.log('Generate bulk emails:', notifications);
-                  addToast(`Generated ${notifications.length} emails`, 'success');
-                }}
-                onMarkEmailSent={(notificationId) => {
-                  console.log('Mark email sent:', notificationId);
-                  addToast('Email marked as sent', 'success');
-                }}
-                onClose={() => {
-                  // No-op - not needed for navigation-based UI
-                }}
-              />
-            </div>
-          )}
-
-          {/* Role Management Section */}
-          {currentSection === 'role-management' && (
+          {/* Campaigns Section */}
+          {currentSection === 'campaigns' && (
             <div className="h-full overflow-auto">
-              <RoleManagement />
+              <CampaignList />
+            </div>
+          )}
+
+          {/* Event Calendar Section */}
+          {currentSection === 'events-calendar' && (
+            <div className="h-full overflow-auto">
+              <EventCalendar />
+            </div>
+          )}
+
+          {/* Event Map Section */}
+          {currentSection === 'events-map' && (
+            <div className="h-full overflow-auto">
+              <EventMap />
+            </div>
+          )}
+
+          {/* Event List Section */}
+          {currentSection === 'events-list' && (
+            <div className="h-full overflow-auto">
+              <EventList />
+            </div>
+          )}
+
+          {/* Venues Section */}
+          {currentSection === 'venues' && (
+            <div className="h-full overflow-auto">
+              <VenueDatabase />
+            </div>
+          )}
+
+          {/* Team Assignments Section (Coming Soon) */}
+          {currentSection === 'team-assignments' && (
+            <div className="h-full overflow-auto p-6">
+              <div className="max-w-4xl mx-auto text-center py-12">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                  <Icon name="users" className="w-16 h-16 mx-auto text-primary-600 dark:text-primary-400 mb-4" />
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                    Team Assignments
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Track who's assigned to what event, manage team availability, and optimize resource allocation.
+                  </p>
+                  <div className="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg text-sm font-medium">
+                    Coming Soon
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Integrations Section */}
+          {currentSection === 'integrations' && (
+            <div className="h-full overflow-auto">
+              <IntegrationSettings />
+            </div>
+          )}
+
+          {/* Power BI Dashboard Section */}
+          {currentSection === 'analytics-dashboard' && (
+            <div className="h-full overflow-auto">
+              <PowerBIDashboard />
+            </div>
+          )}
+
+          {/* Report Export Section */}
+          {currentSection === 'analytics-export' && (
+            <div className="h-full overflow-auto">
+              <ReportExport />
+            </div>
+          )}
+
+          {/* User Management Section */}
+          {currentSection === 'admin-users' && (
+            <div className="h-full overflow-auto">
+              <UserManagement />
+            </div>
+          )}
+
+          {/* Client Management Section */}
+          {currentSection === 'admin-clients' && (
+            <div className="h-full overflow-auto">
+              <ClientManagement />
+            </div>
+          )}
+
+          {/* Program Management Section */}
+          {currentSection === 'admin-programs' && (
+            <div className="h-full overflow-auto">
+              <ProgramManagement />
+            </div>
+          )}
+
+          {/* Settings Section (placeholder for now) */}
+          {currentSection === 'settings' && (
+            <div className="h-full overflow-auto p-6">
+              <div className="max-w-4xl mx-auto">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                  Application Settings
+                </h1>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Settings panel content coming soon. For now, use the settings icon in the header to access agent configuration.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
