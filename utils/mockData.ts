@@ -20,6 +20,7 @@ import {
   OnboardingProgress,
   FreezePeriod,
   FreezePeriodNotification,
+  Venue, // UXP: Venue management
 } from '../types';
 
 // ============================================================================
@@ -2239,4 +2240,651 @@ export const mockApprovalStatistics = {
   inProgressTickets: getInProgressTickets().length,
   resolvedTickets: getResolvedTickets().length,
   freezePeriodTickets: getFreezePeriodTickets().length,
+};
+
+// ============================================================================
+// UXP PLATFORM - VENUES
+// ============================================================================
+// Reusable venue database for experiential events and field marketing
+
+export const mockVenues: Venue[] = [
+  // Stadium venues
+  {
+    id: 'ven-001',
+    name: 'MetLife Stadium',
+    fullAddress: '1 MetLife Stadium Dr, East Rutherford, NJ 07073, USA',
+    formattedAddress: 'MetLife Stadium, East Rutherford, NJ 07073',
+    country: 'USA',
+    city: 'East Rutherford',
+    state: 'New Jersey',
+    stateCode: 'NJ',
+    postCode: '07073',
+    address: '1 MetLife Stadium Dr',
+    latitude: 40.8128,
+    longitude: -74.0742,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts', 'large-capacity'],
+    url: 'https://www.metlifestadium.com',
+    status: 'active',
+    eventsCount: 12,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-01-15'),
+    updatedBy: 'admin@momentumww.com',
+    updatedByName: 'System Admin',
+    updatedOn: new Date('2025-11-10'),
+  },
+  {
+    id: 'ven-002',
+    name: 'Madison Square Garden',
+    fullAddress: '4 Pennsylvania Plaza, New York, NY 10001, USA',
+    formattedAddress: 'Madison Square Garden, New York, NY 10001',
+    country: 'USA',
+    city: 'New York',
+    state: 'New York',
+    stateCode: 'NY',
+    postCode: '10001',
+    address: '4 Pennsylvania Plaza',
+    latitude: 40.7505,
+    longitude: -73.9934,
+    category: 'Arena',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Multi-purpose Arena',
+    subCategory: 'Indoor Arena',
+    tags: ['sports', 'basketball', 'hockey', 'concerts'],
+    url: 'https://www.msg.com',
+    status: 'active',
+    eventsCount: 28,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-01-15'),
+  },
+  {
+    id: 'ven-003',
+    name: 'Times Square',
+    fullAddress: 'Times Square, Manhattan, NY 10036, USA',
+    formattedAddress: 'Times Square, New York, NY 10036',
+    country: 'USA',
+    city: 'New York',
+    state: 'New York',
+    stateCode: 'NY',
+    postCode: '10036',
+    address: 'Broadway & 7th Avenue',
+    latitude: 40.7580,
+    longitude: -73.9855,
+    category: 'Street',
+    platform: 'Google Maps',
+    poiScope: 'Public Space',
+    entityType: 'Public Plaza',
+    subCategory: 'Street Activation',
+    tags: ['sampling', 'brand activation', 'high-traffic', 'tourism'],
+    url: 'https://www.timessquarenyc.org',
+    status: 'active',
+    eventsCount: 45,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-01-20'),
+  },
+  // Convention centers
+  {
+    id: 'ven-004',
+    name: 'Javits Center',
+    fullAddress: '429 11th Ave, New York, NY 10001, USA',
+    formattedAddress: 'Jacob K. Javits Convention Center, New York, NY',
+    country: 'USA',
+    city: 'New York',
+    state: 'New York',
+    stateCode: 'NY',
+    postCode: '10001',
+    address: '429 11th Ave',
+    latitude: 40.7558,
+    longitude: -74.0028,
+    category: 'Convention Center',
+    platform: 'Google Maps',
+    poiScope: 'Events & Exhibitions',
+    entityType: 'Convention Center',
+    subCategory: 'Trade Show Venue',
+    tags: ['trade show', 'exhibitions', 'conventions'],
+    url: 'https://www.javitscenter.com',
+    status: 'active',
+    eventsCount: 8,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-02-01'),
+  },
+  // Parks
+  {
+    id: 'ven-005',
+    name: 'Central Park',
+    fullAddress: 'Central Park, New York, NY 10024, USA',
+    formattedAddress: 'Central Park, New York, NY',
+    country: 'USA',
+    city: 'New York',
+    state: 'New York',
+    stateCode: 'NY',
+    postCode: '10024',
+    address: 'Central Park West',
+    latitude: 40.7829,
+    longitude: -73.9654,
+    category: 'Park',
+    platform: 'Google Maps',
+    poiScope: 'Public Space',
+    entityType: 'Public Park',
+    subCategory: 'Outdoor Activation',
+    tags: ['outdoor', 'recreation', 'festivals', 'brand activation'],
+    url: 'https://www.centralparknyc.org',
+    status: 'active',
+    eventsCount: 15,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-02-05'),
+  },
+  // West Coast venues
+  {
+    id: 'ven-006',
+    name: 'SoFi Stadium',
+    fullAddress: '1001 S Stadium Dr, Inglewood, CA 90301, USA',
+    formattedAddress: 'SoFi Stadium, Inglewood, CA 90301',
+    country: 'USA',
+    city: 'Inglewood',
+    state: 'California',
+    stateCode: 'CA',
+    postCode: '90301',
+    address: '1001 S Stadium Dr',
+    latitude: 33.9535,
+    longitude: -118.3390,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts', 'super-bowl'],
+    url: 'https://www.sofistadium.com',
+    status: 'active',
+    eventsCount: 9,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-03-01'),
+  },
+  {
+    id: 'ven-007',
+    name: 'Santa Monica Pier',
+    fullAddress: '200 Santa Monica Pier, Santa Monica, CA 90401, USA',
+    formattedAddress: 'Santa Monica Pier, Santa Monica, CA',
+    country: 'USA',
+    city: 'Santa Monica',
+    state: 'California',
+    stateCode: 'CA',
+    postCode: '90401',
+    address: '200 Santa Monica Pier',
+    latitude: 34.0094,
+    longitude: -118.4973,
+    category: 'Street',
+    platform: 'Google Maps',
+    poiScope: 'Tourist Attraction',
+    entityType: 'Public Pier',
+    subCategory: 'Outdoor Activation',
+    tags: ['beach', 'tourism', 'sampling', 'brand activation'],
+    url: 'https://www.santamonicapier.org',
+    status: 'active',
+    eventsCount: 22,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-03-10'),
+  },
+  // Chicago venues
+  {
+    id: 'ven-008',
+    name: 'Soldier Field',
+    fullAddress: '1410 Special Olympics Dr, Chicago, IL 60605, USA',
+    formattedAddress: 'Soldier Field, Chicago, IL 60605',
+    country: 'USA',
+    city: 'Chicago',
+    state: 'Illinois',
+    stateCode: 'IL',
+    postCode: '60605',
+    address: '1410 Special Olympics Dr',
+    latitude: 41.8623,
+    longitude: -87.6167,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts'],
+    url: 'https://www.soldierfield.com',
+    status: 'active',
+    eventsCount: 5,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-03-15'),
+  },
+  {
+    id: 'ven-009',
+    name: 'McCormick Place',
+    fullAddress: '2301 S King Dr, Chicago, IL 60616, USA',
+    formattedAddress: 'McCormick Place, Chicago, IL',
+    country: 'USA',
+    city: 'Chicago',
+    state: 'Illinois',
+    stateCode: 'IL',
+    postCode: '60616',
+    address: '2301 S King Dr',
+    latitude: 41.8508,
+    longitude: -87.6176,
+    category: 'Convention Center',
+    platform: 'Google Maps',
+    poiScope: 'Events & Exhibitions',
+    entityType: 'Convention Center',
+    subCategory: 'Trade Show Venue',
+    tags: ['trade show', 'conventions', 'exhibitions'],
+    url: 'https://www.mccormickplace.com',
+    status: 'active',
+    eventsCount: 7,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-04-01'),
+  },
+  // Texas venues
+  {
+    id: 'ven-010',
+    name: 'AT&T Stadium',
+    fullAddress: '1 AT&T Way, Arlington, TX 76011, USA',
+    formattedAddress: 'AT&T Stadium, Arlington, TX 76011',
+    country: 'USA',
+    city: 'Arlington',
+    state: 'Texas',
+    stateCode: 'TX',
+    postCode: '76011',
+    address: '1 AT&T Way',
+    latitude: 32.7473,
+    longitude: -97.0945,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts', 'large-capacity'],
+    url: 'https://attstadium.com',
+    status: 'active',
+    eventsCount: 6,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-04-10'),
+  },
+  // Miami venues
+  {
+    id: 'ven-011',
+    name: 'Hard Rock Stadium',
+    fullAddress: '347 Don Shula Dr, Miami Gardens, FL 33056, USA',
+    formattedAddress: 'Hard Rock Stadium, Miami Gardens, FL',
+    country: 'USA',
+    city: 'Miami Gardens',
+    state: 'Florida',
+    stateCode: 'FL',
+    postCode: '33056',
+    address: '347 Don Shula Dr',
+    latitude: 25.9580,
+    longitude: -80.2389,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts', 'super-bowl'],
+    url: 'https://www.hardrockstadium.com',
+    status: 'active',
+    eventsCount: 4,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-05-01'),
+  },
+  {
+    id: 'ven-012',
+    name: 'South Beach',
+    fullAddress: 'Ocean Drive, Miami Beach, FL 33139, USA',
+    formattedAddress: 'South Beach, Miami Beach, FL',
+    country: 'USA',
+    city: 'Miami Beach',
+    state: 'Florida',
+    stateCode: 'FL',
+    postCode: '33139',
+    address: 'Ocean Drive',
+    latitude: 25.7907,
+    longitude: -80.1300,
+    category: 'Street',
+    platform: 'Google Maps',
+    poiScope: 'Tourist Attraction',
+    entityType: 'Beach Area',
+    subCategory: 'Outdoor Activation',
+    tags: ['beach', 'tourism', 'sampling', 'brand activation'],
+    status: 'active',
+    eventsCount: 18,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-05-10'),
+  },
+  // Boston venues
+  {
+    id: 'ven-013',
+    name: 'Gillette Stadium',
+    fullAddress: '1 Patriot Pl, Foxborough, MA 02035, USA',
+    formattedAddress: 'Gillette Stadium, Foxborough, MA',
+    country: 'USA',
+    city: 'Foxborough',
+    state: 'Massachusetts',
+    stateCode: 'MA',
+    postCode: '02035',
+    address: '1 Patriot Pl',
+    latitude: 42.0909,
+    longitude: -71.2643,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts'],
+    url: 'https://www.gillettestadium.com',
+    status: 'active',
+    eventsCount: 3,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-06-01'),
+  },
+  // Las Vegas venues
+  {
+    id: 'ven-014',
+    name: 'Allegiant Stadium',
+    fullAddress: '3333 Al Davis Way, Las Vegas, NV 89118, USA',
+    formattedAddress: 'Allegiant Stadium, Las Vegas, NV',
+    country: 'USA',
+    city: 'Las Vegas',
+    state: 'Nevada',
+    stateCode: 'NV',
+    postCode: '89118',
+    address: '3333 Al Davis Way',
+    latitude: 36.0909,
+    longitude: -115.1835,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts', 'super-bowl'],
+    url: 'https://www.allegiantstadium.com',
+    status: 'active',
+    eventsCount: 7,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-06-15'),
+  },
+  {
+    id: 'ven-015',
+    name: 'Las Vegas Strip',
+    fullAddress: 'Las Vegas Blvd S, Las Vegas, NV 89109, USA',
+    formattedAddress: 'Las Vegas Strip, Las Vegas, NV',
+    country: 'USA',
+    city: 'Las Vegas',
+    state: 'Nevada',
+    stateCode: 'NV',
+    postCode: '89109',
+    address: 'Las Vegas Blvd S',
+    latitude: 36.1147,
+    longitude: -115.1729,
+    category: 'Street',
+    platform: 'Google Maps',
+    poiScope: 'Tourist Attraction',
+    entityType: 'Entertainment District',
+    subCategory: 'Street Activation',
+    tags: ['tourism', 'brand activation', 'sampling', 'high-traffic'],
+    status: 'active',
+    eventsCount: 31,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-07-01'),
+  },
+  // Seattle venues
+  {
+    id: 'ven-016',
+    name: 'Lumen Field',
+    fullAddress: '800 Occidental Ave S, Seattle, WA 98134, USA',
+    formattedAddress: 'Lumen Field, Seattle, WA',
+    country: 'USA',
+    city: 'Seattle',
+    state: 'Washington',
+    stateCode: 'WA',
+    postCode: '98134',
+    address: '800 Occidental Ave S',
+    latitude: 47.5952,
+    longitude: -122.3316,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'NFL Stadium',
+    tags: ['sports', 'football', 'concerts'],
+    url: 'https://www.lumenfield.com',
+    status: 'active',
+    eventsCount: 5,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-07-15'),
+  },
+  // Additional special venues
+  {
+    id: 'ven-017',
+    name: 'Navy Pier Chicago',
+    fullAddress: '600 E Grand Ave, Chicago, IL 60611, USA',
+    formattedAddress: 'Navy Pier, Chicago, IL',
+    country: 'USA',
+    city: 'Chicago',
+    state: 'Illinois',
+    stateCode: 'IL',
+    postCode: '60611',
+    address: '600 E Grand Ave',
+    latitude: 41.8919,
+    longitude: -87.6051,
+    category: 'Other',
+    platform: 'Google Maps',
+    poiScope: 'Tourist Attraction',
+    entityType: 'Entertainment Complex',
+    subCategory: 'Mixed Use Venue',
+    tags: ['tourism', 'festivals', 'family', 'brand activation'],
+    url: 'https://navypier.org',
+    status: 'active',
+    eventsCount: 12,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-08-01'),
+  },
+  {
+    id: 'ven-018',
+    name: 'Millennium Park',
+    fullAddress: '201 E Randolph St, Chicago, IL 60602, USA',
+    formattedAddress: 'Millennium Park, Chicago, IL',
+    country: 'USA',
+    city: 'Chicago',
+    state: 'Illinois',
+    stateCode: 'IL',
+    postCode: '60602',
+    address: '201 E Randolph St',
+    latitude: 41.8826,
+    longitude: -87.6226,
+    category: 'Park',
+    platform: 'Google Maps',
+    poiScope: 'Public Space',
+    entityType: 'Public Park',
+    subCategory: 'Outdoor Activation',
+    tags: ['outdoor', 'festivals', 'concerts', 'brand activation'],
+    url: 'https://www.chicago.gov/millenniumpark',
+    status: 'active',
+    eventsCount: 10,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-08-10'),
+  },
+  // Archived venue example
+  {
+    id: 'ven-019',
+    name: 'Oakland Coliseum',
+    fullAddress: '7000 Coliseum Way, Oakland, CA 94621, USA',
+    formattedAddress: 'Oakland Coliseum, Oakland, CA',
+    country: 'USA',
+    city: 'Oakland',
+    state: 'California',
+    stateCode: 'CA',
+    postCode: '94621',
+    address: '7000 Coliseum Way',
+    latitude: 37.7516,
+    longitude: -122.2005,
+    category: 'Stadium',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Sports Stadium',
+    subCategory: 'Multi-sport Stadium',
+    tags: ['sports', 'baseball', 'football'],
+    url: 'https://www.oaklandcoliseum.com',
+    status: 'archived',
+    eventsCount: 2,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2024-01-01'),
+    updatedBy: 'admin@momentumww.com',
+    updatedByName: 'System Admin',
+    updatedOn: new Date('2025-09-01'),
+  },
+  // Verified venue example
+  {
+    id: 'ven-020',
+    name: 'Brooklyn Barclays Center',
+    fullAddress: '620 Atlantic Ave, Brooklyn, NY 11217, USA',
+    formattedAddress: 'Barclays Center, Brooklyn, NY',
+    country: 'USA',
+    city: 'Brooklyn',
+    state: 'New York',
+    stateCode: 'NY',
+    postCode: '11217',
+    address: '620 Atlantic Ave',
+    latitude: 40.6826,
+    longitude: -73.9754,
+    category: 'Arena',
+    platform: 'Google Maps',
+    poiScope: 'Sports & Entertainment',
+    entityType: 'Multi-purpose Arena',
+    subCategory: 'Indoor Arena',
+    tags: ['sports', 'basketball', 'hockey', 'concerts'],
+    url: 'https://www.barclayscenter.com',
+    status: 'verified',
+    eventsCount: 16,
+    createdBy: 'admin@momentumww.com',
+    createdByName: 'System Admin',
+    createdOn: new Date('2025-09-01'),
+  },
+];
+
+// ============================================================================
+// VENUE HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get venues by city
+ */
+export function getVenuesByCity(city: string): Venue[] {
+  return mockVenues.filter((v) => v.city.toLowerCase() === city.toLowerCase());
+}
+
+/**
+ * Get venues by country
+ */
+export function getVenuesByCountry(country: string): Venue[] {
+  return mockVenues.filter((v) => v.country.toLowerCase() === country.toLowerCase());
+}
+
+/**
+ * Get venues by category
+ */
+export function getVenuesByCategory(category: Venue['category']): Venue[] {
+  return mockVenues.filter((v) => v.category === category);
+}
+
+/**
+ * Get venues by status
+ */
+export function getVenuesByStatus(status: Venue['status']): Venue[] {
+  return mockVenues.filter((v) => v.status === status);
+}
+
+/**
+ * Get active venues
+ */
+export function getActiveVenues(): Venue[] {
+  return getVenuesByStatus('active');
+}
+
+/**
+ * Get verified venues
+ */
+export function getVerifiedVenues(): Venue[] {
+  return getVenuesByStatus('verified');
+}
+
+/**
+ * Get archived venues
+ */
+export function getArchivedVenues(): Venue[] {
+  return getVenuesByStatus('archived');
+}
+
+/**
+ * Search venues by name or address
+ */
+export function searchVenues(query: string): Venue[] {
+  const lowerQuery = query.toLowerCase();
+  return mockVenues.filter(
+    (v) =>
+      v.name.toLowerCase().includes(lowerQuery) ||
+      v.fullAddress.toLowerCase().includes(lowerQuery) ||
+      v.city.toLowerCase().includes(lowerQuery) ||
+      v.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
+  );
+}
+
+/**
+ * Get most used venues (by events count)
+ */
+export function getMostUsedVenues(limit: number = 10): Venue[] {
+  return [...mockVenues]
+    .sort((a, b) => (b.eventsCount || 0) - (a.eventsCount || 0))
+    .slice(0, limit);
+}
+
+/**
+ * Get venues by state
+ */
+export function getVenuesByState(stateCode: string): Venue[] {
+  return mockVenues.filter((v) => v.stateCode === stateCode);
+}
+
+// ============================================================================
+// VENUE STATISTICS
+// ============================================================================
+
+export const mockVenueStatistics = {
+  totalVenues: mockVenues.length,
+  activeVenues: getActiveVenues().length,
+  verifiedVenues: getVerifiedVenues().length,
+  archivedVenues: getArchivedVenues().length,
+  stadiums: getVenuesByCategory('Stadium').length,
+  arenas: getVenuesByCategory('Arena').length,
+  conventionCenters: getVenuesByCategory('Convention Center').length,
+  parks: getVenuesByCategory('Park').length,
+  streetActivations: getVenuesByCategory('Street').length,
+  totalEvents: mockVenues.reduce((sum, v) => sum + (v.eventsCount || 0), 0),
+  averageEventsPerVenue: mockVenues.reduce((sum, v) => sum + (v.eventsCount || 0), 0) / mockVenues.length,
+  topVenue: getMostUsedVenues(1)[0],
 };

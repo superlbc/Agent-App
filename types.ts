@@ -1207,6 +1207,79 @@ export interface RoleContextState {
 }
 
 // ============================================================================
+// UXP PLATFORM - VENUE MANAGEMENT
+// ============================================================================
+
+/**
+ * Venue entity
+ * Represents event locations with geolocation and categorization
+ *
+ * **Design Decision**: Venues are REUSABLE across multiple events
+ * - One venue can host many events
+ * - Venues are created independently and linked to events
+ * - This allows venue analytics (most used, event count, etc.)
+ *
+ * **Note**: Unlike the master plan which has eventId FK, we make venues
+ * reusable entities for better data architecture
+ */
+export interface Venue {
+  id: string;
+
+  // Venue Identity
+  name: string;
+  fullAddress: string;
+  formattedAddress?: string;
+
+  // Address Components
+  country: string;
+  city: string;
+  state?: string;
+  stateCode?: string;
+  postCode?: string;
+  address: string; // Street address
+  number?: string; // Street number
+
+  // Geolocation (REQUIRED)
+  latitude: number;
+  longitude: number;
+  geoJSONData?: string; // GeoJSON format for mapping libraries
+
+  // Categorization
+  category?: "Stadium" | "Arena" | "Convention Center" | "Park" | "Street" | "Other";
+  platform?: string; // "Google Maps", "Bing Maps", etc.
+  poiScope?: string; // Point of Interest scope
+  entityType?: string; // Venue type classification
+  subCategory?: string; // Detailed categorization
+  tags?: string[]; // Custom tags for filtering
+
+  // External Links
+  url?: string; // Venue website or information URL
+
+  // Tracking & Metadata
+  status: "active" | "verified" | "archived";
+  eventsCount?: number; // Count of events at this venue (computed)
+  createdBy: string;
+  createdByName: string;
+  createdOn: Date;
+  updatedBy?: string;
+  updatedByName?: string;
+  updatedOn?: Date;
+}
+
+/**
+ * Venue filter options
+ * Used for filtering and searching venues in VenueDatabase component
+ */
+export interface VenueFilters {
+  city?: string[];
+  country?: string[];
+  category?: ("Stadium" | "Arena" | "Convention Center" | "Park" | "Street" | "Other")[];
+  poiScope?: string[];
+  status?: ("active" | "verified" | "archived")[];
+  searchQuery?: string; // Search by name or address
+}
+
+// ============================================================================
 // LEGACY TYPES (Preserved from Meeting Notes Generator)
 // ============================================================================
 
