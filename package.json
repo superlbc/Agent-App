@@ -1,7 +1,7 @@
 {
-  "name": "meeting-notes-ai-local",
-  "version": "1.6.3",
-  "description": "Local development setup for Meeting Notes AI.",
+  "name": "uxp-unified-experience-platform",
+  "version": "3.0.0",
+  "description": "UXP - Unified Experience Platform for managing events, campaigns, and organizational workflows.",
   "private": true,
   "type": "module",
   "scripts": {

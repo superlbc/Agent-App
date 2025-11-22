@@ -377,13 +377,13 @@ src/
 
 -------------------
 
-# Employee Onboarding System
+# UXP - Unified Experience Platform
 
-> *Streamline employee onboarding from pre-hire to day one.*
+> *Streamline event management, campaigns, and organizational workflows.*
 
-### 🚀 Automated Onboarding Workflow with Intelligent Package Management
+### 🚀 Comprehensive Event & Campaign Management Platform
 
-Manage the complete employee onboarding process from pre-hire candidate tracking through equipment provisioning and system access setup. Automate package assignments, approval workflows, and freeze period handling with integration to Workday, Active Directory, Helix, and Momentum department data.
+Manage the complete lifecycle of events, campaigns, and organizational workflows with intelligent scheduling, resource management, and analytics. Automate workflows, streamline approvals, and integrate with organizational systems for seamless operations.
 
 ---
 
@@ -414,7 +414,7 @@ Manage the complete employee onboarding process from pre-hire candidate tracking
 
 ## Overview
 
-**Employee Onboarding System** is a React-based web application that manages the complete employee onboarding lifecycle from pre-hire candidate tracking through equipment provisioning and system access setup. The system automates package assignments based on roles, streamlines approval workflows, and handles special Workday freeze period processes with seamless integration to organizational systems including Workday, Active Directory, Helix, Vantage, and Momentum department data.
+**UXP (Unified Experience Platform)** is a React-based web application that manages the complete lifecycle of events, campaigns, and organizational workflows. The platform provides intelligent scheduling, resource management, analytics, and seamless integration with organizational systems including Active Directory, Google Calendar, and department data.
 
 ### 🎯 Key Use Cases
 
@@ -1362,7 +1362,7 @@ The application sends all telemetry data to a single centralized Power Automate 
 
 ```json
 {
-  "appName": "Employee Onboarding System",
+  "appName": "UXP - Unified Experience Platform",
   "appVersion": "2.0.0",
   "sessionId": "unique-session-id-per-browser-session",
   "correlationId": "optional-id-to-link-related-events",
@@ -1416,7 +1416,7 @@ The telemetry data can be used to create Power BI dashboards showing:
 
 ## Data Model
 
-The Employee Onboarding System uses a comprehensive data model to track pre-hires, employees, equipment packages, and approval workflows.
+UXP (Unified Experience Platform) uses a comprehensive data model to track events, campaigns, resources, and organizational workflows.
 
 ### Hardware Entity
 
@@ -3966,9 +3966,9 @@ system: {
 
 ## Recent Changes
 
-### 📅 Latest Update - 2025-11-12 - Application Repurposed: Employee Onboarding System (v2.0.0)
+### 📅 Latest Update - 2025-11-22 - UXP: Unified Experience Platform (v3.0.0)
 
-**Summary**: Transformed the Meeting Notes Generator into a comprehensive Employee Onboarding System while preserving 70-80% of the existing infrastructure. The application now manages the complete employee onboarding lifecycle from pre-hire candidate tracking through equipment provisioning and system access setup.
+**Summary**: Evolved the application into UXP (Unified Experience Platform), a comprehensive event and campaign management system. The platform provides intelligent scheduling, resource management, analytics, and workflow automation while preserving the proven authentication, UI components, and deployment infrastructure.
 
 #### Major Transformation
 
@@ -4920,7 +4920,8 @@ location = /version.json {
 
 ### Version History
 
-- **v2.0.0** (2025-11-12): 🔄 **MAJOR TRANSFORMATION** - Repurposed from Meeting Notes Generator to Employee Onboarding System
+- **v3.0.0** (2025-11-22): 🚀 **UXP LAUNCH** - Evolved into Unified Experience Platform for event and campaign management
+- **v2.0.0** (2025-11-12): 🔄 **MAJOR TRANSFORMATION** - Repurposed from Meeting Notes Generator to Employee Onboarding System (deprecated)
   - Complete application purpose change: Meeting notes → Employee onboarding management
   - New features: Pre-hire tracking, equipment packages, approval workflow, freeze period automation
   - New data model: Hardware, Package, Software, PreHire, Employee, ApprovalRequest, HelixTicket entities

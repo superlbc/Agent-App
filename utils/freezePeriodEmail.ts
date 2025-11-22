@@ -237,11 +237,11 @@ Action Required:
 
 Priority: High (Start date: ${formatDate(preHire.startDate)})
 
-This is an automated message from the Employee Onboarding System.
+This is an automated message from UXP - Unified Experience Platform.
 For questions, contact HR (Camille/Payton).
 
 Thank you,
-Employee Onboarding System`;
+UXP System`;
 
   return {
     to: helixEmail,
@@ -284,11 +284,11 @@ Action Required:
 
 Priority: High (Security-sensitive)
 
-This is an automated message from the Employee Onboarding System.
+This is an automated message from UXP - Unified Experience Platform.
 For questions, contact HR (Camille/Payton).
 
 Thank you,
-Employee Onboarding System`;
+UXP System`;
 
   return {
     to: helixEmail,

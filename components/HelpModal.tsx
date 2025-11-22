@@ -31,7 +31,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Help & Guidance</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Everything you need to know about the Employee Onboarding System
+                  Everything you need to know about UXP - Unified Experience Platform
                 </p>
               </div>
               <button
@@ -95,8 +95,8 @@ const GettingStartedTab: React.FC = () => (
         🎯 System Overview
       </h3>
       <p className="text-gray-700 dark:text-gray-300 mb-3">
-        The Employee Onboarding System streamlines the complete onboarding lifecycle from pre-hire candidate tracking
-        through equipment provisioning and system access setup.
+        UXP (Unified Experience Platform) streamlines the complete lifecycle of events, campaigns, and organizational workflows
+        with intelligent scheduling, resource management, and analytics.
       </p>
       <div className="space-y-2 text-gray-700 dark:text-gray-300">
         <div className="flex items-start gap-2">
