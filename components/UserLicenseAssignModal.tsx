@@ -9,6 +9,7 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Card } from './ui/Card';
 import { useLicense } from '../contexts/LicenseContext';
+import { ManagerSelector, ManagerProfile } from './ManagerSelector';
 import type { Employee, LicensePool, Software } from '../types';
 
 // ============================================================================
@@ -38,6 +39,7 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
 
   // Form state
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(preSelectedEmployeeId || '');
+  const [selectedManagerProfile, setSelectedManagerProfile] = useState<ManagerProfile | null>(null);
   const [selectedPoolId, setSelectedPoolId] = useState<string>('');
   const [expirationDate, setExpirationDate] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
@@ -76,8 +78,37 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
 
   // Get selected employee
   const selectedEmployee = useMemo(() => {
-    return activeEmployees.find((emp) => emp.id === selectedEmployeeId);
-  }, [activeEmployees, selectedEmployeeId]);
+    // If an employee ID is set (pre-selected), use it
+    if (selectedEmployeeId) {
+      return activeEmployees.find((emp) => emp.id === selectedEmployeeId);
+    }
+
+    // If a Graph user is selected, try to find matching employee or use Graph data
+    if (selectedManagerProfile) {
+      // Try to find employee by email
+      const foundEmployee = activeEmployees.find(
+        (emp) => emp.email.toLowerCase() === selectedManagerProfile.email.toLowerCase()
+      );
+
+      if (foundEmployee) {
+        return foundEmployee;
+      }
+
+      // If not found in employees list, create a temporary employee object from Graph data
+      // This allows assigning licenses to any Graph API user even if they're not in our employee list
+      return {
+        id: `graph-${selectedManagerProfile.email}`, // Temporary ID
+        name: selectedManagerProfile.displayName,
+        email: selectedManagerProfile.email,
+        department: selectedManagerProfile.department || 'Unknown',
+        role: selectedManagerProfile.jobTitle || 'Unknown',
+        status: 'active' as const,
+        startDate: new Date(),
+      } as Employee;
+    }
+
+    return undefined;
+  }, [activeEmployees, selectedEmployeeId, selectedManagerProfile]);
 
   // Get selected pool
   const selectedPool = useMemo(() => {
@@ -107,14 +138,31 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
   const employeeHasLicense = (employeeId: string, poolId: string): boolean => {
     const pool = licensePools.find((p) => p.id === poolId);
     if (!pool) return false;
-    return pool.assignments.some(
-      (assignment) => assignment.employeeId === employeeId && assignment.status === 'active'
-    );
+
+    // Check by employee ID or by email if using Graph selection
+    return pool.assignments.some((assignment) => {
+      if (assignment.employeeId === employeeId && assignment.status === 'active') {
+        return true;
+      }
+
+      // Also check by email for Graph-selected users
+      if (selectedManagerProfile && assignment.employeeEmail.toLowerCase() === selectedManagerProfile.email.toLowerCase() && assignment.status === 'active') {
+        return true;
+      }
+
+      return false;
+    });
+  };
+
+  // Handler for Graph user selection
+  const handleManagerProfileChange = (profile: ManagerProfile | null) => {
+    setSelectedManagerProfile(profile);
+    setSelectedPoolId(''); // Reset pool selection when employee changes
   };
 
   // Validation
   const canAssign = useMemo(() => {
-    if (!selectedEmployeeId || !selectedPoolId) return false;
+    if ((!selectedEmployeeId && !selectedManagerProfile) || !selectedPoolId) return false;
 
     const pool = selectedPool;
     if (!pool) return false;
@@ -130,9 +178,11 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
 
   // Get warning message
   const getWarningMessage = (): string | null => {
-    if (!selectedPool || !selectedEmployeeId) return null;
+    if (!selectedPool || (!selectedEmployeeId && !selectedEmployee)) return null;
 
-    if (employeeHasLicense(selectedEmployeeId, selectedPoolId)) {
+    // Check by employee ID or Graph email
+    const empId = selectedEmployee?.id || selectedEmployeeId;
+    if (empId && employeeHasLicense(empId, selectedPoolId)) {
       return 'This employee already has an active assignment for this license.';
     }
 
@@ -182,6 +232,7 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
   // Handle close
   const handleClose = () => {
     setSelectedEmployeeId(preSelectedEmployeeId || '');
+    setSelectedManagerProfile(null);
     setSelectedPoolId('');
     setExpirationDate('');
     setNotes('');
@@ -215,29 +266,28 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Step 1: Select Employee */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Step 1: Select Employee
-            </label>
-            <select
-              value={selectedEmployeeId}
-              onChange={(e) => {
-                setSelectedEmployeeId(e.target.value);
-                setSelectedPoolId(''); // Reset pool selection when employee changes
-              }}
+            <ManagerSelector
+              value={selectedManagerProfile}
+              onChange={handleManagerProfileChange}
+              label="Step 1: Select Employee"
+              placeholder="Search for employee by name or email..."
               disabled={!!preSelectedEmployeeId}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option value="">-- Select Employee --</option>
-              {activeEmployees.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name} ({emp.email}) - {emp.department}
-                </option>
-              ))}
-            </select>
+              required
+            />
             {preSelectedEmployeeId && (
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Employee pre-selected. Close and reopen modal to change.
               </p>
+            )}
+            {selectedEmployee && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm">
+                <p className="text-gray-700 dark:text-gray-300">
+                  <span className="font-medium">Selected:</span> {selectedEmployee.name}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  {selectedEmployee.email} • {selectedEmployee.department}
+                </p>
+              </div>
             )}
           </div>
 
@@ -270,8 +320,8 @@ export const UserLicenseAssignModal: React.FC<UserLicenseAssignModalProps> = ({
                   const utilization = getUtilization(pool);
                   const availableSeats = getAvailableSeats(pool);
                   const isSelected = selectedPoolId === pool.id;
-                  const alreadyAssigned = selectedEmployeeId
-                    ? employeeHasLicense(selectedEmployeeId, pool.id)
+                  const alreadyAssigned = selectedEmployee
+                    ? employeeHasLicense(selectedEmployee.id, pool.id)
                     : false;
 
                   return (

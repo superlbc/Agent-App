@@ -14,7 +14,7 @@ import {
   LicenseAssignmentFilters,
   Employee,
 } from '../types';
-import { mockSoftware } from '../utils/mockData';
+import { mockSoftware, mockLicensePools } from '../utils/mockData';
 import * as softwareService from '../services/softwareService';
 import { batchMigrateToLicensePools } from '../utils/licensePoolMigration';
 
@@ -126,6 +126,8 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
   const fetchLicenses = async () => {
     if (useMockData) {
       setLicenses(mockSoftware);
+      setLicensePools(mockLicensePools); // Phase 10: Load mock license pools
+      console.log(`[LicenseContext] ✅ Loaded ${mockSoftware.length} mock software items and ${mockLicensePools.length} mock license pools`);
       setLoading(false);
       return;
     }
@@ -144,6 +146,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
       // Fallback to mock data
       console.warn('[LicenseContext] Falling back to mock data');
       setLicenses(mockSoftware);
+      setLicensePools(mockLicensePools); // Phase 10: Fallback to mock license pools
     } finally {
       setLoading(false);
     }
