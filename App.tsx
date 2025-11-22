@@ -76,6 +76,9 @@ import {
   mockFreezePeriodNotifications,
   mockPreHires,
   mockHelixTickets,
+  mockClients,
+  mockPrograms,
+  mockIntegrationConfig,
 } from './utils/mockData';
 
 const AppContent: React.FC = () => {
@@ -551,6 +554,112 @@ const AppContent: React.FC = () => {
   };
 
   // ============================================================================
+  // INTEGRATION SETTINGS HANDLERS
+  // ============================================================================
+
+  const [integrationConfig, setIntegrationConfig] = useState(mockIntegrationConfig);
+
+  const handleSaveIntegrationConfig = async (config: typeof mockIntegrationConfig) => {
+    try {
+      // In a real app, this would save to backend/database
+      setIntegrationConfig(config);
+      addToast('Integration settings saved successfully', 'success');
+    } catch (error) {
+      addToast('Failed to save integration settings', 'error');
+      throw error;
+    }
+  };
+
+  const handleTestConnection = async (integration: 'brandscopic' | 'qrTiger' | 'qualtrics' | 'momoBi') => {
+    try {
+      // In a real app, this would make an API call to test the connection
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+
+      const isEnabled = integrationConfig[integration].enabled;
+      if (!isEnabled) {
+        return { success: false, message: `${integration} is currently disabled` };
+      }
+
+      return { success: true, message: `Successfully connected to ${integration}` };
+    } catch (error) {
+      return { success: false, message: `Failed to connect to ${integration}` };
+    }
+  };
+
+  // ============================================================================
+  // PROGRAM MANAGEMENT HANDLERS
+  // ============================================================================
+
+  const [programs, setPrograms] = useState(mockPrograms);
+
+  const handleCreateProgram = async (programData: any) => {
+    try {
+      const newProgram = {
+        id: `prog-${Date.now()}`,
+        ...programData,
+        eventCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: user?.username || 'Unknown',
+      };
+      setPrograms([...programs, newProgram]);
+      addToast(`Program "${programData.name}" created successfully`, 'success');
+    } catch (error) {
+      addToast('Failed to create program', 'error');
+      throw error;
+    }
+  };
+
+  const handleUpdateProgram = async (programId: string, updates: any) => {
+    try {
+      setPrograms(programs.map(prog =>
+        prog.id === programId ? { ...prog, ...updates, updatedAt: new Date() } : prog
+      ));
+      addToast('Program updated successfully', 'success');
+    } catch (error) {
+      addToast('Failed to update program', 'error');
+      throw error;
+    }
+  };
+
+  const handleDeleteProgram = async (programId: string) => {
+    try {
+      setPrograms(programs.filter(prog => prog.id !== programId));
+      addToast('Program deleted successfully', 'success');
+    } catch (error) {
+      addToast('Failed to delete program', 'error');
+      throw error;
+    }
+  };
+
+  // ============================================================================
+  // POWER BI & REPORTING HANDLERS
+  // ============================================================================
+
+  const handleGenerateEmbedToken = async (reportType: string) => {
+    try {
+      // In a real app, this would call backend to generate Power BI embed token
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      return `embed_token_${reportType}_${Date.now()}`;
+    } catch (error) {
+      throw new Error('Failed to generate embed token');
+    }
+  };
+
+  const handleExportReport = async (request: any) => {
+    try {
+      // In a real app, this would trigger backend report generation
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      const downloadUrl = `https://storage.example.com/reports/${request.reportType}_${Date.now()}.${request.format}`;
+      addToast(`Report exported successfully`, 'success');
+      return downloadUrl;
+    } catch (error) {
+      addToast('Failed to export report', 'error');
+      throw error;
+    }
+  };
+
+  // ============================================================================
   // OTHER HANDLERS
   // ============================================================================
 
@@ -687,22 +796,34 @@ const AppContent: React.FC = () => {
 
           {/* Integrations Section */}
           {currentSection === 'integrations' && (
-            <div className="h-full overflow-auto">
-              <IntegrationSettings />
+            <div className="h-full overflow-auto p-6">
+              <IntegrationSettings
+                config={integrationConfig}
+                onSave={handleSaveIntegrationConfig}
+                onTestConnection={handleTestConnection}
+              />
             </div>
           )}
 
           {/* Power BI Dashboard Section */}
           {currentSection === 'analytics-dashboard' && (
-            <div className="h-full overflow-auto">
-              <PowerBIDashboard />
+            <div className="h-full overflow-auto p-6">
+              <PowerBIDashboard
+                clients={mockClients}
+                programs={programs}
+                onGenerateEmbedToken={handleGenerateEmbedToken}
+              />
             </div>
           )}
 
           {/* Report Export Section */}
           {currentSection === 'analytics-export' && (
-            <div className="h-full overflow-auto">
-              <ReportExport />
+            <div className="h-full overflow-auto p-6">
+              <ReportExport
+                clients={mockClients}
+                programs={programs}
+                onExport={handleExportReport}
+              />
             </div>
           )}
 
@@ -722,8 +843,14 @@ const AppContent: React.FC = () => {
 
           {/* Program Management Section */}
           {currentSection === 'admin-programs' && (
-            <div className="h-full overflow-auto">
-              <ProgramManagement />
+            <div className="h-full overflow-auto p-6">
+              <ProgramManagement
+                initialPrograms={programs}
+                clients={mockClients}
+                onCreateProgram={handleCreateProgram}
+                onUpdateProgram={handleUpdateProgram}
+                onDeleteProgram={handleDeleteProgram}
+              />
             </div>
           )}
 

@@ -17,8 +17,9 @@ import type { Event, Campaign, EventMapMarker } from '../../types';
 import { StatusBadge } from '../ui/StatusBadge';
 import { Icon } from '../ui/Icon';
 
-// Mock Google Maps API Key (to be replaced with real key later)
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'; // Placeholder - will be replaced
+// Google Maps API Key (to be configured via environment variable)
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+const HAS_VALID_API_KEY = GOOGLE_MAPS_API_KEY && !GOOGLE_MAPS_API_KEY.includes('XXX') && GOOGLE_MAPS_API_KEY.length > 20;
 
 const containerStyle = {
   width: '100%',
@@ -150,6 +151,38 @@ const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, class
     strokeWeight: 2,
     scale: 8,
   });
+
+  // If no valid API key, show placeholder
+  if (!HAS_VALID_API_KEY) {
+    return (
+      <div className={`flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm ${className}`}>
+        <div className="flex items-center justify-center h-full p-8">
+          <div className="max-w-md text-center">
+            <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <Icon name="location" className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Google Maps API Key Required
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              To display the event map, please configure your Google Maps API key in the environment variables.
+            </p>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-left">
+              <p className="text-xs font-mono text-gray-700 dark:text-gray-300 mb-2">
+                Add to <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">.env.local</code>:
+              </p>
+              <pre className="text-xs font-mono text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+              </pre>
+              <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                Get an API key from: <a href="https://console.cloud.google.com/apis" target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">Google Cloud Console</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm ${className}`}>
