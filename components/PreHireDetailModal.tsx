@@ -355,19 +355,19 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Hardware Items:</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {preHire.assignedPackage.hardware.length} items
+                        {preHire.assignedPackage.hardware?.length || 0} items
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Software & Licenses:</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {preHire.assignedPackage.software.length + preHire.assignedPackage.licenses.length} items
+                        {preHire.assignedPackage.software?.length || 0} items
                       </p>
                     </div>
                   </div>
 
                   {/* Hardware List */}
-                  {preHire.assignedPackage.hardware.length > 0 && (
+                  {preHire.assignedPackage.hardware && preHire.assignedPackage.hardware.length > 0 && (
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Hardware:</p>
                       <div className="space-y-1">
@@ -383,11 +383,11 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                   )}
 
                   {/* Software List */}
-                  {(preHire.assignedPackage.software.length > 0 || preHire.assignedPackage.licenses.length > 0) && (
+                  {preHire.assignedPackage.software && preHire.assignedPackage.software.length > 0 && (
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Software & Licenses:</p>
                       <div className="space-y-1">
-                        {[...preHire.assignedPackage.software, ...preHire.assignedPackage.licenses].map((sw) => (
+                        {preHire.assignedPackage.software.map((sw) => (
                           <div key={sw.id} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Icon name="package" className="w-4 h-4" />
                             <span>{sw.name}</span>
