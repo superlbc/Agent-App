@@ -10,8 +10,9 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Card } from './ui/Card';
+import { UserLicenseAssignModal } from './UserLicenseAssignModal';
 import { useLicense } from '../contexts/LicenseContext';
-import { EmployeeLicenseSummary, LicenseAssignmentFilters } from '../types';
+import { EmployeeLicenseSummary, LicenseAssignmentFilters, Employee } from '../types';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -19,6 +20,7 @@ import { EmployeeLicenseSummary, LicenseAssignmentFilters } from '../types';
 
 interface UserLicenseAssignmentsProps {
   employees?: EmployeeLicenseSummary[];
+  allEmployees: Employee[]; // Full employee records for modal
   onAssignLicense?: (employeeId: string) => void;
   onRevokeLicense?: (assignmentId: string) => void;
   onViewHistory?: (assignmentId: string) => void;
@@ -31,6 +33,7 @@ interface UserLicenseAssignmentsProps {
 
 export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   employees: externalEmployees,
+  allEmployees,
   onAssignLicense,
   onRevokeLicense,
   onViewHistory,
@@ -44,6 +47,10 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'withdrawn' | 'pre-hire'>('all');
   const [licenseStatusFilter, setLicenseStatusFilter] = useState<'all' | 'active' | 'expired' | 'revoked'>('all');
+
+  // Modal state
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedEmployeeForAssignment, setSelectedEmployeeForAssignment] = useState<string | undefined>(undefined);
 
   // Get employee summaries (use external data if provided, otherwise from context)
   const allEmployeeSummaries = useMemo(() => {
@@ -111,8 +118,25 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   };
 
   const handleAssignLicense = () => {
-    if (selectedEmployeeId && onAssignLicense) {
-      onAssignLicense(selectedEmployeeId);
+    // Open modal with selected employee (if any)
+    setSelectedEmployeeForAssignment(selectedEmployeeId || undefined);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleAssignmentSuccess = (employeeId: string, licensePoolId: string) => {
+    // Close modal
+    setIsAssignModalOpen(false);
+    setSelectedEmployeeForAssignment(undefined);
+
+    // Call external callback if provided
+    if (onAssignLicense) {
+      onAssignLicense(employeeId);
+    }
+
+    // Refresh selected employee if they were assigned a license
+    if (employeeId === selectedEmployeeId) {
+      // Re-select to trigger refresh
+      setSelectedEmployeeId(employeeId);
     }
   };
 
@@ -549,6 +573,18 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <UserLicenseAssignModal
+        isOpen={isAssignModalOpen}
+        onClose={() => {
+          setIsAssignModalOpen(false);
+          setSelectedEmployeeForAssignment(undefined);
+        }}
+        preSelectedEmployeeId={selectedEmployeeForAssignment}
+        employees={allEmployees}
+        onAssignSuccess={handleAssignmentSuccess}
+      />
     </div>
   );
 };

@@ -707,9 +707,10 @@ const AppContent: React.FC = () => {
           {currentSection === 'user-license-assignments' && (
             <div className="h-full overflow-hidden">
               <UserLicenseAssignments
+                allEmployees={mockEmployees}
                 onAssignLicense={(employeeId) => {
-                  console.log('Assign license to employee:', employeeId);
-                  addToast('Opening license assignment modal...', 'success');
+                  console.log('License assigned to employee:', employeeId);
+                  addToast('License assigned successfully!', 'success');
                 }}
                 onRevokeLicense={(assignmentId) => {
                   console.log('Revoke license assignment:', assignmentId);
