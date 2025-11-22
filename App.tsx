@@ -45,6 +45,7 @@ import { CollapsibleNavigation, NavigationSection } from './components/Collapsib
 import HardwareInventory from './components/HardwareInventory';
 import SoftwareInventory from './components/SoftwareInventory';
 import { LicensePoolDashboard } from './components/LicensePoolDashboard';
+import { UserLicenseAssignments } from './components/UserLicenseAssignments';
 import { RefreshCalendar } from './components/RefreshCalendar';
 import { RefreshFinanceView } from './components/RefreshFinanceView';
 import { RefreshNotifications } from './components/RefreshNotifications';
@@ -704,21 +705,25 @@ const AppContent: React.FC = () => {
 
           {/* User License Assignments Section */}
           {currentSection === 'user-license-assignments' && (
-            <div className="h-full overflow-auto p-6">
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">🔑</div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    User License Assignments
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    View and manage license assignments for all employees
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
-                    Coming soon in Phase 3 of implementation
-                  </p>
-                </div>
-              </div>
+            <div className="h-full overflow-hidden">
+              <UserLicenseAssignments
+                onAssignLicense={(employeeId) => {
+                  console.log('Assign license to employee:', employeeId);
+                  addToast('Opening license assignment modal...', 'success');
+                }}
+                onRevokeLicense={(assignmentId) => {
+                  console.log('Revoke license assignment:', assignmentId);
+                  addToast('Revoking license assignment...', 'success');
+                }}
+                onViewHistory={(assignmentId) => {
+                  console.log('View assignment history:', assignmentId);
+                  addToast('Opening assignment history...', 'success');
+                }}
+                onBulkImport={() => {
+                  console.log('Opening bulk import modal');
+                  addToast('Opening bulk import...', 'success');
+                }}
+              />
             </div>
           )}
 
