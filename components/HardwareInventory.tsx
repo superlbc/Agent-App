@@ -38,8 +38,7 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
   const [hardware, setHardware] = useState<Hardware[]>(initialHardware);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<Hardware['type'] | 'all'>('all');
-  const [filterStatus, setFilterStatus] = useState<Hardware['status'] | 'all'>('all');
-  const [sortBy, setSortBy] = useState<'model' | 'manufacturer' | 'type' | 'status' | 'cost' | 'purchaseDate'>('model');
+  const [sortBy, setSortBy] = useState<'model' | 'manufacturer' | 'type' | 'cost' | 'purchaseDate'>('model');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [showFilters, setShowFilters] = useState(false);
@@ -64,15 +63,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
     { value: 'dock', label: 'Docks', icon: 'link' },
     { value: 'headset', label: 'Headsets', icon: 'headphones' },
     { value: 'accessory', label: 'Accessories', icon: 'package' },
-  ];
-
-  // Status options for filtering
-  const statusOptions: Array<{ value: Hardware['status'] | 'all'; label: string; color: string }> = [
-    { value: 'all', label: 'All Status', color: 'text-gray-600 dark:text-gray-400' },
-    { value: 'available', label: 'Available', color: 'text-green-600 dark:text-green-400' },
-    { value: 'assigned', label: 'Assigned', color: 'text-blue-600 dark:text-blue-400' },
-    { value: 'maintenance', label: 'Maintenance', color: 'text-orange-600 dark:text-orange-400' },
-    { value: 'retired', label: 'Retired', color: 'text-gray-600 dark:text-gray-400' },
   ];
 
   // Create hardware
@@ -139,9 +129,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       // Type filter
       if (filterType !== 'all' && hw.type !== filterType) return false;
 
-      // Status filter
-      if (filterStatus !== 'all' && hw.status !== filterStatus) return false;
-
       return true;
     })
     .sort((a, b) => {
@@ -156,9 +143,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
           break;
         case 'type':
           compareValue = a.type.localeCompare(b.type);
-          break;
-        case 'status':
-          compareValue = a.status.localeCompare(b.status);
           break;
         case 'cost':
           compareValue = (a.cost || 0) - (b.cost || 0);
@@ -193,7 +177,7 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
   // Reset to first page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterType, filterStatus, itemsPerPage]);
+  }, [searchQuery, filterType, itemsPerPage]);
 
   // Refresh data
   const handleRefresh = () => {
@@ -210,14 +194,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
         type: type.value as Hardware['type'],
         label: type.label,
         count: hardware.filter((hw) => hw.type === type.value).length,
-      })),
-    byStatus: statusOptions
-      .filter((s) => s.value !== 'all')
-      .map((status) => ({
-        status: status.value as Hardware['status'],
-        label: status.label,
-        count: hardware.filter((hw) => hw.status === status.value).length,
-        color: status.color,
       })),
     totalCost: hardware.reduce((sum, hw) => sum + (hw.cost || 0), 0),
   };
@@ -340,7 +316,7 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
         >
           <Icon name="filter" className="w-4 h-4 mr-2" />
           Filters
-          {(filterType !== 'all') && (
+          {filterType !== 'all' && (
             <span className="ml-2 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded-full">
               1
             </span>
@@ -351,66 +327,34 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
       {/* Collapsible Filters */}
       {showFilters && (
         <Card className="p-4">
-          <div className="space-y-4">
+          <div>
             {/* Type Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Filter by Type
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {hardwareTypes.map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => setFilterType(type.value)}
-                    className={`
-                      flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all
-                      ${
-                        filterType === type.value
-                          ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
-                          : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                      }
-                    `}
-                  >
-                    <Icon name={type.icon} className="w-4 h-4" />
-                    {type.label}
-                    {type.value !== 'all' && (
-                      <span className="text-xs opacity-70">
-                        ({stats.byType.find((t) => t.type === type.value)?.count || 0})
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Filter by Status
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {statusOptions.map((status) => (
-                  <button
-                    key={status.value}
-                    onClick={() => setFilterStatus(status.value)}
-                    className={`
-                      flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all
-                      ${
-                        filterStatus === status.value
-                          ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
-                          : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
-                      }
-                    `}
-                  >
-                    {status.label}
-                    {status.value !== 'all' && (
-                      <span className="text-xs opacity-70">
-                        ({stats.byStatus.find((s) => s.status === status.value)?.count || 0})
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Filter by Type
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {hardwareTypes.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => setFilterType(type.value)}
+                  className={`
+                    flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all
+                    ${
+                      filterType === type.value
+                        ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-400 text-indigo-900 dark:text-indigo-100'
+                        : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500'
+                    }
+                  `}
+                >
+                  <Icon name={type.icon} className="w-4 h-4" />
+                  {type.label}
+                  {type.value !== 'all' && (
+                    <span className="text-xs opacity-70">
+                      ({stats.byType.find((t) => t.type === type.value)?.count || 0})
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
         </Card>
@@ -444,23 +388,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                     </h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{hw.manufacturer}</p>
                   </div>
-                </div>
-
-                {/* Status Badge */}
-                <div className="mb-2">
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                      hw.status === 'available'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                        : hw.status === 'assigned'
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : hw.status === 'maintenance'
-                        ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    {hw.status}
-                  </span>
                 </div>
 
                 {/* Key Specs (Inline) */}
@@ -579,22 +506,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                       </div>
                     </th>
 
-                    {/* Sortable Status Column */}
-                    <th
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => handleSort('status')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Status
-                        {sortBy === 'status' && (
-                          <Icon
-                            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
-                            className="w-3 h-3"
-                          />
-                        )}
-                      </div>
-                    </th>
-
                     {/* Sortable Cost Column */}
                     <th
                       className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -677,22 +588,6 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                             <div className="text-xs">{hw.specifications.connectivity}</div>
                           )}
                         </div>
-                      </td>
-                      {/* Status */}
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                            hw.status === 'available'
-                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                              : hw.status === 'assigned'
-                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                              : hw.status === 'maintenance'
-                              ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          {hw.status}
-                        </span>
                       </td>
 
                       {/* Cost */}
