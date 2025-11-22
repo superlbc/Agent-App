@@ -27,6 +27,7 @@ import { ApprovalProvider, useApprovals } from './contexts/ApprovalContext';
 import { LicenseProvider, useLicense } from './contexts/LicenseContext';
 import { CampaignProvider } from './contexts/CampaignContext';
 import { EventProvider } from './contexts/EventContext';
+import { VenueProvider } from './contexts/VenueContext';
 import { PackageAssignmentModal } from './components/PackageAssignmentModal';
 import { PackageBuilder } from './components/PackageBuilder';
 import { PackageDetailView } from './components/PackageDetailView';
@@ -1176,7 +1177,9 @@ function App() {
                 <ApprovalProvider>
                   <CampaignProvider>
                     <EventProvider>
-                      <AppContent />
+                      <VenueProvider>
+                        <AppContent />
+                      </VenueProvider>
                     </EventProvider>
                   </CampaignProvider>
                 </ApprovalProvider>
