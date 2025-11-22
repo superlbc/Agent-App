@@ -271,8 +271,8 @@ export const CampaignList: React.FC<CampaignListProps> = ({
         {/* Footer */}
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
-            <span>Created {campaign.createdAt.toLocaleDateString()}</span>
-            <span>Updated {campaign.updatedAt.toLocaleDateString()}</span>
+            <span>Created {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : 'N/A'}</span>
+            <span>Updated {campaign.updatedAt ? new Date(campaign.updatedAt).toLocaleDateString() : 'N/A'}</span>
           </div>
         </div>
       </div>

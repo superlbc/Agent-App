@@ -237,13 +237,13 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {campaign.createdAt.toLocaleDateString()} by {campaign.createdBy}
+                  {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : 'N/A'} by {campaign.createdBy}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</dt>
                 <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {campaign.updatedAt.toLocaleDateString()}
+                  {campaign.updatedAt ? new Date(campaign.updatedAt).toLocaleDateString() : 'N/A'}
                 </dd>
               </div>
             </dl>
@@ -317,7 +317,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
                           {event.eventName}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                          {new Date(event.eventDate).toLocaleDateString()}
+                          {event.eventDate ? new Date(event.eventDate).toLocaleDateString() : 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                           {event.venueName}
@@ -387,7 +387,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
                       {campaignEvents.length} {campaignEvents.length === 1 ? 'event' : 'events'} added
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                      Latest: {new Date(campaignEvents[0].eventDate).toLocaleDateString()}
+                      Latest: {campaignEvents[0]?.eventDate ? new Date(campaignEvents[0].eventDate).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                 </div>

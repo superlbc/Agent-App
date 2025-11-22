@@ -323,7 +323,7 @@ const EventDetailView: React.FC<EventDetailViewProps> = ({
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Scans: {qr.scanCount}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-500">
-                      Generated: {new Date(qr.generatedOn).toLocaleDateString()}
+                      Generated: {qr.generatedOn ? new Date(qr.generatedOn).toLocaleDateString() : 'N/A'}
                     </p>
                   </Card>
                 ))}
