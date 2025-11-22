@@ -10,11 +10,11 @@
 import React, { useState, useEffect } from 'react';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign, PeopleAssignment } from '../../types';
-import Icon from '../ui/Icon';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
+import { Icon } from '../ui/Icon';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import Textarea from '../ui/Textarea';
-import Select from '../ui/Select';
+import { Select } from '../ui/Select';
 
 interface EventModalProps {
   isOpen: boolean;

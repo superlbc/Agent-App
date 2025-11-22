@@ -12,10 +12,10 @@
 
 import React, { useState } from 'react';
 import type { Event, Campaign } from '../../types';
-import Icon from '../ui/Icon';
-import StatusBadge from '../ui/StatusBadge';
-import Button from '../ui/Button';
-import Card from '../ui/Card';
+import { Icon } from '../ui/Icon';
+import { StatusBadge } from '../ui/StatusBadge';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 
 interface EventDetailViewProps {
   event: Event;

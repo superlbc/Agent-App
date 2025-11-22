@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Icon from '../ui/Icon';
+import { Icon } from '../ui/Icon';
 
 export type EventView = 'calendar' | 'map' | 'list';
 

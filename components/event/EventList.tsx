@@ -13,11 +13,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign } from '../../types';
-import Icon from '../ui/Icon';
-import StatusBadge from '../ui/StatusBadge';
-import Pagination from '../ui/Pagination';
-import Input from '../ui/Input';
-import Select from '../ui/Select';
+import { Icon } from '../ui/Icon';
+import { StatusBadge } from '../ui/StatusBadge';
+import { Pagination } from '../ui/Pagination';
+import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 
 interface EventListProps {
   campaigns?: Campaign[];
@@ -322,7 +322,7 @@ const EventList: React.FC<EventListProps> = ({
                   <SortIcon field="eventName" />
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                 Campaign
               </th>
               <th
@@ -334,7 +334,7 @@ const EventList: React.FC<EventListProps> = ({
                   <SortIcon field="eventStartDate" />
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                 Venue
               </th>
               <th
@@ -355,7 +355,7 @@ const EventList: React.FC<EventListProps> = ({
                   <SortIcon field="status" />
                 </div>
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                 Actions
               </th>
             </tr>

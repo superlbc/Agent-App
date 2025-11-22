@@ -274,7 +274,7 @@ const FeaturesTab: React.FC = () => (
     {/* Package Management */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-        <Icon name="settings" className="h-5 w-5 text-gray-500" />
+        <Icon name="settings" className="h-5 w-5 text-gray-500 dark:text-gray-400" />
         📦 Package Management
       </h3>
       <div className="space-y-3">
@@ -472,7 +472,7 @@ const TipsTab: React.FC = () => (
     {/* Key Contacts */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-        <Icon name="info" className="h-5 w-5 text-gray-500" />
+        <Icon name="info" className="h-5 w-5 text-gray-500 dark:text-gray-400" />
         👥 Key Stakeholders
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

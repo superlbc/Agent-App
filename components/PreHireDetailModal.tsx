@@ -177,7 +177,7 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                         {['offered', 'accepted', 'linked'].includes(preHire.status) ? (
                           <Icon name="check" className="w-5 h-5 text-green-600 dark:text-green-400" />
                         ) : (
-                          <Icon name="document" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                          <Icon name="document" className="w-5 h-5 text-gray-400 dark:text-gray-500 dark:text-gray-400" />
                         )}
                       </div>
                       <p className="text-xs font-medium text-gray-900 dark:text-white text-center">Offered</p>
@@ -199,7 +199,7 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                         {['accepted', 'linked'].includes(preHire.status) ? (
                           <Icon name="check" className="w-5 h-5 text-green-600 dark:text-green-400" />
                         ) : (
-                          <Icon name="user" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                          <Icon name="user" className="w-5 h-5 text-gray-400 dark:text-gray-500 dark:text-gray-400" />
                         )}
                       </div>
                       <p className="text-xs font-medium text-gray-900 dark:text-white text-center">Accepted</p>
@@ -221,7 +221,7 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                         {preHire.assignedPackage ? (
                           <Icon name="check" className="w-5 h-5 text-green-600 dark:text-green-400" />
                         ) : (
-                          <Icon name="package" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                          <Icon name="package" className="w-5 h-5 text-gray-400 dark:text-gray-500 dark:text-gray-400" />
                         )}
                       </div>
                       <p className="text-xs font-medium text-gray-900 dark:text-white text-center">Package</p>
@@ -243,7 +243,7 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                         {preHire.linkedEmployeeId ? (
                           <Icon name="check" className="w-5 h-5 text-green-600 dark:text-green-400" />
                         ) : (
-                          <Icon name="settings" className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                          <Icon name="settings" className="w-5 h-5 text-gray-400 dark:text-gray-500 dark:text-gray-400" />
                         )}
                       </div>
                       <p className="text-xs font-medium text-gray-900 dark:text-white text-center">Systems</p>
@@ -375,7 +375,7 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                           <div key={hw.id} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Icon name="monitor" className="w-4 h-4" />
                             <span>{hw.manufacturer} {hw.model}</span>
-                            {hw.cost && <span className="text-xs text-gray-500">(${hw.cost.toFixed(2)})</span>}
+                            {hw.cost && <span className="text-xs text-gray-500 dark:text-gray-400">(${hw.cost.toFixed(2)})</span>}
                           </div>
                         ))}
                       </div>
@@ -392,7 +392,7 @@ export const PreHireDetailModal: React.FC<PreHireDetailModalProps> = ({
                             <Icon name="package" className="w-4 h-4" />
                             <span>{sw.name}</span>
                             {sw.cost && sw.renewalFrequency && (
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
                                 (${sw.cost.toFixed(2)}/{sw.renewalFrequency === 'monthly' ? 'mo' : 'yr'})
                               </span>
                             )}

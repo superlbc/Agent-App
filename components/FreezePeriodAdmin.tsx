@@ -352,7 +352,7 @@ export const FreezePeriodAdmin: React.FC<FreezePeriodAdminProps> = ({
                                 <span className="ml-2 text-gray-900 dark:text-white font-medium">
                                   {formatDate(period.startDate)}
                                   {daysUntilStart > 0 && (
-                                    <span className="ml-1 text-xs text-gray-500">({daysUntilStart} days)</span>
+                                    <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">({daysUntilStart} days)</span>
                                   )}
                                 </span>
                               </div>
@@ -361,7 +361,7 @@ export const FreezePeriodAdmin: React.FC<FreezePeriodAdminProps> = ({
                                 <span className="ml-2 text-gray-900 dark:text-white font-medium">
                                   {formatDate(period.endDate)}
                                   {daysUntilEnd > 0 && (
-                                    <span className="ml-1 text-xs text-gray-500">({daysUntilEnd} days)</span>
+                                    <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">({daysUntilEnd} days)</span>
                                   )}
                                 </span>
                               </div>
@@ -492,7 +492,7 @@ export const FreezePeriodAdmin: React.FC<FreezePeriodAdminProps> = ({
                     </div>
                   ))}
                   {pastPeriods.length > 5 && (
-                    <div className="text-sm text-gray-500 dark:text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-500 dark:text-gray-400">
                       + {pastPeriods.length - 5} more
                     </div>
                   )}

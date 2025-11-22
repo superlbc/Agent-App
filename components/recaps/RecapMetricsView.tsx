@@ -532,10 +532,10 @@ export const RecapMetricsView: React.FC<RecapMetricsViewProps> = ({
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
                   Event
                 </th>
-                <th className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
                   <button
                     onClick={() => {
                       setSortBy('date');
@@ -550,16 +550,16 @@ export const RecapMetricsView: React.FC<RecapMetricsViewProps> = ({
                     />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
                   Client
                 </th>
-                <th className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
                   Field Manager
                 </th>
-                <th className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 font-semibold">
                   Status
                 </th>
-                <th className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 font-semibold">
                   <button
                     onClick={() => {
                       setSortBy('scans');
@@ -574,7 +574,7 @@ export const RecapMetricsView: React.FC<RecapMetricsViewProps> = ({
                     />
                   </button>
                 </th>
-                <th className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 font-semibold">
+                <th scope="col" className="px-4 py-3 text-right text-gray-700 dark:text-gray-300 font-semibold">
                   <button
                     onClick={() => {
                       setSortBy('surveys');

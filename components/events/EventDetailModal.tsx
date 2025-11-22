@@ -238,7 +238,7 @@ export const EventDetailModal: React.FC<EventDetailModalProps> = ({
                     <Card key={qr.id} className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-semibold">{qr.name}</h4>
-                        <span className="text-sm text-gray-500">{qr.scansCount} scans</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{qr.scansCount} scans</span>
                       </div>
                       <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{qr.url}</p>
                     </Card>

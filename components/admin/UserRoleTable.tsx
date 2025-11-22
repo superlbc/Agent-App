@@ -329,7 +329,7 @@ export const UserRoleTable: React.FC<UserRoleTableProps> = ({
             <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <tr>
                 {/* Select All Checkbox */}
-                <th className="px-4 py-3 w-12">
+                <th scope="col" className="px-4 py-3 w-12">
                   <input
                     type="checkbox"
                     checked={
@@ -342,7 +342,7 @@ export const UserRoleTable: React.FC<UserRoleTableProps> = ({
                 </th>
 
                 {/* Photo */}
-                <th className="px-4 py-3 w-16"></th>
+                <th scope="col" className="px-4 py-3 w-16"></th>
 
                 {/* Name */}
                 <th
@@ -409,7 +409,7 @@ export const UserRoleTable: React.FC<UserRoleTableProps> = ({
                 </th>
 
                 {/* Actions */}
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>

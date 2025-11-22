@@ -14,8 +14,8 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker, InfoWindow, MarkerClusterer } from '@react-google-maps/api';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign, EventMapMarker } from '../../types';
-import StatusBadge from '../ui/StatusBadge';
-import Icon from '../ui/Icon';
+import { StatusBadge } from '../ui/StatusBadge';
+import { Icon } from '../ui/Icon';
 
 // Mock Google Maps API Key (to be replaced with real key later)
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'; // Placeholder - will be replaced

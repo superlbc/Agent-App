@@ -535,7 +535,7 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
                     </th>
 
                     {/* Non-sortable Actions Column */}
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>

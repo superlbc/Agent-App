@@ -17,8 +17,8 @@ import { enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign, CalendarEvent } from '../../types';
-import Icon from '../ui/Icon';
-import StatusBadge from '../ui/StatusBadge';
+import { Icon } from '../ui/Icon';
+import { StatusBadge } from '../ui/StatusBadge';
 
 // Configure date-fns localizer
 const locales = {
