@@ -5,7 +5,14 @@
 // Now connected to backend API with loading states and error handling
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { Software, LicenseAssignment, LicensePool } from '../types';
+import {
+  Software,
+  LicenseAssignment,
+  LicensePool,
+  EmployeeLicenseSummary,
+  LicenseAssignmentHistory,
+  LicenseAssignmentFilters,
+} from '../types';
 import { mockSoftware } from '../utils/mockData';
 import * as softwareService from '../services/softwareService';
 import { batchMigrateToLicensePools } from '../utils/licensePoolMigration';
@@ -66,6 +73,14 @@ interface LicenseContextValue {
   /** @deprecated Use isPoolOverAllocated with licensePoolId instead */
   isOverAllocated: (licenseId: string) => boolean;
   isPoolOverAllocated: (poolId: string) => boolean;
+
+  // Phase 2: NEW - User License Assignments methods
+  getAllAssignments: () => LicenseAssignment[];
+  getEmployeeAssignments: (employeeId: string) => LicenseAssignment[];
+  getEmployeeLicenseSummaries: () => EmployeeLicenseSummary[];
+  searchAssignments: (query: string) => LicenseAssignment[];
+  filterAssignments: (filters: LicenseAssignmentFilters) => LicenseAssignment[];
+  getAssignmentHistory: (assignmentId: string) => LicenseAssignmentHistory[];
 }
 
 interface LicenseProviderProps {
