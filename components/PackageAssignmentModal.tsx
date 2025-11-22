@@ -155,7 +155,7 @@ export const PackageAssignmentModal: React.FC<PackageAssignmentModalProps> = ({
               <span className="text-blue-800 dark:text-blue-300">
                 Currently assigned:{' '}
                 <strong>{preHire.assignedPackage.name}</strong> ($
-                {calculatePackageCost(preHire.assignedPackage).toFixed(2)}/mo)
+                {calculatePackageCost(preHire.assignedPackage).monthlyTotal.toFixed(2)}/mo)
               </span>
             </div>
           </div>
@@ -260,7 +260,7 @@ export const PackageAssignmentModal: React.FC<PackageAssignmentModalProps> = ({
                   <strong className="text-gray-900 dark:text-white">
                     {selectedPackage.name}
                   </strong>{' '}
-                  - ${calculatePackageCost(selectedPackage).toFixed(2)}/mo
+                  - ${calculatePackageCost(selectedPackage).monthlyTotal.toFixed(2)}/mo
                 </span>
               </div>
             ) : (
