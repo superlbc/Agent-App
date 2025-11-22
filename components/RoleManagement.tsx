@@ -11,6 +11,7 @@ import { Input } from './ui/Input';
 import { Card } from './ui/Card';
 import { StatusBadge } from './ui/StatusBadge';
 import { Select } from './ui/Select';
+import { ConfirmModal } from './ui/ConfirmModal';
 import { RoleEditor } from './admin/RoleEditor';
 import { UserRoleAssignment } from './admin/UserRoleAssignment';
 import { PermissionMatrix } from './admin/PermissionMatrix';
@@ -59,6 +60,10 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
   const [isUserAssignmentOpen, setIsUserAssignmentOpen] = useState(false);
   const [isPermissionMatrixOpen, setIsPermissionMatrixOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | undefined>(undefined);
+
+  // Confirmation modal state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
 
   // Mock data - TODO: Replace with API calls
   const [roles, setRoles] = useState<Role[]>([
@@ -158,8 +163,14 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
   };
 
   const handleDeleteRole = (roleId: string) => {
-    if (confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
-      setRoles(prev => prev.filter(r => r.id !== roleId));
+    setRoleToDelete(roleId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteRole = () => {
+    if (roleToDelete) {
+      setRoles(prev => prev.filter(r => r.id !== roleToDelete));
+      setRoleToDelete(null);
     }
   };
 
@@ -540,6 +551,20 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
           onClose={() => setIsPermissionMatrixOpen(false)}
         />
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setRoleToDelete(null);
+        }}
+        onConfirm={confirmDeleteRole}
+        title="Delete Role?"
+        message={`Are you sure you want to delete this role? This action cannot be undone. Users assigned to this role will lose their permissions.`}
+        confirmText="Delete Role"
+        variant="danger"
+      />
     </div>
   );
 };

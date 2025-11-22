@@ -8,6 +8,7 @@ import { Toast } from './components/ui/Toast';
 import { ScrollToTop } from './components/ui/ScrollToTop';
 import { Button } from './components/ui/Button';
 import { Icon } from './components/ui/Icon';
+import { ConfirmModal } from './components/ui/ConfirmModal';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { ToastState, ApiConfig, PreHire } from './types';
 import { TourProvider } from './contexts/TourContext';
@@ -74,6 +75,7 @@ const AppContent: React.FC = () => {
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const { user } = useAuth();
   const {
@@ -548,13 +550,15 @@ const AppContent: React.FC = () => {
   };
 
   const handleResetData = () => {
-    if (window.confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
-      // Clear all pre-hires
-      preHires.forEach(ph => deletePreHire(ph.id));
-      // Clear all packages
-      packages.forEach(pkg => deletePackage(pkg.id));
-      addToast('All data has been reset', 'success');
-    }
+    setShowResetConfirm(true);
+  };
+
+  const confirmReset = () => {
+    // Clear all pre-hires
+    preHires.forEach(ph => deletePreHire(ph.id));
+    // Clear all packages
+    packages.forEach(pkg => deletePackage(pkg.id));
+    addToast('All data has been reset', 'success');
   };
 
   const handleReplayTour = () => {
@@ -1071,6 +1075,17 @@ const AppContent: React.FC = () => {
           />
         ))}
       </div>
+
+      {/* Confirmation Modals */}
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={confirmReset}
+        title="Reset All Data?"
+        message="Are you sure you want to reset all data? This will delete all pre-hires and packages. This action cannot be undone."
+        confirmText="Reset All Data"
+        variant="danger"
+      />
     </div>
   );
 };

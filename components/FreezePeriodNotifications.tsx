@@ -3,11 +3,12 @@
 // ============================================================================
 // Manage freeze period email notifications for password resets and terminations
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { PreHire } from '../types';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
+import { ConfirmModal } from './ui/ConfirmModal';
 import {
   generatePasswordResetEmail,
   openEmailClient,
@@ -37,6 +38,12 @@ export const FreezePeriodNotifications: React.FC<FreezePeriodNotificationsProps>
   onEmailSent,
   className = '',
 }) => {
+  // ============================================================================
+  // STATE
+  // ============================================================================
+
+  const [showSendAllConfirm, setShowSendAllConfirm] = useState(false);
+
   // ============================================================================
   // COMPUTED DATA
   // ============================================================================
@@ -93,15 +100,17 @@ export const FreezePeriodNotifications: React.FC<FreezePeriodNotificationsProps>
   };
 
   const handleSendAllEmails = () => {
-    if (window.confirm(`Send password reset emails for ${upcomingFreezeStarts.length} employee(s)?`)) {
-      upcomingFreezeStarts.forEach((ph) => {
-        const emailTemplate = generatePasswordResetEmail(ph, DEFAULT_HELIX_EMAIL);
-        // In real implementation, this would queue emails or send via API
-        console.log('Queued email for:', ph.candidateName, emailTemplate);
-      });
+    setShowSendAllConfirm(true);
+  };
 
-      alert(`${upcomingFreezeStarts.length} email(s) queued for sending`);
-    }
+  const confirmSendAllEmails = () => {
+    upcomingFreezeStarts.forEach((ph) => {
+      const emailTemplate = generatePasswordResetEmail(ph, DEFAULT_HELIX_EMAIL);
+      // In real implementation, this would queue emails or send via API
+      console.log('Queued email for:', ph.candidateName, emailTemplate);
+    });
+
+    alert(`${upcomingFreezeStarts.length} email(s) queued for sending`);
   };
 
   // ============================================================================
@@ -235,6 +244,17 @@ export const FreezePeriodNotifications: React.FC<FreezePeriodNotificationsProps>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showSendAllConfirm}
+        onClose={() => setShowSendAllConfirm(false)}
+        onConfirm={confirmSendAllEmails}
+        title="Send All Password Reset Emails?"
+        message={`Are you sure you want to send password reset emails for ${upcomingFreezeStarts.length} employee(s)? This will create Helix tickets for each employee.`}
+        confirmText="Send All Emails"
+        variant="warning"
+      />
     </Card>
   );
 };
