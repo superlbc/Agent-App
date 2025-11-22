@@ -25,6 +25,8 @@ import { VersionUpdateBanner } from './components/ui/VersionUpdateBanner';
 import { PackageProvider, usePackages } from './contexts/PackageContext';
 import { ApprovalProvider, useApprovals } from './contexts/ApprovalContext';
 import { LicenseProvider, useLicense } from './contexts/LicenseContext';
+import { CampaignProvider } from './contexts/CampaignContext';
+import { EventProvider } from './contexts/EventContext';
 import { PackageAssignmentModal } from './components/PackageAssignmentModal';
 import { PackageBuilder } from './components/PackageBuilder';
 import { PackageDetailView } from './components/PackageDetailView';
@@ -1045,7 +1047,11 @@ function App() {
             <PackageProvider>
               <LicenseProvider useMockData={true} employees={mockEmployees}>
                 <ApprovalProvider>
-                  <AppContent />
+                  <CampaignProvider>
+                    <EventProvider>
+                      <AppContent />
+                    </EventProvider>
+                  </CampaignProvider>
                 </ApprovalProvider>
               </LicenseProvider>
             </PackageProvider>
