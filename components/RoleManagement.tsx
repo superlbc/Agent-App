@@ -531,6 +531,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
       {viewMode === 'users' && canManageUsers && (
         <div className="mt-6">
           <UserRoleAssignment
+            roles={roles}
             onClose={() => {}} // Empty function since it's inline, not a modal
           />
         </div>

@@ -11,13 +11,14 @@ import { Select } from '../ui/Select';
 import { StatusBadge } from '../ui/StatusBadge';
 import { GraphService } from '../../services/graphService';
 import { ConfirmModal } from '../ui/ConfirmModal';
-import type { UserRoleAssignment as UserRoleAssignmentType, UserRole } from '../../types';
+import type { UserRoleAssignment as UserRoleAssignmentType, UserRole, Role } from '../../types';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
 interface UserRoleAssignmentProps {
+  roles?: Role[];
   onClose: () => void;
 }
 
@@ -44,6 +45,7 @@ interface GraphUser {
 // ============================================================================
 
 export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
+  roles = [],
   onClose,
 }) => {
   // ============================================================================
@@ -113,16 +115,19 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
     },
   ]);
 
-  const availableRoles: UserRole[] = [
-    'EMPLOYEE',
-    'HIRING_MANAGER',
-    'MANAGER',
-    'IT',
-    'FINANCE',
-    'HR',
-    'DIRECTOR',
-    'ADMIN',
-  ];
+  // Derive available roles from passed roles prop, or use fallback hardcoded list
+  const availableRoles: UserRole[] = roles.length > 0
+    ? roles.map(role => role.name as UserRole)
+    : [
+        'EMPLOYEE',
+        'HIRING_MANAGER',
+        'MANAGER',
+        'IT',
+        'FINANCE',
+        'HR',
+        'DIRECTOR',
+        'ADMIN',
+      ];
 
   // ============================================================================
   // FILTERING
