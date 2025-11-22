@@ -2,14 +2,16 @@
 // APPROVAL CONTEXT
 // ============================================================================
 // Centralized state management for approval requests and Helix tickets
+// Now connected to backend API with loading states and error handling
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ApprovalRequest, HelixTicket } from '../types';
 import {
   mockApprovalRequests,
   mockHelixTickets,
   mockApprovalStatistics,
 } from '../utils/mockData';
+import * as approvalService from '../services/approvalService';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -22,15 +24,19 @@ interface ApprovalContextType {
   statistics: typeof mockApprovalStatistics;
   viewingApproval: ApprovalRequest | null;
   viewingTicket: HelixTicket | null;
+  loading: boolean;
+  error: string | null;
 
   // Approval Operations
-  createApproval: (approval: Partial<ApprovalRequest>) => void;
-  updateApproval: (id: string, updates: Partial<ApprovalRequest>) => void;
-  deleteApproval: (id: string) => void;
-  approveRequest: (id: string, notes?: string) => void;
-  rejectRequest: (id: string, reason: string) => void;
+  createApproval: (approval: Partial<ApprovalRequest>) => Promise<void>;
+  updateApproval: (id: string, updates: Partial<ApprovalRequest>) => Promise<void>;
+  deleteApproval: (id: string) => Promise<void>;
+  approveRequest: (id: string, helixTicketId?: string, notes?: string) => Promise<void>;
+  rejectRequest: (id: string, reason: string, notes?: string) => Promise<void>;
+  cancelRequest: (id: string, notes?: string) => Promise<void>;
+  refreshApprovals: () => Promise<void>;
 
-  // Ticket Operations
+  // Ticket Operations (Mock - Helix integration external)
   createTicket: (ticket: Partial<HelixTicket>) => void;
   updateTicket: (id: string, updates: Partial<HelixTicket>) => void;
   deleteTicket: (id: string) => void;
@@ -55,6 +61,7 @@ interface ApprovalContextType {
 
 interface ApprovalProviderProps {
   children: ReactNode;
+  useMockData?: boolean;
 }
 
 // ============================================================================
@@ -67,12 +74,62 @@ const ApprovalContext = createContext<ApprovalContextType | undefined>(undefined
 // PROVIDER COMPONENT
 // ============================================================================
 
-export const ApprovalProvider: React.FC<ApprovalProviderProps> = ({ children }) => {
+export const ApprovalProvider: React.FC<ApprovalProviderProps> = ({
+  children,
+  useMockData = false
+}) => {
   // State
-  const [approvals, setApprovals] = useState<ApprovalRequest[]>(mockApprovalRequests);
-  const [tickets, setTickets] = useState<HelixTicket[]>(mockHelixTickets);
+  const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
+  const [tickets, setTickets] = useState<HelixTicket[]>(mockHelixTickets); // Helix is external
   const [viewingApproval, setViewingApproval] = useState<ApprovalRequest | null>(null);
   const [viewingTicket, setViewingTicket] = useState<HelixTicket | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
+  /**
+   * Fetch all approvals from API
+   */
+  const fetchApprovals = async () => {
+    if (useMockData) {
+      setApprovals(mockApprovalRequests);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await approvalService.getAllApprovals();
+      setApprovals(response.data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch approvals';
+      console.error('[ApprovalContext] Error fetching approvals:', errorMessage);
+      setError(errorMessage);
+
+      // Fallback to mock data
+      console.warn('[ApprovalContext] Falling back to mock data');
+      setApprovals(mockApprovalRequests);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Refresh approvals (public method)
+   */
+  const refreshApprovals = async () => {
+    await fetchApprovals();
+  };
+
+  // Fetch on mount
+  useEffect(() => {
+    fetchApprovals();
+  }, []);
 
   // ============================================================================
   // APPROVAL OPERATIONS
@@ -81,109 +138,243 @@ export const ApprovalProvider: React.FC<ApprovalProviderProps> = ({ children }) 
   /**
    * Create a new approval request
    */
-  const createApproval = (approvalData: Partial<ApprovalRequest>) => {
-    const newApproval: ApprovalRequest = {
-      id: approvalData.id || `apr-${Date.now()}`,
-      employeeId: approvalData.employeeId || '',
-      employeeName: approvalData.employeeName || '',
-      requestType: approvalData.requestType || 'equipment',
-      items: approvalData.items || [],
-      packageId: approvalData.packageId,
-      requester: approvalData.requester || 'Current User',
-      requestDate: approvalData.requestDate || new Date(),
-      approver: approvalData.approver || 'Pending',
-      status: approvalData.status || 'pending',
-      helixTicketId: approvalData.helixTicketId,
-      automatedDecision: approvalData.automatedDecision ?? false,
-      approvalDate: approvalData.approvalDate,
-      rejectionReason: approvalData.rejectionReason,
-      notes: approvalData.notes,
-    };
+  const createApproval = async (approvalData: Partial<ApprovalRequest>) => {
+    if (useMockData) {
+      const newApproval: ApprovalRequest = {
+        id: approvalData.id || `apr-${Date.now()}`,
+        employeeId: approvalData.employeeId || '',
+        employeeName: approvalData.employeeName || '',
+        requestType: approvalData.requestType || 'equipment',
+        items: approvalData.items || [],
+        packageId: approvalData.packageId,
+        requester: approvalData.requester || 'Current User',
+        requestDate: approvalData.requestDate || new Date(),
+        approver: approvalData.approver || 'Pending',
+        status: approvalData.status || 'pending',
+        helixTicketId: approvalData.helixTicketId,
+        automatedDecision: approvalData.automatedDecision ?? false,
+        approvalDate: approvalData.approvalDate,
+        rejectionReason: approvalData.rejectionReason,
+        notes: approvalData.notes,
+      };
+      setApprovals((prev) => [newApproval, ...prev]);
+      return;
+    }
 
-    setApprovals((prev) => [newApproval, ...prev]);
+    try {
+      setError(null);
+      const newApproval = await approvalService.createApproval(approvalData);
+      setApprovals((prev) => [newApproval, ...prev]);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create approval';
+      console.error('[ApprovalContext] Error creating approval:', errorMessage);
+      setError(errorMessage);
+      throw err;
+    }
   };
 
   /**
    * Update an existing approval request
    */
-  const updateApproval = (id: string, updates: Partial<ApprovalRequest>) => {
-    setApprovals((prev) =>
-      prev.map((approval) =>
-        approval.id === id
-          ? { ...approval, ...updates }
-          : approval
-      )
-    );
-
-    // Update viewing state if the updated approval was being viewed
-    if (viewingApproval?.id === id) {
-      setViewingApproval((prev) =>
-        prev ? { ...prev, ...updates } : null
+  const updateApproval = async (id: string, updates: Partial<ApprovalRequest>) => {
+    if (useMockData) {
+      setApprovals((prev) =>
+        prev.map((approval) =>
+          approval.id === id
+            ? { ...approval, ...updates }
+            : approval
+        )
       );
+      if (viewingApproval?.id === id) {
+        setViewingApproval((prev) =>
+          prev ? { ...prev, ...updates } : null
+        );
+      }
+      return;
+    }
+
+    try {
+      setError(null);
+      // Note: Backend doesn't have generic update endpoint, only approve/reject/cancel
+      // This is a placeholder - actual updates should use specific endpoints
+      console.warn('[ApprovalContext] Generic update not supported by API, use approve/reject/cancel instead');
+
+      setApprovals((prev) =>
+        prev.map((approval) =>
+          approval.id === id ? { ...approval, ...updates } : approval
+        )
+      );
+
+      if (viewingApproval?.id === id) {
+        setViewingApproval((prev) =>
+          prev ? { ...prev, ...updates } : null
+        );
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update approval';
+      console.error('[ApprovalContext] Error updating approval:', errorMessage);
+      setError(errorMessage);
+      throw err;
     }
   };
 
   /**
    * Delete an approval request
    */
-  const deleteApproval = (id: string) => {
-    setApprovals((prev) => prev.filter((approval) => approval.id !== id));
+  const deleteApproval = async (id: string) => {
+    if (useMockData) {
+      setApprovals((prev) => prev.filter((approval) => approval.id !== id));
+      if (viewingApproval?.id === id) {
+        setViewingApproval(null);
+      }
+      return;
+    }
 
-    // Clear viewing state if the deleted approval was being viewed
-    if (viewingApproval?.id === id) {
-      setViewingApproval(null);
+    try {
+      setError(null);
+      // Note: Backend doesn't have delete endpoint for approvals
+      // Use cancel instead
+      await approvalService.cancelRequest(id, { notes: 'Deleted by user' });
+
+      setApprovals((prev) => prev.filter((approval) => approval.id !== id));
+
+      if (viewingApproval?.id === id) {
+        setViewingApproval(null);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete approval';
+      console.error('[ApprovalContext] Error deleting approval:', errorMessage);
+      setError(errorMessage);
+      throw err;
     }
   };
 
   /**
-   * Approve a request and create Helix ticket if needed
+   * Approve a request and optionally link Helix ticket
    */
-  const approveRequest = (id: string, notes?: string) => {
-    const approval = approvals.find((a) => a.id === id);
-    if (!approval) return;
+  const approveRequest = async (id: string, helixTicketId?: string, notes?: string) => {
+    if (useMockData) {
+      const approval = approvals.find((a) => a.id === id);
+      if (!approval) return;
 
-    // Update approval status
-    updateApproval(id, {
-      status: 'approved',
-      approvalDate: new Date(),
-      notes,
-    });
-
-    // Create Helix ticket if it doesn't exist
-    if (!approval.helixTicketId) {
-      const ticketId = `hx-${Date.now()}`;
-      createTicket({
-        id: ticketId,
-        type: approval.requestType === 'equipment' ? 'equipment' : 'access-request',
-        employeeId: approval.employeeId,
-        employeeName: approval.employeeName,
-        requestedBy: approval.requester,
-        status: 'open',
-        priority: 'medium',
-        createdDate: new Date(),
-        description: `Approved ${approval.requestType} request for ${approval.employeeName}`,
-        equipmentItems: approval.items,
-        approvalRequestId: approval.id,
+      updateApproval(id, {
+        status: 'approved',
+        approvalDate: new Date(),
+        helixTicketId,
+        notes,
       });
 
-      // Link ticket to approval
-      updateApproval(id, { helixTicketId: ticketId });
+      // Create Helix ticket if it doesn't exist
+      if (!helixTicketId && !approval.helixTicketId) {
+        const ticketId = `hx-${Date.now()}`;
+        createTicket({
+          id: ticketId,
+          type: approval.requestType === 'equipment' ? 'equipment' : 'access-request',
+          employeeId: approval.employeeId,
+          employeeName: approval.employeeName,
+          requestedBy: approval.requester,
+          status: 'open',
+          priority: 'medium',
+          createdDate: new Date(),
+          description: `Approved ${approval.requestType} request for ${approval.employeeName}`,
+          equipmentItems: approval.items,
+          approvalRequestId: approval.id,
+        });
+      }
+      return;
+    }
+
+    try {
+      setError(null);
+      const updatedApproval = await approvalService.approveRequest(id, {
+        helixTicketId,
+        notes,
+      });
+
+      setApprovals((prev) =>
+        prev.map((approval) => (approval.id === id ? updatedApproval : approval))
+      );
+
+      if (viewingApproval?.id === id) {
+        setViewingApproval(updatedApproval);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to approve request';
+      console.error('[ApprovalContext] Error approving request:', errorMessage);
+      setError(errorMessage);
+      throw err;
     }
   };
 
   /**
    * Reject a request
    */
-  const rejectRequest = (id: string, reason: string) => {
-    updateApproval(id, {
-      status: 'rejected',
-      approvalDate: new Date(),
-      rejectionReason: reason,
-    });
+  const rejectRequest = async (id: string, reason: string, notes?: string) => {
+    if (useMockData) {
+      updateApproval(id, {
+        status: 'rejected',
+        approvalDate: new Date(),
+        rejectionReason: reason,
+        notes,
+      });
+      return;
+    }
+
+    try {
+      setError(null);
+      const updatedApproval = await approvalService.rejectRequest(id, {
+        rejectionReason: reason,
+        notes,
+      });
+
+      setApprovals((prev) =>
+        prev.map((approval) => (approval.id === id ? updatedApproval : approval))
+      );
+
+      if (viewingApproval?.id === id) {
+        setViewingApproval(updatedApproval);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reject request';
+      console.error('[ApprovalContext] Error rejecting request:', errorMessage);
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
+  /**
+   * Cancel a pending request
+   */
+  const cancelRequest = async (id: string, notes?: string) => {
+    if (useMockData) {
+      updateApproval(id, {
+        status: 'cancelled',
+        notes,
+      });
+      return;
+    }
+
+    try {
+      setError(null);
+      const updatedApproval = await approvalService.cancelRequest(id, { notes });
+
+      setApprovals((prev) =>
+        prev.map((approval) => (approval.id === id ? updatedApproval : approval))
+      );
+
+      if (viewingApproval?.id === id) {
+        setViewingApproval(updatedApproval);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel request';
+      console.error('[ApprovalContext] Error cancelling request:', errorMessage);
+      setError(errorMessage);
+      throw err;
+    }
   };
 
   // ============================================================================
-  // TICKET OPERATIONS
+  // TICKET OPERATIONS (Mock - Helix is external system)
   // ============================================================================
 
   /**
@@ -223,7 +414,6 @@ export const ApprovalProvider: React.FC<ApprovalProviderProps> = ({ children }) 
       )
     );
 
-    // Update viewing state if the updated ticket was being viewed
     if (viewingTicket?.id === id) {
       setViewingTicket((prev) =>
         prev ? { ...prev, ...updates } : null
@@ -237,7 +427,6 @@ export const ApprovalProvider: React.FC<ApprovalProviderProps> = ({ children }) 
   const deleteTicket = (id: string) => {
     setTickets((prev) => prev.filter((ticket) => ticket.id !== id));
 
-    // Clear viewing state if the deleted ticket was being viewed
     if (viewingTicket?.id === id) {
       setViewingTicket(null);
     }
@@ -376,11 +565,15 @@ export const ApprovalProvider: React.FC<ApprovalProviderProps> = ({ children }) 
     statistics,
     viewingApproval,
     viewingTicket,
+    loading,
+    error,
     createApproval,
     updateApproval,
     deleteApproval,
     approveRequest,
     rejectRequest,
+    cancelRequest,
+    refreshApprovals,
     createTicket,
     updateTicket,
     deleteTicket,
@@ -427,7 +620,7 @@ export const useApprovals = (): ApprovalContextType => {
 /**
  * Wrap your app with ApprovalProvider:
  *
- * <ApprovalProvider>
+ * <ApprovalProvider useMockData={false}>
  *   <App />
  * </ApprovalProvider>
  *
@@ -437,21 +630,30 @@ export const useApprovals = (): ApprovalContextType => {
  *   approvals,
  *   tickets,
  *   statistics,
+ *   loading,
+ *   error,
  *   approveRequest,
  *   rejectRequest,
+ *   cancelRequest,
  *   createTicket,
  *   startViewApproval,
  * } = useApprovals();
  *
- * // Approve a request
- * approveRequest('apr-123', 'Approved for standard package');
+ * // Show loading state
+ * if (loading) return <LoadingSpinner />;
  *
- * // Reject a request
- * rejectRequest('apr-456', 'Budget constraints');
+ * // Show error state
+ * if (error) return <ErrorMessage message={error} />;
  *
- * // Create a Helix ticket
+ * // Approve a request (now async)
+ * await approveRequest('apr-123', 'hx-456', 'Approved for standard package');
+ *
+ * // Reject a request (now async)
+ * await rejectRequest('apr-456', 'Budget constraints', 'Will review next quarter');
+ *
+ * // Cancel a request (now async)
+ * await cancelRequest('apr-789', 'Employee withdrawn application');
+ *
+ * // Create a Helix ticket (still synchronous - external system)
  * createTicket({ type: 'password-reset', employeeId: 'emp-123', ... });
- *
- * // View approval details
- * startViewApproval(selectedApproval);
  */
