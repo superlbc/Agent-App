@@ -2113,9 +2113,9 @@ export function getResolvedTickets(): HelixTicket[] {
 // ============================================================================
 
 export const mockApprovalStatistics = {
-  totalPending: getPendingApprovals().length,
-  totalApproved: getApprovedApprovals().length,
-  totalRejected: getRejectedApprovals().length,
+  totalPending: 0, // mockApprovalRequests is empty
+  totalApproved: 0,
+  totalRejected: 0,
   approvedToday: 2,
   rejectedToday: 1,
   averageApprovalTime: 4.5, // hours
