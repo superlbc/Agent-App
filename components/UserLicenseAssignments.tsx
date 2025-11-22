@@ -12,6 +12,7 @@ import { Select } from './ui/Select';
 import { Card } from './ui/Card';
 import { UserLicenseAssignModal } from './UserLicenseAssignModal';
 import { BulkLicenseImportModal } from './BulkLicenseImportModal';
+import { LicenseAssignmentHistoryModal } from './LicenseAssignmentHistoryModal';
 import { useLicense } from '../contexts/LicenseContext';
 import { EmployeeLicenseSummary, LicenseAssignmentFilters, Employee } from '../types';
 
@@ -53,6 +54,8 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedEmployeeForAssignment, setSelectedEmployeeForAssignment] = useState<string | undefined>(undefined);
   const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [selectedAssignmentIdForHistory, setSelectedAssignmentIdForHistory] = useState<string>('');
 
   // Get employee summaries (use external data if provided, otherwise from context)
   const allEmployeeSummaries = useMemo(() => {
@@ -149,6 +152,10 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   };
 
   const handleViewHistory = (assignmentId: string) => {
+    setSelectedAssignmentIdForHistory(assignmentId);
+    setIsHistoryModalOpen(true);
+
+    // Call external callback if provided
     if (onViewHistory) {
       onViewHistory(assignmentId);
     }
@@ -600,6 +607,15 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
         onClose={() => setIsBulkImportModalOpen(false)}
         employees={allEmployees}
         onImportSuccess={handleBulkImportSuccess}
+      />
+
+      <LicenseAssignmentHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => {
+          setIsHistoryModalOpen(false);
+          setSelectedAssignmentIdForHistory('');
+        }}
+        assignmentId={selectedAssignmentIdForHistory}
       />
     </div>
   );
