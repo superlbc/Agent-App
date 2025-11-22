@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from './ui/Icon.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
 import { Card } from './ui/Card.tsx';
-import { LanguageSelector } from './LanguageSelector.tsx';
 import { AboutModal } from './AboutModal.tsx';
 
 interface HeaderProps {
@@ -134,15 +133,8 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
                     </div>
                   </div>
                   <div className="py-1">
-                    {/* Toggle Theme */}
-                    <button key={menuItems[0].label} id={menuItems[0].id} onClick={() => { menuItems[0].action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
-                      <Icon name={menuItems[0].icon} className="h-5 w-5 text-gray-500 dark:text-gray-400"/>
-                      <span>{menuItems[0].label}</span>
-                    </button>
-                    {/* Language Selector - inserted between Toggle Theme and Replay Tutorial */}
-                    <LanguageSelector variant="menu" />
-                    {/* Remaining menu items */}
-                    {menuItems.slice(1).map(item => (
+                    {/* Menu items */}
+                    {menuItems.map(item => (
                        <button key={item.label} id={item.id} onClick={() => { item.action(); setIsMenuOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
                           <Icon name={item.icon} className="h-5 w-5 text-gray-500 dark:text-gray-400"/>
                           <span>{item.label}</span>
