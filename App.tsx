@@ -679,21 +679,20 @@ const AppContent: React.FC = () => {
           {/* License Pool Dashboard Section */}
           {currentSection === 'license-pools' && (
             <div className="h-full overflow-auto p-6">
-              {/* TODO: Update LicensePoolDashboard to accept licensePools prop */}
-              {/* For now, using backward-compatible licenses prop with mockSoftware */}
               <LicensePoolDashboard
-                licenses={mockSoftware}
-                onAssignLicense={(license) => {
-                  console.log('Assign license:', license);
-                  addToast(`Assigning ${license.name}...`, 'success');
+                licensePools={licensePools}
+                software={mockSoftware}
+                onAssignLicense={(pool) => {
+                  console.log('Assign license from pool:', pool);
+                  addToast(`Assigning from pool ${pool.id}...`, 'success');
                 }}
-                onViewAssignments={(license) => {
-                  console.log('View assignments for:', license);
-                  addToast(`Viewing assignments for ${license.name}`, 'success');
+                onViewAssignments={(pool) => {
+                  console.log('View assignments for pool:', pool);
+                  addToast(`Viewing assignments for pool ${pool.id}`, 'success');
                 }}
-                onEditLicense={(license) => {
-                  console.log('Edit license:', license);
-                  addToast(`Editing ${license.name}...`, 'success');
+                onEditLicense={(pool) => {
+                  console.log('Edit pool:', pool);
+                  addToast(`Editing pool ${pool.id}...`, 'success');
                 }}
               />
             </div>
