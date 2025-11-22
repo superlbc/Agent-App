@@ -10,6 +10,7 @@ import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Card } from './ui/Card';
+import { CompactStatsBar, CompactStat } from './ui/CompactStatsBar';
 import { UserLicenseAssignModal } from './UserLicenseAssignModal';
 import { BulkLicenseImportModal } from './BulkLicenseImportModal';
 import { LicenseAssignmentHistoryModal } from './LicenseAssignmentHistoryModal';
@@ -117,6 +118,58 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
     };
   }, [allEmployeeSummaries]);
 
+  // Compact stats for header bar
+  const compactStats: CompactStat[] = useMemo(() => [
+    {
+      label: 'Employees',
+      value: stats.totalEmployees,
+      icon: 'users',
+      color: 'text-gray-600 dark:text-gray-400',
+      bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+      description: 'Total number of employees',
+    },
+    {
+      label: 'With Licenses',
+      value: stats.employeesWithLicenses,
+      icon: 'user-check',
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-50 dark:bg-green-900/30',
+      description: 'Employees with at least one license assigned',
+    },
+    {
+      label: 'Total Licenses',
+      value: stats.totalLicensesAssigned,
+      icon: 'key',
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+      description: 'Total licenses assigned across all employees',
+    },
+    {
+      label: 'Active',
+      value: stats.activeLicenses,
+      icon: 'check-circle',
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-50 dark:bg-green-900/30',
+      description: 'Active license assignments',
+    },
+    {
+      label: 'Expired',
+      value: stats.expiredLicenses,
+      icon: 'alert-triangle',
+      color: 'text-orange-600 dark:text-orange-400',
+      bgColor: 'bg-orange-50 dark:bg-orange-900/30',
+      description: 'Expired license assignments',
+    },
+    {
+      label: 'Revoked',
+      value: stats.revokedLicenses,
+      icon: 'x-circle',
+      color: 'text-red-600 dark:text-red-400',
+      bgColor: 'bg-red-50 dark:bg-red-900/30',
+      description: 'Revoked license assignments',
+    },
+  ], [stats]);
+
   // Handlers
   const handleEmployeeSelect = (employeeId: string) => {
     setSelectedEmployeeId(employeeId);
@@ -207,102 +260,28 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              User License Assignments
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              View and manage software license assignments for all employees
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={handleBulkImport}>
-              <Icon name="upload" className="w-4 h-4 mr-2" />
-              Bulk Import
-            </Button>
-            <Button variant="primary" onClick={handleAssignLicense} disabled={!selectedEmployeeId}>
-              <Icon name="plus" className="w-4 h-4 mr-2" />
-              Assign License
-            </Button>
-          </div>
-        </div>
+      {/* Compact Stats Bar Header */}
+      <CompactStatsBar
+        title="User License Assignments"
+        headerIcon="user-check"
+        stats={compactStats}
+        actionButton={{
+          label: 'Assign License',
+          icon: 'plus',
+          onClick: handleAssignLicense,
+        }}
+      />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Total Employees</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.totalEmployees}
-                </p>
-              </div>
-              <Icon name="users" className="w-8 h-8 text-gray-400" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">With Licenses</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.employeesWithLicenses}
-                </p>
-              </div>
-              <Icon name="user-check" className="w-8 h-8 text-green-500" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Total Licenses</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                  {stats.totalLicensesAssigned}
-                </p>
-              </div>
-              <Icon name="key" className="w-8 h-8 text-blue-500" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Active</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
-                  {stats.activeLicenses}
-                </p>
-              </div>
-              <Icon name="check-circle" className="w-8 h-8 text-green-500" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Expired</p>
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-1">
-                  {stats.expiredLicenses}
-                </p>
-              </div>
-              <Icon name="alert-triangle" className="w-8 h-8 text-orange-500" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Revoked</p>
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
-                  {stats.revokedLicenses}
-                </p>
-              </div>
-              <Icon name="x-circle" className="w-8 h-8 text-red-500" />
-            </div>
-          </Card>
+      {/* Secondary Actions Bar */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            View and manage software license assignments for all employees
+          </p>
+          <Button variant="secondary" onClick={handleBulkImport}>
+            <Icon name="upload" className="w-4 h-4 mr-2" />
+            Bulk Import
+          </Button>
         </div>
       </div>
 

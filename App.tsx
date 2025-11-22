@@ -1123,7 +1123,7 @@ function App() {
         <DepartmentProvider>
           <PreHireProvider>
             <PackageProvider>
-              <LicenseProvider useMockData={true}>
+              <LicenseProvider useMockData={true} employees={mockEmployees}>
                 <ApprovalProvider>
                   <AppContent />
                 </ApprovalProvider>

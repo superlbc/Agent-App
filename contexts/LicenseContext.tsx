@@ -12,6 +12,7 @@ import {
   EmployeeLicenseSummary,
   LicenseAssignmentHistory,
   LicenseAssignmentFilters,
+  Employee,
 } from '../types';
 import { mockSoftware } from '../utils/mockData';
 import * as softwareService from '../services/softwareService';
@@ -87,6 +88,7 @@ interface LicenseProviderProps {
   children: ReactNode;
   initialLicenses?: Software[];
   useMockData?: boolean;
+  employees?: Employee[]; // For enriching license summaries with employee data
 }
 
 // ============================================================================
@@ -103,6 +105,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
   children,
   initialLicenses = [],
   useMockData = false,
+  employees = [],
 }) => {
   // ============================================================================
   // STATE
@@ -666,6 +669,9 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
       const expiredLicenses = assignments.filter((a) => a.status === 'expired');
       const revokedLicenses = assignments.filter((a) => a.status === 'revoked');
 
+      // Find employee data to enrich summary
+      const employee = employees.find((emp) => emp.id === employeeId);
+
       // Build detailed license list
       const assignedLicenses = assignments.map((a) => {
         const pool = licensePools.find((p) => p.id === a.licensePoolId);
@@ -687,11 +693,11 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
 
       summaries.push({
         employeeId,
-        employeeName: firstAssignment.employeeName,
-        employeeEmail: firstAssignment.employeeEmail,
-        department: 'Unknown', // TODO: Fetch from employee data
-        role: 'Unknown', // TODO: Fetch from employee data
-        status: 'active', // TODO: Fetch from employee data
+        employeeName: employee?.name || firstAssignment.employeeName,
+        employeeEmail: employee?.email || firstAssignment.employeeEmail,
+        department: employee?.department || 'Unknown',
+        role: employee?.role || 'Unknown',
+        status: employee?.status || 'active',
         assignedLicenses,
         totalLicenses: assignments.length,
         activeLicenses: activeLicenses.length,
@@ -701,7 +707,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
     });
 
     return summaries;
-  }, [getAllAssignments, licensePools, licenses]);
+  }, [getAllAssignments, licensePools, licenses, employees]);
 
   /**
    * Search assignments by employee name or email
