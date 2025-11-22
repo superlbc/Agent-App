@@ -46,6 +46,7 @@ import HardwareInventory from './components/HardwareInventory';
 import SoftwareInventory from './components/SoftwareInventory';
 import { LicensePoolDashboard } from './components/LicensePoolDashboard';
 import { UserLicenseAssignments } from './components/UserLicenseAssignments';
+import { UserLicenseAssignModal } from './components/UserLicenseAssignModal';
 import { RefreshCalendar } from './components/RefreshCalendar';
 import { RefreshFinanceView } from './components/RefreshFinanceView';
 import { RefreshNotifications } from './components/RefreshNotifications';
@@ -128,6 +129,10 @@ const AppContent: React.FC = () => {
   const [showPackageBuilder, setShowPackageBuilder] = useState(false);
   const [showPackageLibrary, setShowPackageLibrary] = useState(false);
   const [isCloning, setIsCloning] = useState(false); // Track if we're cloning a package
+
+  // License Assignment Modal State
+  const [showLicenseAssignModal, setShowLicenseAssignModal] = useState(false);
+  const [selectedPoolForAssignment, setSelectedPoolForAssignment] = useState<string | undefined>(undefined);
 
   // Employee Linking Modal State
   const [linkingPreHire, setLinkingPreHire] = useState<PreHire | null>(null);
@@ -688,12 +693,13 @@ const AppContent: React.FC = () => {
                 licensePools={licensePools}
                 software={mockSoftware}
                 onAssignLicense={(pool) => {
-                  console.log('Assign license from pool:', pool);
-                  addToast(`Assigning from pool ${pool.id}...`, 'success');
+                  setSelectedPoolForAssignment(pool.id);
+                  setShowLicenseAssignModal(true);
                 }}
                 onViewAssignments={(pool) => {
-                  console.log('View assignments for pool:', pool);
-                  addToast(`Viewing assignments for pool ${pool.id}`, 'success');
+                  // Navigate to User License Assignments section
+                  setCurrentSection('user-license-assignments');
+                  addToast(`Viewing assignments for ${pool.id}`, 'success');
                 }}
                 onEditLicense={(pool) => {
                   console.log('Edit pool:', pool);
@@ -1080,6 +1086,24 @@ const AppContent: React.FC = () => {
           preHire={linkingPreHire}
           onLink={handleLinkEmployee}
           onClose={() => setLinkingPreHire(null)}
+        />
+      )}
+
+      {/* User License Assignment Modal */}
+      {showLicenseAssignModal && (
+        <UserLicenseAssignModal
+          isOpen={showLicenseAssignModal}
+          onClose={() => {
+            setShowLicenseAssignModal(false);
+            setSelectedPoolForAssignment(undefined);
+          }}
+          preSelectedEmployeeId={undefined}
+          employees={mockEmployees}
+          onAssignSuccess={(employeeId, licensePoolId) => {
+            addToast('License assigned successfully!', 'success');
+            setShowLicenseAssignModal(false);
+            setSelectedPoolForAssignment(undefined);
+          }}
         />
       )}
 
