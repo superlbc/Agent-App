@@ -38,6 +38,10 @@ export const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
   // Users data
   const [users, setUsers] = useState<UserWithRoles[]>([]);
 
+  // TODO: Add loading and error states when implementing API integration
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState<string | null>(null);
+
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -55,13 +59,50 @@ export const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
   const graphService = GraphService.getInstance();
 
   // ============================================================================
+  // EFFECTS - FETCH USERS ON MOUNT
+  // ============================================================================
+
+  // TODO: Uncomment when backend is ready
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const fetchedUsers = await userRoleApi.getAllUsers();
+  //       setUsers(fetchedUsers);
+  //     } catch (error) {
+  //       console.error('[UserRoleManagement] Failed to fetch users:', error);
+  //       setError('Failed to load users. Please try again.');
+  //       // TODO: Show error toast
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //
+  //   fetchUsers();
+  // }, []);
+
+  // ============================================================================
   // HANDLERS - ADD USER
   // ============================================================================
 
   const handleAddUser = async (userData: AddUserData) => {
     try {
-      // In real implementation, this would call an API
-      // For now, we'll create a local user object
+      // TODO: Replace mock implementation with API call when backend is ready
+      // const newUser = await userRoleApi.addUser({
+      //   email: userData.user.email,
+      //   displayName: userData.user.displayName,
+      //   photoUrl: userData.user.photoUrl,
+      //   jobTitle: userData.user.jobTitle,
+      //   department: userData.user.department,
+      //   roles: userData.roles,
+      //   expirationDate: userData.expirationDate,
+      //   notes: userData.notes,
+      // });
+      // setUsers([...users, newUser]);
+      // TODO: Show success toast
+
+      // MOCK IMPLEMENTATION (remove when API is ready)
+      // This creates a local user object for testing without a backend
 
       const newUser: UserWithRoles = {
         userId: `user-${Date.now()}`,
@@ -81,13 +122,10 @@ export const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
       };
 
       setUsers([...users, newUser]);
-      console.log('[UserRoleManagement] User added:', newUser);
-
-      // TODO: Replace with actual API call
-      // await api.createUserWithRoles(newUser);
+      console.log('[UserRoleManagement] User added (MOCK):', newUser);
     } catch (error) {
       console.error('[UserRoleManagement] Failed to add user:', error);
-      // TODO: Show error toast/notification
+      // TODO: Show error toast when API is integrated
     }
   };
 
@@ -97,6 +135,12 @@ export const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
 
   const handleBulkAddUsers = async (usersData: BulkUserData[]) => {
     try {
+      // TODO: Replace mock implementation with API call when backend is ready
+      // const result = await userRoleApi.bulkAddUsers({ users: usersData.map(...) });
+      // setUsers([...users, ...result.users]);
+      // TODO: Show success toast with count: `${result.successCount} users added`
+
+      // MOCK IMPLEMENTATION (remove when API is ready)
       const newUsers: UserWithRoles[] = usersData.map(userData => ({
         userId: `user-${Date.now()}-${userData.user.email}`,
         displayName: userData.user.displayName,
@@ -201,6 +245,12 @@ export const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
 
   const handleSaveUserRoles = async (userId: string, updatedRoles: UpdatedRoleData[]) => {
     try {
+      // TODO: Replace mock implementation with API call when backend is ready
+      // const updatedUser = await userRoleApi.updateUserRoles(userId, { roles: updatedRoles });
+      // setUsers(users.map(u => u.userId === userId ? updatedUser : u));
+      // TODO: Show success toast
+
+      // MOCK IMPLEMENTATION (remove when API is ready)
       setUsers(users.map(user => {
         if (user.userId === userId) {
           return {
@@ -242,17 +292,20 @@ export const UserRoleManagement: React.FC<UserRoleManagementProps> = ({
     if (!userToDelete) return;
 
     try {
-      setUsers(users.filter(user => user.userId !== userToDelete));
-      console.log('[UserRoleManagement] User deleted:', userToDelete);
+      // TODO: Replace mock implementation with API call when backend is ready
+      // await userRoleApi.deleteUser(userToDelete);
+      // setUsers(users.filter(user => user.userId !== userToDelete));
+      // TODO: Show success toast
 
-      // TODO: Replace with actual API call
-      // await api.deleteUser(userToDelete);
+      // MOCK IMPLEMENTATION (remove when API is ready)
+      setUsers(users.filter(user => user.userId !== userToDelete));
+      console.log('[UserRoleManagement] User deleted (MOCK):', userToDelete);
 
       setShowDeleteConfirm(false);
       setUserToDelete(null);
     } catch (error) {
       console.error('[UserRoleManagement] Failed to delete user:', error);
-      // TODO: Show error toast/notification
+      // TODO: Show error toast when API is integrated
     }
   };
 
