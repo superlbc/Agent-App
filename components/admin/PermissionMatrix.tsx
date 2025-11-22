@@ -200,10 +200,10 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
                   {/* Matrix Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse border border-gray-200 dark:border-gray-700">
-                      {/* Table Header - Sticky on vertical scroll */}
-                      <thead className="sticky top-[52px] z-20">
+                      {/* Table Header */}
+                      <thead>
                         <tr className="bg-gray-50 dark:bg-gray-800 border-b-2 border-gray-300 dark:border-gray-600">
-                          <th className="border border-gray-200 dark:border-gray-700 p-2 text-left font-semibold text-gray-900 dark:text-white sticky left-0 bg-gray-50 dark:bg-gray-800 z-30 min-w-[250px] text-sm">
+                          <th className="border border-gray-200 dark:border-gray-700 p-2 text-left font-semibold text-gray-900 dark:text-white min-w-[250px] text-sm bg-gray-50 dark:bg-gray-800">
                             Permission
                           </th>
                           <th className="border border-gray-200 dark:border-gray-700 p-2 text-center font-semibold text-gray-900 dark:text-white min-w-[100px] text-sm bg-gray-50 dark:bg-gray-800">
