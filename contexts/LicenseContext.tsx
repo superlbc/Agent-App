@@ -5,9 +5,10 @@
 // Now connected to backend API with loading states and error handling
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { Software, LicenseAssignment } from '../types';
+import { Software, LicenseAssignment, LicensePool } from '../types';
 import { mockSoftware } from '../utils/mockData';
 import * as softwareService from '../services/softwareService';
+import { batchMigrateToLicensePools } from '../utils/licensePoolMigration';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -16,28 +17,55 @@ import * as softwareService from '../services/softwareService';
 interface LicenseContextValue {
   // State
   licenses: Software[];
+  licensePools: LicensePool[]; // Phase 10: NEW - Separated license pool state
   loading: boolean;
   error: string | null;
 
-  // License CRUD operations
+  // License CRUD operations (Software Catalog)
   createLicense: (license: Partial<Software>) => Promise<Software>;
   updateLicense: (id: string, updates: Partial<Software>) => Promise<void>;
   deleteLicense: (id: string) => Promise<void>;
   getLicense: (id: string) => Software | undefined;
   refreshLicenses: () => Promise<void>;
 
-  // License pool operations
+  // License Pool CRUD operations (Phase 10: NEW)
+  createLicensePool: (pool: Partial<LicensePool>) => Promise<LicensePool>;
+  updateLicensePool: (id: string, updates: Partial<LicensePool>) => Promise<void>;
+  deleteLicensePool: (id: string) => Promise<void>;
+  getLicensePool: (id: string) => LicensePool | undefined;
+  refreshLicensePools: () => Promise<void>;
+
+  // Migration (Phase 10: NEW)
+  migrateToLicensePools: () => void;
+
+  // License pool operations (DEPRECATED - use LicensePool methods instead)
+  /** @deprecated Use updateLicensePool to expand totalSeats */
   expandLicensePool: (licenseId: string, additionalSeats: number) => Promise<void>;
 
   // License assignment operations
+  /** @deprecated Use assignLicenseToPool with licensePoolId instead */
   assignLicense: (licenseId: string, assignment: Omit<LicenseAssignment, 'id' | 'assignedDate' | 'status'>) => Promise<void>;
+  assignLicenseToPool: (poolId: string, assignment: Omit<LicenseAssignment, 'id' | 'assignedDate' | 'status' | 'licensePoolId'>) => Promise<void>;
+
+  /** @deprecated Use reclaimLicenseFromPool with licensePoolId instead */
   reclaimLicense: (licenseId: string, employeeIds?: string[], reclaimExpired?: boolean) => Promise<void>;
+  reclaimLicenseFromPool: (poolId: string, employeeIds?: string[], reclaimExpired?: boolean) => Promise<void>;
+
   getAssignments: (licenseId: string) => LicenseAssignment[];
+  getPoolAssignments: (poolId: string) => LicenseAssignment[];
 
   // Utility functions
+  /** @deprecated Use getPoolAvailableSeats with licensePoolId instead */
   getAvailableSeats: (licenseId: string) => number;
+  getPoolAvailableSeats: (poolId: string) => number;
+
+  /** @deprecated Use getPoolUtilization with licensePoolId instead */
   getUtilization: (licenseId: string) => number;
+  getPoolUtilization: (poolId: string) => number;
+
+  /** @deprecated Use isPoolOverAllocated with licensePoolId instead */
   isOverAllocated: (licenseId: string) => boolean;
+  isPoolOverAllocated: (poolId: string) => boolean;
 }
 
 interface LicenseProviderProps {
@@ -66,6 +94,7 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
   // ============================================================================
 
   const [licenses, setLicenses] = useState<Software[]>(initialLicenses);
+  const [licensePools, setLicensePools] = useState<LicensePool[]>([]); // Phase 10: NEW
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -402,18 +431,205 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
   );
 
   // ============================================================================
+  // LICENSE POOL CRUD OPERATIONS (Phase 10: NEW)
+  // ============================================================================
+
+  const createLicensePool = useCallback(async (poolData: Partial<LicensePool>): Promise<LicensePool> => {
+    const newPool: LicensePool = {
+      id: poolData.id || `pool-${Date.now()}`,
+      softwareId: poolData.softwareId || '',
+      totalSeats: poolData.totalSeats || 0,
+      assignedSeats: poolData.assignedSeats || 0,
+      licenseType: poolData.licenseType || 'subscription',
+      autoRenew: poolData.autoRenew !== undefined ? poolData.autoRenew : false,
+      purchaseDate: poolData.purchaseDate,
+      renewalDate: poolData.renewalDate,
+      renewalFrequency: poolData.renewalFrequency,
+      vendorContact: poolData.vendorContact,
+      internalContact: poolData.internalContact,
+      assignments: poolData.assignments || [],
+      createdBy: poolData.createdBy || 'system',
+      createdDate: poolData.createdDate || new Date(),
+      lastModified: poolData.lastModified || new Date(),
+    };
+
+    setLicensePools((prev) => [...prev, newPool]);
+    return newPool;
+  }, []);
+
+  const updateLicensePool = useCallback(async (id: string, updates: Partial<LicensePool>) => {
+    setLicensePools((prev) =>
+      prev.map((pool) =>
+        pool.id === id ? { ...pool, ...updates, lastModified: new Date() } : pool
+      )
+    );
+  }, []);
+
+  const deleteLicensePool = useCallback(async (id: string) => {
+    setLicensePools((prev) => prev.filter((pool) => pool.id !== id));
+  }, []);
+
+  const getLicensePool = useCallback(
+    (id: string): LicensePool | undefined => {
+      return licensePools.find((pool) => pool.id === id);
+    },
+    [licensePools]
+  );
+
+  const refreshLicensePools = useCallback(async () => {
+    // TODO: Implement API call when backend is ready
+    console.log('[LicenseContext] refreshLicensePools called');
+  }, []);
+
+  // ============================================================================
+  // MIGRATION (Phase 10: NEW)
+  // ============================================================================
+
+  const migrateToLicensePools = useCallback(() => {
+    console.log('[LicenseContext] Migrating Software to LicensePools...');
+    const migrated = batchMigrateToLicensePools(licenses, 'system');
+    setLicensePools(migrated);
+    console.log(`[LicenseContext] ✅ Migrated ${migrated.length} license pools`);
+  }, [licenses]);
+
+  // ============================================================================
+  // NEW LICENSE POOL ASSIGNMENT OPERATIONS (Phase 10)
+  // ============================================================================
+
+  const assignLicenseToPool = useCallback(
+    async (
+      poolId: string,
+      assignmentData: Omit<LicenseAssignment, 'id' | 'assignedDate' | 'status' | 'licensePoolId'>
+    ) => {
+      setLicensePools((prev) =>
+        prev.map((pool) => {
+          if (pool.id === poolId) {
+            const newAssignment: LicenseAssignment = {
+              id: `assign-${Date.now()}`,
+              licensePoolId: poolId,
+              ...assignmentData,
+              assignedDate: new Date(),
+              status: 'active',
+            };
+
+            return {
+              ...pool,
+              assignedSeats: pool.assignedSeats + 1,
+              assignments: [...pool.assignments, newAssignment],
+              lastModified: new Date(),
+            };
+          }
+          return pool;
+        })
+      );
+    },
+    []
+  );
+
+  const reclaimLicenseFromPool = useCallback(
+    async (poolId: string, employeeIds?: string[], reclaimExpired?: boolean) => {
+      setLicensePools((prev) =>
+        prev.map((pool) => {
+          if (pool.id === poolId) {
+            let assignmentsToRevoke: LicenseAssignment[] = [];
+
+            if (employeeIds && employeeIds.length > 0) {
+              assignmentsToRevoke = pool.assignments.filter(
+                (a) => a.status === 'active' && employeeIds.includes(a.employeeId)
+              );
+            } else if (reclaimExpired) {
+              const now = new Date();
+              assignmentsToRevoke = pool.assignments.filter(
+                (a) => a.status === 'active' && a.expirationDate && new Date(a.expirationDate) < now
+              );
+            }
+
+            const updatedAssignments = pool.assignments.map((a) =>
+              assignmentsToRevoke.find((revoked) => revoked.id === a.id)
+                ? { ...a, status: 'revoked' as const }
+                : a
+            );
+
+            return {
+              ...pool,
+              assignedSeats: Math.max(0, pool.assignedSeats - assignmentsToRevoke.length),
+              assignments: updatedAssignments,
+              lastModified: new Date(),
+            };
+          }
+          return pool;
+        })
+      );
+    },
+    []
+  );
+
+  const getPoolAssignments = useCallback(
+    (poolId: string): LicenseAssignment[] => {
+      const pool = licensePools.find((p) => p.id === poolId);
+      return pool?.assignments.filter((a) => a.status === 'active') || [];
+    },
+    [licensePools]
+  );
+
+  // ============================================================================
+  // NEW POOL UTILITY FUNCTIONS (Phase 10)
+  // ============================================================================
+
+  const getPoolAvailableSeats = useCallback(
+    (poolId: string): number => {
+      const pool = licensePools.find((p) => p.id === poolId);
+      if (!pool) return 0;
+      return pool.totalSeats - pool.assignedSeats;
+    },
+    [licensePools]
+  );
+
+  const getPoolUtilization = useCallback(
+    (poolId: string): number => {
+      const pool = licensePools.find((p) => p.id === poolId);
+      if (!pool || pool.totalSeats === 0) return 0;
+      return (pool.assignedSeats / pool.totalSeats) * 100;
+    },
+    [licensePools]
+  );
+
+  const isPoolOverAllocated = useCallback(
+    (poolId: string): boolean => {
+      return getPoolUtilization(poolId) > 100;
+    },
+    [getPoolUtilization]
+  );
+
+  // ============================================================================
   // CONTEXT VALUE
   // ============================================================================
 
   const value: LicenseContextValue = {
+    // State
     licenses,
+    licensePools, // Phase 10: NEW
     loading,
     error,
+
+    // Software Catalog CRUD
     createLicense,
     updateLicense,
     deleteLicense,
     getLicense,
     refreshLicenses,
+
+    // License Pool CRUD (Phase 10: NEW)
+    createLicensePool,
+    updateLicensePool,
+    deleteLicensePool,
+    getLicensePool,
+    refreshLicensePools,
+
+    // Migration (Phase 10: NEW)
+    migrateToLicensePools,
+
+    // Legacy methods (deprecated but kept for backward compatibility)
     expandLicensePool,
     assignLicense,
     reclaimLicense,
@@ -421,6 +637,14 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
     getAvailableSeats,
     getUtilization,
     isOverAllocated,
+
+    // New pool-specific methods (Phase 10: NEW)
+    assignLicenseToPool,
+    reclaimLicenseFromPool,
+    getPoolAssignments,
+    getPoolAvailableSeats,
+    getPoolUtilization,
+    isPoolOverAllocated,
   };
 
   return (
