@@ -13,6 +13,7 @@ import { Icon } from './ui/Icon';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Card } from './ui/Card';
+import { CompactStatsBar, CompactStat } from './ui/CompactStatsBar';
 import { LicensePoolCreateModal } from './LicensePoolCreateModal';
 import { LicensePoolEditModal } from './LicensePoolEditModal';
 
@@ -141,6 +142,60 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
     );
   }, [licensePools]);
 
+  // Compact stats for header bar
+  const compactStats: CompactStat[] = useMemo(() => {
+    const utilizationPercent = stats.totalSeats > 0
+      ? Math.round((stats.assignedSeats / stats.totalSeats) * 100)
+      : 0;
+
+    return [
+      {
+        label: 'Pools',
+        value: stats.totalPools,
+        icon: 'key',
+        color: 'text-blue-600 dark:text-blue-400',
+        bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+        description: `${stats.totalPools} license pools with ${stats.totalSeats} total seats`,
+      },
+      {
+        label: 'Assigned',
+        value: stats.assignedSeats,
+        icon: 'check-circle',
+        color: 'text-green-600 dark:text-green-400',
+        bgColor: 'bg-green-50 dark:bg-green-900/30',
+        description: `${stats.assignedSeats} seats assigned (${utilizationPercent}% utilization)`,
+      },
+      {
+        label: 'Available',
+        value: stats.availableSeats,
+        icon: 'package',
+        color: 'text-gray-600 dark:text-gray-400',
+        bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+        description: `${stats.availableSeats} seats ready to assign`,
+      },
+      {
+        label: 'Over-Allocated',
+        value: stats.overAllocated,
+        icon: 'alert-triangle',
+        color: stats.overAllocated > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400',
+        bgColor: stats.overAllocated > 0 ? 'bg-red-50 dark:bg-red-900/30' : 'bg-gray-50 dark:bg-gray-900/30',
+        description: stats.overAllocated > 0
+          ? `${stats.overAllocated} pools with more assignments than seats`
+          : 'No over-allocated pools',
+      },
+      {
+        label: 'Expiring',
+        value: stats.expiringWithin30Days,
+        icon: 'clock',
+        color: stats.expiringWithin30Days > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-600 dark:text-gray-400',
+        bgColor: stats.expiringWithin30Days > 0 ? 'bg-orange-50 dark:bg-orange-900/30' : 'bg-gray-50 dark:bg-gray-900/30',
+        description: stats.expiringWithin30Days > 0
+          ? `${stats.expiringWithin30Days} pools expiring within 30 days`
+          : 'No licenses expiring soon',
+      },
+    ];
+  }, [stats]);
+
   // ============================================================================
   // FILTERING
   // ============================================================================
@@ -235,101 +290,27 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
   };
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">License Pool Dashboard</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Monitor license utilization and manage software seat allocations
-          </p>
-        </div>
+    <div className={`flex flex-col h-full ${className}`}>
+      {/* Compact Stats Bar Header */}
+      <CompactStatsBar
+        title="License Pool Dashboard"
+        headerIcon="key"
+        stats={compactStats}
+        actionButton={onCreateLicense ? {
+          label: 'Create License Pool',
+          icon: 'plus',
+          onClick: () => setIsCreateModalOpen(true),
+        } : undefined}
+      />
 
-        {onCreateLicense && (
-          <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
-            <Icon name="add" className="w-4 h-4 mr-2" />
-            Create License Pool
-          </Button>
-        )}
+      {/* Secondary Description Bar */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Monitor license utilization and manage software seat allocations
+        </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Pools */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Pools</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalPools}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{stats.totalSeats} total seats</p>
-            </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <Icon name="key" className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Assigned Seats */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Assigned Seats</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.assignedSeats}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                {stats.totalSeats > 0 ? Math.round((stats.assignedSeats / stats.totalSeats) * 100) : 0}% utilization
-              </p>
-            </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
-              <Icon name="check-circle" className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Available Seats */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Available Seats</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.availableSeats}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Ready to assign</p>
-            </div>
-            <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <Icon name="package" className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Alerts */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Alerts</p>
-              <div className="flex items-center gap-3 mt-1">
-                {stats.overAllocated > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.overAllocated}</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">over</span>
-                  </div>
-                )}
-                {stats.expiringWithin30Days > 0 && (
-                  <div className="flex items-center gap-1">
-                    <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {stats.expiringWithin30Days}
-                    </span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">expiring</span>
-                  </div>
-                )}
-                {stats.overAllocated === 0 && stats.expiringWithin30Days === 0 && (
-                  <span className="text-2xl font-bold text-green-600 dark:text-green-400">All Good</span>
-                )}
-              </div>
-            </div>
-            <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
-              <Icon name="alert" className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-          </div>
-        </Card>
-      </div>
+      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-6 space-y-6">
 
       {/* Filters */}
       <div className="space-y-4">
@@ -512,6 +493,7 @@ export const LicensePoolDashboard: React.FC<LicensePoolDashboardProps> = ({
           </div>
         </Card>
       )}
+      </div>
 
       {/* Modals */}
       {isCreateModalOpen && (
