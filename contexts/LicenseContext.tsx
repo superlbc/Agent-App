@@ -617,6 +617,180 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
   );
 
   // ============================================================================
+  // USER LICENSE ASSIGNMENTS METHODS (Phase 2: NEW)
+  // ============================================================================
+
+  /**
+   * Get all license assignments across all pools
+   * Used for User License Assignments dashboard
+   */
+  const getAllAssignments = useCallback((): LicenseAssignment[] => {
+    const allAssignments: LicenseAssignment[] = [];
+    licensePools.forEach((pool) => {
+      allAssignments.push(...pool.assignments);
+    });
+    return allAssignments;
+  }, [licensePools]);
+
+  /**
+   * Get all license assignments for a specific employee
+   * Shows complete license portfolio for one employee
+   */
+  const getEmployeeAssignments = useCallback(
+    (employeeId: string): LicenseAssignment[] => {
+      const allAssignments = getAllAssignments();
+      return allAssignments.filter((a) => a.employeeId === employeeId);
+    },
+    [getAllAssignments]
+  );
+
+  /**
+   * Get license summaries for all employees
+   * Efficient for displaying license counts per employee
+   */
+  const getEmployeeLicenseSummaries = useCallback((): EmployeeLicenseSummary[] => {
+    const allAssignments = getAllAssignments();
+    const employeeMap = new Map<string, LicenseAssignment[]>();
+
+    // Group assignments by employee
+    allAssignments.forEach((assignment) => {
+      const existing = employeeMap.get(assignment.employeeId) || [];
+      employeeMap.set(assignment.employeeId, [...existing, assignment]);
+    });
+
+    // Convert to summary objects
+    const summaries: EmployeeLicenseSummary[] = [];
+    employeeMap.forEach((assignments, employeeId) => {
+      const firstAssignment = assignments[0];
+      const activeLicenses = assignments.filter((a) => a.status === 'active');
+      const expiredLicenses = assignments.filter((a) => a.status === 'expired');
+      const revokedLicenses = assignments.filter((a) => a.status === 'revoked');
+
+      // Build detailed license list
+      const assignedLicenses = assignments.map((a) => {
+        const pool = licensePools.find((p) => p.id === a.licensePoolId);
+        const software = licenses.find((l) => l.id === pool?.softwareId);
+
+        return {
+          assignmentId: a.id,
+          licensePoolId: a.licensePoolId,
+          licenseName: software?.name || 'Unknown',
+          poolName: `${software?.name || 'Unknown'} Pool`,
+          vendor: software?.vendor || 'Unknown',
+          assignedDate: a.assignedDate,
+          assignedBy: a.assignedBy,
+          expirationDate: a.expirationDate,
+          status: a.status,
+          notes: a.notes,
+        };
+      });
+
+      summaries.push({
+        employeeId,
+        employeeName: firstAssignment.employeeName,
+        employeeEmail: firstAssignment.employeeEmail,
+        department: 'Unknown', // TODO: Fetch from employee data
+        role: 'Unknown', // TODO: Fetch from employee data
+        status: 'active', // TODO: Fetch from employee data
+        assignedLicenses,
+        totalLicenses: assignments.length,
+        activeLicenses: activeLicenses.length,
+        expiredLicenses: expiredLicenses.length,
+        revokedLicenses: revokedLicenses.length,
+      });
+    });
+
+    return summaries;
+  }, [getAllAssignments, licensePools, licenses]);
+
+  /**
+   * Search assignments by employee name or email
+   * Case-insensitive search
+   */
+  const searchAssignments = useCallback(
+    (query: string): LicenseAssignment[] => {
+      if (!query || query.trim() === '') {
+        return getAllAssignments();
+      }
+
+      const lowerQuery = query.toLowerCase();
+      const allAssignments = getAllAssignments();
+
+      return allAssignments.filter(
+        (a) =>
+          a.employeeName.toLowerCase().includes(lowerQuery) ||
+          a.employeeEmail.toLowerCase().includes(lowerQuery)
+      );
+    },
+    [getAllAssignments]
+  );
+
+  /**
+   * Filter assignments by multiple criteria
+   * Supports filtering by employee status, license status, pools, departments, roles, dates
+   */
+  const filterAssignments = useCallback(
+    (filters: LicenseAssignmentFilters): LicenseAssignment[] => {
+      let results = getAllAssignments();
+
+      // Filter by license status
+      if (filters.licenseStatus && filters.licenseStatus.length > 0) {
+        results = results.filter((a) => filters.licenseStatus!.includes(a.status));
+      }
+
+      // Filter by license pool IDs
+      if (filters.licensePoolIds && filters.licensePoolIds.length > 0) {
+        results = results.filter((a) => filters.licensePoolIds!.includes(a.licensePoolId));
+      }
+
+      // Filter by assigned date range
+      if (filters.assignedDateFrom) {
+        results = results.filter((a) => new Date(a.assignedDate) >= filters.assignedDateFrom!);
+      }
+      if (filters.assignedDateTo) {
+        results = results.filter((a) => new Date(a.assignedDate) <= filters.assignedDateTo!);
+      }
+
+      // Filter by expiration date range
+      if (filters.expirationDateFrom) {
+        results = results.filter(
+          (a) => a.expirationDate && new Date(a.expirationDate) >= filters.expirationDateFrom!
+        );
+      }
+      if (filters.expirationDateTo) {
+        results = results.filter(
+          (a) => a.expirationDate && new Date(a.expirationDate) <= filters.expirationDateTo!
+        );
+      }
+
+      // Filter by search query (employee name or email)
+      if (filters.searchQuery) {
+        results = searchAssignments(filters.searchQuery);
+      }
+
+      // TODO: Filter by employee status, departments, roles when employee data is available
+
+      return results;
+    },
+    [getAllAssignments, searchAssignments]
+  );
+
+  /**
+   * Get assignment history for a specific assignment
+   * Returns audit trail of all actions performed on an assignment
+   * NOTE: Currently returns empty array - will be implemented when history tracking is added
+   */
+  const getAssignmentHistory = useCallback(
+    (assignmentId: string): LicenseAssignmentHistory[] => {
+      // TODO: Implement when LicenseAssignmentHistory storage is added
+      // For now, return empty array
+      console.log(`[LicenseContext] getAssignmentHistory called for ${assignmentId} - not yet implemented`);
+      return [];
+    },
+    []
+  );
+
+  // ============================================================================
   // CONTEXT VALUE
   // ============================================================================
 
@@ -660,6 +834,14 @@ export const LicenseProvider: React.FC<LicenseProviderProps> = ({
     getPoolAvailableSeats,
     getPoolUtilization,
     isPoolOverAllocated,
+
+    // User License Assignments methods (Phase 2: NEW)
+    getAllAssignments,
+    getEmployeeAssignments,
+    getEmployeeLicenseSummaries,
+    searchAssignments,
+    filterAssignments,
+    getAssignmentHistory,
   };
 
   return (
