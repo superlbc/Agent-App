@@ -1,0 +1,89 @@
+/* EventMap Leaflet Styles */
+
+/* Custom marker icon styling */
+.custom-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Leaflet popup styling for dark mode */
+.leaflet-popup-content-wrapper {
+  background-color: white;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background-color: #1f2937; /* gray-800 */
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .leaflet-popup-tip {
+  background-color: #1f2937; /* gray-800 */
+}
+
+/* Leaflet controls styling for dark mode */
+.dark .leaflet-control-zoom a {
+  background-color: #374151; /* gray-700 */
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .leaflet-control-zoom a:hover {
+  background-color: #4b5563; /* gray-600 */
+}
+
+/* Leaflet attribution styling for dark mode */
+.dark .leaflet-control-attribution {
+  background-color: rgba(31, 41, 55, 0.8); /* gray-800 with transparency */
+  color: #d1d5db; /* gray-300 */
+}
+
+.dark .leaflet-control-attribution a {
+  color: #60a5fa; /* blue-400 */
+}
+
+/* Marker cluster styling */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: rgba(59, 130, 246, 0.6);
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: rgba(59, 130, 246, 0.8);
+  color: white;
+  font-weight: 600;
+}
+
+.dark .marker-cluster-small,
+.dark .marker-cluster-medium,
+.dark .marker-cluster-large {
+  background-color: rgba(96, 165, 250, 0.6);
+}
+
+.dark .marker-cluster-small div,
+.dark .marker-cluster-medium div,
+.dark .marker-cluster-large div {
+  background-color: rgba(96, 165, 250, 0.8);
+}
+
+/* Ensure full height for map container */
+.leaflet-container {
+  background: #e5e7eb; /* gray-200 */
+}
+
+.dark .leaflet-container {
+  background: #374151; /* gray-700 */
+  filter: brightness(0.9) invert(1) hue-rotate(180deg);
+}
+
+/* Fix for map tiles in dark mode - revert the filter */
+.dark .leaflet-tile-pane {
+  filter: brightness(0.9) invert(1) hue-rotate(180deg);
+}
+
+/* Revert controls and popups from the dark mode filter */
+.dark .leaflet-control-container,
+.dark .leaflet-popup {
+  filter: brightness(0.9) invert(1) hue-rotate(180deg);
+}

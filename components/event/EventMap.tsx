@@ -2,7 +2,7 @@
  * EventMap - Map View Component
  *
  * Features:
- * - Google Maps showing all event venues
+ * - OpenStreetMap showing all event venues (using Leaflet)
  * - Markers clustered by proximity
  * - Click marker → event detail popup
  * - Filter by: Date range, Campaign, Status
@@ -10,26 +10,27 @@
  * - Legend showing campaign colors
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker, InfoWindow, MarkerClusterer } from '@react-google-maps/api';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import './EventMap.css';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign, EventMapMarker } from '../../types';
 import { StatusBadge } from '../ui/StatusBadge';
 import { Icon } from '../ui/Icon';
 
-// Google Maps API Key (to be configured via environment variable)
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-const HAS_VALID_API_KEY = GOOGLE_MAPS_API_KEY && !GOOGLE_MAPS_API_KEY.includes('XXX') && GOOGLE_MAPS_API_KEY.length > 20;
+// Fix for default marker icons in Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
-const containerStyle = {
-  width: '100%',
-  height: '100%',
-};
-
-const defaultCenter = {
-  lat: 39.8283, // Center of USA
-  lng: -98.5795,
-};
+const defaultCenter: [number, number] = [39.8283, -98.5795]; // Center of USA
+const defaultZoom = 4;
 
 interface EventMapProps {
   campaigns?: Campaign[];
@@ -37,9 +38,23 @@ interface EventMapProps {
   className?: string;
 }
 
+// Helper component to fit bounds when markers change
+const FitBoundsController: React.FC<{ markers: EventMapMarker[] }> = ({ markers }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (markers.length > 0) {
+      const bounds = L.latLngBounds(markers.map((m) => [m.position.lat, m.position.lng]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [markers, map]);
+
+  return null;
+};
+
 const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, className = '' }) => {
   const { filteredEvents, setFilters, filters } = useEvents();
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<EventMapMarker | null>(null);
 
   // Transform events into map markers
@@ -78,31 +93,15 @@ const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, class
 
   // Fit bounds to show all markers
   const fitBounds = useCallback(() => {
-    if (!map || markers.length === 0) return;
+    if (!mapRef.current || markers.length === 0) return;
 
-    const bounds = new google.maps.LatLngBounds();
-    markers.forEach((marker) => {
-      bounds.extend(new google.maps.LatLng(marker.position.lat, marker.position.lng));
-    });
-
-    map.fitBounds(bounds);
-  }, [map, markers]);
-
-  // Auto-fit bounds when markers change
-  useEffect(() => {
-    if (map && markers.length > 0) {
-      fitBounds();
-    }
-  }, [markers, map, fitBounds]);
+    const bounds = L.latLngBounds(markers.map((m) => [m.position.lat, m.position.lng]));
+    mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+  }, [markers]);
 
   // Handle marker click
   const handleMarkerClick = (marker: EventMapMarker) => {
     setSelectedMarker(marker);
-  };
-
-  // Handle info window close
-  const handleInfoWindowClose = () => {
-    setSelectedMarker(null);
   };
 
   // Handle "View Details" button click
@@ -142,47 +141,21 @@ const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, class
     setFilters({ dateTo: value ? new Date(value) : undefined });
   };
 
-  // Custom marker icon based on campaign color
-  const getMarkerIcon = (color: string) => ({
-    path: google.maps.SymbolPath.CIRCLE,
-    fillColor: color,
-    fillOpacity: 0.9,
-    strokeColor: '#ffffff',
-    strokeWeight: 2,
-    scale: 8,
-  });
-
-  // If no valid API key, show placeholder
-  if (!HAS_VALID_API_KEY) {
-    return (
-      <div className={`flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm ${className}`}>
-        <div className="flex items-center justify-center h-full p-8">
-          <div className="max-w-md text-center">
-            <div className="mx-auto w-16 h-16 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <Icon name="location" className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Google Maps API Key Required
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              To display the event map, please configure your Google Maps API key in the environment variables.
-            </p>
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-left">
-              <p className="text-xs font-mono text-gray-700 dark:text-gray-300 mb-2">
-                Add to <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">.env.local</code>:
-              </p>
-              <pre className="text-xs font-mono text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
-                VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
-              </pre>
-              <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                Get an API key from: <a href="https://console.cloud.google.com/apis" target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">Google Cloud Console</a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Create custom marker icon based on campaign color
+  const createCustomIcon = (color: string) => {
+    const svgIcon = `
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="12" fill="${color}" stroke="#ffffff" stroke-width="3" opacity="0.9"/>
+      </svg>
+    `;
+    return L.divIcon({
+      html: svgIcon,
+      className: 'custom-marker-icon',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -16],
+    });
+  };
 
   return (
     <div className={`flex flex-col h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm ${className}`}>
@@ -257,78 +230,72 @@ const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, class
 
       {/* Map */}
       <div className="flex-1 relative overflow-hidden">
-        <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={defaultCenter}
-            zoom={4}
-            onLoad={setMap}
-            options={{
-              styles: [], // Can add custom styles here for dark mode
-              zoomControl: true,
-              mapTypeControl: true,
-              streetViewControl: false,
-              fullscreenControl: true,
-            }}
-          >
-            {/* Marker Clusterer for grouping nearby markers */}
-            <MarkerClusterer>
-              {(clusterer) => (
-                <>
-                  {markers.map((marker) => (
-                    <Marker
-                      key={marker.id}
-                      position={marker.position}
-                      title={marker.title}
-                      icon={getMarkerIcon(marker.color)}
-                      onClick={() => handleMarkerClick(marker)}
-                      clusterer={clusterer}
-                    />
-                  ))}
-                </>
-              )}
-            </MarkerClusterer>
+        <MapContainer
+          center={defaultCenter}
+          zoom={defaultZoom}
+          style={{ width: '100%', height: '100%' }}
+          ref={mapRef}
+          zoomControl={true}
+          scrollWheelZoom={true}
+        >
+          {/* OpenStreetMap Tiles */}
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-            {/* Info Window */}
-            {selectedMarker && (
-              <InfoWindow
-                position={selectedMarker.position}
-                onCloseClick={handleInfoWindowClose}
+          {/* Auto-fit bounds when markers change */}
+          <FitBoundsController markers={markers} />
+
+          {/* Marker Clustering */}
+          <MarkerClusterGroup>
+            {markers.map((marker) => (
+              <Marker
+                key={marker.id}
+                position={[marker.position.lat, marker.position.lng]}
+                icon={createCustomIcon(marker.color)}
+                eventHandlers={{
+                  click: () => handleMarkerClick(marker),
+                }}
               >
-                <div className="p-2 max-w-sm">
-                  <h3 className="font-semibold text-gray-900 mb-1">{selectedMarker.event.eventName}</h3>
-                  <div className="space-y-1 text-sm text-gray-600 mb-3">
-                    <div className="flex items-center gap-2">
-                      <Icon name="calendar" className="w-4 h-4" />
-                      <span>
-                        {selectedMarker.event.eventStartDate ? new Date(selectedMarker.event.eventStartDate).toLocaleDateString() : 'N/A'}
-                      </span>
+                <Popup>
+                  <div className="p-2 max-w-sm">
+                    <h3 className="font-semibold text-gray-900 mb-1">{marker.event.eventName}</h3>
+                    <div className="space-y-1 text-sm text-gray-600 mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4">📅</span>
+                        <span>
+                          {marker.event.eventStartDate
+                            ? new Date(marker.event.eventStartDate).toLocaleDateString()
+                            : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4">📍</span>
+                        <span>
+                          {marker.event.eventVenue}, {marker.event.city}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4">💼</span>
+                        <span>{marker.campaign.client}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <StatusBadge status={marker.event.status} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Icon name="location" className="w-4 h-4" />
-                      <span>
-                        {selectedMarker.event.eventVenue}, {selectedMarker.event.city}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Icon name="briefcase" className="w-4 h-4" />
-                      <span>{selectedMarker.campaign.client}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <StatusBadge status={selectedMarker.event.status} />
-                    </div>
+                    <button
+                      onClick={() => handleViewDetails(marker.event)}
+                      className="w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                    >
+                      View Details
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleViewDetails(selectedMarker.event)}
-                    className="w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </InfoWindow>
-            )}
-          </GoogleMap>
-        </LoadScript>
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        </MapContainer>
       </div>
 
       {/* Legend */}
