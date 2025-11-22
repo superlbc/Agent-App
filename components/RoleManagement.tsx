@@ -57,8 +57,6 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
 
   // Modal states
   const [isRoleEditorOpen, setIsRoleEditorOpen] = useState(false);
-  const [isUserAssignmentOpen, setIsUserAssignmentOpen] = useState(false);
-  const [isPermissionMatrixOpen, setIsPermissionMatrixOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | undefined>(undefined);
 
   // Confirmation modal state
@@ -214,7 +212,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
   // ============================================================================
 
   return (
-    <div className={`${className}`}>
+    <div className={`p-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -386,7 +384,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      {canManageRoles && !role.isSystemRole && (
+                      {canManageRoles && (
                         <>
                           <Button
                             variant="secondary"
@@ -397,26 +395,17 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                             <Icon name="edit" className="w-3.5 h-3.5 mr-1" />
                             Edit
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteRole(role.id)}
-                            className="text-red-600 hover:text-red-700 w-8 h-8 p-0"
-                          >
-                            <Icon name="trash" className="w-3.5 h-3.5" />
-                          </Button>
+                          {!role.isSystemRole && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRole(role.id)}
+                              className="text-red-600 hover:text-red-700 w-8 h-8 p-0"
+                            >
+                              <Icon name="trash" className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                         </>
-                      )}
-                      {role.isSystemRole && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditRole(role)}
-                          className="w-full justify-center text-xs h-8"
-                        >
-                          <Icon name="eye" className="w-3.5 h-3.5 mr-1.5" />
-                          View Details
-                        </Button>
                       )}
                     </div>
                   </Card>
@@ -485,7 +474,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
 
                       {/* Actions */}
                       <div className="flex gap-2">
-                        {canManageRoles && !role.isSystemRole && (
+                        {canManageRoles && (
                           <>
                             <Button
                               variant="secondary"
@@ -496,26 +485,17 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                               <Icon name="edit" className="w-3.5 h-3.5 mr-1" />
                               Edit
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteRole(role.id)}
-                              className="text-red-600 hover:text-red-700 w-8 h-8 p-0"
-                            >
-                              <Icon name="trash" className="w-3.5 h-3.5" />
-                            </Button>
+                            {!role.isSystemRole && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteRole(role.id)}
+                                className="text-red-600 hover:text-red-700 w-8 h-8 p-0"
+                              >
+                                <Icon name="trash" className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
                           </>
-                        )}
-                        {role.isSystemRole && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditRole(role)}
-                            className="text-xs h-8"
-                          >
-                            <Icon name="eye" className="w-3.5 h-3.5 mr-1.5" />
-                            View Details
-                          </Button>
                         )}
                       </div>
                     </div>
@@ -549,37 +529,20 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
 
       {/* User Assignments View */}
       {viewMode === 'users' && canManageUsers && (
-        <div className="space-y-4">
-          <Card className="p-6">
-            <p className="text-gray-600 dark:text-gray-400">
-              User role assignment interface coming soon...
-            </p>
-            <Button
-              onClick={() => setIsUserAssignmentOpen(true)}
-              className="mt-4"
-            >
-              <Icon name="user-plus" className="w-5 h-5 mr-2" />
-              Assign Roles to Users
-            </Button>
-          </Card>
+        <div className="mt-6">
+          <UserRoleAssignment
+            onClose={() => {}} // Empty function since it's inline, not a modal
+          />
         </div>
       )}
 
       {/* Permission Matrix View */}
       {viewMode === 'permissions' && (
-        <div className="space-y-4">
-          <Card className="p-6">
-            <p className="text-gray-600 dark:text-gray-400">
-              Permission matrix showing all roles and their permissions coming soon...
-            </p>
-            <Button
-              onClick={() => setIsPermissionMatrixOpen(true)}
-              className="mt-4"
-            >
-              <Icon name="grid" className="w-5 h-5 mr-2" />
-              View Permission Matrix
-            </Button>
-          </Card>
+        <div className="mt-6">
+          <PermissionMatrix
+            roles={roles}
+            onClose={() => {}} // Empty function since it's inline, not a modal
+          />
         </div>
       )}
 
@@ -589,19 +552,6 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
           role={selectedRole}
           onSave={handleSaveRole}
           onClose={() => setIsRoleEditorOpen(false)}
-        />
-      )}
-
-      {isUserAssignmentOpen && (
-        <UserRoleAssignment
-          onClose={() => setIsUserAssignmentOpen(false)}
-        />
-      )}
-
-      {isPermissionMatrixOpen && (
-        <PermissionMatrix
-          roles={roles}
-          onClose={() => setIsPermissionMatrixOpen(false)}
         />
       )}
 
