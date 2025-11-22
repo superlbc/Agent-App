@@ -10,6 +10,7 @@ import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
+import { Pagination } from './ui/Pagination';
 import { calculatePackageCost } from '../utils/mockData';
 import { DEPARTMENTS, ROLES } from '../constants';
 
@@ -56,6 +57,10 @@ export const PackageLibrary: React.FC<PackageLibraryProps> = ({
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   // ============================================================================
   // FILTERING, SORTING & SEARCH
@@ -109,17 +114,29 @@ export const PackageLibrary: React.FC<PackageLibraryProps> = ({
     return filtered;
   }, [packages, searchQuery, roleFilter, departmentFilter, typeFilter, sortField, sortOrder]);
 
+  // Pagination
+  const totalFilteredItems = filteredAndSortedPackages.length;
+  const paginatedPackages = filteredAndSortedPackages.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, roleFilter, departmentFilter, typeFilter, itemsPerPage]);
+
   // ============================================================================
   // STATS
   // ============================================================================
 
   const stats = useMemo(() => {
     return {
-      total: filteredAndSortedPackages.length,
+      total: totalFilteredItems,
       standard: filteredAndSortedPackages.filter((p) => p.isStandard).length,
       exception: filteredAndSortedPackages.filter((p) => !p.isStandard).length,
     };
-  }, [filteredAndSortedPackages]);
+  }, [filteredAndSortedPackages, totalFilteredItems]);
 
   // ============================================================================
   // HANDLERS
@@ -143,6 +160,13 @@ export const PackageLibrary: React.FC<PackageLibraryProps> = ({
 
   const hasActiveFilters = searchQuery || roleFilter !== 'all' || departmentFilter !== 'all' || typeFilter !== 'all';
 
+  // Refresh handler
+  const handleRefresh = () => {
+    // Trigger a refresh by notifying parent if needed
+    // For now, just reset page to 1
+    setCurrentPage(1);
+  };
+
   // ============================================================================
   // RENDER
   // ============================================================================
@@ -160,12 +184,21 @@ export const PackageLibrary: React.FC<PackageLibraryProps> = ({
           </p>
         </div>
 
-        {onCreate && (
-          <Button variant="primary" onClick={onCreate}>
-            <Icon name="add" className="w-4 h-4 mr-2" />
-            Create Package
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            onClick={handleRefresh}
+            title="Refresh package list"
+          >
+            <Icon name="refresh" className="w-4 h-4" />
           </Button>
-        )}
+          {onCreate && (
+            <Button variant="primary" onClick={onCreate}>
+              <Icon name="add" className="w-4 h-4 mr-2" />
+              Create Package
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Filters & Controls */}
@@ -291,28 +324,44 @@ export const PackageLibrary: React.FC<PackageLibraryProps> = ({
       </div>
 
       {/* Package Grid/List */}
-      {filteredAndSortedPackages.length > 0 ? (
-        <div
-          className={
-            viewMode === 'grid'
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
-              : 'space-y-3'
-          }
-        >
-          {filteredAndSortedPackages.map((pkg) => (
-            <PackageCard
-              key={pkg.id}
-              package={pkg}
-              onView={onView}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onDuplicate={onDuplicate}
-              onSelect={onSelect}
-              isSelected={selectedPackage?.id === pkg.id}
-              compact={viewMode === 'list'}
-            />
-          ))}
-        </div>
+      {totalFilteredItems > 0 ? (
+        <>
+          <div
+            className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+                : 'space-y-3'
+            }
+          >
+            {paginatedPackages.map((pkg) => (
+              <PackageCard
+                key={pkg.id}
+                package={pkg}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onDuplicate={onDuplicate}
+                onSelect={onSelect}
+                isSelected={selectedPackage?.id === pkg.id}
+                compact={viewMode === 'list'}
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalFilteredItems > itemsPerPage && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalFilteredItems}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={setItemsPerPage}
+                itemsPerPageOptions={[10, 25, 50, 100]}
+              />
+            </div>
+          )}
+        </>
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 p-8">
           <div className="text-center">
