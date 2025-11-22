@@ -12,13 +12,16 @@ import { Icon } from './ui/Icon';
 
 export type NavigationSection =
   | 'pre-hires'
+  | 'packages'
+  | 'approvals'
   | 'hardware-inventory'
+  | 'software-catalog'
   | 'license-pools'
+  | 'refresh-calendar'
+  | 'refresh-budget'
+  | 'refresh-notifications'
   | 'freeze-period-admin'
   | 'freeze-period-dashboard'
-  | 'refresh-calendar'
-  | 'refresh-finance'
-  | 'refresh-notifications'
   | 'role-management';
 
 interface NavigationProps {
@@ -36,64 +39,101 @@ interface NavigationItem {
   description: string;
 }
 
+interface NavigationGroup {
+  label: string;
+  items: NavigationItem[];
+}
+
 // ============================================================================
 // NAVIGATION ITEMS CONFIGURATION
 // ============================================================================
 
-const NAVIGATION_ITEMS: NavigationItem[] = [
+const NAVIGATION_GROUPS: NavigationGroup[] = [
   {
-    id: 'pre-hires',
-    label: 'Pre-hire Management',
-    icon: 'users',
-    description: 'Primary dashboard for candidate onboarding',
+    label: 'PRE-HIRES & PACKAGES',
+    items: [
+      {
+        id: 'pre-hires',
+        label: 'Pre-hires',
+        icon: 'users',
+        description: 'Candidate tracking and onboarding',
+      },
+      {
+        id: 'packages',
+        label: 'Packages',
+        icon: 'package',
+        description: 'Equipment package management',
+      },
+      {
+        id: 'approvals',
+        label: 'Approvals',
+        icon: 'check-circle',
+        description: 'Approval queue and workflow',
+      },
+    ],
   },
   {
-    id: 'hardware-inventory',
-    label: 'Hardware Inventory',
-    icon: 'package',
-    description: 'Manage hardware items and inventory',
+    label: 'INVENTORY',
+    items: [
+      {
+        id: 'hardware-inventory',
+        label: 'Hardware Inventory',
+        icon: 'monitor',
+        description: 'Computers, monitors, accessories',
+      },
+      {
+        id: 'software-catalog',
+        label: 'Software Catalog',
+        icon: 'grid',
+        description: 'All software and applications',
+      },
+      {
+        id: 'license-pools',
+        label: 'License Pools',
+        icon: 'key',
+        description: 'License inventory and utilization',
+      },
+    ],
   },
   {
-    id: 'license-pools',
-    label: 'License Pool Dashboard',
-    icon: 'key',
-    description: 'Manage software license pools and assignments',
+    label: 'HARDWARE REFRESH',
+    items: [
+      {
+        id: 'refresh-calendar',
+        label: 'Refresh Calendar',
+        icon: 'calendar',
+        description: 'Hardware refresh schedule',
+      },
+      {
+        id: 'refresh-budget',
+        label: 'Budget Forecast',
+        icon: 'trending-up',
+        description: 'Financial planning and costs',
+      },
+      {
+        id: 'refresh-notifications',
+        label: 'Notifications',
+        icon: 'bell',
+        description: 'Upcoming refresh alerts',
+      },
+    ],
   },
   {
-    id: 'refresh-calendar',
-    label: 'Refresh Calendar',
-    icon: 'calendar',
-    description: 'View hardware refresh schedule and timeline',
-  },
-  {
-    id: 'refresh-finance',
-    label: 'Refresh Budget Forecast',
-    icon: 'trending-up',
-    description: 'Financial planning and cost projections',
-  },
-  {
-    id: 'refresh-notifications',
-    label: 'Refresh Notifications',
-    icon: 'bell',
-    description: 'Manage upcoming refresh notifications',
-  },
-  {
-    id: 'freeze-period-admin',
-    label: 'Freeze Period Admin',
-    icon: 'settings',
-    description: 'Configure freeze period settings',
-  },
-  {
-    id: 'freeze-period-dashboard',
-    label: 'Freeze Period Dashboard',
-    icon: 'inbox',
-    description: 'Monitor freeze period notifications',
-  },
-  {
-    id: 'role-management',
-    label: 'Role Management',
-    icon: 'shield',
-    description: 'Manage system roles and permissions (Admin)',
+    label: 'FREEZE PERIOD ADMIN',
+    items: [
+      {
+        id: 'freeze-period-admin',
+        label: 'Freeze Period Admin',
+        icon: 'settings',
+        description: 'Configure freeze periods',
+      },
+      {
+        id: 'freeze-period-dashboard',
+        label: 'Freeze Period Dashboard',
+        icon: 'inbox',
+        description: 'Monitor freeze notifications',
+      },
+    ],
   },
 ];
 
@@ -151,59 +191,73 @@ export const Navigation: React.FC<NavigationProps> = ({
 
       {/* Navigation Items */}
       <div className="flex-1 overflow-y-auto p-2">
-        <ul className="space-y-1">
-          {NAVIGATION_ITEMS.map((item) => {
-            const isActive = currentSection === item.id;
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => handleSectionChange(item.id)}
-                  className={`
-                    w-full flex items-start gap-3 px-3 py-3 rounded-lg transition-all
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
-                    ${
-                      isActive
-                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }
-                  `}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {/* Icon */}
-                  <Icon
-                    name={item.icon}
-                    className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                      isActive
-                        ? 'text-primary-600 dark:text-primary-400'
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}
-                  />
+        <div className="space-y-6">
+          {NAVIGATION_GROUPS.map((group, groupIndex) => (
+            <div key={groupIndex}>
+              {/* Group Header */}
+              <div className="px-3 py-2">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {group.label}
+                </h3>
+              </div>
 
-                  {/* Label and Description */}
-                  <div className="flex-1 text-left">
-                    <div
-                      className={`text-sm font-medium ${
-                        isActive
-                          ? 'text-primary-700 dark:text-primary-300'
-                          : 'text-gray-900 dark:text-white'
-                      }`}
-                    >
-                      {item.label}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-                      {item.description}
-                    </div>
-                  </div>
+              {/* Group Items */}
+              <ul className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = currentSection === item.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => handleSectionChange(item.id)}
+                        className={`
+                          w-full flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900
+                          ${
+                            isActive
+                              ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }
+                        `}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {/* Icon */}
+                        <Icon
+                          name={item.icon}
+                          className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                            isActive
+                              ? 'text-primary-600 dark:text-primary-400'
+                              : 'text-gray-500 dark:text-gray-400'
+                          }`}
+                        />
 
-                  {/* Active Indicator */}
-                  {isActive && (
-                    <div className="w-1 h-full bg-primary-600 dark:bg-primary-400 rounded-full absolute right-0" />
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                        {/* Label and Description */}
+                        <div className="flex-1 text-left">
+                          <div
+                            className={`text-sm font-medium ${
+                              isActive
+                                ? 'text-primary-700 dark:text-primary-300'
+                                : 'text-gray-900 dark:text-white'
+                            }`}
+                          >
+                            {item.label}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                            {item.description}
+                          </div>
+                        </div>
+
+                        {/* Active Indicator */}
+                        {isActive && (
+                          <div className="w-1 h-full bg-primary-600 dark:bg-primary-400 rounded-full absolute right-0" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Navigation Footer */}
