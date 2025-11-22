@@ -1,7 +1,7 @@
 // ============================================================================
 // PERMISSION MATRIX COMPONENT
 // ============================================================================
-// Visual matrix showing all roles and their assigned permissions
+// Visual matrix interface showing all roles and their assigned permissions
 
 import React, { useState, useMemo } from 'react';
 import { Icon } from '../ui/Icon';
@@ -119,25 +119,18 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
   // ============================================================================
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Permission Matrix
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Visual overview of permissions across all roles
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <Icon name="x" className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-          </button>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Permission Matrix
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Visual overview of permissions across all roles
+          </p>
         </div>
+      </div>
 
         {/* Filters */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
@@ -284,15 +277,11 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Showing {filteredPermissions.length} of {allPermissions.length} permissions
-            across {roles.length} roles
-          </div>
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
+      {/* Footer */}
+      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Showing {filteredPermissions.length} of {allPermissions.length} permissions
+          across {roles.length} roles
         </div>
       </div>
     </div>

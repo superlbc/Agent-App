@@ -1,7 +1,7 @@
 // ============================================================================
 // USER ROLE ASSIGNMENT COMPONENT
 // ============================================================================
-// Modal for assigning and revoking roles to/from users
+// Interface for assigning and revoking roles to/from users
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Icon } from '../ui/Icon';
@@ -64,6 +64,7 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchDropdownRef = useRef<HTMLDivElement | null>(null);
   const graphService = useMemo(() => GraphService.getInstance(), []);
 
   // User database with role assignments
@@ -184,6 +185,23 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
     };
   }, [graphSearchQuery, graphService]);
 
+  // Click outside handler to close search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    if (showSearchResults) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSearchResults]);
+
   const handleSelectGraphUser = (graphUser: GraphUser) => {
     // Check if user already exists in our database
     const existingUser = users.find(u => u.userEmail === graphUser.mail);
@@ -268,25 +286,18 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
   // ============================================================================
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              User Role Assignments
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Assign or revoke roles for users in the system
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <Icon name="x" className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-          </button>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            User Role Assignments
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Assign or revoke roles for users in the system
+          </p>
         </div>
+      </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
@@ -296,6 +307,58 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Users
               </h3>
+
+              {/* Add New User from Graph API */}
+              <div className="relative" ref={searchDropdownRef}>
+                <Input
+                  label="Add New User"
+                  value={graphSearchQuery}
+                  onChange={(e) => setGraphSearchQuery(e.target.value)}
+                  placeholder="Search organization directory..."
+                  icon={isSearching ? 'loader' : 'search'}
+                />
+
+                {/* Search Results Dropdown */}
+                {showSearchResults && graphSearchResults.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    {graphSearchResults.map((user) => (
+                      <button
+                        key={user.id}
+                        onClick={() => handleSelectGraphUser(user)}
+                        className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                      >
+                        <div className="font-medium text-gray-900 dark:text-white">
+                          {user.displayName}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {user.mail || user.userPrincipalName}
+                        </div>
+                        {(user.jobTitle || user.department) && (
+                          <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            {user.jobTitle}
+                            {user.jobTitle && user.department && ' • '}
+                            {user.department}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* No Results Message */}
+                {showSearchResults && graphSearchResults.length === 0 && !isSearching && (
+                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                    No users found matching "{graphSearchQuery}"
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Filter Existing Users
+                </h4>
+              </div>
 
               {/* Filters */}
               <div className="space-y-3">
@@ -473,14 +536,6 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end p-6 border-t border-gray-200 dark:border-gray-700">
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-        </div>
-      </div>
 
       {/* Confirmation Modal */}
       <ConfirmModal

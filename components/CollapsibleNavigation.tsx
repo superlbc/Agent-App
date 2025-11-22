@@ -13,6 +13,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export type NavigationSection =
   | 'pre-hires'
+  | 'approvals'
   | 'hardware-inventory'
   | 'software-inventory'
   | 'license-pools'
@@ -24,7 +25,8 @@ export type NavigationSection =
   | 'refresh-finance'
   | 'refresh-notifications'
   | 'freeze-period-admin'
-  | 'freeze-period-dashboard';
+  | 'freeze-period-dashboard'
+  | 'role-management';
 
 interface NavigationProps {
   currentSection: NavigationSection;
@@ -60,6 +62,18 @@ const NAVIGATION_STRUCTURE: NavigationGroup[] = [
         label: 'Pre-hires & Onboarding',
         icon: 'users',
         description: 'Primary dashboard for candidate onboarding',
+      },
+      {
+        id: 'approvals',
+        label: 'Approvals',
+        icon: 'check-circle',
+        description: 'Approval queue and workflow management',
+      },
+      {
+        id: 'role-management',
+        label: 'Role Management',
+        icon: 'shield',
+        description: 'Manage user roles and permissions',
       },
     ],
   },
