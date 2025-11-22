@@ -12,9 +12,11 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-cluster';
-import L from 'leaflet';
+import MarkerClusterGroup from 'react-leaflet-markercluster';
+import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import './EventMap.css';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign, EventMapMarker } from '../../types';
