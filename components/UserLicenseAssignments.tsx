@@ -322,27 +322,31 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
 
             <div className="grid grid-cols-2 gap-2">
               <Select
+                id="employee-status-filter"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
                 label="Employee Status"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="withdrawn">Withdrawn</option>
-                <option value="pre-hire">Pre-hire</option>
-              </Select>
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                  { value: 'withdrawn', label: 'Withdrawn' },
+                  { value: 'pre-hire', label: 'Pre-hire' },
+                ]}
+              />
 
               <Select
+                id="license-status-filter"
                 value={licenseStatusFilter}
                 onChange={(e) => setLicenseStatusFilter(e.target.value as any)}
                 label="License Status"
-              >
-                <option value="all">All Licenses</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="revoked">Revoked</option>
-              </Select>
+                options={[
+                  { value: 'all', label: 'All Licenses' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'expired', label: 'Expired' },
+                  { value: 'revoked', label: 'Revoked' },
+                ]}
+              />
             </div>
 
             {(searchQuery || statusFilter !== 'all' || licenseStatusFilter !== 'all') && (
