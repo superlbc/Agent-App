@@ -843,3 +843,127 @@ export interface EventStatistics {
   eventsByMonth: Record<string, number>;
   eventsByCity: Record<string, number>;
 }
+
+// ============================================================================
+// EMPLOYEE ONBOARDING SYSTEM - DATA MODEL
+// ============================================================================
+
+/**
+ * Hardware Entity
+ * Physical equipment inventory for employee provisioning
+ */
+export interface Hardware {
+  id: string;
+  type: "computer" | "monitor" | "keyboard" | "mouse" | "dock" | "headset" | "accessory";
+  model: string;
+  manufacturer: string;
+  specifications: {
+    processor?: string;
+    ram?: string;
+    storage?: string;
+    screenSize?: string;
+    connectivity?: string;
+  };
+  status: "available" | "assigned" | "maintenance" | "retired";
+  serialNumber?: string;
+  purchaseDate?: Date;
+  cost?: number;
+}
+
+/**
+ * Software/License Entity
+ * Software catalog and license pool management
+ */
+export interface Software {
+  id: string;
+  name: string;
+  vendor: string;
+  licenseType: "perpetual" | "subscription" | "concurrent";
+  requiresApproval: boolean;
+  approver?: string;
+  cost: number;
+  renewalFrequency?: "monthly" | "annual";
+  seatCount?: number;
+  description?: string;
+}
+
+/**
+ * Package Entity
+ * Pre-defined equipment and software bundles for roles
+ */
+export interface Package {
+  id: string;
+  name: string;
+  description: string;
+  roleTarget: string[];
+  departmentTarget: string[];
+  hardware: Hardware[];
+  software: Software[];
+  licenses: Software[];
+  isStandard: boolean;
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+}
+
+/**
+ * PreHire Entity
+ * Candidate tracking from offer acceptance through start date
+ */
+export interface PreHire {
+  id: string;
+  candidateName: string;
+  email?: string;
+  role: string;
+  department: string;
+  startDate: Date;
+  hiringManager: string;
+  status: "candidate" | "offered" | "accepted" | "linked" | "cancelled";
+  assignedPackage?: Package;
+  customizations?: {
+    addedHardware?: Hardware[];
+    removedHardware?: Hardware[];
+    addedSoftware?: Software[];
+    removedSoftware?: Software[];
+    reason?: string;
+  };
+  linkedEmployeeId?: string;
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+}
+
+/**
+ * Employee Entity
+ * Full employee record with onboarding status
+ */
+export interface Employee {
+  id: string;
+  activeDirectoryId?: string;
+  workdayId?: string;
+  name: string;
+  email: string;
+  department: string;
+  role: string;
+  startDate: Date;
+  endDate?: Date;
+  manager?: string;
+  assignedPackage?: Package;
+  actualHardware: Hardware[];
+  actualSoftware: Software[];
+  preHireId?: string;
+  onboardingStatus: "pre-hire" | "systems-created" | "equipment-assigned" | "active";
+  onboardingPhases: {
+    adCreated?: Date;
+    vantageCreated?: Date;
+    workdayCreated?: Date;
+    equipmentOrdered?: Date;
+    equipmentReceived?: Date;
+    onboardingComplete?: Date;
+  };
+  isPreloaded: boolean;
+  needsPasswordReset: boolean;
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+}
