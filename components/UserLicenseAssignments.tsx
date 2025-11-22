@@ -11,6 +11,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { Card } from './ui/Card';
 import { UserLicenseAssignModal } from './UserLicenseAssignModal';
+import { BulkLicenseImportModal } from './BulkLicenseImportModal';
 import { useLicense } from '../contexts/LicenseContext';
 import { EmployeeLicenseSummary, LicenseAssignmentFilters, Employee } from '../types';
 
@@ -51,6 +52,7 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   // Modal state
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedEmployeeForAssignment, setSelectedEmployeeForAssignment] = useState<string | undefined>(undefined);
+  const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
 
   // Get employee summaries (use external data if provided, otherwise from context)
   const allEmployeeSummaries = useMemo(() => {
@@ -153,6 +155,13 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
   };
 
   const handleBulkImport = () => {
+    setIsBulkImportModalOpen(true);
+  };
+
+  const handleBulkImportSuccess = (importedCount: number) => {
+    setIsBulkImportModalOpen(false);
+
+    // Call external callback if provided
     if (onBulkImport) {
       onBulkImport();
     }
@@ -584,6 +593,13 @@ export const UserLicenseAssignments: React.FC<UserLicenseAssignmentsProps> = ({
         preSelectedEmployeeId={selectedEmployeeForAssignment}
         employees={allEmployees}
         onAssignSuccess={handleAssignmentSuccess}
+      />
+
+      <BulkLicenseImportModal
+        isOpen={isBulkImportModalOpen}
+        onClose={() => setIsBulkImportModalOpen(false)}
+        employees={allEmployees}
+        onImportSuccess={handleBulkImportSuccess}
       />
     </div>
   );
