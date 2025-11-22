@@ -268,7 +268,7 @@ const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, class
                     <div className="flex items-center gap-2">
                       <Icon name="calendar" className="w-4 h-4" />
                       <span>
-                        {new Date(selectedMarker.event.eventStartDate).toLocaleDateString()}
+                        {selectedMarker.event.eventStartDate ? new Date(selectedMarker.event.eventStartDate).toLocaleDateString() : 'N/A'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
