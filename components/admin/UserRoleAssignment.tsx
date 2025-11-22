@@ -10,6 +10,7 @@ import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { StatusBadge } from '../ui/StatusBadge';
 import { GraphService } from '../../services/graphService';
+import { ConfirmModal } from '../ui/ConfirmModal';
 import type { UserRoleAssignment as UserRoleAssignmentType, UserRole } from '../../types';
 
 // ============================================================================
@@ -64,6 +65,11 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
   const graphService = useMemo(() => GraphService.getInstance(), []);
 
   // User database with role assignments
+  // Confirmation modal state
+  const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
+  const [revokeData, setRevokeData] = useState<{ userId: string; roleId: string } | null>(null);
+
+  // Mock data - TODO: Replace with API calls
   const [users, setUsers] = useState<UserWithRoles[]>([
     {
       userId: 'camille@momentumww.com',
@@ -232,18 +238,24 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
   };
 
   const handleRevokeRole = (userId: string, roleId: string) => {
-    if (!confirm('Are you sure you want to revoke this role assignment?')) return;
+    setRevokeData({ userId, roleId });
+    setShowRevokeConfirm(true);
+  };
 
-    setUsers(prev => prev.map(u =>
-      u.userId === userId
-        ? {
-            ...u,
-            roles: u.roles.map(r =>
-              r.id === roleId ? { ...r, isActive: false } : r
-            ),
-          }
-        : u
-    ));
+  const confirmRevokeRole = () => {
+    if (revokeData) {
+      setUsers(prev => prev.map(u =>
+        u.userId === revokeData.userId
+          ? {
+              ...u,
+              roles: u.roles.map(r =>
+                r.id === revokeData.roleId ? { ...r, isActive: false } : r
+              ),
+            }
+          : u
+      ));
+      setRevokeData(null);
+    }
   };
 
   // ============================================================================
@@ -464,6 +476,20 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showRevokeConfirm}
+        onClose={() => {
+          setShowRevokeConfirm(false);
+          setRevokeData(null);
+        }}
+        onConfirm={confirmRevokeRole}
+        title="Revoke Role Assignment?"
+        message="Are you sure you want to revoke this role assignment? The user will immediately lose access to permissions associated with this role."
+        confirmText="Revoke Role"
+        variant="danger"
+      />
     </div>
   );
 };
