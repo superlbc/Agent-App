@@ -189,7 +189,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Navigation Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Employee Onboarding
+          UXP Platform
         </h2>
         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
           Pre-hire to Active Employee
@@ -270,8 +270,8 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Navigation Footer */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
-          <p>Version 2.0.0</p>
-          <p className="mt-1">Employee Onboarding System</p>
+          <p>Version 3.0.0</p>
+          <p className="mt-1">UXP - Unified Experience Platform</p>
         </div>
       </div>
     </nav>

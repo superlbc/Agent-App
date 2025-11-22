@@ -68,10 +68,10 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
              <Icon name="logo" className="h-10 w-10 text-primary flex-shrink-0"/>
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Employee Onboarding System</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">UXP - Unified Experience Platform</h1>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500 text-white">Beta</span>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">Streamline employee onboarding from pre-hire to day one.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">Streamline event management, campaigns, and organizational workflows.</p>
             </div>
           </div>
           <div id="user-profile-menu" className="relative">
