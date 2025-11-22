@@ -107,7 +107,13 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
   // ============================================================================
 
   const renderStatusBadge = (status: typeof campaign.status) => {
-    const config = STATUS_CONFIG[status];
+    const config = STATUS_CONFIG[status] || {
+      label: status || 'Unknown',
+      bgClass: 'bg-gray-100 dark:bg-gray-800',
+      textClass: 'text-gray-700 dark:text-gray-300',
+      borderClass: 'border-gray-300 dark:border-gray-600',
+      icon: 'help-circle' as const,
+    };
     return (
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${config.bgClass} ${config.textClass} ${config.borderClass}`}
@@ -119,7 +125,11 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
   };
 
   const renderEventStatusBadge = (status: UXPEvent['status']) => {
-    const config = EVENT_STATUS_CONFIG[status];
+    const config = EVENT_STATUS_CONFIG[status] || {
+      label: status || 'Unknown',
+      bgClass: 'bg-gray-100 dark:bg-gray-800',
+      textClass: 'text-gray-700 dark:text-gray-300',
+    };
     return (
       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${config.bgClass} ${config.textClass}`}>
         {config.label}
