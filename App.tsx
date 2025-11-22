@@ -626,7 +626,52 @@ const AppContent: React.FC = () => {
           )}
 
           {/* Packages Section */}
-          {currentSection === 'packages' && (
+          {currentSection === 'manage-packages' && (
+            <div className="h-full overflow-auto p-6">
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          )}
+
+          {/* Packages - Hardware Sub-section */}
+          {currentSection === 'packages-hardware' && (
+            <div className="h-full overflow-auto p-6">
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          )}
+
+          {/* Packages - Software Sub-section */}
+          {currentSection === 'packages-software' && (
+            <div className="h-full overflow-auto p-6">
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          )}
+
+          {/* Packages - Licenses Sub-section */}
+          {currentSection === 'packages-licenses' && (
             <div className="h-full overflow-auto p-6">
               <PackageLibrary
                 packages={packages}
@@ -668,7 +713,7 @@ const AppContent: React.FC = () => {
           )}
 
           {/* Software Catalog Section */}
-          {currentSection === 'software-catalog' && (
+          {currentSection === 'software-inventory' && (
             <div className="h-full overflow-auto p-6">
               <SoftwareInventory
                 initialSoftware={mockSoftware}
@@ -716,7 +761,7 @@ const AppContent: React.FC = () => {
           )}
 
           {/* Refresh Budget Forecast Section */}
-          {currentSection === 'refresh-budget' && (
+          {currentSection === 'refresh-finance' && (
             <div className="h-full overflow-hidden">
               <RefreshFinanceView
                 schedules={[]} // TODO: Add mock refresh schedules
