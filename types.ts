@@ -967,3 +967,51 @@ export interface Employee {
   createdDate: Date;
   lastModified: Date;
 }
+
+// ============================================================================
+// APPROVAL REQUEST ENTITY
+// ============================================================================
+
+export interface ApprovalRequest {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  requestType: "equipment" | "software" | "exception" | "mid-employment";
+  items: (Hardware | Software)[];
+  packageId?: string;
+  requester: string;
+  requestDate: Date;
+  approver: string;              // "Auto", "Steve Sanderson", "Patricia"
+  status: "pending" | "approved" | "rejected" | "cancelled";
+  helixTicketId?: string;
+  automatedDecision: boolean;    // true for standard packages
+  approvalDate?: Date;
+  rejectionReason?: string;
+  notes?: string;
+}
+
+// ============================================================================
+// HELIX TICKET ENTITY
+// ============================================================================
+
+export interface HelixTicket {
+  id: string;
+  type: "new-hire" | "password-reset" | "termination" | "access-request" | "equipment";
+  employeeId: string;
+  employeeName: string;
+  requestedBy: string;
+  status: "open" | "in-progress" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
+  createdDate: Date;
+  resolvedDate?: Date;
+  assignedTo?: string;
+  description: string;
+
+  // For freeze period
+  scheduledAction?: "activate" | "deactivate";
+  actionDate?: Date;
+
+  // For equipment
+  equipmentItems?: (Hardware | Software)[];
+  approvalRequestId?: string;
+}

@@ -2074,6 +2074,13 @@ export function getTotalQRScans(): number {
 }
 
 /**
+ * Get tickets by status
+ */
+export function getTicketsByStatus(status: HelixTicket['status']): HelixTicket[] {
+  return mockHelixTickets.filter((t) => t.status === status);
+}
+
+/**
  * Get tickets by type
  */
 export function getTicketsByType(type: HelixTicket['type']): HelixTicket[] {
