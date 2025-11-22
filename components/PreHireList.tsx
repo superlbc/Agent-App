@@ -578,6 +578,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
               leftIcon="search"
+              aria-label="Search pre-hires"
             />
           </div>
           {hasActiveFilters && (
@@ -589,7 +590,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
         </div>
 
         {/* Filter Selects */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Select
             placeholder="All Statuses"
             value={filters.status}
@@ -711,6 +712,7 @@ export const PreHireList: React.FC<PreHireListProps> = ({
                   onChange={(e) =>
                     handleFilterChange('hiringManager', e.target.value)
                   }
+                  aria-label="Search hiring manager"
                 />
               </div>
             </div>
