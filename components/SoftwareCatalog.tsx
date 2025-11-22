@@ -9,6 +9,7 @@ import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { Input } from './ui/Input';
+import { CompactStatsBar, CompactStat } from './ui/CompactStatsBar';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -109,13 +110,31 @@ export const SoftwareCatalog: React.FC<SoftwareCatalogProps> = ({
       return sum;
     }, 0);
 
+    // Calculate software catalog stats
+    const totalSoftware = software.length;
+    const subscriptions = software.filter((s) => s.licenseType === 'subscription').length;
+    const requiresApproval = software.filter((s) => s.requiresApproval).length;
+    const totalMonthlyCost = software.reduce((sum, item) => {
+      if (item.renewalFrequency === 'monthly') {
+        return sum + (item.cost || 0);
+      } else if (item.renewalFrequency === 'annual') {
+        return sum + (item.cost || 0) / 12;
+      }
+      return sum;
+    }, 0);
+
     return {
       total: filteredSoftware.length,
       selected: selectedItems.length,
       monthlyCost,
       annualCost: monthlyCost * 12,
+      // Catalog-wide stats for CompactStatsBar
+      totalSoftware,
+      subscriptions,
+      requiresApproval,
+      totalMonthlyCost,
     };
-  }, [filteredSoftware, selectedItems]);
+  }, [filteredSoftware, selectedItems, software]);
 
   // ============================================================================
   // RENDER HELPERS
@@ -288,6 +307,34 @@ export const SoftwareCatalog: React.FC<SoftwareCatalogProps> = ({
           </div>
         )}
       </div>
+
+      {/* Statistics Bar */}
+      <CompactStatsBar
+        headerIcon="grid"
+        headerTitle="Software Catalog Overview"
+        stats={[
+          {
+            label: 'Total Software',
+            value: stats.totalSoftware.toString(),
+            icon: 'package',
+          },
+          {
+            label: 'Subscriptions',
+            value: stats.subscriptions.toString(),
+            icon: 'refresh',
+          },
+          {
+            label: 'Requires Approval',
+            value: stats.requiresApproval.toString(),
+            icon: 'alert-circle',
+          },
+          {
+            label: 'Monthly Cost',
+            value: `$${stats.totalMonthlyCost.toFixed(2)}`,
+            icon: 'trending-up',
+          },
+        ]}
+      />
 
       {/* Filters & Search */}
       <div className="space-y-4">

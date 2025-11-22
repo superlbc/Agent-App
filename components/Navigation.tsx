@@ -17,6 +17,7 @@ export type NavigationSection =
   | 'hardware-inventory'
   | 'software-catalog'
   | 'license-pools'
+  | 'user-license-assignments'
   | 'refresh-calendar'
   | 'refresh-budget'
   | 'refresh-notifications'
@@ -92,6 +93,12 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
         label: 'License Pools',
         icon: 'key',
         description: 'License inventory and utilization',
+      },
+      {
+        id: 'user-license-assignments',
+        label: 'User License Assignments',
+        icon: 'user-check',
+        description: 'Manage employee license assignments',
       },
     ],
   },
