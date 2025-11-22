@@ -745,7 +745,13 @@ export class GraphService {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Silently handle 404 errors (user doesn't have a photo) - this is expected
+      if (error?.statusCode === 404 || error?.code === 'ResourceNotFound') {
+        return undefined;
+      }
+
+      // Log unexpected errors only
       console.error(`[GraphService] getUserPhoto error for ${emailOrUpn}:`, error);
       return undefined;
     }

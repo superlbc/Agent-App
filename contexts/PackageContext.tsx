@@ -97,7 +97,12 @@ export const PackageProvider: React.FC<PackageProviderProps> = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch packages';
       console.error('[PackageContext] Error fetching packages:', errorMessage);
-      setError(errorMessage);
+
+      // Don't set error if MSAL not initialized (expected during initial load)
+      if (!errorMessage.includes('MSAL not initialized')) {
+        setError(errorMessage);
+      }
+
       // Fallback to mock data
       setPackages(mockPackages);
     }
