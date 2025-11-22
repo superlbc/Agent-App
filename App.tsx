@@ -27,6 +27,7 @@ import { ApprovalProvider, useApprovals } from './contexts/ApprovalContext';
 import { LicenseProvider, useLicense } from './contexts/LicenseContext';
 import { CampaignProvider } from './contexts/CampaignContext';
 import { EventProvider } from './contexts/EventContext';
+import { VenueProvider } from './contexts/VenueContext';
 import { PackageAssignmentModal } from './components/PackageAssignmentModal';
 import { PackageBuilder } from './components/PackageBuilder';
 import { PackageDetailView } from './components/PackageDetailView';
@@ -60,6 +61,7 @@ import { CampaignList } from './components/campaign/CampaignList';
 import EventCalendar from './components/event/EventCalendar';
 import EventMap from './components/event/EventMap';
 import EventList from './components/event/EventList';
+import { TeamAssignments } from './components/team/TeamAssignments';
 import VenueDatabase from './components/venue/VenueDatabase';
 import { IntegrationSettings } from './components/integrations/IntegrationSettings';
 import { PowerBIDashboard } from './components/analytics/PowerBIDashboard';
@@ -79,6 +81,10 @@ import {
   mockClients,
   mockPrograms,
   mockIntegrationConfig,
+  mockUsers,
+  mockPeopleAssignments,
+  mockEvents,
+  mockCampaigns,
 } from './utils/mockData';
 
 const AppContent: React.FC = () => {
@@ -774,23 +780,14 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {/* Team Assignments Section (Coming Soon) */}
+          {/* Team Assignments Section */}
           {currentSection === 'team-assignments' && (
-            <div className="h-full overflow-auto p-6">
-              <div className="max-w-4xl mx-auto text-center py-12">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-                  <Icon name="users" className="w-16 h-16 mx-auto text-primary-600 dark:text-primary-400 mb-4" />
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                    Team Assignments
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Track who's assigned to what event, manage team availability, and optimize resource allocation.
-                  </p>
-                  <div className="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded-lg text-sm font-medium">
-                    Coming Soon
-                  </div>
-                </div>
-              </div>
+            <div className="h-full overflow-auto">
+              <TeamAssignments
+                assignments={mockPeopleAssignments}
+                events={mockEvents}
+                campaigns={mockCampaigns}
+              />
             </div>
           )}
 
@@ -830,7 +827,11 @@ const AppContent: React.FC = () => {
           {/* User Management Section */}
           {currentSection === 'admin-users' && (
             <div className="h-full overflow-auto">
-              <UserManagement />
+              <UserManagement
+                initialUsers={mockUsers}
+                clients={mockClients}
+                currentUser={mockUsers[0]} // Admin user
+              />
             </div>
           )}
 
@@ -1176,7 +1177,9 @@ function App() {
                 <ApprovalProvider>
                   <CampaignProvider>
                     <EventProvider>
-                      <AppContent />
+                      <VenueProvider>
+                        <AppContent />
+                      </VenueProvider>
                     </EventProvider>
                   </CampaignProvider>
                 </ApprovalProvider>

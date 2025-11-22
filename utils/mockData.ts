@@ -2973,6 +2973,133 @@ export const mockEmployees: Employee[] = [
 ];
 
 /**
+ * Mock Users
+ * User accounts for the UXP platform with roles and client access
+ */
+export const mockUsers = [
+  {
+    id: 'user-admin-001',
+    azureAdId: 'aad-001',
+    email: 'sarah.johnson@momentumww.com',
+    firstName: 'Sarah',
+    lastName: 'Johnson',
+    role: 'admin' as const,
+    clientIds: [], // Admins have access to all clients
+    isActive: true,
+  },
+  {
+    id: 'user-bl-001',
+    azureAdId: 'aad-002',
+    email: 'michael.chen@momentumww.com',
+    firstName: 'Michael',
+    lastName: 'Chen',
+    role: 'business_leader' as const,
+    clientIds: ['client-amex', 'client-verizon', 'client-apple'],
+    isActive: true,
+  },
+  {
+    id: 'user-pm-001',
+    azureAdId: 'aad-003',
+    email: 'jessica.martinez@momentumww.com',
+    firstName: 'Jessica',
+    lastName: 'Martinez',
+    role: 'project_manager' as const,
+    clientIds: ['client-amex', 'client-cocacola'],
+    isActive: true,
+  },
+  {
+    id: 'user-pm-002',
+    azureAdId: 'aad-004',
+    email: 'david.park@momentumww.com',
+    firstName: 'David',
+    lastName: 'Park',
+    role: 'project_manager' as const,
+    clientIds: ['client-verizon', 'client-nike'],
+    isActive: true,
+  },
+  {
+    id: 'user-fm-001',
+    azureAdId: 'aad-005',
+    email: 'kevin.thompson@momentumww.com',
+    firstName: 'Kevin',
+    lastName: 'Thompson',
+    role: 'field_manager' as const,
+    clientIds: ['client-amex'],
+    isActive: true,
+  },
+  {
+    id: 'user-fm-002',
+    azureAdId: 'aad-006',
+    email: 'emily.rodriguez@momentumww.com',
+    firstName: 'Emily',
+    lastName: 'Rodriguez',
+    role: 'field_manager' as const,
+    clientIds: ['client-verizon', 'client-microsoft'],
+    isActive: true,
+  },
+  {
+    id: 'user-ba-001',
+    azureAdId: 'aad-007',
+    email: 'alicia.chen@momentumww.com',
+    firstName: 'Alicia',
+    lastName: 'Chen',
+    role: 'brand_ambassador' as const,
+    clientIds: ['client-amex'],
+    isActive: true,
+  },
+  {
+    id: 'user-ba-002',
+    azureAdId: 'aad-008',
+    email: 'brandon.lee@momentumww.com',
+    firstName: 'Brandon',
+    lastName: 'Lee',
+    role: 'brand_ambassador' as const,
+    clientIds: ['client-amex', 'client-cocacola'],
+    isActive: true,
+  },
+  {
+    id: 'user-ba-003',
+    azureAdId: 'aad-009',
+    email: 'sophia.williams@momentumww.com',
+    firstName: 'Sophia',
+    lastName: 'Williams',
+    role: 'brand_ambassador' as const,
+    clientIds: ['client-verizon', 'client-nike'],
+    isActive: true,
+  },
+  {
+    id: 'user-ba-004',
+    azureAdId: 'aad-010',
+    email: 'marcus.thompson@momentumww.com',
+    firstName: 'Marcus',
+    lastName: 'Thompson',
+    role: 'brand_ambassador' as const,
+    clientIds: ['client-cocacola'],
+    isActive: false, // Inactive user example
+  },
+  {
+    id: 'user-pm-003',
+    azureAdId: 'aad-011',
+    email: 'rachel.kim@momentumww.com',
+    firstName: 'Rachel',
+    lastName: 'Kim',
+    role: 'project_manager' as const,
+    clientIds: ['client-samsung', 'client-adobe'],
+    isActive: true,
+  },
+  {
+    id: 'user-fm-003',
+    azureAdId: 'aad-012',
+    email: 'james.anderson@momentumww.com',
+    firstName: 'James',
+    lastName: 'Anderson',
+    role: 'field_manager' as const,
+    clientIds: ['client-apple', 'client-nike'],
+    isActive: true,
+  },
+];
+
+/**
  * Mock Freeze Periods
  * Workday freeze period configurations
  */
