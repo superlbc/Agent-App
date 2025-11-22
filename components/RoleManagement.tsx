@@ -175,18 +175,42 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
   };
 
   // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  // Get role-specific icon
+  const getRoleIcon = (roleName: string): string => {
+    const name = roleName.toLowerCase();
+    if (name.includes('hr') || name.includes('human')) return 'users';
+    if (name.includes('it') || name.includes('tech')) return 'wrench';
+    if (name.includes('admin') || name.includes('system')) return 'shield-check';
+    if (name.includes('manager')) return 'briefcase';
+    return 'shield';
+  };
+
+  // Get role-specific color
+  const getRoleColor = (roleName: string): string => {
+    const name = roleName.toLowerCase();
+    if (name.includes('hr') || name.includes('human')) return 'blue';
+    if (name.includes('it') || name.includes('tech')) return 'purple';
+    if (name.includes('admin') || name.includes('system')) return 'red';
+    if (name.includes('manager')) return 'green';
+    return 'gray';
+  };
+
+  // ============================================================================
   // RENDER
   // ============================================================================
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Role Management
           </h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Manage system roles, permissions, and user access control
           </p>
         </div>
@@ -194,7 +218,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
         <div className="flex gap-2">
           {canManageRoles && (
             <Button onClick={handleCreateRole}>
-              <Icon name="plus" className="w-5 h-5 mr-2" />
+              <Icon name="plus" className="w-4 h-4 mr-2" />
               Create Role
             </Button>
           )}
@@ -296,130 +320,57 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
 
           {/* Role Cards - Grid View */}
           {layoutMode === 'grid' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredRoles.map((role) => (
-                <Card key={role.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                  {/* Radio button indicator */}
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="flex-shrink-0 pt-1">
-                      <div className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center">
-                        {/* Inner dot for selected state - can be conditionally shown */}
-                        {/* <div className="w-2.5 h-2.5 rounded-full bg-blue-600" /> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredRoles.map((role) => {
+                const roleIcon = getRoleIcon(role.name);
+                const roleColor = getRoleColor(role.name);
+                const colorClasses = {
+                  blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+                  purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+                  red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+                  green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                  gray: 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400',
+                };
+
+                return (
+                  <Card key={role.id} className="p-4 hover:shadow-md transition-all hover:scale-[1.02]">
+                    {/* Icon and Title */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${colorClasses[roleColor as keyof typeof colorClasses]}`}>
+                        <Icon name={roleIcon as any} className="w-5 h-5" />
                       </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        {role.displayName}
-                      </h3>
-                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        {role.name}
-                      </p>
-                    </div>
-                  </div>
-
-                  {role.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                      {role.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
-                    <div className="flex items-center gap-1.5">
-                      <Icon name="key" className="w-4 h-4" />
-                      <span>{role.permissions.length} permissions</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Icon name="users" className="w-4 h-4" />
-                      <span>0 users</span> {/* TODO: Add user count */}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    {canManageRoles && !role.isSystemRole && (
-                      <>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleEditRole(role)}
-                          className="flex-1"
-                        >
-                          <Icon name="edit" className="w-4 h-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteRole(role.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Icon name="trash" className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
-                    {role.isSystemRole && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditRole(role)}
-                        className="w-full justify-center"
-                      >
-                        <Icon name="eye" className="w-4 h-4 mr-2" />
-                        View Details
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Role Cards - List View */}
-          {layoutMode === 'list' && (
-            <div className="space-y-3">
-              {filteredRoles.map((role) => (
-                <Card key={role.id} className="p-5 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-6">
-                    {/* Icon */}
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <Icon name="shield" className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
                           {role.displayName}
                         </h3>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
                           {role.name}
-                        </span>
-                        {role.isSystemRole && (
-                          <StatusBadge status="info" size="sm">
-                            System
-                          </StatusBadge>
-                        )}
-                      </div>
-                      {role.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
-                          {role.description}
                         </p>
-                      )}
+                      </div>
                     </div>
 
+                    {/* Description */}
+                    {role.description && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 leading-relaxed min-h-[2.5rem]">
+                        {role.description}
+                      </p>
+                    )}
+
                     {/* Stats */}
-                    <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <Icon name="key" className="w-4 h-4" />
+                    <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center gap-1">
+                        <Icon name="key" className="w-3.5 h-3.5" />
                         <span className="font-medium">{role.permissions.length}</span>
-                        <span className="text-xs">permissions</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Icon name="users" className="w-4 h-4" />
+                      <div className="flex items-center gap-1">
+                        <Icon name="users" className="w-3.5 h-3.5" />
                         <span className="font-medium">0</span>
-                        <span className="text-xs">users</span>
                       </div>
+                      {role.isSystemRole && (
+                        <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium">
+                          SYSTEM
+                        </span>
+                      )}
                     </div>
 
                     {/* Actions */}
@@ -430,17 +381,18 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                             variant="secondary"
                             size="sm"
                             onClick={() => handleEditRole(role)}
+                            className="flex-1 text-xs h-8"
                           >
-                            <Icon name="edit" className="w-4 h-4 mr-1" />
+                            <Icon name="edit" className="w-3.5 h-3.5 mr-1" />
                             Edit
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteRole(role.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 w-8 h-8 p-0"
                           >
-                            <Icon name="trash" className="w-4 h-4" />
+                            <Icon name="trash" className="w-3.5 h-3.5" />
                           </Button>
                         </>
                       )}
@@ -449,15 +401,116 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditRole(role)}
+                          className="w-full justify-center text-xs h-8"
                         >
-                          <Icon name="eye" className="w-4 h-4 mr-1" />
+                          <Icon name="eye" className="w-3.5 h-3.5 mr-1.5" />
                           View Details
                         </Button>
                       )}
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Role Cards - List View */}
+          {layoutMode === 'list' && (
+            <div className="space-y-2">
+              {filteredRoles.map((role) => {
+                const roleIcon = getRoleIcon(role.name);
+                const roleColor = getRoleColor(role.name);
+                const colorClasses = {
+                  blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+                  purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+                  red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+                  green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                  gray: 'bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400',
+                };
+
+                return (
+                  <Card key={role.id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                      {/* Icon */}
+                      <div className="flex-shrink-0">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorClasses[roleColor as keyof typeof colorClasses]}`}>
+                          <Icon name={roleIcon as any} className="w-5 h-5" />
+                        </div>
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                            {role.displayName}
+                          </h3>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            {role.name}
+                          </span>
+                          {role.isSystemRole && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium">
+                              SYSTEM
+                            </span>
+                          )}
+                        </div>
+                        {role.description && (
+                          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                            {role.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1.5">
+                          <Icon name="key" className="w-3.5 h-3.5" />
+                          <span className="font-medium">{role.permissions.length}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Icon name="users" className="w-3.5 h-3.5" />
+                          <span className="font-medium">0</span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        {canManageRoles && !role.isSystemRole && (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleEditRole(role)}
+                              className="text-xs h-8"
+                            >
+                              <Icon name="edit" className="w-3.5 h-3.5 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRole(role.id)}
+                              className="text-red-600 hover:text-red-700 w-8 h-8 p-0"
+                            >
+                              <Icon name="trash" className="w-3.5 h-3.5" />
+                            </Button>
+                          </>
+                        )}
+                        {role.isSystemRole && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditRole(role)}
+                            className="text-xs h-8"
+                          >
+                            <Icon name="eye" className="w-3.5 h-3.5 mr-1.5" />
+                            View Details
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           )}
 

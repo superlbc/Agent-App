@@ -3,12 +3,13 @@
 // ============================================================================
 // Modal for assigning and revoking roles to/from users
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Icon } from '../ui/Icon';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { StatusBadge } from '../ui/StatusBadge';
+import { GraphService } from '../../services/graphService';
 import type { UserRoleAssignment as UserRoleAssignmentType, UserRole } from '../../types';
 
 // ============================================================================
@@ -23,7 +24,18 @@ interface UserWithRoles {
   userId: string;
   userEmail: string;
   userName: string;
+  department?: string;
+  jobTitle?: string;
   roles: UserRoleAssignmentType[];
+}
+
+interface GraphUser {
+  id: string;
+  displayName: string;
+  mail: string;
+  userPrincipalName: string;
+  jobTitle?: string;
+  department?: string;
 }
 
 // ============================================================================
@@ -43,12 +55,22 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
   const [selectedRole, setSelectedRole] = useState<UserRole | ''>('');
   const [expirationDate, setExpirationDate] = useState<string>('');
 
-  // Mock data - TODO: Replace with API calls
+  // Graph API search
+  const [graphSearchQuery, setGraphSearchQuery] = useState('');
+  const [graphSearchResults, setGraphSearchResults] = useState<GraphUser[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const graphService = useMemo(() => GraphService.getInstance(), []);
+
+  // User database with role assignments
   const [users, setUsers] = useState<UserWithRoles[]>([
     {
       userId: 'camille@momentumww.com',
       userEmail: 'camille@momentumww.com',
       userName: 'Camille Harper',
+      department: 'Human Resources',
+      jobTitle: 'HR Manager',
       roles: [
         {
           id: 'ur-001',
@@ -67,6 +89,8 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
       userId: 'luis.bustos@momentumww.com',
       userEmail: 'luis.bustos@momentumww.com',
       userName: 'Luis Bustos',
+      department: 'Technology',
+      jobTitle: 'AI & Technology Director',
       roles: [
         {
           id: 'ur-002',
@@ -110,6 +134,70 @@ export const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({
       return matchesSearch && matchesRole;
     });
   }, [users, searchQuery, roleFilter]);
+
+  // ============================================================================
+  // GRAPH API SEARCH
+  // ============================================================================
+
+  // Debounced search effect
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (!graphSearchQuery || graphSearchQuery.length < 2) {
+      setGraphSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await graphService.searchUsers(graphSearchQuery);
+        setGraphSearchResults(results);
+        setShowSearchResults(true);
+      } catch (error) {
+        console.error('User search failed:', error);
+        setGraphSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [graphSearchQuery, graphService]);
+
+  const handleSelectGraphUser = (graphUser: GraphUser) => {
+    // Check if user already exists in our database
+    const existingUser = users.find(u => u.userEmail === graphUser.mail);
+
+    if (existingUser) {
+      // Select existing user
+      setSelectedUser(existingUser);
+    } else {
+      // Create new user entry
+      const newUser: UserWithRoles = {
+        userId: graphUser.mail,
+        userEmail: graphUser.mail,
+        userName: graphUser.displayName,
+        department: graphUser.department,
+        jobTitle: graphUser.jobTitle,
+        roles: [],
+      };
+      setUsers(prev => [...prev, newUser]);
+      setSelectedUser(newUser);
+    }
+
+    // Clear search
+    setGraphSearchQuery('');
+    setShowSearchResults(false);
+  };
 
   // ============================================================================
   // EVENT HANDLERS
