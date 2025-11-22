@@ -79,7 +79,11 @@ const EventList: React.FC<EventListProps> = ({
           comparison = a.eventName.localeCompare(b.eventName);
           break;
         case 'eventStartDate':
-          comparison = new Date(a.eventStartDate).getTime() - new Date(b.eventStartDate).getTime();
+          // Handle undefined dates - put them at the end
+          if (!a.eventStartDate && !b.eventStartDate) comparison = 0;
+          else if (!a.eventStartDate) comparison = 1;
+          else if (!b.eventStartDate) comparison = -1;
+          else comparison = new Date(a.eventStartDate).getTime() - new Date(b.eventStartDate).getTime();
           break;
         case 'city':
           comparison = a.city.localeCompare(b.city);
