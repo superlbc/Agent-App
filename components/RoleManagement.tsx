@@ -275,7 +275,7 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
 
       {/* Roles View */}
       {viewMode === 'roles' && (
-        <div className="space-y-4">
+        <div className="mt-6 space-y-4">
           {/* Filters */}
           <div className="flex gap-4 items-end">
             <div className="flex-1">

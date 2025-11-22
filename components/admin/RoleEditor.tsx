@@ -278,7 +278,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., PROJECT_MANAGER"
-              disabled={role?.isSystemRole}
               required
             />
 
@@ -287,7 +286,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="e.g., Project Manager"
-              disabled={role?.isSystemRole}
               required
             />
 
@@ -297,7 +295,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the role's responsibilities and scope..."
               rows={3}
-              disabled={role?.isSystemRole}
             />
           </div>
 
@@ -344,14 +341,12 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                           ({selectedCount}/{perms.length})
                         </span>
                       </button>
-                      {!role?.isSystemRole && (
-                        <button
-                          onClick={() => selectAllInModule(module)}
-                          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          {allSelected ? 'Deselect All' : 'Select All'}
-                        </button>
-                      )}
+                      <button
+                        onClick={() => selectAllInModule(module)}
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        {allSelected ? 'Deselect All' : 'Select All'}
+                      </button>
                     </div>
 
                     {/* Module Permissions */}
@@ -366,7 +361,6 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
                               type="checkbox"
                               checked={selectedPermissions.includes(permission)}
                               onChange={() => togglePermission(permission)}
-                              disabled={role?.isSystemRole}
                               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                             <span className="text-sm text-gray-900 dark:text-white font-mono">
@@ -401,7 +395,7 @@ export const RoleEditor: React.FC<RoleEditorProps> = ({
             </Button>
             <Button
               onClick={handleSave}
-              disabled={!isValid || role?.isSystemRole}
+              disabled={!isValid}
             >
               <Icon name="check" className="w-5 h-5 mr-2" />
               {role ? 'Save Changes' : 'Create Role'}
