@@ -15,12 +15,10 @@ export type NavigationSection =
   | 'pre-hires'
   | 'approvals'
   | 'hardware-inventory'
-  | 'software-inventory'
+  | 'software-catalog'
   | 'license-pools'
+  | 'user-license-assignments'
   | 'manage-packages'
-  | 'packages-hardware'
-  | 'packages-software'
-  | 'packages-licenses'
   | 'refresh-calendar'
   | 'refresh-finance'
   | 'refresh-notifications'
@@ -87,16 +85,30 @@ const NAVIGATION_STRUCTURE: NavigationGroup[] = [
         description: 'Manage hardware items and inventory',
       },
       {
-        id: 'software-inventory',
-        label: 'Software & Licenses',
+        id: 'software-catalog',
+        label: 'Software Inventory',
         icon: 'disc',
-        description: 'Manage software applications and license seat allocations',
-      },
-      {
-        id: 'license-pools',
-        label: 'License Pool Dashboard',
-        icon: 'key',
-        description: 'Monitor license utilization and seat availability',
+        description: 'Manage software, licenses, and assignments',
+        children: [
+          {
+            id: 'software-catalog',
+            label: 'Software Catalog',
+            icon: 'grid',
+            description: 'All software and applications',
+          },
+          {
+            id: 'license-pools',
+            label: 'License Pool Dashboard',
+            icon: 'key',
+            description: 'License inventory and utilization',
+          },
+          {
+            id: 'user-license-assignments',
+            label: 'User License Assignments',
+            icon: 'user-check',
+            description: 'View all user license assignments',
+          },
+        ],
       },
     ],
   },
@@ -108,32 +120,6 @@ const NAVIGATION_STRUCTURE: NavigationGroup[] = [
         label: 'Packages',
         icon: 'clipboard-list',
         description: 'Manage equipment packages',
-        children: [
-          {
-            id: 'manage-packages',
-            label: 'Manage Packages',
-            icon: 'clipboard-list',
-            description: 'View and manage all packages',
-          },
-          {
-            id: 'packages-hardware',
-            label: 'Hardware',
-            icon: 'laptop',
-            description: 'Hardware package templates',
-          },
-          {
-            id: 'packages-software',
-            label: 'Software',
-            icon: 'disc',
-            description: 'Software package templates',
-          },
-          {
-            id: 'packages-licenses',
-            label: 'Licenses',
-            icon: 'ticket',
-            description: 'License package templates',
-          },
-        ],
       },
     ],
   },
@@ -308,7 +294,7 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
 
   // Expanded groups state (which parent items are expanded)
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    packages: false,
+    'software-catalog': false,
     'hardware-refresh': false,
     'freeze-period': false,
   });
