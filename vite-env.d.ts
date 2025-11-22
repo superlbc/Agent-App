@@ -11,6 +11,15 @@ interface ImportMetaEnv {
   readonly VITE_DEFAULT_INTERROGATION_AGENT_ID: string;
   // Legacy (deprecated)
   readonly VITE_DEFAULT_BOT_ID: string;
+  // Integration Services
+  readonly VITE_BRANDSCOPIC_API_KEY: string;
+  readonly VITE_BRANDSCOPIC_API_URL: string;
+  readonly VITE_PLACER_API_KEY: string;
+  readonly VITE_PLACER_API_URL: string;
+  readonly VITE_SMARTSHEET_ACCESS_TOKEN: string;
+  readonly VITE_SMARTSHEET_API_URL: string;
+  readonly VITE_QRTIGER_API_KEY: string;
+  readonly VITE_QRTIGER_API_URL: string;
 }
 
 interface ImportMeta {
