@@ -24,6 +24,7 @@ import { useVersionCheck } from './hooks/useVersionCheck';
 import { VersionUpdateBanner } from './components/ui/VersionUpdateBanner';
 import { PackageProvider, usePackages } from './contexts/PackageContext';
 import { ApprovalProvider, useApprovals } from './contexts/ApprovalContext';
+import { LicenseProvider, useLicense } from './contexts/LicenseContext';
 import { PackageAssignmentModal } from './components/PackageAssignmentModal';
 import { PackageBuilder } from './components/PackageBuilder';
 import { PackageDetailView } from './components/PackageDetailView';
@@ -104,6 +105,14 @@ const AppContent: React.FC = () => {
     startView: startViewPackage,
     cancelView: cancelViewPackage,
   } = usePackages();
+
+  // License Pool Management
+  const {
+    licensePools,
+    assignLicenseToPool,
+    getPoolUtilization,
+    getPoolAvailableSeats,
+  } = useLicense();
 
   // Pre-hire Modal States
   const [viewingPreHire, setViewingPreHire] = useState<PreHire | null>(null);
@@ -596,7 +605,7 @@ const AppContent: React.FC = () => {
 
         {/* Content Area */}
         <div className="flex-1 overflow-hidden">
-          {/* Pre-hires & Packages Section */}
+          {/* Pre-hires Section */}
           {currentSection === 'pre-hires' && (
             <div className="h-full overflow-hidden relative">
               <OutputPanel
@@ -608,6 +617,35 @@ const AppContent: React.FC = () => {
                 onMerge={handleMergePreHire}
                 onCreate={handleCreatePreHire}
                 loading={preHiresLoading}
+              />
+            </div>
+          )}
+
+          {/* Packages Section */}
+          {currentSection === 'packages' && (
+            <div className="h-full overflow-auto p-6">
+              <PackageLibrary
+                packages={packages}
+                selectedPackage={null}
+                onView={handleViewPackage}
+                onEdit={handleEditPackage}
+                onDelete={handleDeletePackage}
+                onDuplicate={handleDuplicatePackage}
+                onCreate={handleCreatePackage}
+              />
+            </div>
+          )}
+
+          {/* Approvals Section */}
+          {currentSection === 'approvals' && (
+            <div className="h-full overflow-auto p-6">
+              <ApprovalQueue
+                approvals={approvals}
+                statistics={approvalStatistics}
+                onView={handleViewApprovalDetail}
+                onApprove={handleStartApprove}
+                onReject={handleStartReject}
+                onViewTicket={handleViewTicketById}
               />
             </div>
           )}
@@ -625,14 +663,14 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {/* Software Inventory Section */}
-          {currentSection === 'software-inventory' && (
+          {/* Software Catalog Section */}
+          {currentSection === 'software-catalog' && (
             <div className="h-full overflow-auto p-6">
               <SoftwareInventory
                 initialSoftware={mockSoftware}
                 onSoftwareChange={(updatedSoftware) => {
                   console.log('Software updated:', updatedSoftware);
-                  addToast('Software inventory updated', 'success');
+                  addToast('Software catalog updated', 'success');
                 }}
               />
             </div>
@@ -641,68 +679,8 @@ const AppContent: React.FC = () => {
           {/* License Pool Dashboard Section */}
           {currentSection === 'license-pools' && (
             <div className="h-full overflow-auto p-6">
-              <LicensePoolDashboard
-                licenses={mockSoftware}
-                onAssignLicense={(license) => {
-                  console.log('Assign license:', license);
-                  addToast(`Assigning ${license.name}...`, 'success');
-                }}
-                onViewAssignments={(license) => {
-                  console.log('View assignments for:', license);
-                  addToast(`Viewing assignments for ${license.name}`, 'success');
-                }}
-                onEditLicense={(license) => {
-                  console.log('Edit license:', license);
-                  addToast(`Editing ${license.name}...`, 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Manage Packages Section */}
-          {currentSection === 'manage-packages' && (
-            <div className="h-full overflow-auto p-6">
-              <PackageLibrary
-                packages={packages}
-                selectedPackage={null}
-                onView={handleViewPackage}
-                onEdit={handleEditPackage}
-                onDelete={handleDeletePackage}
-                onDuplicate={handleDuplicatePackage}
-                onCreate={handleCreatePackage}
-              />
-            </div>
-          )}
-
-          {/* Packages > Hardware Section */}
-          {currentSection === 'packages-hardware' && (
-            <div className="h-full overflow-auto p-6">
-              <HardwareInventory
-                initialHardware={mockHardware}
-                onHardwareChange={(updatedHardware) => {
-                  console.log('Hardware updated:', updatedHardware);
-                  addToast('Hardware inventory updated', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Packages > Software Section */}
-          {currentSection === 'packages-software' && (
-            <div className="h-full overflow-auto p-6">
-              <SoftwareInventory
-                initialSoftware={mockSoftware}
-                onSoftwareChange={(updatedSoftware) => {
-                  console.log('Software updated:', updatedSoftware);
-                  addToast('Software inventory updated', 'success');
-                }}
-              />
-            </div>
-          )}
-
-          {/* Packages > Licenses Section */}
-          {currentSection === 'packages-licenses' && (
-            <div className="h-full overflow-auto p-6">
+              {/* TODO: Update LicensePoolDashboard to accept licensePools prop */}
+              {/* For now, using backward-compatible licenses prop with mockSoftware */}
               <LicensePoolDashboard
                 licenses={mockSoftware}
                 onAssignLicense={(license) => {
@@ -734,16 +712,16 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {/* Refresh Finance View Section */}
-          {currentSection === 'refresh-finance' && (
+          {/* Refresh Budget Forecast Section */}
+          {currentSection === 'refresh-budget' && (
             <div className="h-full overflow-hidden">
               <RefreshFinanceView
                 schedules={[]} // TODO: Add mock refresh schedules
                 onExportCSV={() => {
-                  addToast('Exported refresh forecast to CSV', 'success');
+                  addToast('Exported budget forecast to CSV', 'success');
                 }}
                 onExportPDF={() => {
-                  addToast('Exported refresh forecast to PDF', 'success');
+                  addToast('Exported budget forecast to PDF', 'success');
                 }}
               />
             </div>
@@ -1105,9 +1083,11 @@ function App() {
         <DepartmentProvider>
           <PreHireProvider>
             <PackageProvider>
-              <ApprovalProvider>
-                <AppContent />
-              </ApprovalProvider>
+              <LicenseProvider useMockData={true}>
+                <ApprovalProvider>
+                  <AppContent />
+                </ApprovalProvider>
+              </LicenseProvider>
             </PackageProvider>
           </PreHireProvider>
         </DepartmentProvider>
