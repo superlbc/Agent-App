@@ -76,7 +76,12 @@ export const PreHireProvider: React.FC<PreHireProviderProps> = ({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch pre-hires';
       console.error('[PreHireContext] Error fetching pre-hires:', errorMessage);
-      setError(errorMessage);
+
+      // Don't set error if MSAL not initialized (expected during initial load)
+      // We're falling back to mock data anyway
+      if (!errorMessage.includes('MSAL not initialized')) {
+        setError(errorMessage);
+      }
 
       // Fallback to mock data on error
       console.warn('[PreHireContext] Falling back to mock data');
