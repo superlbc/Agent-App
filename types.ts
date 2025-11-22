@@ -435,6 +435,7 @@ export interface Employee {
   email: string;
   department: string;
   role: string;
+  status: 'active' | 'inactive' | 'withdrawn' | 'pre-hire'; // From vw_personnel.csv
   startDate: Date;
   endDate?: Date;
   manager?: string;
@@ -463,6 +464,76 @@ export interface Employee {
   createdBy: string;
   createdDate: Date;
   lastModified: Date;
+}
+
+/**
+ * Employee License Summary
+ * Efficient view of all licenses assigned to an employee
+ * Used for User License Assignments dashboard
+ *
+ * **Phase 2: NEW**
+ */
+export interface EmployeeLicenseSummary {
+  employeeId: string;
+  employeeName: string;
+  employeeEmail: string;
+  department: string;
+  role: string;
+  status: 'active' | 'inactive' | 'withdrawn' | 'pre-hire';
+  assignedLicenses: Array<{
+    assignmentId: string;
+    licensePoolId: string;
+    licenseName: string;
+    poolName: string;
+    vendor: string;
+    assignedDate: Date;
+    assignedBy: string;
+    expirationDate?: Date;
+    status: 'active' | 'expired' | 'revoked';
+    notes?: string;
+  }>;
+  totalLicenses: number;
+  activeLicenses: number;
+  expiredLicenses: number;
+  revokedLicenses: number;
+}
+
+/**
+ * License Assignment History
+ * Audit trail for license assignment actions
+ * Tracks who did what and when for compliance
+ *
+ * **Phase 2: NEW**
+ */
+export interface LicenseAssignmentHistory {
+  id: string;
+  assignmentId: string; // FK to LicenseAssignment.id
+  action: 'assigned' | 'revoked' | 'expired' | 'renewed';
+  performedBy: string;
+  performedAt: Date;
+  reason?: string;
+  notes?: string;
+  previousStatus?: 'active' | 'expired' | 'revoked';
+  newStatus?: 'active' | 'expired' | 'revoked';
+}
+
+/**
+ * License Assignment Filters
+ * Filter options for User License Assignments view
+ *
+ * **Phase 2: NEW**
+ */
+export interface LicenseAssignmentFilters {
+  employeeStatus?: ('active' | 'inactive' | 'withdrawn' | 'pre-hire')[];
+  licenseStatus?: ('active' | 'expired' | 'revoked')[];
+  licensePoolIds?: string[];
+  departments?: string[];
+  roles?: string[];
+  assignedDateFrom?: Date;
+  assignedDateTo?: Date;
+  expirationDateFrom?: Date;
+  expirationDateTo?: Date;
+  searchQuery?: string; // Search employee name or email
 }
 
 /**

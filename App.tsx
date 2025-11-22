@@ -640,51 +640,6 @@ const AppContent: React.FC = () => {
             </div>
           )}
 
-          {/* Packages - Hardware Sub-section */}
-          {currentSection === 'packages-hardware' && (
-            <div className="h-full overflow-auto p-6">
-              <PackageLibrary
-                packages={packages}
-                selectedPackage={null}
-                onView={handleViewPackage}
-                onEdit={handleEditPackage}
-                onDelete={handleDeletePackage}
-                onDuplicate={handleDuplicatePackage}
-                onCreate={handleCreatePackage}
-              />
-            </div>
-          )}
-
-          {/* Packages - Software Sub-section */}
-          {currentSection === 'packages-software' && (
-            <div className="h-full overflow-auto p-6">
-              <PackageLibrary
-                packages={packages}
-                selectedPackage={null}
-                onView={handleViewPackage}
-                onEdit={handleEditPackage}
-                onDelete={handleDeletePackage}
-                onDuplicate={handleDuplicatePackage}
-                onCreate={handleCreatePackage}
-              />
-            </div>
-          )}
-
-          {/* Packages - Licenses Sub-section */}
-          {currentSection === 'packages-licenses' && (
-            <div className="h-full overflow-auto p-6">
-              <PackageLibrary
-                packages={packages}
-                selectedPackage={null}
-                onView={handleViewPackage}
-                onEdit={handleEditPackage}
-                onDelete={handleDeletePackage}
-                onDuplicate={handleDuplicatePackage}
-                onCreate={handleCreatePackage}
-              />
-            </div>
-          )}
-
           {/* Approvals Section */}
           {currentSection === 'approvals' && (
             <div className="h-full overflow-auto p-6">
@@ -713,7 +668,7 @@ const AppContent: React.FC = () => {
           )}
 
           {/* Software Catalog Section */}
-          {currentSection === 'software-inventory' && (
+          {currentSection === 'software-catalog' && (
             <div className="h-full overflow-auto p-6">
               <SoftwareInventory
                 initialSoftware={mockSoftware}
@@ -744,6 +699,26 @@ const AppContent: React.FC = () => {
                   addToast(`Editing pool ${pool.id}...`, 'success');
                 }}
               />
+            </div>
+          )}
+
+          {/* User License Assignments Section */}
+          {currentSection === 'user-license-assignments' && (
+            <div className="h-full overflow-auto p-6">
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">🔑</div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    User License Assignments
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    View and manage license assignments for all employees
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    Coming soon in Phase 3 of implementation
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
