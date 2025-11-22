@@ -3,7 +3,7 @@
  *
  * Features:
  * - OpenStreetMap showing all event venues (using Leaflet)
- * - Markers clustered by proximity
+ * - Interactive markers for each event
  * - Click marker → event detail popup
  * - Filter by: Date range, Campaign, Status
  * - Zoom to fit all markers
@@ -12,11 +12,8 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-markercluster';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import './EventMap.css';
 import { useEvents } from '../../contexts/EventContext';
 import type { Event, Campaign, EventMapMarker } from '../../types';
@@ -249,54 +246,52 @@ const EventMap: React.FC<EventMapProps> = ({ campaigns = [], onEventClick, class
           {/* Auto-fit bounds when markers change */}
           <FitBoundsController markers={markers} />
 
-          {/* Marker Clustering */}
-          <MarkerClusterGroup>
-            {markers.map((marker) => (
-              <Marker
-                key={marker.id}
-                position={[marker.position.lat, marker.position.lng]}
-                icon={createCustomIcon(marker.color)}
-                eventHandlers={{
-                  click: () => handleMarkerClick(marker),
-                }}
-              >
-                <Popup>
-                  <div className="p-2 max-w-sm">
-                    <h3 className="font-semibold text-gray-900 mb-1">{marker.event.eventName}</h3>
-                    <div className="space-y-1 text-sm text-gray-600 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="w-4 h-4">📅</span>
-                        <span>
-                          {marker.event.eventStartDate
-                            ? new Date(marker.event.eventStartDate).toLocaleDateString()
-                            : 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-4 h-4">📍</span>
-                        <span>
-                          {marker.event.eventVenue}, {marker.event.city}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-4 h-4">💼</span>
-                        <span>{marker.campaign.client}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <StatusBadge status={marker.event.status} />
-                      </div>
+          {/* Markers */}
+          {markers.map((marker) => (
+            <Marker
+              key={marker.id}
+              position={[marker.position.lat, marker.position.lng]}
+              icon={createCustomIcon(marker.color)}
+              eventHandlers={{
+                click: () => handleMarkerClick(marker),
+              }}
+            >
+              <Popup>
+                <div className="p-2 max-w-sm">
+                  <h3 className="font-semibold text-gray-900 mb-1">{marker.event.eventName}</h3>
+                  <div className="space-y-1 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4">📅</span>
+                      <span>
+                        {marker.event.eventStartDate
+                          ? new Date(marker.event.eventStartDate).toLocaleDateString()
+                          : 'N/A'}
+                      </span>
                     </div>
-                    <button
-                      onClick={() => handleViewDetails(marker.event)}
-                      className="w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-                    >
-                      View Details
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4">📍</span>
+                      <span>
+                        {marker.event.eventVenue}, {marker.event.city}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-4 h-4">💼</span>
+                      <span>{marker.campaign.client}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={marker.event.status} />
+                    </div>
                   </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
+                  <button
+                    onClick={() => handleViewDetails(marker.event)}
+                    className="w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
       </div>
 
