@@ -2126,10 +2126,10 @@ export const mockApprovalStatistics = {
   approvedToday: 2,
   rejectedToday: 1,
   averageApprovalTime: 4.5, // hours
-  openTickets: getOpenTickets().length,
-  inProgressTickets: getInProgressTickets().length,
-  resolvedTickets: getResolvedTickets().length,
-  freezePeriodTickets: getFreezePeriodTickets().length,
+  openTickets: 0, // mockHelixTickets is empty
+  inProgressTickets: 0, // mockHelixTickets is empty
+  resolvedTickets: 0, // mockHelixTickets is empty
+  freezePeriodTickets: 0, // mockHelixTickets is empty
 };
 
 // ============================================================================
