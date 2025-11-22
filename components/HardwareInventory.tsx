@@ -15,6 +15,7 @@ import HardwareEditModal from './HardwareEditModal';
 import HardwareBulkImportModal from './HardwareBulkImportModal';
 import { Hardware } from '../types';
 import { useRole } from '../contexts/RoleContext';
+import { ConfirmModal } from './ui/ConfirmModal';
 
 interface HardwareInventoryProps {
   // Optional: pass in hardware data from parent
@@ -53,6 +54,10 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [selectedHardware, setSelectedHardware] = useState<Hardware | null>(null);
 
+  // Confirmation modal state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [hardwareToDelete, setHardwareToDelete] = useState<Hardware | null>(null);
+
   // Hardware types for filtering
   const hardwareTypes: Array<{ value: Hardware['type'] | 'all'; label: string; icon: string }> = [
     { value: 'all', label: 'All Types', icon: 'package' },
@@ -86,13 +91,20 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
 
   // Delete hardware
   const handleDeleteHardware = (hardwareId: string) => {
-    if (!confirm('Are you sure you want to delete this hardware item?')) {
-      return;
+    const hw = hardware.find((h) => h.id === hardwareId);
+    if (hw) {
+      setHardwareToDelete(hw);
+      setShowDeleteConfirm(true);
     }
+  };
 
-    const updatedHardware = hardware.filter((hw) => hw.id !== hardwareId);
-    setHardware(updatedHardware);
-    onHardwareChange?.(updatedHardware);
+  const confirmDelete = () => {
+    if (hardwareToDelete) {
+      const updatedHardware = hardware.filter((hw) => hw.id !== hardwareToDelete.id);
+      setHardware(updatedHardware);
+      onHardwareChange?.(updatedHardware);
+      setHardwareToDelete(null);
+    }
   };
 
   // Bulk import hardware
@@ -705,6 +717,19 @@ const HardwareInventory: React.FC<HardwareInventoryProps> = ({
         isOpen={showBulkImportModal}
         onClose={() => setShowBulkImportModal(false)}
         onImportHardware={handleImportHardware}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setHardwareToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Hardware Item?"
+        message={`Are you sure you want to delete ${hardwareToDelete?.model}? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );
