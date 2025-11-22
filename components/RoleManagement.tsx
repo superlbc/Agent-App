@@ -13,7 +13,7 @@ import { StatusBadge } from './ui/StatusBadge';
 import { Select } from './ui/Select';
 import { ConfirmModal } from './ui/ConfirmModal';
 import { RoleEditor } from './admin/RoleEditor';
-import { UserRoleAssignment } from './admin/UserRoleAssignment';
+import { UserRoleManagement } from './admin/UserRoleManagement';
 import { PermissionMatrix } from './admin/PermissionMatrix';
 import { useRole } from '../contexts/RoleContext';
 import type { Role, UserRole, Permission } from '../types';
@@ -530,9 +530,8 @@ export const RoleManagement: React.FC<RoleManagementProps> = ({
       {/* User Assignments View */}
       {viewMode === 'users' && canManageUsers && (
         <div className="mt-6">
-          <UserRoleAssignment
-            roles={roles}
-            onClose={() => {}} // Empty function since it's inline, not a modal
+          <UserRoleManagement
+            availableRoles={roles.map(r => r.name as UserRole)}
           />
         </div>
       )}
