@@ -15,7 +15,6 @@ import { TourProvider } from './contexts/TourContext';
 import { RoleProvider } from './contexts/RoleContext';
 import { DepartmentProvider } from './contexts/DepartmentContext';
 import { PreHireProvider, usePreHires } from './contexts/PreHireContext';
-import { TourController } from './components/tour/TourController';
 import { TourWelcomeModal } from './components/tour/TourWelcomeModal';
 import { useAuth } from './contexts/AuthContext';
 import { telemetryService } from './utils/telemetryService';
