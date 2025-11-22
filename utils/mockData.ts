@@ -3003,6 +3003,190 @@ export const mockHelixTickets: any[] = [];
 export const mockLicensePools: any[] = [];
 
 /**
+ * Mock Clients
+ * Client organizations for campaigns and programs
+ */
+export const mockClients = [
+  {
+    id: 'client-001',
+    name: 'American Express',
+    code: 'AMEX',
+  },
+  {
+    id: 'client-002',
+    name: 'Verizon',
+    code: 'VZ',
+  },
+  {
+    id: 'client-003',
+    name: 'Coca-Cola',
+    code: 'COKE',
+  },
+  {
+    id: 'client-004',
+    name: 'Delta Airlines',
+    code: 'DELTA',
+  },
+  {
+    id: 'client-005',
+    name: 'Tesla',
+    code: 'TESLA',
+  },
+  {
+    id: 'client-006',
+    name: 'Samsung',
+    code: 'SAMSUNG',
+  },
+  {
+    id: 'client-007',
+    name: 'Mastercard',
+    code: 'MC',
+  },
+  {
+    id: 'client-008',
+    name: 'AT&T',
+    code: 'ATT',
+  },
+];
+
+/**
+ * Mock Programs
+ * Master programs for grouping campaigns
+ */
+export const mockPrograms = [
+  {
+    id: 'prog-001',
+    clientId: 'client-001',
+    name: 'AMEX Unstaged',
+    code: 'AMEX_UNSTAGED',
+    region: 'National',
+    eventType: 'Music Festival',
+    status: 'active' as const,
+    eventCount: 8,
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2025-03-10'),
+    createdBy: 'sarah.johnson@momentumww.com',
+  },
+  {
+    id: 'prog-002',
+    clientId: 'client-002',
+    name: 'Verizon NFL Sponsorship',
+    code: 'VZ_NFL',
+    region: 'National',
+    eventType: 'Sports Activation',
+    status: 'active' as const,
+    eventCount: 16,
+    createdAt: new Date('2024-02-01'),
+    updatedAt: new Date('2025-02-15'),
+    createdBy: 'michael.chen@momentumww.com',
+  },
+  {
+    id: 'prog-003',
+    clientId: 'client-003',
+    name: 'Zero Sugar Launch',
+    code: 'COKE_ZERO',
+    region: 'National',
+    eventType: 'Product Sampling',
+    status: 'active' as const,
+    eventCount: 50,
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2025-03-20'),
+    createdBy: 'emily.rodriguez@momentumww.com',
+  },
+  {
+    id: 'prog-004',
+    clientId: 'client-004',
+    name: 'Delta Summer Travel',
+    code: 'DELTA_SUMMER',
+    region: 'National',
+    eventType: 'Travel Activation',
+    status: 'planning' as const,
+    eventCount: 5,
+    createdAt: new Date('2024-04-01'),
+    updatedAt: new Date('2025-04-10'),
+    createdBy: 'james.wilson@momentumww.com',
+  },
+  {
+    id: 'prog-005',
+    clientId: 'client-005',
+    name: 'Tesla Test Drive',
+    code: 'TESLA_TD',
+    region: 'West',
+    eventType: 'Product Demo',
+    status: 'active' as const,
+    eventCount: 12,
+    createdAt: new Date('2024-05-01'),
+    updatedAt: new Date('2025-05-15'),
+    createdBy: 'olivia.taylor@momentumww.com',
+  },
+  {
+    id: 'prog-006',
+    clientId: 'client-006',
+    name: 'Samsung Galaxy Launch',
+    code: 'SAMSUNG_GALAXY',
+    region: 'National',
+    eventType: 'Product Launch',
+    status: 'completed' as const,
+    eventCount: 25,
+    createdAt: new Date('2023-06-01'),
+    updatedAt: new Date('2024-12-31'),
+    createdBy: 'daniel.anderson@momentumww.com',
+  },
+  {
+    id: 'prog-007',
+    clientId: 'client-007',
+    name: 'Mastercard Priceless Cities',
+    code: 'MC_PRICELESS',
+    region: 'National',
+    eventType: 'Hospitality',
+    status: 'active' as const,
+    eventCount: 30,
+    createdAt: new Date('2024-07-01'),
+    updatedAt: new Date('2025-05-20'),
+    createdBy: 'sophia.martinez@momentumww.com',
+  },
+  {
+    id: 'prog-008',
+    clientId: 'client-008',
+    name: 'AT&T 5G Activation',
+    code: 'ATT_5G',
+    region: 'National',
+    eventType: 'Tech Activation',
+    status: 'active' as const,
+    eventCount: 20,
+    createdAt: new Date('2024-08-01'),
+    updatedAt: new Date('2025-05-25'),
+    createdBy: 'liam.thomas@momentumww.com',
+  },
+];
+
+/**
+ * Mock Integration Config
+ * API configuration for Brandscopic, QR Tiger, Qualtrics, MOMO BI
+ */
+export const mockIntegrationConfig = {
+  brandscopic: {
+    apiKey: 'bs_test_key_123456789',
+    baseUrl: 'https://api.brandscopic.com/v2',
+    enabled: true,
+  },
+  qrTiger: {
+    apiKey: 'qr_test_key_987654321',
+    baseUrl: 'https://api.qrtiger.com/v1',
+    enabled: true,
+  },
+  qualtrics: {
+    apiKey: 'qualtrics_test_key_abcdef',
+    datacenterId: 'sjc1',
+    enabled: false,
+  },
+  momoBi: {
+    flowUrl: 'https://prod-00.westus.logic.azure.com:443/workflows/abc123/triggers/manual/paths/invoke',
+    enabled: true,
+  },
+};
+
+/**
  * Calculate total cost of a package
  * Helper function for package cost calculations
  */
