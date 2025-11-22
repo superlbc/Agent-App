@@ -58,7 +58,10 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
     roles.forEach(role => {
       role.permissions.forEach(perm => permSet.add(perm));
     });
-    return Array.from(permSet).sort();
+    const perms = Array.from(permSet).sort();
+    console.log('[PermissionMatrix] All permissions extracted:', perms.length, perms);
+    console.log('[PermissionMatrix] Roles:', roles.length, roles.map(r => ({name: r.displayName, perms: r.permissions.length})));
+    return perms;
   }, [roles]);
 
   // ============================================================================
@@ -66,7 +69,7 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
   // ============================================================================
 
   const filteredPermissions = useMemo(() => {
-    return allPermissions.filter(permission => {
+    const filtered = allPermissions.filter(permission => {
       // Search filter
       const matchesSearch = !searchQuery ||
         permission.toLowerCase().includes(searchQuery.toLowerCase());
@@ -84,6 +87,8 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
 
       return matchesSearch && matchesModule;
     });
+    console.log('[PermissionMatrix] Filtered permissions:', filtered.length, '| Search:', searchQuery, '| Module:', selectedModule, '| ShowDiff:', showOnlyDifferences);
+    return filtered;
   }, [allPermissions, searchQuery, selectedModule, showOnlyDifferences, roles]);
 
   // Group permissions by module
