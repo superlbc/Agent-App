@@ -1276,3 +1276,244 @@ declare module './types' {
     searchError?: string;
   }
 }
+
+// ============================================================================
+// UXP FIELD MARKETING PLATFORM - EVENT MANAGEMENT TYPES
+// ============================================================================
+
+/**
+ * Campaign
+ * Represents a multi-event marketing campaign
+ * Example: "Nike Air Max 2025 Launch Tour" with 50 events across US
+ */
+export interface Campaign {
+  id: string;
+  campaignName: string;
+  campaignDescription?: string;
+  client: string; // e.g., "Nike", "Coca-Cola"
+  eventType: string; // e.g., "Product Launch", "Brand Activation", "Sampling"
+  masterProgram?: string; // e.g., "Summer Tour 2025"
+  region: string; // e.g., "North America", "EMEA", "APAC"
+  status: "planning" | "active" | "completed" | "cancelled";
+  year: number;
+  month?: number;
+  campaignOwner: string; // User ID or email of campaign owner
+  campaignOwnerName?: string;
+
+  // Financial tracking
+  totalBudget?: number;
+  spentToDate?: number;
+
+  // Dates
+  startDate?: Date;
+  endDate?: Date;
+
+  // Metadata
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+  modifiedBy: string;
+
+  // Stats (calculated)
+  totalEvents?: number;
+  completedEvents?: number;
+  upcomingEvents?: number;
+}
+
+/**
+ * Event
+ * Individual event within a campaign
+ * Example: "Nike Air Max Launch - Los Angeles" on specific date/venue
+ */
+export interface Event {
+  id: string;
+  campaignId: string; // FK to Campaign.id
+  eventName: string;
+  eventDetails?: string;
+
+  // Dates
+  eventStartDate: Date;
+  eventEndDate: Date;
+
+  // Location
+  eventVenue: string; // Venue name (e.g., "Staples Center")
+  city: string;
+  country: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+
+  // Logistics
+  distanceFromOfficeMi?: number; // Distance from main office
+  timeFromOfficeMins?: number; // Drive time from office
+
+  // Ownership
+  owner: string; // User ID or email of event owner
+  ownerName?: string;
+  status: "planning" | "confirmed" | "in-progress" | "completed" | "cancelled";
+
+  // Team assignments
+  peopleAssignments?: PeopleAssignment[];
+
+  // Data capture
+  qrCodes?: QRCode[];
+
+  // Metadata
+  createdBy: string;
+  createdDate: Date;
+  lastModified: Date;
+  modifiedBy: string;
+}
+
+/**
+ * Venue
+ * Location/venue data with Placer.ai integration
+ */
+export interface Venue {
+  id: string;
+  name: string;
+  fullAddress: string;
+  latitude: number;
+  longitude: number;
+  geoJSONData?: any; // GeoJSON polygon data
+
+  // Placer.ai platform data
+  platform?: string; // e.g., "Placer.ai"
+  poiScope?: string; // Point of Interest scope
+  category?: string; // Venue category (e.g., "Retail", "Sports", "Entertainment")
+  tags?: string[]; // Venue tags for categorization
+  url?: string; // Venue URL
+
+  // Placer analytics
+  placerData?: PlacerData[];
+
+  // Metadata
+  createdDate: Date;
+  lastModified: Date;
+}
+
+/**
+ * PlacerData
+ * Footfall analytics from Placer.ai
+ */
+export interface PlacerData {
+  id: string;
+  venueId: string; // FK to Venue.id
+  placerEntryId?: string; // Placer.ai's internal ID
+  movementData?: any; // Footfall/movement analytics JSON
+  url?: string; // Link to Placer.ai dashboard
+  createdOn: Date;
+}
+
+/**
+ * QRCode
+ * Lead capture QR codes generated for events
+ */
+export interface QRCode {
+  id: string;
+  eventId: string; // FK to Event.id
+  codeData: string; // QR code content (URL, text, etc.)
+  generatedOn: Date;
+  scanCount: number;
+
+  // QRtiger integration
+  qrtigerId?: string; // QRtiger's internal ID
+  qrtigerStatus?: string; // e.g., "active", "disabled"
+
+  // Metadata
+  createdBy: string;
+  lastModified: Date;
+}
+
+/**
+ * PeopleAssignment
+ * Team member assignments to events
+ */
+export interface PeopleAssignment {
+  id: string;
+  eventId: string; // FK to Event.id
+
+  // User info
+  userId: string; // Azure AD user ID or Employee ID
+  userName: string;
+  userEmail: string;
+  userDepartment?: string;
+  userRole?: string; // Role in event (e.g., "Event Manager", "Field Manager", "Brand Ambassador")
+
+  // On-site tracking
+  onSite: boolean; // Will this person be on-site?
+
+  // Manager info
+  managerName?: string;
+  managerEmail?: string;
+
+  // Logistics
+  distanceFromOffice?: number; // Distance from person's office to venue
+  timeFromOffice?: number; // Travel time from person's office to venue
+
+  // Metadata
+  assignedBy: string;
+  assignedDate: Date;
+}
+
+/**
+ * Event filter state
+ * Filters for event list/calendar/map views
+ */
+export interface EventFilters {
+  campaigns?: string[]; // Filter by campaign IDs
+  statuses?: ("planning" | "confirmed" | "in-progress" | "completed" | "cancelled")[];
+  cities?: string[];
+  countries?: string[];
+  dateFrom?: Date;
+  dateTo?: Date;
+  owners?: string[]; // Filter by owner user IDs
+  searchQuery?: string; // Search event name or venue
+}
+
+/**
+ * Event calendar data
+ * Transformed data for react-big-calendar
+ */
+export interface CalendarEvent {
+  id: string;
+  title: string; // Event name
+  start: Date;
+  end: Date;
+  resource?: {
+    event: Event; // Original event object
+    campaign: Campaign; // Associated campaign
+    color: string; // Campaign color
+  };
+}
+
+/**
+ * Event map marker
+ * Transformed data for Google Maps markers
+ */
+export interface EventMapMarker {
+  id: string;
+  position: {
+    lat: number;
+    lng: number;
+  };
+  title: string;
+  event: Event;
+  campaign: Campaign;
+  color: string; // Campaign color for marker
+}
+
+/**
+ * Event statistics
+ * Dashboard statistics for events
+ */
+export interface EventStatistics {
+  totalEvents: number;
+  upcomingEvents: number;
+  inProgressEvents: number;
+  completedEvents: number;
+  cancelledEvents: number;
+  eventsByCampaign: Record<string, number>;
+  eventsByMonth: Record<string, number>;
+  eventsByCity: Record<string, number>;
+}
