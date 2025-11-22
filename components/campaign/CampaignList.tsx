@@ -369,7 +369,7 @@ export const CampaignList: React.FC<CampaignListProps> = ({
           </div>
 
           {/* Filters Row */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Select
               value={filters.clientId || ''}
               onChange={(e) => handleFilterChange('clientId', e.target.value)}
