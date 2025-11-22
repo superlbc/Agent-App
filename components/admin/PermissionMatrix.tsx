@@ -5,9 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Icon } from '../ui/Icon';
-import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Select } from '../ui/Select';
 import type { Role, Permission } from '../../types';
 
 // ============================================================================
@@ -18,20 +16,6 @@ interface PermissionMatrixProps {
   roles: Role[];
   onClose: () => void;
 }
-
-// Permission modules for grouping
-const PERMISSION_MODULES = [
-  'PREHIRE',
-  'PACKAGE',
-  'HARDWARE',
-  'SOFTWARE',
-  'LICENSE',
-  'EMPLOYEE',
-  'APPROVAL',
-  'FREEZEPERIOD',
-  'HELIX',
-  'ADMIN',
-] as const;
 
 // ============================================================================
 // COMPONENT
@@ -46,8 +30,6 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
   // ============================================================================
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedModule, setSelectedModule] = useState<string>('all');
-  const [showOnlyDifferences, setShowOnlyDifferences] = useState(false);
 
   // ============================================================================
   // ALL PERMISSIONS
@@ -70,26 +52,12 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
 
   const filteredPermissions = useMemo(() => {
     const filtered = allPermissions.filter(permission => {
-      // Search filter
-      const matchesSearch = !searchQuery ||
-        permission.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Module filter
-      const matchesModule = selectedModule === 'all' ||
-        permission.startsWith(selectedModule + '_');
-
-      // Show only differences filter
-      if (showOnlyDifferences) {
-        const rolesWithPerm = roles.filter(r => r.permissions.includes(permission)).length;
-        const hasDifference = rolesWithPerm > 0 && rolesWithPerm < roles.length;
-        return matchesSearch && matchesModule && hasDifference;
-      }
-
-      return matchesSearch && matchesModule;
+      // Search filter only
+      return !searchQuery || permission.toLowerCase().includes(searchQuery.toLowerCase());
     });
-    console.log('[PermissionMatrix] Filtered permissions:', filtered.length, '| Search:', searchQuery, '| Module:', selectedModule, '| ShowDiff:', showOnlyDifferences);
+    console.log('[PermissionMatrix] Filtered permissions:', filtered.length, '/ Total:', allPermissions.length, '| Search:', searchQuery);
     return filtered;
-  }, [allPermissions, searchQuery, selectedModule, showOnlyDifferences, roles]);
+  }, [allPermissions, searchQuery]);
 
   // Group permissions by module
   const permissionsByModule = useMemo(() => {
@@ -137,9 +105,9 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
         </div>
       </div>
 
-        {/* Filters */}
+        {/* Search Filter */}
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="max-w-md">
             <Input
               label="Search Permissions"
               value={searchQuery}
@@ -147,31 +115,6 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
               placeholder="Search by permission name..."
               icon="search"
             />
-            <Select
-              label="Module"
-              value={selectedModule}
-              onChange={(e) => setSelectedModule(e.target.value)}
-            >
-              <option value="all">All Modules</option>
-              {PERMISSION_MODULES.map(module => (
-                <option key={module} value={module}>
-                  {module}
-                </option>
-              ))}
-            </Select>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showOnlyDifferences}
-                  onChange={(e) => setShowOnlyDifferences(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Show only differences
-                </span>
-              </label>
-            </div>
           </div>
         </div>
 
@@ -181,7 +124,7 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
             <div className="flex items-center justify-center h-full text-gray-600 dark:text-gray-400">
               <div className="text-center">
                 <Icon name="search" className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>No permissions match your filters</p>
+                <p>No permissions match your search</p>
               </div>
             </div>
           ) : (
@@ -285,8 +228,11 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({
       {/* Footer */}
       <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {filteredPermissions.length} of {allPermissions.length} permissions
-          across {roles.length} roles
+          {searchQuery ? (
+            <>Showing {filteredPermissions.length} of {allPermissions.length} permissions across {roles.length} roles</>
+          ) : (
+            <>{allPermissions.length} permissions across {roles.length} roles</>
+          )}
         </div>
       </div>
     </div>
