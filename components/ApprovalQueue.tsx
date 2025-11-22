@@ -236,6 +236,7 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 leftIcon="search"
+                aria-label="Search approvals"
               />
             </div>
 
@@ -309,7 +310,7 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({
         </div>
       ) : (
         <Card className="p-8">
-          <div className="text-center">
+          <div className="text-center" role="status">
             <Icon
               name="search"
               className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4"

@@ -216,6 +216,7 @@ const EventList: React.FC<EventListProps> = ({
             onChange={handleSearchChange}
             leftIcon="magnifying-glass"
             className="w-full"
+              aria-label="Search events or venues..."
           />
         </div>
 
@@ -364,7 +365,7 @@ const EventList: React.FC<EventListProps> = ({
             {paginatedEvents.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-2" role="status">
                     <Icon name="folder-open" className="w-12 h-12 text-gray-400 dark:text-gray-600" />
                     <p>No events found</p>
                     <button

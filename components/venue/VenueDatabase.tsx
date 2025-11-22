@@ -324,6 +324,7 @@ const VenueDatabase: React.FC<VenueDatabaseProps> = ({
               leftIcon="search"
               rightIcon={searchQuery ? 'x' : undefined}
               onRightIconClick={() => setSearchQuery('')}
+              aria-label="Search venues"
             />
           </div>
 
@@ -592,12 +593,14 @@ const VenueDatabase: React.FC<VenueDatabaseProps> = ({
               {paginatedVenues.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center">
-                    <Icon name="map-pin" className="mx-auto mb-4 text-gray-400" size={48} />
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {searchQuery || filterCity.length > 0 || filterCountry.length > 0 || filterCategory.length > 0 || filterStatus.length > 0
-                        ? 'No venues match your search or filters.'
-                        : 'No venues found. Create your first venue to get started.'}
-                    </p>
+                    <div role="status">
+                      <Icon name="map-pin" className="mx-auto mb-4 text-gray-400" size={48} />
+                      <p className="text-gray-600 dark:text-gray-400">
+                        {searchQuery || filterCity.length > 0 || filterCountry.length > 0 || filterCategory.length > 0 || filterStatus.length > 0
+                          ? 'No venues match your search or filters.'
+                          : 'No venues found. Create your first venue to get started.'}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
