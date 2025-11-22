@@ -182,7 +182,13 @@ export const CampaignList: React.FC<CampaignListProps> = ({
   // ============================================================================
 
   const renderStatusBadge = (status: CampaignWithClient['status']) => {
-    const config = STATUS_CONFIG[status];
+    const config = STATUS_CONFIG[status] || {
+      label: status || 'Unknown',
+      color: 'gray',
+      bgClass: 'bg-gray-100 dark:bg-gray-800',
+      textClass: 'text-gray-700 dark:text-gray-300',
+      borderClass: 'border-gray-300 dark:border-gray-600',
+    };
     return (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.bgClass} ${config.textClass} ${config.borderClass}`}
