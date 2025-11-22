@@ -1,0 +1,1 @@
+﻿here's a list of a couple common tasks you can do w/ the qualtrics API:https://api.qualtrics.com/ce4e22f0b0a34-overview we only really use one of them - get survey responses:https://api.qualtrics.com/5e86e383167d5-getting-survey-responses-via-the-new-export-ap-is
