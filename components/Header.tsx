@@ -10,7 +10,6 @@ interface HeaderProps {
   onToggleDarkMode: () => void;
   onOpenHelp: () => void;
   onOpenSettings: () => void;
-  onReplayTour: () => void;
   onReset: () => void;
 }
 
@@ -30,7 +29,7 @@ const getInitials = (name?: string): string => {
   return name.substring(0, 2).toUpperCase();
 };
 
-export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onOpenHelp, onOpenSettings, onReplayTour, onReset }) => {
+export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, onOpenHelp, onOpenSettings, onReset }) => {
   const { t } = useTranslation(['common']);
   const { user, graphData, logout, isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,7 +51,6 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
   // Build menu items array, conditionally including settings for admin users only
   const menuItems: MenuItem[] = [
     { label: t('common:header.menu.toggleTheme'), icon: isDarkMode ? 'sun' : 'moon', action: onToggleDarkMode },
-    { id: 'replay-tutorial-button', label: t('common:header.menu.replayTutorial'), icon: 'sparkles', action: onReplayTour },
     { label: t('common:header.menu.help'), icon: 'help', action: onOpenHelp },
     { label: t('common:header.menu.resetData'), icon: 'refresh', action: onReset },
     // Settings is only available to admin users
@@ -68,10 +66,10 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
              <Icon name="logo" className="h-10 w-10 text-primary flex-shrink-0"/>
             <div className="flex flex-col">
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">UXP - Unified Experience Platform</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Momentum Knowledge Assistant</h1>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500 text-white">Beta</span>
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">Streamline event management, campaigns, and organizational workflows.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">Ask questions and access team resources powered by AI.</p>
             </div>
           </div>
           <div id="user-profile-menu" className="relative">

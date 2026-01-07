@@ -1,7 +1,6 @@
 // NOTE: This service handles communication with the custom Interact API ("AI Console").
 import { Payload, AgentResponse, ApiConfig, AuthToken, FormState, InterrogationResponse, CriticalThinkingRequest, CriticalThinkingResponse, Participant, Controls } from '../types.ts';
 import i18n from '../utils/i18n';
-import { buildParticipantContext } from '../utils/participantContext';
 
 const getAuthToken = async (config: ApiConfig, signal?: AbortSignal): Promise<string> => {
     if (!config.clientId || !config.clientSecret) {
@@ -93,20 +92,16 @@ const constructPrompt = (payload: Payload): string => {
         console.log(`📝 Including user notes in agent context (${user_notes.trim().split(/\s+/).length} words)`);
     }
 
-    // NEW: Add participant context if available
-    // This provides the AI agent with structured participant data for:
-    // - Accurate department assignment in Next Steps
-    // - Speaker identification and matching
-    // - Participation metrics (if attendance data present)
-    // - Silent stakeholder identification
-    if (participants && participants.length > 0) {
-        const participantContext = buildParticipantContext(participants);
-        if (participantContext) {
-            promptParts.push(participantContext);
-            promptParts.push('');
-            console.log(`📊 Including ${participants.length} participants in agent context`);
-        }
-    }
+    // DISABLED: Participant context temporarily disabled (utility function removed during cleanup)
+    // TODO: Re-implement if needed for meeting notes functionality
+    // if (participants && participants.length > 0) {
+    //     const participantContext = buildParticipantContext(participants);
+    //     if (participantContext) {
+    //         promptParts.push(participantContext);
+    //         promptParts.push('');
+    //         console.log(`📊 Including ${participants.length} participants in agent context`);
+    //     }
+    // }
 
     promptParts.push(`Controls:`);
 

@@ -12,18 +12,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 // ============================================================================
 
 export type NavigationSection =
-  | 'campaigns'
-  | 'events-calendar'
-  | 'events-map'
-  | 'events-list'
-  | 'venues'
-  | 'team-assignments'
-  | 'integrations'
-  | 'analytics-dashboard'
-  | 'analytics-export'
-  | 'admin-users'
-  | 'admin-clients'
-  | 'admin-programs'
+  | 'chat'
   | 'settings';
 
 interface NavigationProps {
@@ -53,109 +42,13 @@ interface NavigationGroup {
 
 const NAVIGATION_STRUCTURE: NavigationGroup[] = [
   {
-    section: 'CAMPAIGNS',
+    section: 'KNOWLEDGE ASSISTANT',
     items: [
       {
-        id: 'campaigns',
-        label: 'All Campaigns',
-        icon: 'briefcase',
-        description: 'Campaign list and grid view',
-      },
-    ],
-  },
-  {
-    section: 'EVENTS',
-    items: [
-      {
-        id: 'events-calendar',
-        label: 'Event Calendar',
-        icon: 'calendar',
-        description: 'Calendar view of all events',
-      },
-      {
-        id: 'events-map',
-        label: 'Event Map',
-        icon: 'map-pin',
-        description: 'Geographic map view',
-      },
-      {
-        id: 'events-list',
-        label: 'Event List',
-        icon: 'list',
-        description: 'Filterable event list',
-      },
-    ],
-  },
-  {
-    section: 'VENUES',
-    items: [
-      {
-        id: 'venues',
-        label: 'Venue Database',
-        icon: 'map',
-        description: 'All venues with search and filter',
-      },
-    ],
-  },
-  {
-    section: 'TEAM',
-    items: [
-      {
-        id: 'team-assignments',
-        label: 'Team Assignments',
-        icon: 'users',
-        description: 'Who\'s assigned to what event',
-      },
-    ],
-  },
-  {
-    section: 'INTEGRATIONS',
-    items: [
-      {
-        id: 'integrations',
-        label: 'Integration Settings',
-        icon: 'zap',
-        description: 'Brandscopic, QR Tiger, Qualtrics',
-      },
-    ],
-  },
-  {
-    section: 'ANALYTICS',
-    items: [
-      {
-        id: 'analytics-dashboard',
-        label: 'Power BI Dashboard',
-        icon: 'bar-chart',
-        description: 'Reports and KPIs',
-      },
-      {
-        id: 'analytics-export',
-        label: 'Report Export',
-        icon: 'download',
-        description: 'Excel, PDF, and CSV exports',
-      },
-    ],
-  },
-  {
-    section: 'ADMIN',
-    items: [
-      {
-        id: 'admin-users',
-        label: 'User Management',
-        icon: 'user-check',
-        description: 'User roles and access',
-      },
-      {
-        id: 'admin-clients',
-        label: 'Client Management',
-        icon: 'building',
-        description: 'Client configuration',
-      },
-      {
-        id: 'admin-programs',
-        label: 'Program Management',
-        icon: 'folder',
-        description: 'Program setup',
+        id: 'chat',
+        label: 'Ask Questions',
+        icon: 'message-square',
+        description: 'AI-powered knowledge assistant',
       },
     ],
   },
@@ -166,7 +59,7 @@ const NAVIGATION_STRUCTURE: NavigationGroup[] = [
         id: 'settings',
         label: 'Settings',
         icon: 'settings',
-        description: 'Application settings',
+        description: 'Application settings and user management',
       },
     ],
   },

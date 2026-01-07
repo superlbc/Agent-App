@@ -3,7 +3,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AuthGuard } from './auth/AuthGuard';
-import { DepartmentProvider } from './contexts/DepartmentContext';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './utils/i18n';
 
@@ -16,11 +15,9 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <I18nextProvider i18n={i18n}>
-      <DepartmentProvider>
-        <AuthGuard>
-          <App />
-        </AuthGuard>
-      </DepartmentProvider>
+      <AuthGuard>
+        <App />
+      </AuthGuard>
     </I18nextProvider>
   </React.StrictMode>
 );

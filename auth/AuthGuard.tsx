@@ -3,7 +3,6 @@ import { MsalProvider, useMsal, useIsAuthenticated } from "@azure/msal-react";
 import { BrowserAuthError, AccountInfo } from "@azure/msal-browser";
 import { msalInstance, loginRequest, graphConfig, getRedirectUri, REQUIRED_GROUP_ID, ADMIN_GROUP_ID } from './authConfig';
 import { AuthContext } from '../contexts/AuthContext';
-import { useDepartmentContext } from '../contexts/DepartmentContext';
 import { fetchMomentumDepartments, getDepartmentDataStats } from '../services/departmentService';
 import { GraphData } from '../types';
 import { SignInPage } from './SignInPage';
@@ -153,7 +152,7 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const hasFetchedGraphData = useRef(false);
-    const { setDepartmentData, setIsLoading: setDepartmentLoading, setError: setDepartmentError } = useDepartmentContext();
+    // Department data is now handled locally in services/departmentService.ts with caching
 
     const handleLogin = useCallback(() => {
         setPopupBlocked(false);
@@ -219,8 +218,7 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
                     });
 
                     // Fetch Momentum department data in parallel (non-blocking)
-                    // App continues to load even if this fails
-                    setDepartmentLoading(true);
+                    // Data is cached in departmentService.ts with 24-hour TTL
                     const departmentFetchStart = performance.now();
 
                     fetchMomentumDepartments()
@@ -228,7 +226,7 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
                             const fetchDuration = Math.round(performance.now() - departmentFetchStart);
 
                             if (departmentMap && departmentMap.size > 0) {
-                                setDepartmentData(departmentMap);
+                                // Data is automatically cached in departmentService
 
                                 // Track successful fetch with stats
                                 const stats = getDepartmentDataStats(departmentMap);
@@ -240,13 +238,10 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
                                     fetchDurationMs: fetchDuration,
                                     source: 'momentum-database'
                                 });
-                            } else {
-                                setDepartmentError('No department data available');
                             }
                         })
                         .catch(error => {
                             const fetchDuration = Math.round(performance.now() - departmentFetchStart);
-                            setDepartmentError(error instanceof Error ? error.message : 'Failed to fetch department data');
 
                             // Track failure
                             telemetryService.trackEvent('departmentDataFetchFailed', {
@@ -254,9 +249,6 @@ const AuthenticatedAppController: React.FC<{ children: React.ReactNode }> = ({ c
                                 fetchDurationMs: fetchDuration,
                                 willUseFallback: true
                             });
-                        })
-                        .finally(() => {
-                            setDepartmentLoading(false);
                         });
                 }).catch(error => {
                     console.error("Failed to fetch graph data, using fallbacks:", error);

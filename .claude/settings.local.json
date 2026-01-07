@@ -37,7 +37,10 @@
       "Bash(tree:*)",
       "Bash(powershell -Command \"(Get-Content ''c:\\Users\\luis.bustos\\Downloads\\UXP\\utils\\mockData.ts'' | Measure-Object -Line).Lines\")",
       "Bash(powershell -Command \"(Get-Content ''c:\\Users\\luis.bustos\\Downloads\\UXP\\CLAUDE.md'' | Select-String -Pattern ''### 🖥️ Hardware Inventory'' -Context 0,200 | Select-Object -ExpandProperty Context | Select-Object -ExpandProperty PostContext | Select-String -Pattern ''^###'' -List | Select-Object -First 1).LineNumber\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(ls:*)",
+      "Bash(Event)",
+      "Bash(Venue \")"
     ],
     "deny": [],
     "ask": []

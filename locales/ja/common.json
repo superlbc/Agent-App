@@ -1,12 +1,12 @@
 {
   "app": {
-    "title": "議事録ジェネレーター",
+    "title": "Momentumナレッジアシスタント",
     "loading": "読み込み中...",
     "error": "エラー",
     "success": "成功"
   },
   "header": {
-    "title": "議事録ジェネレーター",
+    "title": "Momentumナレッジアシスタント",
     "menu": {
       "toggleTheme": "テーマ切替",
       "replayTutorial": "チュートリアルを再生",
@@ -137,19 +137,19 @@
   },
   "about": {
     "title": "について",
-    "appName": "議事録ジェネレーター",
+    "appName": "Momentumナレッジアシスタント",
     "version": "バージョン {{version}} ベータ版",
     "developedBy": "開発者",
     "organization": "組織",
     "orgName": "Momentum グローバルテクノロジーチーム",
     "initiative": "AI リテラシープログラムイニシアチブ",
-    "copyright": "© {{year}} 議事録ジェネレーター"
+    "copyright": "© {{year}} Momentumナレッジアシスタント"
   },
   "auth": {
     "signIn": {
       "welcomeTo": "ようこそ",
-      "appName": "議事録ジェネレーター",
-      "tagline": "すべての会議で一貫性と影響力を推進します。",
+      "appName": "Momentumナレッジアシスタント",
+      "tagline": "AI搭載ナレッジベース - 質問して回答を得る",
       "instruction": "続けるには、Momentumアカウントでサインインしてください。",
       "button": "サインイン",
       "popupBlocked": {

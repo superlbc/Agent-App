@@ -48,8 +48,8 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({
     };
 
     // Hard-coded defaults with env override capability
-    const defaultNotesAgentId = (import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
-    const defaultInterrogationAgentId = (import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
+    const defaultNotesAgentId = (import.meta.env)?.DEFAULT_BOT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
+    const defaultInterrogationAgentId = (import.meta.env)?.DEFAULT_BOT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
 
     // Telemetry: Track agent ID changes
     if (localNotesAgentId !== notesAgentId) {
@@ -77,8 +77,8 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({
 
   const handleReset = () => {
     // Hard-coded defaults with env override capability
-    const defaultNotesAgentId = (import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
-    const defaultInterrogationAgentId = (import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
+    const defaultNotesAgentId = (import.meta.env)?.DEFAULT_BOT_ID || 'b8460071-daee-4820-8198-5224fdc99e45';
+    const defaultInterrogationAgentId = (import.meta.env)?.DEFAULT_BOT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044';
 
     // Telemetry: Track agent ID reset
     telemetryService.trackEvent('botIdChanged', {
@@ -126,7 +126,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({
               label="Agent 1 ID"
               value={localNotesAgentId}
               onChange={e => setLocalNotesAgentId(e.target.value)}
-              placeholder={(import.meta.env)?.VITE_DEFAULT_NOTES_AGENT_ID || 'b8460071-daee-4820-8198-5224fdc99e45'}
+              placeholder={(import.meta.env)?.DEFAULT_BOT_ID || 'b8460071-daee-4820-8198-5224fdc99e45'}
             />
 
             <Input
@@ -134,7 +134,7 @@ export const ApiConfigModal: React.FC<ApiConfigModalProps> = ({
               label="Agent 2 ID"
               value={localInterrogationAgentId}
               onChange={e => setLocalInterrogationAgentId(e.target.value)}
-              placeholder={(import.meta.env)?.VITE_DEFAULT_INTERROGATION_AGENT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044'}
+              placeholder={(import.meta.env)?.DEFAULT_BOT_ID || 'f8bf98dc-997c-4993-bbd6-02245b8b0044'}
             />
 
             <div className="flex items-center gap-2 pt-2">

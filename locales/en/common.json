@@ -1,12 +1,12 @@
 {
   "app": {
-    "title": "Employee Onboarding System",
+    "title": "Momentum Knowledge Assistant",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success"
   },
   "header": {
-    "title": "Employee Onboarding System",
+    "title": "Momentum Knowledge Assistant",
     "adminBadge": "Admin",
     "menu": {
       "toggleTheme": "Toggle Theme",
@@ -138,19 +138,19 @@
   },
   "about": {
     "title": "About",
-    "appName": "Employee Onboarding System",
+    "appName": "Momentum Knowledge Assistant",
     "version": "Version {{version}} Beta",
     "developedBy": "Developed By",
     "organization": "Organization",
     "orgName": "Momentum Global Technology Team",
     "initiative": "AI Literacy Program Initiative",
-    "copyright": "© {{year}} Employee Onboarding System"
+    "copyright": "© {{year}} Momentum Knowledge Assistant"
   },
   "auth": {
     "signIn": {
       "welcomeTo": "Welcome to",
-      "appName": "Employee Onboarding System",
-      "tagline": "Streamline employee onboarding from pre-hire to day one.",
+      "appName": "Momentum Knowledge Assistant",
+      "tagline": "AI-powered knowledge base - Ask questions, get answers",
       "instruction": "Please sign in with your Momentum account to continue.",
       "button": "Sign In",
       "popupBlocked": {

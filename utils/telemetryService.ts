@@ -47,6 +47,10 @@ export type EventType =
   // Coach
   | 'meetingCoachViewed'
   | 'coachInsightsExpanded'
+  // Version updates
+  | 'versionMismatchDetected'
+  | 'versionUpdateRefreshed'
+  | 'versionUpdateDismissed'
   // User data
   | 'userDataReset'
   // Meeting selection

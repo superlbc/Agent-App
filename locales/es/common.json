@@ -1,12 +1,12 @@
 {
   "app": {
-    "title": "Generador de Notas de Reunión",
+    "title": "Asistente de Conocimiento de Momentum",
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito"
   },
   "header": {
-    "title": "Generador de Notas de Reunión",
+    "title": "Asistente de Conocimiento de Momentum",
     "adminBadge": "Admin",
     "menu": {
       "toggleTheme": "Cambiar Tema",
@@ -138,19 +138,19 @@
   },
   "about": {
     "title": "Acerca de",
-    "appName": "Generador de Notas de Reunión",
+    "appName": "Asistente de Conocimiento de Momentum",
     "version": "Versión {{version}} Beta",
     "developedBy": "Desarrollado Por",
     "organization": "Organización",
     "orgName": "Equipo de Tecnología Global de Momentum",
     "initiative": "Iniciativa del Programa de Aprendizaje en IA",
-    "copyright": "© {{year}} Generador de Notas de Reunión"
+    "copyright": "© {{year}} Asistente de Conocimiento de Momentum"
   },
   "auth": {
     "signIn": {
       "welcomeTo": "Bienvenido a",
-      "appName": "Generador de Notas de Reunión",
-      "tagline": "Impulsa consistencia e impacto en cada reunión.",
+      "appName": "Asistente de Conocimiento de Momentum",
+      "tagline": "Base de conocimiento impulsada por IA - Haz preguntas, obtén respuestas",
       "instruction": "Por favor, inicia sesión con tu cuenta de Momentum para continuar.",
       "button": "Iniciar Sesión",
       "popupBlocked": {
