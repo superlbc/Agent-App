@@ -31,7 +31,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Help & Guidance</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Everything you need to know about UXP - Unified Experience Platform
+                  Everything you need to know about Momentum Knowledge Assistant
                 </p>
               </div>
               <button
@@ -72,11 +72,11 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-center">
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Need more help? Use the{' '}
+                Need more help? Contact IT support or use the{' '}
                 <button className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                   Feedback
                 </button>{' '}
-                button to ask questions or report issues
+                button to report issues
               </p>
             </div>
           </div>
@@ -95,84 +95,71 @@ const GettingStartedTab: React.FC = () => (
         🎯 System Overview
       </h3>
       <p className="text-gray-700 dark:text-gray-300 mb-3">
-        UXP (Unified Experience Platform) streamlines the complete lifecycle of events, campaigns, and organizational workflows
-        with intelligent scheduling, resource management, and analytics.
+        Momentum Knowledge Assistant is an AI-powered knowledge base that helps Momentum employees
+        access information through natural conversation with Microsoft Copilot Studio integration.
       </p>
       <div className="space-y-2 text-gray-700 dark:text-gray-300">
         <div className="flex items-start gap-2">
           <span className="text-blue-500 font-bold">•</span>
-          <strong>Pre-hire Management:</strong> Track candidates from offer acceptance through start date
+          <strong>Multi-Tab Conversations:</strong> Organize your questions across multiple conversation tabs
         </div>
         <div className="flex items-start gap-2">
           <span className="text-blue-500 font-bold">•</span>
-          <strong>Equipment Packages:</strong> Automate hardware and software assignment based on role
+          <strong>Department-Based Access:</strong> Get relevant information based on your role and department
         </div>
         <div className="flex items-start gap-2">
           <span className="text-blue-500 font-bold">•</span>
-          <strong>Approval Workflow:</strong> Standard packages auto-approve, exceptions route to SVP
+          <strong>Adaptive Card Responses:</strong> Rich, interactive responses from the AI assistant
         </div>
         <div className="flex items-start gap-2">
           <span className="text-blue-500 font-bold">•</span>
-          <strong>Freeze Period Handling:</strong> Automate Nov-Jan 5 Workday freeze with password reset emails
+          <strong>Persistent Conversations:</strong> Your chat history is saved and synced across sessions
         </div>
       </div>
     </section>
 
-    {/* Onboarding Workflow */}
+    {/* How to Get Started */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-        <Icon name="document" className="h-5 w-5 text-blue-500" />
-        Onboarding Process Flow
+        <Icon name="sparkles" className="h-5 w-5 text-green-500" />
+        How to Get Started
       </h3>
 
       <div className="space-y-4">
-        {/* Phase 1 */}
+        {/* Step 1 */}
         <div className="border-l-4 border-blue-400 pl-4">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-1">📋 Phase 1: Pre-hire Setup</h4>
-          <ul className="text-gray-600 dark:text-gray-400 space-y-1">
-            <li>• Create pre-hire record with candidate details</li>
-            <li>• Assign equipment package based on role (e.g., "XD Designer Standard")</li>
-            <li>• Customize packages during negotiations if needed</li>
-            <li>• Track start date and hiring manager</li>
-          </ul>
+          <h4 className="font-medium text-gray-900 dark:text-white mb-1">1️⃣ Sign In</h4>
+          <p className="text-gray-600 dark:text-gray-400">
+            Authenticate with your Momentum account through Azure Active Directory.
+            You must be a member of the "MOM WW All Users 1 SG" group to access the app.
+          </p>
         </div>
 
-        {/* Phase 2 */}
+        {/* Step 2 */}
         <div className="border-l-4 border-green-400 pl-4">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-1">🔑 Phase 2: System Access</h4>
-          <ul className="text-gray-600 dark:text-gray-400 space-y-1">
-            <li>• Workday record created (Nov onwards)</li>
-            <li>• Active Directory account provisioned</li>
-            <li>• Vantage record created manually by Laurie Walker</li>
-            <li>• During freeze period: Users pre-loaded with scrubbed passwords</li>
-          </ul>
+          <h4 className="font-medium text-gray-900 dark:text-white mb-1">2️⃣ Department Detection</h4>
+          <p className="text-gray-600 dark:text-gray-400">
+            Your department is automatically detected from personnel data (962 Momentum users).
+            This ensures SharePoint content is filtered to show only what's relevant to your role.
+          </p>
         </div>
 
-        {/* Phase 3 */}
+        {/* Step 3 */}
         <div className="border-l-4 border-purple-400 pl-4">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-1">📦 Phase 3: Equipment Provisioning</h4>
-          <ul className="text-gray-600 dark:text-gray-400 space-y-1">
-            <li>• Standard packages: Auto-approve → Helix ticket</li>
-            <li>• Exception requests: Route to SVP (Patricia/Steve) for approval</li>
-            <li>• IT provisions equipment via Weenus</li>
-            <li>• Employee receives equipment before start date</li>
-          </ul>
+          <h4 className="font-medium text-gray-900 dark:text-white mb-1">3️⃣ Start Asking Questions</h4>
+          <p className="text-gray-600 dark:text-gray-400">
+            Type your questions in the chat interface using natural language.
+            The AI assistant will search SharePoint documents and provide relevant answers.
+          </p>
         </div>
 
-        {/* Freeze Period */}
+        {/* Step 4 */}
         <div className="border-l-4 border-amber-400 pl-4">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-1">❄️ Freeze Period (Nov - Jan 5)</h4>
-          <div className="space-y-2 text-gray-600 dark:text-gray-400">
-            <div>
-              <span className="font-medium">Start Date:</span> HR sends password reset email to IT
-            </div>
-            <div>
-              <span className="font-medium">End Date:</span> HR sends account deactivation email to IT
-            </div>
-            <div>
-              <span className="font-medium">Automation:</span> System monitors dates and generates emails
-            </div>
-          </div>
+          <h4 className="font-medium text-gray-900 dark:text-white mb-1">4️⃣ Organize with Tabs</h4>
+          <p className="text-gray-600 dark:text-gray-400">
+            Create multiple chat tabs to organize different topics or projects.
+            Each tab maintains its own conversation history and context.
+          </p>
         </div>
       </div>
     </section>
@@ -187,31 +174,31 @@ const GettingStartedTab: React.FC = () => (
         <div className="flex items-start gap-2">
           <span className="text-blue-500 font-bold">•</span>
           <div>
-            <strong>Workday:</strong> HR system of record (starts Nov, with freeze period Nov-Jan 5)
+            <strong>Microsoft Copilot Studio:</strong> AI agent powering natural language Q&A with Direct Line API integration
           </div>
         </div>
         <div className="flex items-start gap-2">
           <span className="text-green-500 font-bold">•</span>
           <div>
-            <strong>Active Directory:</strong> User authentication and access control
+            <strong>SharePoint:</strong> Document repository with department-based content filtering (962 users)
           </div>
         </div>
         <div className="flex items-start gap-2">
           <span className="text-purple-500 font-bold">•</span>
           <div>
-            <strong>Helix:</strong> IT ticketing and approval system (contact: Chris Kumar)
+            <strong>Azure Active Directory:</strong> Authentication, group membership (MOM WW All Users 1 SG), and user profiles
           </div>
         </div>
         <div className="flex items-start gap-2">
           <span className="text-amber-500 font-bold">•</span>
           <div>
-            <strong>Weenus:</strong> IT request system for equipment and software
+            <strong>Power Automate:</strong> Personnel data lookup with 24-hour caching and circuit breaker resilience
           </div>
         </div>
         <div className="flex items-start gap-2">
           <span className="text-red-500 font-bold">•</span>
           <div>
-            <strong>Vantage:</strong> Internal employee records (manual entry by Laurie Walker)
+            <strong>Microsoft Graph API:</strong> Fallback department lookup when Power Automate is unavailable
           </div>
         </div>
       </div>
@@ -229,154 +216,153 @@ const FeaturesTab: React.FC = () => (
         ⚡ Core Features
       </h3>
       <p className="text-gray-600 dark:text-gray-400 mb-3">
-        Comprehensive onboarding management tools
+        AI-powered knowledge access with natural conversation
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">📋 Pre-hire Tracking</div>
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🤖 AI-Powered Q&A</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Track candidates from offer acceptance through start date with package assignment
+            Ask questions in natural language and get answers from Microsoft Copilot Studio integrated with SharePoint
           </p>
         </div>
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">📦 Equipment Packages</div>
+          <div className="font-medium text-gray-900 dark:text-white mb-1">📑 Multi-Tab Conversations</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Role-based packages with hardware, software, and licenses (e.g., "XD Designer Standard")
+            Organize different topics across multiple chat tabs with independent conversation histories
           </p>
         </div>
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">✅ Approval Workflow</div>
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🎯 Department Filtering</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Standard packages auto-approve, exceptions route to SVP via Helix
+            SharePoint content automatically filtered based on your department for relevant results
           </p>
         </div>
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">❄️ Freeze Period Admin</div>
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🎴 Adaptive Cards</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Automate Nov-Jan 5 Workday freeze with password reset and termination emails
+            Rich, interactive responses with buttons, images, and formatted content from the AI
           </p>
         </div>
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">🖥️ Hardware Inventory</div>
+          <div className="font-medium text-gray-900 dark:text-white mb-1">⚡ Smart Caching</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Manage computers, monitors, keyboards, and accessories with status tracking
+            24-hour personnel data cache (962 users) with circuit breaker for fast, resilient performance
           </p>
         </div>
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">🔑 License Pool Management</div>
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🌙 Dark Mode</div>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Track software licenses, assignments, and renewals with utilization monitoring
+            Automatic theme switching based on your browser preference for comfortable reading
           </p>
         </div>
       </div>
     </section>
 
-    {/* Package Management */}
+    {/* How to Ask Effective Questions */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
         <Icon name="settings" className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-        📦 Package Management
+        💬 How to Ask Effective Questions
       </h3>
       <div className="space-y-3">
         <div className="border-l-4 border-blue-400 pl-4">
-          <h4 className="font-medium mb-1">🎯 Role-Based Assignment</h4>
+          <h4 className="font-medium mb-1">🎯 Be Specific</h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs">
-            Packages automatically recommended based on role and department (e.g., "XD Designer Standard Package")
+            "What is the PTO policy?" is better than "Tell me about time off". Specific questions get specific answers.
           </p>
         </div>
         <div className="border-l-4 border-green-400 pl-4">
-          <h4 className="font-medium mb-1">🔧 Package Builder</h4>
+          <h4 className="font-medium mb-1">📝 Provide Context</h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs">
-            Create custom packages with hardware (computers, monitors), software (Adobe CC, Cinema 4D), and licenses
+            "I'm in the Creative department, what design tools do I have access to?" helps the AI understand your needs.
           </p>
         </div>
         <div className="border-l-4 border-purple-400 pl-4">
-          <h4 className="font-medium mb-1">✅ Approval Types</h4>
+          <h4 className="font-medium mb-1">🔄 Ask Follow-ups</h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs">
-            <strong>Standard:</strong> Auto-approve → Direct to IT <br />
-            <strong>Exception:</strong> Route to SVP (Patricia/Steve) via Helix
+            Continue the conversation! Ask clarifying questions or dive deeper into topics for better understanding.
           </p>
         </div>
         <div className="border-l-4 border-amber-400 pl-4">
-          <h4 className="font-medium mb-1">🔄 Customization Support</h4>
+          <h4 className="font-medium mb-1">💬 Use Natural Language</h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs">
-            Modify packages during candidate negotiations with audit trail of changes
+            Talk to the AI as you would a colleague. No need for special commands or formal syntax.
           </p>
         </div>
       </div>
     </section>
 
-    {/* Freeze Period Features */}
+    {/* Department-Based Access */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
         <Icon name="upload" className="h-5 w-5 text-green-500" />
-        ❄️ Freeze Period Administration
+        🏢 Department-Based Access
       </h3>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex items-start gap-2">
           <Icon name="settings" className="h-5 w-5 text-blue-500 mt-0.5" />
           <div>
-            <div className="font-medium">Configurable Periods</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Define custom freeze periods with date ranges</p>
+            <div className="font-medium">Automatic Detection</div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Department pulled from personnel data (962 Momentum users)</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Icon name="email" className="h-5 w-5 text-red-500 mt-0.5" />
+          <Icon name="document" className="h-5 w-5 text-green-500 mt-0.5" />
           <div>
-            <div className="font-medium">Email Templates</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Customize password reset and termination emails</p>
+            <div className="font-medium">SharePoint Filtering</div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Only see content relevant to your role and department</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Icon name="sparkles" className="h-5 w-5 text-green-500 mt-0.5" />
+          <Icon name="sparkles" className="h-5 w-5 text-purple-500 mt-0.5" />
           <div>
-            <div className="font-medium">Automated Notifications</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Auto-generate emails based on start/end dates</p>
+            <div className="font-medium">24-Hour Caching</div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Fast lookups with 5-minute circuit breaker for resilience</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Icon name="document" className="h-5 w-5 text-purple-500 mt-0.5" />
+          <Icon name="info" className="h-5 w-5 text-amber-500 mt-0.5" />
           <div>
-            <div className="font-medium">Dashboard Monitoring</div>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Track affected employees and pending actions</p>
+            <div className="font-medium">Fallback Mechanism</div>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Graph API fallback when Power Automate unavailable</p>
           </div>
         </div>
       </div>
     </section>
 
-    {/* Data Management */}
+    {/* Conversation Management */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
         <Icon name="sparkles" className="h-5 w-5 text-purple-500" />
-        📊 Data Management
+        💬 Conversation Management
       </h3>
       <div className="space-y-3">
-        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
           <h4 className="font-medium mb-1 flex items-center gap-2">
             <Icon name="upload" className="h-4 w-4" />
-            Bulk Hardware Import
+            Create Tabs
           </h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs mb-2">
-            Import hundreds of hardware items via CSV with comprehensive validation
+            Organize different topics or projects across unlimited chat tabs
           </p>
           <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-            <li>• Download CSV template with sample data</li>
-            <li>• Real-time validation preview before import</li>
-            <li>• Selective import (skip invalid rows)</li>
+            <li>• Click the "+" button to create a new tab</li>
+            <li>• Each tab has independent conversation history</li>
+            <li>• Switch between tabs instantly</li>
           </ul>
         </div>
 
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-          <h4 className="font-medium mb-1">🔧 Maintenance Tracking</h4>
+          <h4 className="font-medium mb-1">✏️ Rename & Organize</h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs">
-            Record repairs, upgrades, and service history for all hardware with cost tracking and warranty management.
+            Give your tabs meaningful names like "Benefits Questions" or "IT Support" to stay organized and find conversations quickly.
           </p>
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-          <h4 className="font-medium mb-1">📈 License Utilization</h4>
+        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+          <h4 className="font-medium mb-1">💾 Persistent History</h4>
           <p className="text-gray-600 dark:text-gray-400 text-xs">
-            Monitor license pool usage with color-coded alerts for capacity, over-allocation, and expiration warnings.
+            All conversations are saved automatically. Come back anytime and your chat history will be waiting for you.
           </p>
         </div>
       </div>
@@ -398,32 +384,32 @@ const TipsTab: React.FC = () => (
         {/* DO's */}
         <div>
           <h4 className="font-medium text-green-700 dark:text-green-400 mb-2 flex items-center gap-2">
-            ✅ Onboarding Best Practices
+            ✅ DO: Effective Knowledge Search
           </h4>
           <ul className="space-y-2 text-gray-600 dark:text-gray-400">
             <li className="flex items-start gap-2">
               <span className="text-green-500 font-bold">•</span>
-              Create pre-hire records as soon as candidate accepts offer
+              Ask specific questions about Momentum policies, processes, or resources
             </li>
             <li className="flex items-start gap-2">
               <span className="text-green-500 font-bold">•</span>
-              Assign equipment packages early to allow time for customization
+              Use natural language as you would when talking to a colleague
             </li>
             <li className="flex items-start gap-2">
               <span className="text-green-500 font-bold">•</span>
-              Link pre-hire records to employee records once Vantage/AD created
+              Create separate tabs for different topics to keep conversations organized
             </li>
             <li className="flex items-start gap-2">
               <span className="text-green-500 font-bold">•</span>
-              Monitor freeze period dashboard for upcoming start/end dates
+              Provide context about your department or role when asking department-specific questions
             </li>
             <li className="flex items-start gap-2">
               <span className="text-green-500 font-bold">•</span>
-              Track hardware status changes (available → assigned → maintenance)
+              Ask follow-up questions to clarify answers or dive deeper into topics
             </li>
             <li className="flex items-start gap-2">
               <span className="text-green-500 font-bold">•</span>
-              Document equipment customizations with clear reasons
+              Reference specific documents or policies if you know their names
             </li>
           </ul>
         </div>
@@ -431,24 +417,24 @@ const TipsTab: React.FC = () => (
         {/* DON'Ts */}
         <div>
           <h4 className="font-medium text-red-700 dark:text-red-400 mb-2 flex items-center gap-2">
-            ❌ Common Mistakes to Avoid
+            ❌ DON'T: Limitations to Keep in Mind
           </h4>
           <ul className="space-y-2 text-gray-600 dark:text-gray-400">
             <li className="flex items-start gap-2">
               <span className="text-red-500 font-bold">•</span>
-              Don't forget to update pre-hire records during negotiations
+              Don't share sensitive personal information, passwords, or confidential data in chats
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 font-bold">•</span>
-              Don't assign exception packages without SVP approval
+              Don't expect the AI to access real-time system data or external tools
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 font-bold">•</span>
-              Don't skip linking pre-hire to employee records
+              Don't ask about confidential employee records, client data, or financial information
             </li>
             <li className="flex items-start gap-2">
               <span className="text-red-500 font-bold">•</span>
-              Don't miss freeze period email deadlines (start/end dates)
+              Don't expect information outside Momentum's SharePoint knowledge base
             </li>
           </ul>
         </div>
@@ -456,99 +442,137 @@ const TipsTab: React.FC = () => (
         {/* Quality Tips */}
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
           <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-            🎯 For Smooth Onboarding
+            🎯 Tips for Better Results
           </h4>
           <ul className="space-y-1 text-gray-600 dark:text-gray-300 text-xs">
-            <li>📦 Use standard packages whenever possible (auto-approve)</li>
-            <li>⚡ Create pre-hire records 2+ weeks before start date</li>
-            <li>🔍 Monitor license pool utilization before assigning</li>
-            <li>📄 Track all package customizations for audit trail</li>
-            <li>💬 Coordinate with IT (Chris Kumar) for Helix approvals</li>
+            <li>📝 Start broad, then narrow down with follow-up questions</li>
+            <li>🏢 Mention your department for role-specific information</li>
+            <li>💬 Ask "Can you provide more details?" if answers are too high-level</li>
+            <li>📑 Use tabs to separate topics like "HR Policies", "IT Resources", etc.</li>
+            <li>🔄 Rephrase your question if the answer isn't what you expected</li>
           </ul>
         </div>
       </div>
     </section>
 
-    {/* Key Contacts */}
+    {/* Common Use Cases */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
         <Icon name="info" className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-        👥 Key Stakeholders
+        📋 Common Use Cases
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">HR Team</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            <strong>Camille, Payton:</strong> Pre-hire tracking, start date management, freeze period coordination
+        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+          <div className="font-medium text-gray-900 dark:text-white mb-1">📄 Policy Questions</div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Ask about HR policies, benefits, time off, expense reporting
+          </p>
+          <p className="text-xs text-blue-600 dark:text-blue-400 italic">
+            "What is the remote work policy?" or "How do I request PTO?"
+          </p>
+        </div>
+        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded border border-green-200 dark:border-green-800">
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🔄 Process Guidance</div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Learn how to complete common workflows and procedures
+          </p>
+          <p className="text-xs text-green-600 dark:text-green-400 italic">
+            "How do I submit an expense report?" or "What's the client onboarding process?"
+          </p>
+        </div>
+        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded border border-purple-200 dark:border-purple-800">
+          <div className="font-medium text-gray-900 dark:text-white mb-1">📍 Resource Location</div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Find templates, guidelines, contacts, and tools
+          </p>
+          <p className="text-xs text-purple-600 dark:text-purple-400 italic">
+            "Where can I find brand guidelines?" or "Who do I contact for IT support?"
+          </p>
+        </div>
+        <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 dark:border-amber-800">
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🏢 Department Information</div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Get role-specific tools, processes, and deliverables
+          </p>
+          <p className="text-xs text-amber-600 dark:text-amber-400 italic">
+            "What tools does the Creative team use?" or "What are Strategy deliverables?"
+          </p>
+        </div>
+        <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
+          <div className="font-medium text-gray-900 dark:text-white mb-1">📚 Training Materials</div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Access onboarding guides, methodology docs, skill development
+          </p>
+          <p className="text-xs text-red-600 dark:text-red-400 italic">
+            "Where is the new hire training?" or "How do I learn about our methodology?"
           </p>
         </div>
         <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">IT Team</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            Equipment provisioning, Helix ticket management, system access setup
+          <div className="font-medium text-gray-900 dark:text-white mb-1">🔧 Technical Support</div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Find IT documentation, troubleshooting guides, software access
           </p>
-        </div>
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">Laurie Walker</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            <strong>Vantage Records:</strong> Manual employee record creation and management
-          </p>
-        </div>
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">Chris Kumar (McCarthy)</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            <strong>Helix Configuration:</strong> IT ticketing and approval system coordination
-          </p>
-        </div>
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">Leadership (Patricia, Steve)</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            <strong>SVP Approval:</strong> Exception requests for non-standard equipment/software
-          </p>
-        </div>
-        <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="font-medium text-gray-900 dark:text-white mb-1">Hiring Managers</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            Package selection and equipment customization requests
+          <p className="text-xs text-gray-600 dark:text-gray-400 italic">
+            "How do I reset my VPN password?" or "What software does my role include?"
           </p>
         </div>
       </div>
     </section>
 
-    {/* Sample Use Cases */}
+    {/* Example Questions */}
     <section>
       <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
         <Icon name="document" className="h-5 w-5 text-green-500" />
-        📚 Common Scenarios
+        💬 Example Questions
       </h3>
       <div className="space-y-3">
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <h4 className="font-medium mb-1">New XD Designer Hire</h4>
+          <h4 className="font-medium mb-1">🌐 General Information</h4>
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-            <strong>Package:</strong> XD Designer Standard | <strong>Approval:</strong> Auto
+            <strong>Example:</strong> "What employee benefits does Momentum offer?"
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            MacBook Pro, 27" monitor, Adobe CC, Figma, Cinema 4D → Auto-approved → Helix ticket
+            Get high-level overviews of company-wide policies, benefits, and resources available to all employees.
           </p>
         </div>
 
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <h4 className="font-medium mb-1">Custom Equipment Request</h4>
+          <h4 className="font-medium mb-1">🎨 Department-Specific</h4>
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-            <strong>Package:</strong> Exception (High-End Workstation) | <strong>Approval:</strong> SVP Required
+            <strong>Example:</strong> "As a Creative, what design tools do I have access to?"
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            Non-standard hardware → Routes to Patricia/Steve → Helix ticket after approval
+            Include your department in the question to get role-specific software, tools, and resources filtered to your needs.
           </p>
         </div>
 
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
-          <h4 className="font-medium mb-1">Freeze Period Start Date (Dec 15)</h4>
+          <h4 className="font-medium mb-1">📍 Location & Facilities</h4>
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-            <strong>Status:</strong> Pre-loaded Account | <strong>Action:</strong> Password Reset Email
+            <strong>Example:</strong> "How do I book a conference room at the NYC office?"
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            System auto-generates email to IT → User credentials reset → MFA activated
+            Find information about office locations, room bookings, parking, building access, and facilities.
+          </p>
+        </div>
+
+        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+          <h4 className="font-medium mb-1">📄 Templates & Documents</h4>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            <strong>Example:</strong> "Where can I find client presentation templates?"
+          </p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
+            Locate templates, brand assets, document guidelines, and standardized formats for client deliverables.
+          </p>
+        </div>
+
+        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+          <h4 className="font-medium mb-1">👥 Contacts & Teams</h4>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            <strong>Example:</strong> "Who should I contact about payroll questions?"
+          </p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">
+            Find the right people or teams to contact for specific issues, from HR to IT to department leads.
           </p>
         </div>
       </div>
@@ -559,20 +583,20 @@ const TipsTab: React.FC = () => (
       <h3 className="font-semibold text-lg mb-3">🚀 Quick Reference</h3>
       <div className="grid grid-cols-2 gap-4 text-xs">
         <div>
-          <div className="font-medium mb-1">Standard Hires:</div>
-          <div className="text-gray-600 dark:text-gray-400">Use pre-defined packages → Auto-approve → Fast provisioning</div>
+          <div className="font-medium mb-1">Data Source:</div>
+          <div className="text-gray-600 dark:text-gray-400">962 Momentum employees from Power Automate flow</div>
         </div>
         <div>
-          <div className="font-medium mb-1">Executive Hires:</div>
-          <div className="text-gray-600 dark:text-gray-400">Exception package → SVP approval → Custom equipment</div>
+          <div className="font-medium mb-1">Cache Duration:</div>
+          <div className="text-gray-600 dark:text-gray-400">24 hours for personnel data with circuit breaker</div>
         </div>
         <div>
-          <div className="font-medium mb-1">During Freeze Period:</div>
-          <div className="text-gray-600 dark:text-gray-400">Monitor dashboard → Auto-email IT → Track notifications</div>
+          <div className="font-medium mb-1">Access Control:</div>
+          <div className="text-gray-600 dark:text-gray-400">MOM WW All Users 1 SG group (886 members)</div>
         </div>
         <div>
-          <div className="font-medium mb-1">Hardware Management:</div>
-          <div className="text-gray-600 dark:text-gray-400">Track status → Log maintenance → Monitor availability</div>
+          <div className="font-medium mb-1">Support:</div>
+          <div className="text-gray-600 dark:text-gray-400">Contact IT for access issues or technical problems</div>
         </div>
       </div>
     </section>

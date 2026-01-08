@@ -306,7 +306,7 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
             <p>Version 3.0.0</p>
-            <p className="mt-1">UXP - Unified Experience Platform</p>
+            <p className="mt-1">Momentum Knowledge Assistant</p>
           </div>
         </div>
       )}

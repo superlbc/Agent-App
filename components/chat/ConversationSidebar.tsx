@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Icon } from '../ui/Icon';
 import { Button } from '../ui/Button';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 // Types
 interface ChatTab {
@@ -33,6 +34,15 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'name' | 'date'>('recent');
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    conversationId: string | null;
+    conversationName: string;
+  }>({
+    isOpen: false,
+    conversationId: null,
+    conversationName: '',
+  });
 
   // Filter and sort conversations
   const filteredConversations = useMemo(() => {
@@ -77,6 +87,27 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   const handleCancelRename = () => {
     setEditingId(null);
     setEditingName('');
+  };
+
+  // Handle delete click - open confirmation modal
+  const handleDeleteClick = (conversation: ChatTab) => {
+    setDeleteConfirm({
+      isOpen: true,
+      conversationId: conversation.id,
+      conversationName: conversation.name,
+    });
+  };
+
+  // Handle confirmed deletion
+  const handleConfirmDelete = () => {
+    if (deleteConfirm.conversationId) {
+      onDeleteConversation(deleteConfirm.conversationId);
+    }
+    setDeleteConfirm({
+      isOpen: false,
+      conversationId: null,
+      conversationName: '',
+    });
   };
 
   // Format timestamp
@@ -268,9 +299,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm(`Delete "${conversation.name}"?`)) {
-                            onDeleteConversation(conversation.id);
-                          }
+                          handleDeleteClick(conversation);
                         }}
                         className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                         aria-label="Delete conversation"
@@ -293,6 +322,25 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
           {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() =>
+          setDeleteConfirm({
+            isOpen: false,
+            conversationId: null,
+            conversationName: '',
+          })
+        }
+        onConfirm={handleConfirmDelete}
+        title="Delete Conversation?"
+        message={`Are you sure you want to delete "${deleteConfirm.conversationName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        confirmButtonVariant="danger"
+      />
     </div>
   );
 };
