@@ -149,7 +149,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
       {/* Version Update Banner */}
       {updateAvailable && currentVersion && serverVersion && (
         <VersionUpdateBanner
@@ -178,7 +178,7 @@ const AppContent: React.FC = () => {
       </button>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-w-0">
         {/* Navigation Sidebar */}
         <CollapsibleNavigation
           currentSection={currentSection as any}
@@ -188,7 +188,7 @@ const AppContent: React.FC = () => {
         />
 
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-w-0">
           {/* Chat Interface Section */}
           {currentSection === 'chat' && (
             <div className="h-full overflow-hidden">

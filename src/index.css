@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* Prevent horizontal scrolling */
+html {
+  overflow-x: hidden !important;
+  overflow-y: scroll; /* Always show vertical scrollbar to prevent layout shift */
+}
+
+body {
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
+
+/* Prevent horizontal scrolling on all containers */
+#root {
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Dark mode configuration - enable class-based dark mode */
 @variant dark (&:where(.dark, .dark *));
 

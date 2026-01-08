@@ -40,7 +40,14 @@
       "Bash(powershell -Command:*)",
       "Bash(ls:*)",
       "Bash(Event)",
-      "Bash(Venue \")"
+      "Bash(Venue \")",
+      "Bash(npx playwright:*)",
+      "Bash(node:*)",
+      "Bash(del test-mobile-scroll.js)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(del test-horizontal-scroll.js test-horizontal-scroll-1440.js test-horizontal-scroll-1024.js desktop-view-full.png desktop-view-1440.png desktop-view-1024.png)",
+      "Bash(dir:*)",
+      "Bash(del test-horizontal-scroll.js)"
     ],
     "deny": [],
     "ask": []

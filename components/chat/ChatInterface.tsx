@@ -175,9 +175,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full overflow-x-hidden">
       {/* Conversation Sidebar - Desktop */}
-      <div className="hidden lg:block w-80 flex-shrink-0">
+      <div className="hidden lg:block w-80 flex-shrink-0 overflow-hidden max-w-[20rem]">
         <ConversationSidebar
           conversations={tabs}
           activeConversationId={activeTabId}
@@ -218,9 +218,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       )}
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header with Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Mobile Menu Toggle */}
           <Button
             onClick={() => setIsMobileSidebarOpen(true)}
@@ -249,7 +249,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 bg-gray-50 dark:bg-gray-900">
           {activeTab && activeTab.messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <Icon name="chat-bubble" className="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />

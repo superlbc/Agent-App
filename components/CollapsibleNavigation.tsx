@@ -201,9 +201,6 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
     }
   };
 
-  // Calculate width based on collapse state
-  const navWidth = isCollapsed ? 'w-16' : 'w-64';
-
   return (
     <>
       {/* Mobile Overlay */}
@@ -218,18 +215,22 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
       {/* Navigation Sidebar/Drawer */}
       <nav
         className={`
-          ${navWidth}
           fixed lg:relative inset-y-0 left-0 z-50
           bg-white dark:bg-gray-800
           border-r border-gray-200 dark:border-gray-700
-          flex flex-col
-          transition-all duration-300 ease-in-out overflow-x-hidden
+          flex flex-col flex-shrink-0
+          transition-all duration-300 ease-in-out overflow-hidden
           transform ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${className}
         `}
+        style={{
+          width: isCollapsed ? '4rem' : '16rem',
+          minWidth: isCollapsed ? '4rem' : '16rem',
+          maxWidth: isCollapsed ? '4rem' : '16rem'
+        }}
       >
       {/* Navigation Toggle Button */}
-      <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex justify-end">
+      <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex justify-end overflow-x-hidden">
         {/* Hamburger Toggle Button */}
         <button
           onClick={toggleCollapse}
@@ -245,18 +246,18 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2">
         {NAVIGATION_STRUCTURE.map((group) => (
-          <div key={group.section} className="mb-4">
+          <div key={group.section} className="mb-4 overflow-x-hidden">
             {/* Section Header (hidden when collapsed) */}
             {!isCollapsed && (
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider truncate">
                 {group.section}
               </div>
             )}
 
             {/* Section Items */}
-            <ul className="space-y-1">
+            <ul className="space-y-1 overflow-x-hidden">
               {group.items.map((item) => {
                 const hasChildren = item.children && item.children.length > 0;
                 const groupKey = item.id;
@@ -303,10 +304,10 @@ export const CollapsibleNavigation: React.FC<NavigationProps> = ({
 
       {/* Navigation Footer */}
       {!isCollapsed && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-xs text-gray-600 dark:text-gray-400 text-center">
-            <p>Version 3.0.0</p>
-            <p className="mt-1">Momentum Knowledge Assistant</p>
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 overflow-x-hidden">
+          <div className="text-xs text-gray-600 dark:text-gray-400 text-center overflow-hidden">
+            <p className="truncate">Version 3.0.0</p>
+            <p className="mt-1 truncate px-2">Momentum Knowledge Assistant</p>
           </div>
         </div>
       )}

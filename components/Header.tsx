@@ -59,9 +59,9 @@ export const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, on
 
   return (
     <>
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800">
-      <div className="w-full px-4">
-        <div className="flex items-center justify-between h-20">
+    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="w-full px-4 overflow-hidden">
+        <div className="flex items-center justify-between h-20 overflow-hidden">
           <div className="flex items-center space-x-3">
              <Icon name="logo" className="h-10 w-10 text-primary flex-shrink-0"/>
             <div className="flex flex-col">
